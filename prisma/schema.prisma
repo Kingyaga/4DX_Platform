@@ -1,0 +1,267 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── ORGANIZATION ───────────────────────────────────────────────────────────
+
+model Organization {
+  id         String   @id @default(cuid())
+  name       String
+  slug       String   @unique
+  timezone   String   @default("UTC")
+  createdAt  DateTime @default(now())
+
+  memberships OrgMembership[]
+  teams       Team[]
+}
+
+// ─── USER ───────────────────────────────────────────────────────────────────
+
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  name          String
+  passwordHash  String
+  createdAt     DateTime @default(now())
+  defaultTeamId String?
+
+  orgMemberships  OrgMembership[]
+  teamMemberships TeamMembership[]
+  activityLogs    ActivityLog[]
+  weeklySessions  WeeklySession[]
+  notifications   Notification[]
+  auditLogs       AuditLog[]
+  leadMeasures    LeadMeasureOwner[]
+}
+
+// ─── ORG MEMBERSHIP ─────────────────────────────────────────────────────────
+
+model OrgMembership {
+  id     String          @id @default(cuid())
+  role   OrgRole
+
+  userId String
+  user   User         @relation(fields: [userId], references: [id])
+
+  orgId  String
+  org    Organization @relation(fields: [orgId], references: [id])
+
+  @@unique([userId, orgId])
+}
+
+enum OrgRole {
+  ADMIN
+  MEMBER
+}
+
+// ─── TEAM ───────────────────────────────────────────────────────────────────
+
+model Team {
+  id         String    @id @default(cuid())
+  name       String
+  slug       String    @unique
+  createdAt  DateTime  @default(now())
+  archivedAt DateTime?
+
+  orgId      String
+  org        Organization @relation(fields: [orgId], references: [id])
+
+  leadUserId String
+  members    TeamMembership[]
+  wigs       WIG[]
+}
+
+model TeamMembership {
+  id       String   @id @default(cuid())
+  role     TeamRole
+  joinedAt DateTime @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  teamId String
+  team   Team   @relation(fields: [teamId], references: [id])
+
+  @@unique([userId, teamId])
+}
+
+enum TeamRole {
+  LEAD
+  MEMBER
+}
+
+// ─── WIG ────────────────────────────────────────────────────────────────────
+
+model WIG {
+  id           String    @id @default(cuid())
+  title        String
+  description  String?
+  fromValue    Float
+  toValue      Float
+  currentValue Float     @default(0)
+  unit         String
+  deadline     DateTime
+  status       WIGStatus @default(DRAFT)
+  createdAt    DateTime  @default(now())
+  closedAt     DateTime?
+
+  teamId          String
+  team            Team           @relation(fields: [teamId], references: [id])
+
+  createdByUserId String
+
+  leadMeasures    LeadMeasure[]
+  weeklySessions  WeeklySession[]
+}
+
+enum WIGStatus {
+  DRAFT
+  ACTIVE
+  ACHIEVED
+  MISSED
+  ABANDONED
+}
+
+// ─── LEAD MEASURE ───────────────────────────────────────────────────────────
+
+model LeadMeasure {
+  id          String         @id @default(cuid())
+  name        String
+  description String?
+  cadence     Cadence
+  targetValue Float
+  unit        String
+  createdAt   DateTime       @default(now())
+  archivedAt  DateTime?
+
+  wigId String
+  wig   WIG    @relation(fields: [wigId], references: [id])
+
+  owners       LeadMeasureOwner[]
+  activityLogs ActivityLog[]
+  commitments  Commitment[]
+}
+
+enum Cadence {
+  WEEKLY
+  BIWEEKLY
+}
+
+model LeadMeasureOwner {
+  id String @id @default(cuid())
+
+  leadMeasureId String
+  leadMeasure   LeadMeasure @relation(fields: [leadMeasureId], references: [id])
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@unique([leadMeasureId, userId])
+}
+
+// ─── ACTIVITY LOG ───────────────────────────────────────────────────────────
+
+model ActivityLog {
+  id           String   @id @default(cuid())
+  value        Float
+  loggedForDate DateTime
+  note         String?
+  createdAt    DateTime @default(now())
+  editedAt     DateTime?
+
+  leadMeasureId String
+  leadMeasure   LeadMeasure @relation(fields: [leadMeasureId], references: [id])
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+}
+
+// ─── WEEKLY SESSION ──────────────────────────────────────────────────────────
+
+model WeeklySession {
+  id             String        @id @default(cuid())
+  weekStarting   DateTime
+  status         SessionStatus @default(PENDING)
+  accountDoneAt  DateTime?
+  reviewDoneAt   DateTime?
+  commitDoneAt   DateTime?
+  createdAt      DateTime      @default(now())
+
+  wigId String
+  wig   WIG    @relation(fields: [wigId], references: [id])
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  commitments Commitment[]
+}
+
+enum SessionStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETE
+  OVERDUE
+}
+
+// ─── COMMITMENT ──────────────────────────────────────────────────────────────
+
+model Commitment {
+  id         String           @id @default(cuid())
+  text       String
+  status     CommitmentStatus @default(PENDING)
+  notDoneReason NotDoneReason?
+  reflection String?
+  resolvedAt DateTime?
+
+  weeklySessionId String
+  weeklySession   WeeklySession @relation(fields: [weeklySessionId], references: [id])
+
+  linkedLeadMeasureId String?
+  linkedLeadMeasure   LeadMeasure? @relation(fields: [linkedLeadMeasureId], references: [id])
+}
+
+enum CommitmentStatus {
+  PENDING
+  DONE
+  PARTIAL
+  NOT_DONE
+}
+
+enum NotDoneReason {
+  WHIRLWIND
+  MISJUDGED
+  BLOCKED
+  OTHER
+}
+
+// ─── NOTIFICATION ────────────────────────────────────────────────────────────
+
+model Notification {
+  id          String   @id @default(cuid())
+  type        String
+  payloadJson Json
+  readAt      DateTime?
+  createdAt   DateTime @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+}
+
+// ─── AUDIT LOG ───────────────────────────────────────────────────────────────
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  entityType  String
+  entityId    String
+  action      String
+  beforeJson  Json?
+  afterJson   Json?
+  createdAt   DateTime @default(now())
+
+  actorUserId String
+  actor       User   @relation(fields: [actorUserId], references: [id])
+}
