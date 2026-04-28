@@ -1,14 +1,20 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import { db } from "./db";
-import { type NextRequest } from "next/server";
+import { router } from "../trpc";
+import { authRouter } from "./auth";
+import { orgRouter } from "./org";
+import { teamsRouter } from "./teams";
+import { wigsRouter } from "./wigs";
+import { leadMeasuresRouter } from "./leadMeasure";
+import { activityLogsRouter } from "./activityLogs";
+import { sessionsRouter } from "./session";
 
-export async function createContext(req: NextRequest) {
-  const session = await getServerSession(authOptions);
-  return {
-    db,
-    session,
-  };
-}
+export const appRouter = router({
+  auth: authRouter,
+  org: orgRouter,
+  teams: teamsRouter,
+  wigs: wigsRouter,
+  leadMeasures: leadMeasuresRouter,
+  activityLogs: activityLogsRouter,
+  sessions: sessionsRouter,
+});
 
-export type Context = Awaited<ReturnType<typeof createContext>>;
+export type AppRouter = typeof appRouter;
