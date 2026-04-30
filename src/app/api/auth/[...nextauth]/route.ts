@@ -1,55 +1,34 @@
-import NextAuth, { type NextAuthOptions } from "next-auth";
-import CredentialsProvider from "next-auth/providers/credentials";
-import { db } from "@/server/db";
-import bcrypt from "bcryptjs";
+async authorize(credentials) {
+  if (!credentials?.email || !credentials?.password) {
+    console.log("❌ Missing credentials");
+    return null;
+  }
 
-export const authOptions: NextAuthOptions = {
-  providers: [
-    CredentialsProvider({
-      name: "credentials",
-      credentials: {
-        email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" },
-      },
-      async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) return null;
+  console.log("🔍 Looking up user:", credentials.email);
 
-        const user = await db.user.findUnique({
-          where: { email: credentials.email },
-        });
+  const user = await db.user.findUnique({
+    where: { email: credentials.email },
+  });
 
-        if (!user) return null;
+  if (!user) {
+    console.log("❌ No user found with email:", credentials.email);
+    return null;
+  }
 
-        const passwordMatch = await bcrypt.compare(
-          credentials.password,
-          user.passwordHash,
-        );
+  console.log("✅ User found:", user.email);
 
-        if (!passwordMatch) return null;
+  const passwordMatch = await bcrypt.compare(
+    credentials.password,
+    user.passwordHash
+  );
 
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-        };
-      },
-    }),
-  ],
-  session: { strategy: "jwt" },
-  callbacks: {
-    jwt({ token, user }) {
-      if (user) token.id = user.id;
-      return token;
-    },
-    session({ session, token }) {
-      if (session.user) session.user.id = token.id as string;
-      return session;
-    },
-  },
-  pages: {
-    signIn: "/login",
-  },
-};
+  console.log("🔑 Password match:", passwordMatch);
 
-const handler = NextAuth(authOptions);
-export { handler as GET, handler as POST };
+  if (!passwordMatch) return null;
+
+  return {
+    id: user.id,
+    email: user.email,
+    name: user.name,
+  };
+},
