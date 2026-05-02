@@ -8,7 +8,7 @@ export const activityLogsRouter = router({
       z.object({
         leadMeasureId: z.string(),
         value: z.number(),
-        loggedForDate: z.date(),
+        loggedForDate: z.coerce.date(),
         note: z.string().optional(),
       }),
     )

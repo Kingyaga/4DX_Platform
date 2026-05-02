@@ -77,6 +77,27 @@ export default function TestApi() {
           Create Lead Measure
         </button>
       </div>
+      <button
+        onClick={() =>
+          post("activityLogs.log", {
+            leadMeasureId: "cmoonih2n0005ew2gcy87znfk",
+            value: 8,
+            loggedForDate: "2026-05-02T00:00:00.000Z",
+            note: "Had a great week",
+          })
+        }
+      >
+        Log Activity
+      </button>
+      <button
+        onClick={() =>
+          post("sessions.generateForTeam", {
+            teamSlug: "test-team",
+          })
+        }
+      >
+        Generate Sessions
+      </button>
       <pre
         style={{
           background: "#111",
