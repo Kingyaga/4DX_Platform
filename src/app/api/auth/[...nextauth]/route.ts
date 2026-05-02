@@ -14,8 +14,6 @@ export const authOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials: any) {
-        console.log("🔥 authorize called with:", credentials?.email);
-
         if (!credentials?.email || !credentials?.password) return null;
 
         try {
@@ -23,16 +21,12 @@ export const authOptions = {
             where: { email: credentials.email },
           });
 
-          console.log("👤 user found:", !!user);
-
           if (!user) return null;
 
           const passwordMatch = await bcrypt.compare(
             credentials.password,
             user.passwordHash,
           );
-
-          console.log("🔑 password match:", passwordMatch);
 
           if (!passwordMatch) return null;
 
@@ -42,7 +36,6 @@ export const authOptions = {
             name: user.name,
           };
         } catch (error) {
-          console.error("❌ Auth DB error:", error);
           return null;
         }
       },

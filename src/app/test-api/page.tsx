@@ -111,6 +111,47 @@ export default function TestApi() {
       >
         {result || "Click a button to test an endpoint"}
       </pre>
+      <button
+        onClick={() =>
+          post("sessions.completeAccount", {
+            sessionId: "cmooo0hfh0002ewnwalz9juj6",
+            commitmentUpdates: [],
+          })
+        }
+      >
+        Step 1: Account
+      </button>
+      <button
+        onClick={() =>
+          post("sessions.completeReview", {
+            sessionId: "cmooo0hfh0002ewnwalz9juj6",
+          })
+        }
+      >
+        Step 2: Review
+      </button>
+      <button
+        onClick={() =>
+          post("sessions.completeCommit", {
+            sessionId: "cmooo0hfh0002ewnwalz9juj6",
+            commitments: [
+              { text: "Make 10 sales calls this week" },
+              { text: "Follow up with 5 leads" },
+            ],
+          })
+        }
+      >
+        Step 3: Commit
+      </button>
+      <button
+        onClick={() =>
+          get("sessions.getMySession", {
+            sessionId: "cmooo0hfh0002ewnwalz9juj6",
+          })
+        }
+      >
+        Get Session
+      </button>
     </div>
   );
 }
