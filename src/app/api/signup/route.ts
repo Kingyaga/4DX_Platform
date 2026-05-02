@@ -1,12 +1,13 @@
 import { NextResponse } from "next/server";
+import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
-import { db } from "@/server/db";
+
+const db = new PrismaClient();
 
 export async function POST(req: Request) {
   try {
     const { email, name, password } = await req.json();
 
-    // Validate all fields are present
     if (!email || !name || !password) {
       return NextResponse.json(
         { error: "Name, email, and password are required." },
@@ -14,7 +15,6 @@ export async function POST(req: Request) {
       );
     }
 
-    // Password length check
     if (password.length < 8) {
       return NextResponse.json(
         { error: "Password must be at least 8 characters." },
@@ -22,7 +22,6 @@ export async function POST(req: Request) {
       );
     }
 
-    // Check if email is already registered
     const existing = await db.user.findUnique({ where: { email } });
     if (existing) {
       return NextResponse.json(
@@ -31,17 +30,10 @@ export async function POST(req: Request) {
       );
     }
 
-    // Hash the password — never store plain text
-    // 12 = how many rounds of hashing (higher = slower = more secure)
     const passwordHash = await bcrypt.hash(password, 12);
 
-    // Create the user in your Supabase DB via Prisma
     const user = await db.user.create({
-      data: {
-        email,
-        name,
-        passwordHash,
-      },
+      data: { email, name, passwordHash },
     });
 
     return NextResponse.json(

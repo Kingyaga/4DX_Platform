@@ -1,34 +1,66 @@
-async authorize(credentials) {
-  if (!credentials?.email || !credentials?.password) {
-    console.log("❌ Missing credentials");
-    return null;
-  }
+import NextAuth from "next-auth";
+import CredentialsProvider from "next-auth/providers/credentials";
+import { PrismaClient } from "@prisma/client";
+import bcrypt from "bcryptjs";
 
-  console.log("🔍 Looking up user:", credentials.email);
+const prisma = new PrismaClient();
 
-  const user = await db.user.findUnique({
-    where: { email: credentials.email },
-  });
+export const authOptions = {
+  providers: [
+    CredentialsProvider({
+      name: "credentials",
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" },
+      },
+      async authorize(credentials: any) {
+        console.log("🔥 authorize called with:", credentials?.email);
 
-  if (!user) {
-    console.log("❌ No user found with email:", credentials.email);
-    return null;
-  }
+        if (!credentials?.email || !credentials?.password) return null;
 
-  console.log("✅ User found:", user.email);
+        try {
+          const user = await prisma.user.findUnique({
+            where: { email: credentials.email },
+          });
 
-  const passwordMatch = await bcrypt.compare(
-    credentials.password,
-    user.passwordHash
-  );
+          console.log("👤 user found:", !!user);
 
-  console.log("🔑 Password match:", passwordMatch);
+          if (!user) return null;
 
-  if (!passwordMatch) return null;
+          const passwordMatch = await bcrypt.compare(
+            credentials.password,
+            user.passwordHash,
+          );
 
-  return {
-    id: user.id,
-    email: user.email,
-    name: user.name,
-  };
-},
+          console.log("🔑 password match:", passwordMatch);
+
+          if (!passwordMatch) return null;
+
+          return {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+          };
+        } catch (error) {
+          console.error("❌ Auth DB error:", error);
+          return null;
+        }
+      },
+    }),
+  ],
+  session: { strategy: "jwt" as const },
+  callbacks: {
+    jwt({ token, user }: any) {
+      if (user) token.id = user.id;
+      return token;
+    },
+    session({ session, token }: any) {
+      if (session.user) session.user.id = token.id;
+      return session;
+    },
+  },
+  secret: process.env.NEXTAUTH_SECRET,
+};
+
+const handler = NextAuth(authOptions);
+export { handler as GET, handler as POST };

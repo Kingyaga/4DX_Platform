@@ -11,7 +11,7 @@ export const wigsRouter = router({
         fromValue: z.number(),
         toValue: z.number(),
         unit: z.string().min(1),
-        deadline: z.date(),
+        deadline: z.coerce.date(),
         description: z.string().optional(),
       }),
     )

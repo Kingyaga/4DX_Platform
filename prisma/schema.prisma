@@ -20,6 +20,7 @@ model Organization {
 
   memberships OrgMembership[]
   teams       Team[]
+  apiKeys     ApiKey[]
 }
 
 // ─── USER ───────────────────────────────────────────────────────────────────
@@ -267,4 +268,19 @@ model AuditLog {
 
   actorUserId String
   actor       User   @relation(fields: [actorUserId], references: [id])
+}
+
+// ─── API KEY ─────────────────────────────────────────────────────────────────
+
+model ApiKey {
+  id         String    @id @default(cuid())
+  key        String    @unique
+  name       String?
+  createdAt  DateTime  @default(now())
+  expiresAt  DateTime?
+  lastUsedAt DateTime?
+  revokedAt  DateTime?
+
+  orgId String
+  org   Organization @relation(fields: [orgId], references: [id])
 }

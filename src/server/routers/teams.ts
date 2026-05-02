@@ -90,7 +90,18 @@ export const teamsRouter = router({
       const team = await ctx.db.team.findUnique({
         where: { slug: input.slug },
         include: {
-          members: { include: { user: true } },
+          members: {
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  name: true,
+                  email: true,
+                  createdAt: true,
+                },
+              },
+            },
+          },
           wigs: {
             where: { status: "ACTIVE" },
             include: { leadMeasures: true },
