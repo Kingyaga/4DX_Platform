@@ -203,6 +203,61 @@ export const sessionsRouter = router({
 
       return session;
     }),
+
+  // Team lead views all sessions for their team this week
+  getTeamSessions: protectedProcedure
+    .input(
+      z.object({
+        teamSlug: z.string(),
+        weekStarting: z.string().optional(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const team = await ctx.db.team.findUnique({
+        where: { slug: input.teamSlug },
+        include: { members: true },
+      });
+
+      if (!team) throw new TRPCError({ code: "NOT_FOUND" });
+
+      const isTeamLead = team.leadUserId === ctx.session.user.id;
+      const isOrgAdmin = await ctx.db.orgMembership.findFirst({
+        where: {
+          userId: ctx.session.user.id,
+          orgId: team.orgId,
+          role: "ADMIN",
+        },
+      });
+
+      if (!isTeamLead && !isOrgAdmin) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message:
+            "Only the team lead or org admin can view all team sessions.",
+        });
+      }
+
+      const weekFilter = input.weekStarting
+        ? new Date(input.weekStarting)
+        : getThisMonday();
+
+      return ctx.db.weeklySession.findMany({
+        where: {
+          wig: { teamId: team.id },
+          weekStarting: weekFilter,
+        },
+        include: {
+          user: {
+            select: { id: true, name: true, email: true },
+          },
+          wig: {
+            select: { id: true, title: true },
+          },
+          commitments: true,
+        },
+        orderBy: { user: { name: "asc" } },
+      });
+    }),
 });
 
 // Helper: get the most recent Monday at midnight UTC

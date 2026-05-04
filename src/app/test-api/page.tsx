@@ -152,6 +152,25 @@ export default function TestApi() {
       >
         Get Session
       </button>
+      <button
+        onClick={() =>
+          post("teams.assignTeamLead", {
+            teamSlug: "test-team",
+            newLeadUserId: "cmohulr4l0001ewwc1d6tobpl",
+          })
+        }
+      >
+        Assign New Lead
+      </button>
+      <button
+        onClick={() =>
+          get("sessions.getTeamSessions", {
+            teamSlug: "test-team",
+          })
+        }
+      >
+        Get Team Sessions (Lead Only)
+      </button>
     </div>
   );
 }

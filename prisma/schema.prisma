@@ -21,6 +21,7 @@ model Organization {
   memberships OrgMembership[]
   teams       Team[]
   apiKeys     ApiKey[]
+  
 }
 
 // ─── USER ───────────────────────────────────────────────────────────────────
@@ -96,6 +97,7 @@ model TeamMembership {
 enum TeamRole {
   LEAD
   MEMBER
+  OBSERVER
 }
 
 // ─── WIG ────────────────────────────────────────────────────────────────────

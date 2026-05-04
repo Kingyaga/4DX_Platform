@@ -1,7 +1,19 @@
 import { z } from "zod";
 import { router, protectedProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
+import { type PrismaClient } from "@prisma/client";
 
+async function isObserver(db: PrismaClient, userId: string, teamId: string) {
+  const membership = await db.teamMembership.findUnique({
+    where: {
+      userId_teamId: {
+        userId,
+        teamId,
+      },
+    },
+  });
+  return membership?.role === "OBSERVER";
+}
 export const sessionsRouter = router({
   // Called every Monday to generate sessions for all team members
   generateForTeam: protectedProcedure
@@ -21,17 +33,46 @@ export const sessionsRouter = router({
         throw new TRPCError({ code: "FORBIDDEN" });
       }
 
+      // For each member, check if they have a pending/in-progress session
+      // on any other team this week before creating a new one
       const monday = getThisMonday();
 
-      // Create one session per member per active WIG
-      const sessionsToCreate = team.members.flatMap((member) =>
-        team.wigs.map((wig) => ({
-          userId: member.userId,
-          wigId: wig.id,
-          weekStarting: monday,
-          status: "PENDING" as const,
-        })),
-      );
+      const sessionsToCreate = [];
+
+      for (const member of team.members) {
+        // Skip observers — they don't participate in sessions
+        if (member.role === "OBSERVER") continue;
+
+        // Check if this member already has an active session this week
+        const existingSession = await ctx.db.weeklySession.findFirst({
+          where: {
+            userId: member.userId,
+            weekStarting: monday,
+            status: { in: ["PENDING", "IN_PROGRESS"] },
+          },
+        });
+
+        if (existingSession) {
+          // Skip this member for this team — they're already in a session
+          continue;
+        }
+
+        for (const wig of team.wigs) {
+          sessionsToCreate.push({
+            userId: member.userId,
+            wigId: wig.id,
+            weekStarting: monday,
+            status: "PENDING" as const,
+          });
+        }
+      }
+
+      await ctx.db.weeklySession.createMany({
+        data: sessionsToCreate,
+        skipDuplicates: true,
+      });
+
+      return { created: sessionsToCreate.length };
 
       await ctx.db.weeklySession.createMany({
         data: sessionsToCreate,
@@ -58,6 +99,7 @@ export const sessionsRouter = router({
         ),
       }),
     )
+
     .mutation(async ({ ctx, input }) => {
       const session = await ctx.db.weeklySession.findUnique({
         where: { id: input.sessionId },
@@ -71,6 +113,24 @@ export const sessionsRouter = router({
           code: "BAD_REQUEST",
           message: "Account step already completed.",
         });
+      // Observers cannot participate in sessions
+      const sessionWig = await ctx.db.wIG.findUnique({
+        where: { id: session.wigId },
+      });
+
+      if (sessionWig) {
+        const observer = await isObserver(
+          ctx.db,
+          ctx.session.user.id,
+          sessionWig.teamId,
+        );
+        if (observer) {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "Observers cannot participate in sessions.",
+          });
+        }
+      }
 
       // Update each commitment's outcome
       await Promise.all(
@@ -122,6 +182,24 @@ export const sessionsRouter = router({
           code: "BAD_REQUEST",
           message: "Review step already completed.",
         });
+      // Observers cannot participate in sessions
+      const sessionWig = await ctx.db.wIG.findUnique({
+        where: { id: session.wigId },
+      });
+
+      if (sessionWig) {
+        const observer = await isObserver(
+          ctx.db,
+          ctx.session.user.id,
+          sessionWig.teamId,
+        );
+        if (observer) {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "Observers cannot participate in sessions.",
+          });
+        }
+      }
 
       return ctx.db.weeklySession.update({
         where: { id: input.sessionId },
@@ -167,6 +245,24 @@ export const sessionsRouter = router({
           code: "BAD_REQUEST",
           message: "Commit step already completed.",
         });
+      // Observers cannot participate in sessions
+      const sessionWig = await ctx.db.wIG.findUnique({
+        where: { id: session.wigId },
+      });
+
+      if (sessionWig) {
+        const observer = await isObserver(
+          ctx.db,
+          ctx.session.user.id,
+          sessionWig.teamId,
+        );
+        if (observer) {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "Observers cannot participate in sessions.",
+          });
+        }
+      }
 
       await ctx.db.commitment.createMany({
         data: input.commitments.map((c) => ({
@@ -186,22 +282,60 @@ export const sessionsRouter = router({
       });
     }),
 
-  getMySession: protectedProcedure
-    .input(z.object({ sessionId: z.string() }))
+  // Team lead views all sessions for their team this week
+  getTeamSessions: protectedProcedure
+    .input(
+      z.object({
+        teamSlug: z.string(),
+        weekStarting: z.string().optional(),
+      }),
+    )
     .query(async ({ ctx, input }) => {
-      const session = await ctx.db.weeklySession.findUnique({
-        where: { id: input.sessionId },
-        include: {
-          commitments: true,
-          wig: { include: { leadMeasures: true } },
+      const team = await ctx.db.team.findUnique({
+        where: { slug: input.teamSlug },
+        include: { members: true },
+      });
+
+      if (!team) throw new TRPCError({ code: "NOT_FOUND" });
+
+      // Only team lead or org admin can see all sessions
+      const isTeamLead = team.leadUserId === ctx.session.user.id;
+      const isOrgAdmin = await ctx.db.orgMembership.findFirst({
+        where: {
+          userId: ctx.session.user.id,
+          orgId: team.orgId,
+          role: "ADMIN",
         },
       });
 
-      if (!session) throw new TRPCError({ code: "NOT_FOUND" });
-      if (session.userId !== ctx.session.user.id)
-        throw new TRPCError({ code: "FORBIDDEN" });
+      if (!isTeamLead && !isOrgAdmin) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message:
+            "Only the team lead or org admin can view all team sessions.",
+        });
+      }
 
-      return session;
+      const weekFilter = input.weekStarting
+        ? new Date(input.weekStarting)
+        : getThisMonday();
+
+      return ctx.db.weeklySession.findMany({
+        where: {
+          wig: { teamId: team.id },
+          weekStarting: weekFilter,
+        },
+        include: {
+          user: {
+            select: { id: true, name: true, email: true },
+          },
+          wig: {
+            select: { id: true, title: true },
+          },
+          commitments: true,
+        },
+        orderBy: { user: { name: "asc" } },
+      });
     }),
 });
 
