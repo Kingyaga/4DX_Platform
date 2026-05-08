@@ -372,4 +372,57 @@ export const orgRouter = router({
         },
       });
     }),
+  // Get all teams in org with counts — admin only
+  getTeams: protectedProcedure
+    .input(z.object({ orgSlug: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const org = await ctx.db.organization.findUnique({
+        where: { slug: input.orgSlug },
+      });
+
+      if (!org) throw new TRPCError({ code: "NOT_FOUND" });
+
+      const membership = await ctx.db.orgMembership.findUnique({
+        where: {
+          userId_orgId: {
+            userId: ctx.session.user.id,
+            orgId: org.id,
+          },
+        },
+      });
+
+      if (!membership || membership.role !== "ADMIN") {
+        throw new TRPCError({ code: "FORBIDDEN" });
+      }
+
+      const teams = await ctx.db.team.findMany({
+        where: { orgId: org.id },
+        include: {
+          _count: {
+            select: { members: true },
+          },
+          wigs: {
+            where: { status: "ACTIVE" },
+            select: { id: true, title: true, status: true },
+          },
+          members: {
+            include: {
+              user: { select: { id: true, name: true, email: true } },
+            },
+          },
+        },
+        orderBy: { name: "asc" },
+      });
+
+      return teams.map((team) => ({
+        id: team.id,
+        name: team.name,
+        slug: team.slug,
+        leadUserId: team.leadUserId,
+        memberCount: team._count.members,
+        activeWigCount: team.wigs.length,
+        activeWigs: team.wigs,
+        members: team.members,
+      }));
+    }),
 });

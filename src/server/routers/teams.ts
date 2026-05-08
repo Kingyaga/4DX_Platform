@@ -304,4 +304,112 @@ export const teamsRouter = router({
 
       return { success: true };
     }),
+  // Get members of a team with their roles
+  getMembers: protectedProcedure
+    .input(z.object({ teamSlug: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const team = await ctx.db.team.findUnique({
+        where: { slug: input.teamSlug },
+      });
+
+      if (!team) throw new TRPCError({ code: "NOT_FOUND" });
+
+      return ctx.db.teamMembership.findMany({
+        where: { teamId: team.id },
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              createdAt: true,
+            },
+          },
+        },
+        orderBy: { role: "asc" },
+      });
+    }),
+
+  // Get team activity summary
+  getActivitySummary: protectedProcedure
+    .input(
+      z.object({
+        teamSlug: z.string(),
+        startDate: z.string().optional(),
+        endDate: z.string().optional(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const team = await ctx.db.team.findUnique({
+        where: { slug: input.teamSlug },
+        include: {
+          wigs: {
+            where: { status: "ACTIVE" },
+            include: {
+              leadMeasures: {
+                where: { archivedAt: null },
+              },
+            },
+          },
+        },
+      });
+
+      if (!team) throw new TRPCError({ code: "NOT_FOUND" });
+
+      const dateFilter: { gte?: Date; lte?: Date } = {};
+      if (input.startDate) dateFilter.gte = new Date(input.startDate);
+      if (input.endDate) dateFilter.lte = new Date(input.endDate);
+
+      // Get all lead measure IDs for this team
+      const leadMeasureIds = team.wigs.flatMap((w) =>
+        w.leadMeasures.map((lm) => lm.id),
+      );
+
+      // Get all activity logs for those lead measures
+      const activityLogs = await ctx.db.activityLog.findMany({
+        where: {
+          leadMeasureId: { in: leadMeasureIds },
+          ...(Object.keys(dateFilter).length > 0
+            ? { loggedForDate: dateFilter }
+            : {}),
+        },
+        include: {
+          user: { select: { id: true, name: true } },
+          leadMeasure: {
+            select: { id: true, name: true, targetValue: true, unit: true },
+          },
+        },
+        orderBy: { loggedForDate: "desc" },
+      });
+
+      // Aggregate by lead measure
+      const summaryByLeadMeasure = leadMeasureIds.map((lmId) => {
+        const lm = team.wigs
+          .flatMap((w) => w.leadMeasures)
+          .find((lm) => lm.id === lmId);
+
+        const logs = activityLogs.filter((l) => l.leadMeasureId === lmId);
+        const total = logs.reduce((sum, l) => sum + l.value, 0);
+
+        return {
+          leadMeasureId: lmId,
+          name: lm?.name ?? "",
+          targetValue: lm?.targetValue ?? 0,
+          unit: lm?.unit ?? "",
+          totalLogged: total,
+          percentComplete: lm?.targetValue
+            ? Math.round((total / lm.targetValue) * 100)
+            : 0,
+          logCount: logs.length,
+          logs,
+        };
+      });
+
+      return {
+        teamId: team.id,
+        teamName: team.name,
+        summaryByLeadMeasure,
+        totalLogs: activityLogs.length,
+      };
+    }),
 });

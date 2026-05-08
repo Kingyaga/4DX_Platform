@@ -144,4 +144,69 @@ export const wigsRouter = router({
 
       return updatedWIG;
     }),
+  // Get a single WIG by ID with full details
+  getById: protectedProcedure
+    .input(z.object({ wigId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const wig = await ctx.db.wIG.findUnique({
+        where: { id: input.wigId },
+        include: {
+          team: {
+            select: { id: true, name: true, slug: true, leadUserId: true },
+          },
+          leadMeasures: {
+            where: { archivedAt: null },
+            include: {
+              owners: {
+                include: {
+                  user: { select: { id: true, name: true, email: true } },
+                },
+              },
+              activityLogs: {
+                orderBy: { loggedForDate: "desc" },
+                take: 10,
+              },
+            },
+          },
+        },
+      });
+
+      if (!wig) throw new TRPCError({ code: "NOT_FOUND" });
+      return wig;
+    }),
+
+  // Update a WIG — Team Lead only
+  update: protectedProcedure
+    .input(
+      z.object({
+        wigId: z.string(),
+        title: z.string().min(3).max(200).optional(),
+        description: z.string().optional(),
+        deadline: z.coerce.date().optional(),
+        toValue: z.number().optional(),
+        unit: z.string().optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const wig = await ctx.db.wIG.findUnique({
+        where: { id: input.wigId },
+        include: { team: true },
+      });
+
+      if (!wig) throw new TRPCError({ code: "NOT_FOUND" });
+
+      if (wig.team.leadUserId !== ctx.session.user.id) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Only the team lead can update a WIG.",
+        });
+      }
+
+      const { wigId, ...updateData } = input;
+
+      return ctx.db.wIG.update({
+        where: { id: wigId },
+        data: updateData,
+      });
+    }),
 });

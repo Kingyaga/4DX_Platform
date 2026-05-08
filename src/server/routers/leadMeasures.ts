@@ -74,4 +74,69 @@ export const leadMeasuresRouter = router({
         include: { owners: { include: { user: true } } },
       });
     }),
+  // Update a lead measure — Team Lead only
+  update: protectedProcedure
+    .input(
+      z.object({
+        leadMeasureId: z.string(),
+        name: z.string().min(3).optional(),
+        description: z.string().optional(),
+        cadence: z.enum(["WEEKLY", "BIWEEKLY"]).optional(),
+        targetValue: z.number().optional(),
+        unit: z.string().optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const leadMeasure = await ctx.db.leadMeasure.findUnique({
+        where: { id: input.leadMeasureId },
+        include: { wig: { include: { team: true } } },
+      });
+
+      if (!leadMeasure) throw new TRPCError({ code: "NOT_FOUND" });
+
+      if (leadMeasure.wig.team.leadUserId !== ctx.session.user.id) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Only the team lead can update lead measures.",
+        });
+      }
+
+      const { leadMeasureId, ...updateData } = input;
+
+      return ctx.db.leadMeasure.update({
+        where: { id: leadMeasureId },
+        data: updateData,
+      });
+    }),
+
+  // Archive a lead measure — preserves all history
+  archive: protectedProcedure
+    .input(z.object({ leadMeasureId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const leadMeasure = await ctx.db.leadMeasure.findUnique({
+        where: { id: input.leadMeasureId },
+        include: { wig: { include: { team: true } } },
+      });
+
+      if (!leadMeasure) throw new TRPCError({ code: "NOT_FOUND" });
+
+      if (leadMeasure.wig.team.leadUserId !== ctx.session.user.id) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Only the team lead can archive lead measures.",
+        });
+      }
+
+      if (leadMeasure.archivedAt) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Lead measure is already archived.",
+        });
+      }
+
+      return ctx.db.leadMeasure.update({
+        where: { id: input.leadMeasureId },
+        data: { archivedAt: new Date() },
+      });
+    }),
 });
