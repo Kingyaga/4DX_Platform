@@ -171,6 +171,46 @@ export default function TestApi() {
       >
         Get Team Sessions (Lead Only)
       </button>
+      <button
+        onClick={() =>
+          post("activityLogs.log", {
+            leadMeasureId: "cmoonih2n0005ew2gcy87znfk",
+            value: 5,
+            loggedForDate: "2026-05-05T00:00:00.000Z",
+            note: "Test log after refactor",
+          })
+        }
+      >
+        Log Activity (Member Check)
+      </button>
+      <button
+        onClick={() =>
+          get("activityLogs.getByLeadMeasure", {
+            leadMeasureId: "cmoonih2n0005ew2gcy87znfk",
+          })
+        }
+      >
+        Get Activity Logs
+      </button>
+      <button onClick={() => get("activityLogs.getByUser", {})}>
+        Get My Logs
+      </button>
+      <button onClick={() => get("notifications.getUnreadCount", {})}>
+        Get Notification Count
+      </button>
+      <button onClick={() => get("notifications.getUnread", {})}>
+        Get Notifications
+      </button>
+      <button
+        onClick={() =>
+          get("org.getAuditLogs", {
+            orgSlug: "test-org",
+            limit: 10,
+          })
+        }
+      >
+        Get Audit Logs
+      </button>
     </div>
   );
 }

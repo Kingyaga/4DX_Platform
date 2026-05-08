@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { router, protectedProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
+import { auditLog } from "../audit";
 
 export const teamsRouter = router({
   // Org admin creates a team
@@ -39,7 +40,7 @@ export const teamsRouter = router({
         });
       }
 
-      return ctx.db.team.create({
+      const createdTeam = await ctx.db.team.create({
         data: {
           name: input.name,
           slug: input.slug,
@@ -53,6 +54,21 @@ export const teamsRouter = router({
           },
         },
       });
+
+      await auditLog({
+        db: ctx.db,
+        actorUserId: ctx.session.user.id,
+        entityType: "TEAM",
+        entityId: createdTeam.id,
+        action: "TEAM_CREATED",
+        after: {
+          name: createdTeam.name,
+          slug: createdTeam.slug,
+          orgId: createdTeam.orgId,
+        },
+      });
+
+      return createdTeam;
     }),
 
   // Add a member to a team — org admin or current team lead only
@@ -85,13 +101,28 @@ export const teamsRouter = router({
         });
       }
 
-      return ctx.db.teamMembership.create({
+      const newMembership = await ctx.db.teamMembership.create({
         data: {
           teamId: team.id,
           userId: input.userId,
           role: input.role,
         },
       });
+
+      await auditLog({
+        db: ctx.db,
+        actorUserId: ctx.session.user.id,
+        entityType: "TEAM_MEMBER",
+        entityId: newMembership.id,
+        action: "TEAM_MEMBER_ADDED",
+        after: {
+          teamId: newMembership.teamId,
+          userId: newMembership.userId,
+          role: newMembership.role,
+        },
+      });
+
+      return newMembership;
     }),
 
   // ← NEW: Assign a new team lead — org admin only
@@ -129,6 +160,14 @@ export const teamsRouter = router({
       const isMember = team.members.some(
         (m) => m.userId === input.newLeadUserId,
       );
+      if (!isMember) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "The new team lead must already be a member of the team.",
+        });
+      }
+
+      // Step 1: Demote current lead to MEMBER
 
       if (!isMember) {
         throw new TRPCError({
@@ -156,10 +195,26 @@ export const teamsRouter = router({
       });
 
       // Step 3: Update the team's leadUserId
-      return ctx.db.team.update({
+      const updatedTeam = await ctx.db.team.update({
         where: { id: team.id },
         data: { leadUserId: input.newLeadUserId },
       });
+
+      await auditLog({
+        db: ctx.db,
+        actorUserId: ctx.session.user.id,
+        entityType: "TEAM",
+        entityId: team.id,
+        action: "TEAM_LEAD_ASSIGNED",
+        before: {
+          leadUserId: team.leadUserId,
+        },
+        after: {
+          leadUserId: updatedTeam.leadUserId,
+        },
+      });
+
+      return updatedTeam;
     }),
 
   // Get team by slug — members and lead included
@@ -228,11 +283,25 @@ export const teamsRouter = router({
         });
       }
 
-      return ctx.db.teamMembership.deleteMany({
+      await ctx.db.teamMembership.deleteMany({
         where: {
           teamId: team.id,
           userId: input.userId,
         },
       });
+
+      await auditLog({
+        db: ctx.db,
+        actorUserId: ctx.session.user.id,
+        entityType: "TEAM_MEMBER",
+        entityId: `${team.id}-${input.userId}`,
+        action: "TEAM_MEMBER_REMOVED",
+        before: {
+          teamId: team.id,
+          userId: input.userId,
+        },
+      });
+
+      return { success: true };
     }),
 });

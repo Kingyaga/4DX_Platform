@@ -38,6 +38,21 @@ export const leadMeasuresRouter = router({
           message: "A WIG can have a maximum of 3 lead measures.",
         });
       }
+      const isOrgAdmin = await ctx.db.orgMembership.findFirst({
+        where: {
+          userId: ctx.session.user.id,
+          orgId: wig.team.orgId,
+          role: "ADMIN",
+        },
+      });
+
+      if (isOrgAdmin && wig.team.leadUserId !== ctx.session.user.id) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message:
+            "Org admins cannot create lead measures. This is a team lead action.",
+        });
+      }
 
       return ctx.db.leadMeasure.create({
         data: {

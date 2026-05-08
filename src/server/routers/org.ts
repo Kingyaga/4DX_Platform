@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { router, protectedProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
+import { auditLog } from "../audit";
 
 export const orgRouter = router({
   // Create organization — first user becomes admin
@@ -26,7 +27,7 @@ export const orgRouter = router({
         });
       }
 
-      return ctx.db.organization.create({
+      const createdOrg = await ctx.db.organization.create({
         data: {
           name: input.name,
           slug: input.slug,
@@ -38,6 +39,20 @@ export const orgRouter = router({
           },
         },
       });
+
+      await auditLog({
+        db: ctx.db,
+        actorUserId: ctx.session.user.id,
+        entityType: "ORGANIZATION",
+        entityId: createdOrg.id,
+        action: "ORG_CREATED",
+        after: {
+          name: createdOrg.name,
+          slug: createdOrg.slug,
+        },
+      });
+
+      return createdOrg;
     }),
 
   // Admin dashboard — full portfolio view across all teams
@@ -223,13 +238,28 @@ export const orgRouter = router({
         });
       }
 
-      return ctx.db.orgMembership.create({
+      const newMembership = await ctx.db.orgMembership.create({
         data: {
           userId: input.userId,
           orgId: org.id,
           role: input.role,
         },
       });
+
+      await auditLog({
+        db: ctx.db,
+        actorUserId: ctx.session.user.id,
+        entityType: "ORG_MEMBER",
+        entityId: newMembership.id,
+        action: "ORG_MEMBER_INVITED",
+        after: {
+          userId: newMembership.userId,
+          orgId: newMembership.orgId,
+          role: newMembership.role,
+        },
+      });
+
+      return newMembership;
     }),
 
   // Change a member's org role — admin only
@@ -269,7 +299,16 @@ export const orgRouter = router({
         });
       }
 
-      return ctx.db.orgMembership.update({
+      const previousMembership = await ctx.db.orgMembership.findUnique({
+        where: {
+          userId_orgId: {
+            userId: input.userId,
+            orgId: org.id,
+          },
+        },
+      });
+
+      const updatedMembership = await ctx.db.orgMembership.update({
         where: {
           userId_orgId: {
             userId: input.userId,
@@ -277,6 +316,60 @@ export const orgRouter = router({
           },
         },
         data: { role: input.role },
+      });
+
+      await auditLog({
+        db: ctx.db,
+        actorUserId: ctx.session.user.id,
+        entityType: "ORG_MEMBER",
+        entityId: updatedMembership.id,
+        action: "ORG_MEMBER_ROLE_UPDATED",
+        before: {
+          role: previousMembership?.role,
+        },
+        after: {
+          role: updatedMembership.role,
+        },
+      });
+
+      return updatedMembership;
+    }),
+  // Get audit logs — admin only
+  getAuditLogs: protectedProcedure
+    .input(
+      z.object({
+        orgSlug: z.string(),
+        limit: z.number().min(1).max(100).default(50),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const org = await ctx.db.organization.findUnique({
+        where: { slug: input.orgSlug },
+      });
+
+      if (!org) throw new TRPCError({ code: "NOT_FOUND" });
+
+      const membership = await ctx.db.orgMembership.findUnique({
+        where: {
+          userId_orgId: {
+            userId: ctx.session.user.id,
+            orgId: org.id,
+          },
+        },
+      });
+
+      if (!membership || membership.role !== "ADMIN") {
+        throw new TRPCError({ code: "FORBIDDEN" });
+      }
+
+      return ctx.db.auditLog.findMany({
+        orderBy: { createdAt: "desc" },
+        take: input.limit,
+        include: {
+          actor: {
+            select: { id: true, name: true, email: true },
+          },
+        },
       });
     }),
 });

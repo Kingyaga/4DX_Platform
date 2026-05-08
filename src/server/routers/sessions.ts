@@ -1,6 +1,9 @@
 import { z } from "zod";
 import { router, protectedProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
+import { notify, notifyMany } from "../notify";
+import { sendSessionReadyEmail } from "../email";
+import { auditLog } from "../audit";
 
 export const sessionsRouter = router({
   // Called every Monday to generate sessions for all team members
@@ -22,21 +25,81 @@ export const sessionsRouter = router({
       }
 
       const monday = getThisMonday();
+      const sessionsToCreate = [];
 
-      // Create one session per member per active WIG
-      const sessionsToCreate = team.members.flatMap((member) =>
-        team.wigs.map((wig) => ({
-          userId: member.userId,
-          wigId: wig.id,
-          weekStarting: monday,
-          status: "PENDING" as const,
-        })),
-      );
+      for (const member of team.members) {
+        // Check if this member already has an active session this week
+        const existingSession = await ctx.db.weeklySession.findFirst({
+          where: {
+            userId: member.userId,
+            weekStarting: monday,
+            status: { in: ["PENDING", "IN_PROGRESS"] },
+          },
+        });
+
+        if (existingSession) continue;
+
+        for (const wig of team.wigs) {
+          sessionsToCreate.push({
+            userId: member.userId,
+            wigId: wig.id,
+            weekStarting: monday,
+            status: "PENDING" as const,
+          });
+        }
+      }
 
       await ctx.db.weeklySession.createMany({
         data: sessionsToCreate,
         skipDuplicates: true,
       });
+
+      // Log the generation event
+      if (sessionsToCreate.length > 0) {
+        await auditLog({
+          db: ctx.db,
+          actorUserId: ctx.session.user.id,
+          entityType: "TEAM_SESSION_GENERATION",
+          entityId: input.teamSlug,
+          action: "SESSION_GENERATED",
+          after: {
+            teamSlug: input.teamSlug,
+            sessionsCreated: sessionsToCreate.length,
+            weekStarting: monday.toISOString(),
+          },
+        });
+      }
+
+      // Notify each member their session is ready
+      const uniqueUserIds = [...new Set(sessionsToCreate.map((s) => s.userId))];
+
+      await notifyMany({
+        db: ctx.db,
+        userIds: uniqueUserIds,
+        type: "SESSION_READY",
+        payload: {
+          teamSlug: input.teamSlug,
+          weekStarting: monday.toISOString(),
+          message:
+            "Your weekly session is ready. Complete it before the end of the week.",
+        },
+      });
+
+      // Send email to each member
+      const members = await ctx.db.user.findMany({
+        where: { id: { in: uniqueUserIds } },
+        select: { id: true, name: true, email: true },
+      });
+
+      await Promise.all(
+        members.map((member) =>
+          sendSessionReadyEmail({
+            to: member.email,
+            name: member.name,
+            teamName: team.name,
+          }),
+        ),
+      );
 
       return { created: sessionsToCreate.length };
     }),
@@ -72,6 +135,30 @@ export const sessionsRouter = router({
           message: "Account step already completed.",
         });
 
+      // Verify user is a team member — admins cannot complete sessions
+      const sessionWig = await ctx.db.wIG.findUnique({
+        where: { id: session.wigId },
+        include: { team: true },
+      });
+
+      if (sessionWig) {
+        const teamMembership = await ctx.db.teamMembership.findUnique({
+          where: {
+            userId_teamId: {
+              userId: ctx.session.user.id,
+              teamId: sessionWig.team.id,
+            },
+          },
+        });
+
+        if (!teamMembership) {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "You must be a team member to complete sessions.",
+          });
+        }
+      }
+
       // Update each commitment's outcome
       await Promise.all(
         input.commitmentUpdates.map((update) =>
@@ -87,13 +174,28 @@ export const sessionsRouter = router({
         ),
       );
 
-      return ctx.db.weeklySession.update({
+      const updatedSession = await ctx.db.weeklySession.update({
         where: { id: input.sessionId },
         data: {
           accountDoneAt: new Date(),
           status: "IN_PROGRESS",
         },
       });
+
+      await auditLog({
+        db: ctx.db,
+        actorUserId: ctx.session.user.id,
+        entityType: "WEEKLY_SESSION",
+        entityId: input.sessionId,
+        action: "SESSION_ACCOUNT_COMPLETED",
+        after: {
+          sessionId: input.sessionId,
+          status: "IN_PROGRESS",
+          commitmentCount: input.commitmentUpdates.length,
+        },
+      });
+
+      return updatedSession;
     }),
 
   // Step 2 of 3: Review — acknowledge the scoreboard
@@ -107,6 +209,30 @@ export const sessionsRouter = router({
       if (!session) throw new TRPCError({ code: "NOT_FOUND" });
       if (session.userId !== ctx.session.user.id)
         throw new TRPCError({ code: "FORBIDDEN" });
+
+      // Verify user is a team member
+      const sessionWig = await ctx.db.wIG.findUnique({
+        where: { id: session.wigId },
+        include: { team: true },
+      });
+
+      if (sessionWig) {
+        const teamMembership = await ctx.db.teamMembership.findUnique({
+          where: {
+            userId_teamId: {
+              userId: ctx.session.user.id,
+              teamId: sessionWig.team.id,
+            },
+          },
+        });
+
+        if (!teamMembership) {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "You must be a team member to complete sessions.",
+          });
+        }
+      }
 
       // Gate: Account must be done first
       if (!session.accountDoneAt) {
@@ -123,10 +249,24 @@ export const sessionsRouter = router({
           message: "Review step already completed.",
         });
 
-      return ctx.db.weeklySession.update({
+      const updatedReviewSession = await ctx.db.weeklySession.update({
         where: { id: input.sessionId },
         data: { reviewDoneAt: new Date() },
       });
+
+      await auditLog({
+        db: ctx.db,
+        actorUserId: ctx.session.user.id,
+        entityType: "WEEKLY_SESSION",
+        entityId: input.sessionId,
+        action: "SESSION_REVIEW_COMPLETED",
+        after: {
+          sessionId: input.sessionId,
+          reviewDoneAt: updatedReviewSession.reviewDoneAt,
+        },
+      });
+
+      return updatedReviewSession;
     }),
 
   // Step 3 of 3: Commit — make 1-3 commitments for next week
@@ -154,6 +294,30 @@ export const sessionsRouter = router({
       if (session.userId !== ctx.session.user.id)
         throw new TRPCError({ code: "FORBIDDEN" });
 
+      // Verify user is a team member
+      const sessionWig = await ctx.db.wIG.findUnique({
+        where: { id: session.wigId },
+        include: { team: true },
+      });
+
+      if (sessionWig) {
+        const teamMembership = await ctx.db.teamMembership.findUnique({
+          where: {
+            userId_teamId: {
+              userId: ctx.session.user.id,
+              teamId: sessionWig.team.id,
+            },
+          },
+        });
+
+        if (!teamMembership) {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "You must be a team member to complete sessions.",
+          });
+        }
+      }
+
       // Gate: Both Account and Review must be done first
       if (!session.accountDoneAt || !session.reviewDoneAt) {
         throw new TRPCError({
@@ -177,15 +341,52 @@ export const sessionsRouter = router({
         })),
       });
 
-      return ctx.db.weeklySession.update({
+      const updatedCommitSession = await ctx.db.weeklySession.update({
         where: { id: input.sessionId },
         data: {
           commitDoneAt: new Date(),
           status: "COMPLETE",
         },
       });
+
+      await auditLog({
+        db: ctx.db,
+        actorUserId: ctx.session.user.id,
+        entityType: "WEEKLY_SESSION",
+        entityId: input.sessionId,
+        action: "SESSION_COMMIT_COMPLETED",
+        after: {
+          sessionId: input.sessionId,
+          status: "COMPLETE",
+          commitmentCount: input.commitments.length,
+        },
+      });
+
+      // Notify team lead that this member completed their session
+      const completedSession = await ctx.db.weeklySession.findUnique({
+        where: { id: input.sessionId },
+        include: {
+          wig: { include: { team: true } },
+          user: { select: { name: true } },
+        },
+      });
+
+      if (completedSession) {
+        await notify({
+          db: ctx.db,
+          userId: completedSession.wig.team.leadUserId,
+          type: "SESSION_READY",
+          payload: {
+            message: `${completedSession.user.name} has completed their weekly session.`,
+            sessionId: input.sessionId,
+          },
+        });
+      }
+
+      return updatedCommitSession;
     }),
 
+  // Get a single session for the logged in user
   getMySession: protectedProcedure
     .input(z.object({ sessionId: z.string() }))
     .query(async ({ ctx, input }) => {
@@ -263,7 +464,7 @@ export const sessionsRouter = router({
 // Helper: get the most recent Monday at midnight UTC
 function getThisMonday(): Date {
   const now = new Date();
-  const day = now.getUTCDay(); // 0 = Sunday, 1 = Monday...
+  const day = now.getUTCDay();
   const diff = day === 0 ? -6 : 1 - day;
   const monday = new Date(now);
   monday.setUTCDate(now.getUTCDate() + diff);

@@ -8,7 +8,6 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-
 // ─── ORGANIZATION ───────────────────────────────────────────────────────────
 
 model Organization {
@@ -97,7 +96,6 @@ model TeamMembership {
 enum TeamRole {
   LEAD
   MEMBER
-  OBSERVER
 }
 
 // ─── WIG ────────────────────────────────────────────────────────────────────
@@ -108,7 +106,7 @@ model WIG {
   description  String?
   fromValue    Float
   toValue      Float
-  currentValue Float     @default(0)
+  currentValue Float    @default(0)
   unit         String
   deadline     DateTime
   status       WIGStatus @default(DRAFT)
@@ -139,7 +137,7 @@ model LeadMeasure {
   name        String
   description String?
   cadence     Cadence
-  targetValue Float
+  targetValue  Float
   unit        String
   createdAt   DateTime       @default(now())
   archivedAt  DateTime?
