@@ -7,6 +7,7 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { trpc, parseTRPCError } from "./api-client";
 import { useUserStore } from "./stores/user-store";
 import { useTeamStore } from "./stores/team-store";
@@ -18,12 +19,26 @@ import type { Team, WIG, LeadMeasure, WeeklySession, APIError, UserRole } from "
  */
 export function useCurrentUser() {
   const router = useRouter();
+  const { data: session, status } = useSession();
   const { user, setUser, clearUser } = useUserStore();
-  // Fetch user data whenever there's no user in store (refetch on login/logout)
+  
+  // Fetch user data - refetch when session changes
   const { data: me, isLoading, error, refetch } = trpc.auth.me.useQuery(undefined, {
     retry: false,
-    staleTime: Infinity, // Keep data as long as page is open
+    staleTime: 0, // Always refetch to get latest data
+    gcTime: 0, // Don't cache the data
   });
+
+  // Refetch when session status changes
+  useEffect(() => {
+    if (status === "authenticated") {
+      console.log("Session authenticated, refetching user data");
+      refetch();
+    } else if (status === "unauthenticated") {
+      console.log("Session unauthenticated, clearing user");
+      clearUser();
+    }
+  }, [status, refetch, clearUser]);
 
   useEffect(() => {
     // Handle unauthorized error - user not logged in
@@ -36,7 +51,7 @@ export function useCurrentUser() {
   }, [error, router, clearUser]);
 
   useEffect(() => {
-    if (me && !user) {
+    if (me && (!user || user.id !== me.id)) {
       console.log("Fetched user from auth.me:", me);
       // me.role will be "ADMIN", "TEAM_LEAD", or "MEMBER"
       setUser(me);
