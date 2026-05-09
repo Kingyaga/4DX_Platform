@@ -1,9 +1,40 @@
 import { z } from "zod";
-import { router, publicProcedure } from "../trpc";
+import { router, publicProcedure, protectedProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
 import bcrypt from "bcryptjs";
 
 export const authRouter = router({
+  me: protectedProcedure.query(async ({ ctx }) => {
+    // Return current user with their org role
+    const user = await ctx.db.user.findUnique({
+      where: { id: ctx.session.user.id },
+      include: {
+        orgMemberships: {
+          select: {
+            role: true,
+          },
+        },
+      },
+    });
+
+    if (!user) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "User not found",
+      });
+    }
+
+    // Get the first org role (users should only have one org for now)
+    const orgRole = user.orgMemberships[0]?.role || "MEMBER";
+
+    return {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      role: orgRole,
+    };
+  }),
+
   signup: publicProcedure
     .input(
       z.object({

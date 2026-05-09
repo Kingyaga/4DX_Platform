@@ -203,6 +203,37 @@ export const sessionsRouter = router({
 
       return session;
     }),
+
+  getCurrentSession: protectedProcedure
+    .input(z.object({ teamSlug: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const team = await ctx.db.team.findUnique({
+        where: { slug: input.teamSlug },
+        include: { wigs: { where: { status: "ACTIVE" } } },
+      });
+
+      if (!team) throw new TRPCError({ code: "NOT_FOUND" });
+
+      const monday = getThisMonday();
+
+      return ctx.db.weeklySession.findMany({
+        where: {
+          userId: ctx.session.user.id,
+          wig: { teamId: team.id },
+          weekStarting: monday,
+        },
+        include: {
+          commitments: true,
+          wig: {
+            include: {
+              leadMeasures: {
+                where: { archivedAt: null },
+              },
+            },
+          },
+        },
+      });
+    }),
 });
 
 // Helper: get the most recent Monday at midnight UTC

@@ -101,4 +101,32 @@ export const teamsRouter = router({
       if (!team) throw new TRPCError({ code: "NOT_FOUND" });
       return team;
     }),
+
+  getMyTeams: protectedProcedure
+    .input(z.object({ orgSlug: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const org = await ctx.db.organization.findUnique({
+        where: { slug: input.orgSlug },
+      });
+
+      if (!org) throw new TRPCError({ code: "NOT_FOUND" });
+
+      return ctx.db.team.findMany({
+        where: {
+          orgId: org.id,
+          members: {
+            some: { userId: ctx.session.user.id },
+          },
+        },
+        include: {
+          members: {
+            where: { userId: ctx.session.user.id },
+            select: { role: true },
+          },
+          wigs: {
+            where: { status: "ACTIVE" },
+          },
+        },
+      });
+    }),
 });

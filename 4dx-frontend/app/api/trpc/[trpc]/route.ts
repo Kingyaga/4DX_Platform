@@ -1,3 +1,8 @@
+/**
+ * tRPC Proxy Route
+ * Forwards tRPC requests to the backend server at localhost:3000
+ */
+
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const backendUrl = `http://localhost:3000${url.pathname}${url.search}`;
