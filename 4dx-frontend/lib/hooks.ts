@@ -7,7 +7,7 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
+import { useSession as useAuthSession } from "next-auth/react";
 import { trpc, parseTRPCError } from "./api-client";
 import { useUserStore } from "./stores/user-store";
 import { useTeamStore } from "./stores/team-store";
@@ -19,7 +19,7 @@ import type { Team, WIG, LeadMeasure, WeeklySession, APIError, UserRole } from "
  */
 export function useCurrentUser() {
   const router = useRouter();
-  const { data: session, status } = useSession();
+  const { data: session, status } = useAuthSession();
   const { user, setUser, clearUser } = useUserStore();
   
   // Fetch user data - refetch when session changes
