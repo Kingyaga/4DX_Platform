@@ -62,6 +62,8 @@ export default function DashboardLayout({
         router.push("/dashboard/admin");
       } else if (userRole === "TEAM_LEAD") {
         router.push("/dashboard/team-lead");
+      } else if (userRole === "MEMBER") {
+        router.push("/dashboard/scoreboard");
       }
     }
   }, [pathname, userRole, router]);
