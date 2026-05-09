@@ -18,20 +18,22 @@ import type { Team, WIG, LeadMeasure, WeeklySession, APIError, UserRole } from "
  */
 export function useCurrentUser() {
   const router = useRouter();
-  const { user, setUser } = useUserStore();
-  const { data: me, isLoading, error } = trpc.auth.me.useQuery(undefined, {
-    enabled: !user, // Only fetch if user not already in store
+  const { user, setUser, clearUser } = useUserStore();
+  // Fetch user data whenever there's no user in store (refetch on login/logout)
+  const { data: me, isLoading, error, refetch } = trpc.auth.me.useQuery(undefined, {
     retry: false,
+    staleTime: Infinity, // Keep data as long as page is open
   });
 
   useEffect(() => {
     // Handle unauthorized error - user not logged in
     if (error?.data?.code === "UNAUTHORIZED") {
-      console.log("User not authenticated, redirecting to login");
+      console.log("User not authenticated, clearing store and redirecting to login");
+      clearUser();
       router.push("/login");
       return;
     }
-  }, [error, router]);
+  }, [error, router, clearUser]);
 
   useEffect(() => {
     if (me && !user) {
@@ -41,7 +43,7 @@ export function useCurrentUser() {
     }
   }, [me, user, setUser]);
 
-  return { data: me, isLoading, error };
+  return { data: me, isLoading, error, refetch };
 }
 
 /**

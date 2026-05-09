@@ -17,11 +17,10 @@ export default function SettingsPage() {
     setIsLoggingOut(true);
     // Clear user store first
     clearUser();
-    // Then sign out with explicit frontend URL
-    await signOut({ 
-      callbackUrl: `${typeof window !== 'undefined' ? window.location.origin : ''}/login`, 
-      redirect: true 
-    });
+    // Sign out without callback, then manually redirect
+    await signOut({ redirect: false });
+    // Manually redirect to frontend login
+    window.location.href = "/login";
   };
 
   if (!session?.user) {
