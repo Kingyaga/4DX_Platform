@@ -6,7 +6,7 @@ const db = new PrismaClient();
 
 export async function POST(req: Request) {
   try {
-    const { email, name, password } = await req.json();
+    const { email, name, password, token } = await req.json();
 
     if (!email || !name || !password) {
       return NextResponse.json(
@@ -22,6 +22,49 @@ export async function POST(req: Request) {
       );
     }
 
+    // Validate invite token — required for invite-only signup
+    if (!token) {
+      return NextResponse.json(
+        { error: "An invite link is required to sign up." },
+        { status: 403 },
+      );
+    }
+
+    const invite = await db.inviteToken.findUnique({
+      where: { token },
+      include: { org: true },
+    });
+
+    if (!invite) {
+      return NextResponse.json(
+        { error: "Invalid invite link." },
+        { status: 403 },
+      );
+    }
+
+    if (invite.usedAt) {
+      return NextResponse.json(
+        { error: "This invite link has already been used." },
+        { status: 403 },
+      );
+    }
+
+    if (invite.expiresAt < new Date()) {
+      return NextResponse.json(
+        { error: "This invite link has expired." },
+        { status: 403 },
+      );
+    }
+
+    // If invite was for a specific email, enforce it
+    if (invite.email && invite.email.toLowerCase() !== email.toLowerCase()) {
+      return NextResponse.json(
+        { error: "This invite was sent to a different email address." },
+        { status: 403 },
+      );
+    }
+
+    // Check if email already registered
     const existing = await db.user.findUnique({ where: { email } });
     if (existing) {
       return NextResponse.json(
@@ -32,8 +75,40 @@ export async function POST(req: Request) {
 
     const passwordHash = await bcrypt.hash(password, 12);
 
-    const user = await db.user.create({
-      data: { email, name, passwordHash },
+    // Create user + org membership + optional team membership in one transaction
+    const user = await db.$transaction(async (tx) => {
+      // Create the user
+      const newUser = await tx.user.create({
+        data: { email, name, passwordHash },
+      });
+
+      // Auto-assign MEMBER role in the org
+      await tx.orgMembership.create({
+        data: {
+          userId: newUser.id,
+          orgId: invite.orgId,
+          role: "MEMBER",
+        },
+      });
+
+      // If invite includes a team, add them to it
+      if (invite.teamId) {
+        await tx.teamMembership.create({
+          data: {
+            userId: newUser.id,
+            teamId: invite.teamId,
+            role: "MEMBER",
+          },
+        });
+      }
+
+      // Mark invite as used
+      await tx.inviteToken.update({
+        where: { token },
+        data: { usedAt: new Date() },
+      });
+
+      return newUser;
     });
 
     return NextResponse.json(

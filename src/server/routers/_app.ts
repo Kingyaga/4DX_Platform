@@ -7,6 +7,7 @@ import { activityLogsRouter } from "./activityLogs";
 import { sessionsRouter } from "./sessions";
 import { orgRouter } from "./org";
 import { notificationsRouter } from "./notifications";
+import { invitesRouter } from "./invites";
 
 export const appRouter = router({
   wigs: wigsRouter,
@@ -17,6 +18,7 @@ export const appRouter = router({
   sessions: sessionsRouter,
   org: orgRouter,
   notifications: notificationsRouter,
+  invites: invitesRouter,
 });
 
 export type AppRouter = typeof appRouter;

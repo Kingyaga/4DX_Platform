@@ -20,6 +20,7 @@ model Organization {
   memberships OrgMembership[]
   teams       Team[]
   apiKeys     ApiKey[]
+  inviteTokens InviteToken[]
   
 }
 
@@ -40,6 +41,7 @@ model User {
   notifications   Notification[]
   auditLogs       AuditLog[]
   leadMeasures    LeadMeasureOwner[]
+  createdInvites InviteToken[]
 }
 
 // ─── ORG MEMBERSHIP ─────────────────────────────────────────────────────────
@@ -283,4 +285,19 @@ model ApiKey {
 
   orgId String
   org   Organization @relation(fields: [orgId], references: [id])
+}
+model InviteToken {
+  id              String    @id @default(cuid())
+  token           String    @unique
+  email           String?   // optional — pre-fill signup form
+  orgId           String
+  teamId          String?   // optional — auto add to team on signup
+  role            OrgRole   @default(MEMBER)
+  usedAt          DateTime?
+  expiresAt       DateTime
+  createdAt       DateTime  @default(now())
+  createdByUserId String
+
+  org             Organization @relation(fields: [orgId], references: [id])
+  createdBy       User         @relation(fields: [createdByUserId], references: [id])
 }
