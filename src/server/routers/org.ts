@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { Prisma } from "@prisma/client";
 import { router, protectedProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
 import { auditLog } from "../audit";
@@ -326,10 +327,10 @@ export const orgRouter = router({
         action: "ORG_MEMBER_ROLE_UPDATED",
         before: {
           role: previousMembership?.role,
-        },
+        } as Prisma.InputJsonValue,
         after: {
           role: updatedMembership.role,
-        },
+        } as Prisma.InputJsonValue,
       });
 
       return updatedMembership;

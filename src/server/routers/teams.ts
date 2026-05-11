@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { Prisma } from "@prisma/client";
 import { router, protectedProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
 import { auditLog } from "../audit";
@@ -208,10 +209,10 @@ export const teamsRouter = router({
         action: "TEAM_LEAD_ASSIGNED",
         before: {
           leadUserId: team.leadUserId,
-        },
+        } as Prisma.InputJsonValue,
         after: {
           leadUserId: updatedTeam.leadUserId,
-        },
+        } as Prisma.InputJsonValue,
       });
 
       return updatedTeam;
@@ -299,7 +300,7 @@ export const teamsRouter = router({
         before: {
           teamId: team.id,
           userId: input.userId,
-        },
+        } as Prisma.InputJsonValue,
       });
 
       return { success: true };

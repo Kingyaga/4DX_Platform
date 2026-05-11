@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { Prisma } from "@prisma/client";
 import { router, protectedProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
 import { auditLog } from "../audit";
@@ -135,11 +136,11 @@ export const wigsRouter = router({
         before: {
           status: wig.status,
           closedAt: wig.closedAt,
-        },
+        } as Prisma.InputJsonValue,
         after: {
           status: updatedWIG.status,
           closedAt: updatedWIG.closedAt,
-        },
+        } as Prisma.InputJsonValue,
       });
 
       return updatedWIG;

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { Prisma } from "@prisma/client";
 import { router, protectedProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
 import { auditLog } from "../audit";
@@ -120,11 +121,11 @@ export const activityLogsRouter = router({
         before: {
           value: log.value,
           note: log.note,
-        },
+        } as Prisma.InputJsonValue,
         after: {
           value: updatedLog.value,
           note: updatedLog.note,
-        },
+        } as Prisma.InputJsonValue,
       });
 
       return updatedLog;
