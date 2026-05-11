@@ -45,9 +45,8 @@ export async function auditLog({
         entityType,
         entityId,
         action,
-        // AFTER
-        beforeJson: before ?? undefined,
-        afterJson: after ?? undefined,
+        beforeJson: before,
+        afterJson: after,
       },
     });
   } catch (error) {
