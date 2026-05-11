@@ -8,7 +8,6 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-
 // ─── ORGANIZATION ───────────────────────────────────────────────────────────
 
 model Organization {
@@ -20,7 +19,13 @@ model Organization {
 
   memberships OrgMembership[]
   teams       Team[]
+<<<<<<< HEAD
   invites     Invite[]
+=======
+  apiKeys     ApiKey[]
+  inviteTokens InviteToken[]
+  
+>>>>>>> origin/main
 }
 
 // ─── USER ───────────────────────────────────────────────────────────────────
@@ -40,7 +45,11 @@ model User {
   notifications   Notification[]
   auditLogs       AuditLog[]
   leadMeasures    LeadMeasureOwner[]
+<<<<<<< HEAD
   invites         Invite[]
+=======
+  createdInvites InviteToken[]
+>>>>>>> origin/main
 }
 
 // ─── ORG MEMBERSHIP ─────────────────────────────────────────────────────────
@@ -116,6 +125,7 @@ model TeamMembership {
 enum TeamRole {
   LEAD
   MEMBER
+  OBSERVER
 }
 
 // ─── WIG ────────────────────────────────────────────────────────────────────
@@ -126,7 +136,7 @@ model WIG {
   description  String?
   fromValue    Float
   toValue      Float
-  currentValue Float     @default(0)
+  currentValue Float    @default(0)
   unit         String
   deadline     DateTime
   status       WIGStatus @default(DRAFT)
@@ -157,7 +167,7 @@ model LeadMeasure {
   name        String
   description String?
   cadence     Cadence
-  targetValue Float
+  targetValue  Float
   unit        String
   createdAt   DateTime       @default(now())
   archivedAt  DateTime?
@@ -191,7 +201,7 @@ model LeadMeasureOwner {
 
 model ActivityLog {
   id           String   @id @default(cuid())
-  value        Float
+  value        Int
   loggedForDate DateTime
   note         String?
   status       ActivityLogStatus @default(PENDING)
@@ -295,4 +305,34 @@ model AuditLog {
 
   actorUserId String
   actor       User   @relation(fields: [actorUserId], references: [id])
+}
+
+// ─── API KEY ─────────────────────────────────────────────────────────────────
+
+model ApiKey {
+  id         String    @id @default(cuid())
+  key        String    @unique
+  name       String?
+  createdAt  DateTime  @default(now())
+  expiresAt  DateTime?
+  lastUsedAt DateTime?
+  revokedAt  DateTime?
+
+  orgId String
+  org   Organization @relation(fields: [orgId], references: [id])
+}
+model InviteToken {
+  id              String    @id @default(cuid())
+  token           String    @unique
+  email           String?   // optional — pre-fill signup form
+  orgId           String
+  teamId          String?   // optional — auto add to team on signup
+  role            OrgRole   @default(MEMBER)
+  usedAt          DateTime?
+  expiresAt       DateTime
+  createdAt       DateTime  @default(now())
+  createdByUserId String
+
+  org             Organization @relation(fields: [orgId], references: [id])
+  createdBy       User         @relation(fields: [createdByUserId], references: [id])
 }

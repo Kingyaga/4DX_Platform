@@ -1,8 +1,11 @@
 import { z } from "zod";
+import { Prisma } from "@prisma/client";
 import { router, protectedProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
+import { auditLog } from "../audit";
 
 export const teamsRouter = router({
+  // Org admin creates a team
   create: protectedProcedure
     .input(
       z.object({
@@ -21,6 +24,7 @@ export const teamsRouter = router({
 
       if (!org) throw new TRPCError({ code: "NOT_FOUND" });
 
+      // Only org admins can create teams
       const membership = await ctx.db.orgMembership.findUnique({
         where: {
           userId_orgId: {
@@ -37,8 +41,12 @@ export const teamsRouter = router({
         });
       }
 
+<<<<<<< HEAD
       // Create team first
       const team = await ctx.db.team.create({
+=======
+      const createdTeam = await ctx.db.team.create({
+>>>>>>> origin/main
         data: {
           name: input.name,
           slug: input.slug,
@@ -47,6 +55,7 @@ export const teamsRouter = router({
         },
       });
 
+<<<<<<< HEAD
       // Add creator as team lead
       await ctx.db.teamMembership.create({
         data: {
@@ -57,8 +66,25 @@ export const teamsRouter = router({
       });
 
       return team;
+=======
+      await auditLog({
+        db: ctx.db,
+        actorUserId: ctx.session.user.id,
+        entityType: "TEAM",
+        entityId: createdTeam.id,
+        action: "TEAM_CREATED",
+        after: {
+          name: createdTeam.name,
+          slug: createdTeam.slug,
+          orgId: createdTeam.orgId,
+        },
+      });
+
+      return createdTeam;
+>>>>>>> origin/main
     }),
 
+  // Add a member to a team — org admin or current team lead only
   addMember: protectedProcedure
     .input(
       z.object({
@@ -70,10 +96,12 @@ export const teamsRouter = router({
     .mutation(async ({ ctx, input }) => {
       const team = await ctx.db.team.findUnique({
         where: { slug: input.teamSlug },
+        include: { org: { include: { memberships: true } } },
       });
 
       if (!team) throw new TRPCError({ code: "NOT_FOUND" });
 
+<<<<<<< HEAD
       const orgMembership = await ctx.db.orgMembership.findUnique({
         where: {
           userId_orgId: {
@@ -90,32 +118,76 @@ export const teamsRouter = router({
         throw new TRPCError({
           code: "FORBIDDEN",
           message: "Only the team lead or organization admin can add members.",
+=======
+      // Check if requester is org admin or team lead
+      const isOrgAdmin = team.org.memberships.some(
+        (m) => m.userId === ctx.session.user.id && m.role === "ADMIN",
+      );
+      const isTeamLead = team.leadUserId === ctx.session.user.id;
+
+      if (!isOrgAdmin && !isTeamLead) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Only org admins or the team lead can add members.",
+>>>>>>> origin/main
         });
       }
 
-      return ctx.db.teamMembership.create({
+      const newMembership = await ctx.db.teamMembership.create({
         data: {
           teamId: team.id,
           userId: input.userId,
           role: input.role,
         },
       });
+
+      await auditLog({
+        db: ctx.db,
+        actorUserId: ctx.session.user.id,
+        entityType: "TEAM_MEMBER",
+        entityId: newMembership.id,
+        action: "TEAM_MEMBER_ADDED",
+        after: {
+          teamId: newMembership.teamId,
+          userId: newMembership.userId,
+          role: newMembership.role,
+        },
+      });
+
+      return newMembership;
     }),
 
+<<<<<<< HEAD
   assignLead: protectedProcedure
     .input(
       z.object({
         teamSlug: z.string(),
         userId: z.string(),
+=======
+  // ← NEW: Assign a new team lead — org admin only
+  assignTeamLead: protectedProcedure
+    .input(
+      z.object({
+        teamSlug: z.string(),
+        newLeadUserId: z.string(),
+>>>>>>> origin/main
       }),
     )
     .mutation(async ({ ctx, input }) => {
       const team = await ctx.db.team.findUnique({
         where: { slug: input.teamSlug },
+<<<<<<< HEAD
+=======
+        include: {
+          org: { include: { memberships: true } },
+          members: true,
+        },
+>>>>>>> origin/main
       });
 
       if (!team) throw new TRPCError({ code: "NOT_FOUND" });
 
+<<<<<<< HEAD
       const orgMembership = await ctx.db.orgMembership.findUnique({
         where: {
           userId_orgId: {
@@ -222,13 +294,100 @@ export const teamsRouter = router({
       return { success: true };
     }),
 
+=======
+      // Only org admins can reassign the team lead
+      const isOrgAdmin = team.org.memberships.some(
+        (m) => m.userId === ctx.session.user.id && m.role === "ADMIN",
+      );
+
+      if (!isOrgAdmin) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Only org admins can assign a new team lead.",
+        });
+      }
+
+      // New lead must already be a member of the team
+      const isMember = team.members.some(
+        (m) => m.userId === input.newLeadUserId,
+      );
+      if (!isMember) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "The new team lead must already be a member of the team.",
+        });
+      }
+
+      // Step 1: Demote current lead to MEMBER
+
+      if (!isMember) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "The new team lead must already be a member of the team.",
+        });
+      }
+
+      // Step 1: Demote current lead to MEMBER
+      await ctx.db.teamMembership.updateMany({
+        where: {
+          teamId: team.id,
+          userId: team.leadUserId,
+        },
+        data: { role: "MEMBER" },
+      });
+
+      // Step 2: Promote new lead to LEAD
+      await ctx.db.teamMembership.updateMany({
+        where: {
+          teamId: team.id,
+          userId: input.newLeadUserId,
+        },
+        data: { role: "LEAD" },
+      });
+
+      // Step 3: Update the team's leadUserId
+      const updatedTeam = await ctx.db.team.update({
+        where: { id: team.id },
+        data: { leadUserId: input.newLeadUserId },
+      });
+
+      await auditLog({
+        db: ctx.db,
+        actorUserId: ctx.session.user.id,
+        entityType: "TEAM",
+        entityId: team.id,
+        action: "TEAM_LEAD_ASSIGNED",
+        before: {
+          leadUserId: team.leadUserId,
+        } as Prisma.InputJsonValue,
+        after: {
+          leadUserId: updatedTeam.leadUserId,
+        } as Prisma.InputJsonValue,
+      });
+
+      return updatedTeam;
+    }),
+
+  // Get team by slug — members and lead included
+>>>>>>> origin/main
   getBySlug: protectedProcedure
     .input(z.object({ slug: z.string() }))
     .query(async ({ ctx, input }) => {
       const team = await ctx.db.team.findUnique({
         where: { slug: input.slug },
         include: {
-          members: { include: { user: true } },
+          members: {
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  name: true,
+                  email: true,
+                  createdAt: true,
+                },
+              },
+            },
+          },
           wigs: {
             where: { status: "ACTIVE" },
             include: { leadMeasures: true },
@@ -240,6 +399,7 @@ export const teamsRouter = router({
       return team;
     }),
 
+<<<<<<< HEAD
   getMyTeams: protectedProcedure
     .input(z.object({ orgSlug: z.string() }))
     .query(async ({ ctx, input }) => {
@@ -306,6 +466,9 @@ export const teamsRouter = router({
       });
     }),
 
+=======
+  // Remove a member — org admin or team lead only
+>>>>>>> origin/main
   removeMember: protectedProcedure
     .input(
       z.object({
@@ -316,10 +479,15 @@ export const teamsRouter = router({
     .mutation(async ({ ctx, input }) => {
       const team = await ctx.db.team.findUnique({
         where: { slug: input.teamSlug },
+<<<<<<< HEAD
+=======
+        include: { org: { include: { memberships: true } } },
+>>>>>>> origin/main
       });
 
       if (!team) throw new TRPCError({ code: "NOT_FOUND" });
 
+<<<<<<< HEAD
       // Check if user is team lead or org admin
       const isTeamLead = team.leadUserId === ctx.session.user.id;
       const orgMembership = await ctx.db.orgMembership.findUnique({
@@ -358,4 +526,155 @@ export const teamsRouter = router({
 
       return { success: true };
     }),
+=======
+      const isOrgAdmin = team.org.memberships.some(
+        (m) => m.userId === ctx.session.user.id && m.role === "ADMIN",
+      );
+      const isTeamLead = team.leadUserId === ctx.session.user.id;
+
+      if (!isOrgAdmin && !isTeamLead) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Only org admins or the team lead can remove members.",
+        });
+      }
+
+      // Cannot remove the current team lead
+      if (input.userId === team.leadUserId) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Cannot remove the team lead. Assign a new lead first.",
+        });
+      }
+
+      await ctx.db.teamMembership.deleteMany({
+        where: {
+          teamId: team.id,
+          userId: input.userId,
+        },
+      });
+
+      await auditLog({
+        db: ctx.db,
+        actorUserId: ctx.session.user.id,
+        entityType: "TEAM_MEMBER",
+        entityId: `${team.id}-${input.userId}`,
+        action: "TEAM_MEMBER_REMOVED",
+        before: {
+          teamId: team.id,
+          userId: input.userId,
+        } as Prisma.InputJsonValue,
+      });
+
+      return { success: true };
+    }),
+  // Get members of a team with their roles
+  getMembers: protectedProcedure
+    .input(z.object({ teamSlug: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const team = await ctx.db.team.findUnique({
+        where: { slug: input.teamSlug },
+      });
+
+      if (!team) throw new TRPCError({ code: "NOT_FOUND" });
+
+      return ctx.db.teamMembership.findMany({
+        where: { teamId: team.id },
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              createdAt: true,
+            },
+          },
+        },
+        orderBy: { role: "asc" },
+      });
+    }),
+
+  // Get team activity summary
+  getActivitySummary: protectedProcedure
+    .input(
+      z.object({
+        teamSlug: z.string(),
+        startDate: z.string().optional(),
+        endDate: z.string().optional(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const team = await ctx.db.team.findUnique({
+        where: { slug: input.teamSlug },
+        include: {
+          wigs: {
+            where: { status: "ACTIVE" },
+            include: {
+              leadMeasures: {
+                where: { archivedAt: null },
+              },
+            },
+          },
+        },
+      });
+
+      if (!team) throw new TRPCError({ code: "NOT_FOUND" });
+
+      const dateFilter: { gte?: Date; lte?: Date } = {};
+      if (input.startDate) dateFilter.gte = new Date(input.startDate);
+      if (input.endDate) dateFilter.lte = new Date(input.endDate);
+
+      // Get all lead measure IDs for this team
+      const leadMeasureIds = team.wigs.flatMap((w) =>
+        w.leadMeasures.map((lm) => lm.id),
+      );
+
+      // Get all activity logs for those lead measures
+      const activityLogs = await ctx.db.activityLog.findMany({
+        where: {
+          leadMeasureId: { in: leadMeasureIds },
+          ...(Object.keys(dateFilter).length > 0
+            ? { loggedForDate: dateFilter }
+            : {}),
+        },
+        include: {
+          user: { select: { id: true, name: true } },
+          leadMeasure: {
+            select: { id: true, name: true, targetValue: true, unit: true },
+          },
+        },
+        orderBy: { loggedForDate: "desc" },
+      });
+
+      // Aggregate by lead measure
+      const summaryByLeadMeasure = leadMeasureIds.map((lmId) => {
+        const lm = team.wigs
+          .flatMap((w) => w.leadMeasures)
+          .find((lm) => lm.id === lmId);
+
+        const logs = activityLogs.filter((l) => l.leadMeasureId === lmId);
+        const total = logs.reduce((sum, l) => sum + l.value, 0);
+
+        return {
+          leadMeasureId: lmId,
+          name: lm?.name ?? "",
+          targetValue: lm?.targetValue ?? 0,
+          unit: lm?.unit ?? "",
+          totalLogged: total,
+          percentComplete: lm?.targetValue
+            ? Math.round((total / lm.targetValue) * 100)
+            : 0,
+          logCount: logs.length,
+          logs,
+        };
+      });
+
+      return {
+        teamId: team.id,
+        teamName: team.name,
+        summaryByLeadMeasure,
+        totalLogs: activityLogs.length,
+      };
+    }),
+>>>>>>> origin/main
 });

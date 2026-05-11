@@ -1,6 +1,8 @@
 import { z } from "zod";
+import { Prisma } from "@prisma/client";
 import { router, protectedProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
+import { auditLog } from "../audit";
 
 export const wigsRouter = router({
   create: protectedProcedure
@@ -11,10 +13,11 @@ export const wigsRouter = router({
         fromValue: z.number(),
         toValue: z.number(),
         unit: z.string().min(1),
-        deadline: z.date(),
+        deadline: z.coerce.date(),
         description: z.string().optional(),
       }),
     )
+
     .mutation(async ({ ctx, input }) => {
       const team = await ctx.db.team.findUnique({
         where: { slug: input.teamSlug },
@@ -39,8 +42,23 @@ export const wigsRouter = router({
             "Teams cannot have more than 2 active WIGs. Close an existing WIG first.",
         });
       }
+      // Org admins cannot create WIGs — management only
+      const isOrgAdmin = await ctx.db.orgMembership.findFirst({
+        where: {
+          userId: ctx.session.user.id,
+          orgId: team.orgId,
+          role: "ADMIN",
+        },
+      });
 
-      return ctx.db.wIG.create({
+      if (isOrgAdmin && team.leadUserId !== ctx.session.user.id) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Org admins cannot create WIGs. This is a team lead action.",
+        });
+      }
+
+      const createdWIG = await ctx.db.wIG.create({
         data: {
           title: input.title,
           fromValue: input.fromValue,
@@ -54,6 +72,21 @@ export const wigsRouter = router({
           createdByUserId: ctx.session.user.id,
         },
       });
+
+      await auditLog({
+        db: ctx.db,
+        actorUserId: ctx.session.user.id,
+        entityType: "WIG",
+        entityId: createdWIG.id,
+        action: "WIG_CREATED",
+        after: {
+          title: createdWIG.title,
+          status: createdWIG.status,
+          teamId: createdWIG.teamId,
+        },
+      });
+
+      return createdWIG;
     }),
 
   getByTeam: protectedProcedure
@@ -73,6 +106,7 @@ export const wigsRouter = router({
         status: z.enum(["ACHIEVED", "MISSED", "ABANDONED"]),
       }),
     )
+
     .mutation(async ({ ctx, input }) => {
       const wig = await ctx.db.wIG.findUnique({
         where: { id: input.wigId },
@@ -85,12 +119,95 @@ export const wigsRouter = router({
         throw new TRPCError({ code: "FORBIDDEN" });
       }
 
-      return ctx.db.wIG.update({
+      const updatedWIG = await ctx.db.wIG.update({
         where: { id: input.wigId },
         data: {
           status: input.status,
           closedAt: new Date(),
         },
+      });
+
+      await auditLog({
+        db: ctx.db,
+        actorUserId: ctx.session.user.id,
+        entityType: "WIG",
+        entityId: input.wigId,
+        action: "WIG_CLOSED",
+        before: {
+          status: wig.status,
+          closedAt: wig.closedAt,
+        } as Prisma.InputJsonValue,
+        after: {
+          status: updatedWIG.status,
+          closedAt: updatedWIG.closedAt,
+        } as Prisma.InputJsonValue,
+      });
+
+      return updatedWIG;
+    }),
+  // Get a single WIG by ID with full details
+  getById: protectedProcedure
+    .input(z.object({ wigId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const wig = await ctx.db.wIG.findUnique({
+        where: { id: input.wigId },
+        include: {
+          team: {
+            select: { id: true, name: true, slug: true, leadUserId: true },
+          },
+          leadMeasures: {
+            where: { archivedAt: null },
+            include: {
+              owners: {
+                include: {
+                  user: { select: { id: true, name: true, email: true } },
+                },
+              },
+              activityLogs: {
+                orderBy: { loggedForDate: "desc" },
+                take: 10,
+              },
+            },
+          },
+        },
+      });
+
+      if (!wig) throw new TRPCError({ code: "NOT_FOUND" });
+      return wig;
+    }),
+
+  // Update a WIG — Team Lead only
+  update: protectedProcedure
+    .input(
+      z.object({
+        wigId: z.string(),
+        title: z.string().min(3).max(200).optional(),
+        description: z.string().optional(),
+        deadline: z.coerce.date().optional(),
+        toValue: z.number().optional(),
+        unit: z.string().optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const wig = await ctx.db.wIG.findUnique({
+        where: { id: input.wigId },
+        include: { team: true },
+      });
+
+      if (!wig) throw new TRPCError({ code: "NOT_FOUND" });
+
+      if (wig.team.leadUserId !== ctx.session.user.id) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Only the team lead can update a WIG.",
+        });
+      }
+
+      const { wigId, ...updateData } = input;
+
+      return ctx.db.wIG.update({
+        where: { id: wigId },
+        data: updateData,
       });
     }),
 

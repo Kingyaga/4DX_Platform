@@ -1,0 +1,315 @@
+4DX EXECUTION PLATFORM
+Product Requirements Document
+Internal Platform — v1.0
+
+
+Document Version	1.0
+Status	Draft
+Owner	Yaga
+Last Updated	April 26, 2026
+
+
+
+
+
+ 
+ 
+1. Overview
+1.1 Problem Statement
+Teams within the organization set ambitious goals each quarter and year, but most goals quietly fade by week three. The "whirlwind" — the urgent operational demands of daily work — consumes the bandwidth needed for strategic execution. Existing tools (spreadsheets, OKR templates, project trackers) capture goals but do not enforce the discipline of executing them. Managers run inconsistent check-ins. Lead indicators are confused with lag indicators. Scoreboards become stale. Accountability becomes performative.
+
+The result: strategy gets written, not executed.
+
+1.2 Vision
+An internal web platform that operationalizes the 4 Disciplines of Execution methodology as software-enforced behavior. The platform is not a tracker — it is a discipline engine. It makes it structurally difficult to drift, structurally easy to stay accountable, and structurally visible whether the team is winning or losing.
+
+1.3 Goals
+•	Force strategic focus by capping goals (max 2 WIGs per team)
+•	Enforce the distinction between lead and lag measures
+•	Make the scoreboard the default surface, not a buried report
+•	Make the weekly accountability cadence unavoidable
+•	Provide leadership with cross-team visibility into execution health
+
+1.4 Non-Goals (v1)
+•	Public/external sale of the platform
+•	Mobile native apps (responsive web is sufficient)
+•	AI-driven coaching or insight generation
+•	Third-party integrations (Microsoft Teams, Jira, etc.)
+•	Personal/individual (non-team) goal tracking
+•	Executive portfolio analytics beyond a basic cross-team view
+
+1.5 Success Metrics
+
+Metric	Target (3 months post-launch)
+Weekly session completion rate	≥ 80% per active team
+Active WIGs per team	1–2 (no team exceeds the cap)
+Lead measure activity logging cadence	≥ 70% of expected entries logged on time
+Teams onboarded	3+ teams running active WIGs
+WIG achievement rate	≥ 50% of WIGs reach their target by deadline
+
+2. Users & Roles
+2.1 Personas
+Org Admin
+Sets up the organization, manages teams, oversees execution health across teams. Likely a founder, COO, or operations lead.
+
+Team Lead
+Defines team WIGs and lead measures, runs the weekly cadence, holds members accountable. Owns the team's execution discipline.
+
+Team Member
+Executes against assigned lead measures, logs activity, completes weekly sessions, makes commitments.
+
+2.2 Role Permissions Matrix
+
+Action	Org Admin	Team Lead	Member
+Create/edit organization	✅	❌	❌
+Create teams	✅	❌	❌
+Invite users	✅	✅ (own team)	❌
+Create/edit WIGs	✅	✅ (own team)	❌
+Define lead measures	✅	✅ (own team)	❌
+Log activity	✅	✅	✅ (own)
+Complete weekly session	✅	✅	✅
+View team scoreboard	✅	✅	✅
+View cross-team scoreboard	✅	❌	❌
+Archive/close WIG	✅	✅ (own team)	❌
+
+3. Core Concepts (Domain Model)
+3.1 Organization
+The top-level container. One per deployment in v1, but architected for multi-org from day one.
+
+3.2 Team
+A group of people with a Team Lead and Members. Owns its own WIGs.
+
+3.3 WIG (Wildly Important Goal)
+A goal expressed as "Move [metric] from [X] to [Y] by [date]." Belongs to one Team. Maximum 2 active WIGs per team enforced by the system.
+
+States:  Draft → Active → Achieved | Missed | Abandoned
+
+3.4 Lead Measure
+A predictive, influenceable behavior or output that drives the WIG. Each WIG has 2–3 lead measures. Each lead measure has a defined cadence (weekly target), unit, and one or more owners.
+
+3.5 Activity Log
+A record of lead measure activity by a team member. Includes value, date, and optional note.
+
+3.6 Weekly Session
+A structured weekly accountability ritual per WIG, per team member. Composed of three gated steps:
+
+1.	Account — Status of last week's commitments
+2.	Review — Scoreboard snapshot acknowledgment
+3.	Commit — 1–3 specific commitments for the coming week
+
+3.7 Commitment
+A specific, schedulable action a team member commits to in a Weekly Session. Marked complete/incomplete the following week.
+
+4. Functional Requirements
+4.1 Authentication & Onboarding
+•	FR-1.1  Users sign up via email + password (and/or SSO in a later release)
+•	FR-1.2  First user to sign up becomes the Org Admin and creates the organization
+•	FR-1.3  Org Admin invites users via email link; invitee sets password on first login
+•	FR-1.4  Users can belong to one or more teams
+•	FR-1.5  Users have a default landing team if they belong to multiple
+
+4.2 Team Management
+•	FR-2.1  Org Admin can create teams with name, description, Team Lead assignment
+•	FR-2.2  Team Lead can add/remove members from their team
+•	FR-2.3  Each team has a unique URL slug
+•	FR-2.4  Teams cannot be deleted while they have active WIGs (must archive first)
+
+4.3 WIG Creation & Management
+•	FR-3.1  WIG creation uses a guided wizard with required fields: Title, Starting value (X), Target value (Y), Unit, Deadline, and optional Description
+•	FR-3.2  System enforces a hard cap of 2 active WIGs per team. The "Create WIG" button is disabled with a tooltip when the cap is reached
+•	FR-3.3  WIGs cannot be created without all required fields. The phrase "From X to Y by When" is shown live as the user fills the form
+•	FR-3.4  WIGs can be edited only by the WIG owner (Team Lead) or Org Admin
+•	FR-3.5  WIGs have a status field with controlled transitions: Draft → Active → (Achieved | Missed | Abandoned). Once closed, read-only
+
+4.4 Lead Measure Management
+•	FR-4.1  Each WIG must have at least 1 and at most 3 lead measures defined before activation
+•	FR-4.2  Each lead measure has: Name, Description, Cadence (weekly | bi-weekly), Target value per cadence, Unit, Owner(s)
+•	FR-4.3  System shows a coaching tooltip distinguishing leads (predictive, controllable behaviors) from lags (outcome metrics) — non-blocking
+•	FR-4.4  Lead measures can be edited by the WIG owner; historical activity logs remain attached
+
+4.5 Activity Logging
+•	FR-5.1  Members can log activity against any lead measure they own
+•	FR-5.2  Activity log entry: value (numeric), date (defaults to today), optional note
+•	FR-5.3  Activity logs are visible to all team members for transparency
+•	FR-5.4  Log entries can be edited within 24 hours; after that, immutable (corrections require an offsetting entry)
+
+4.6 Scoreboard
+•	FR-6.1  The team scoreboard is the default landing page after login
+•	FR-6.2  Scoreboard displays per active WIG: title, current vs target progress bar, days remaining, and trend indicator (on track / at risk / off track)
+•	FR-6.3  Per lead measure: weekly target vs actual, per-owner contribution, 4-week trend sparkline, and status color (green ≥100%, amber 75–99%, red <75%)
+•	FR-6.4  Scoreboard auto-refreshes every 60 seconds while the tab is open
+•	FR-6.5  Scoreboard has a "Display Mode" — full-screen view optimized for a wall display
+
+4.7 Weekly Session (Discipline 4 — Critical Path)
+•	FR-7.1  A Weekly Session is generated automatically every Monday at 00:00 (org-configurable timezone) for each active WIG, per team member
+•	FR-7.2  Members are notified via in-app banner that their session is due
+The session is a 3-step gated flow:
+
+Step 1 — Account
+•	System displays last week's commitments
+•	User marks each: Done | Partially Done | Not Done
+•	If not done, user must select a reason (Whirlwind / Misjudged effort / Blocked / Other) and add a brief reflection
+
+Step 2 — Review
+•	System shows the team's scoreboard snapshot for the week
+•	User must acknowledge before proceeding
+
+Step 3 — Commit
+•	User enters 1–3 commitments for the coming week
+•	Each commitment is free text, with an optional linked lead measure
+•	Commitments must be specific (system warns on vague entries < 5 words)
+
+•	FR-7.4  Session is only marked complete when all 3 steps are submitted
+•	FR-7.5  Until the session is complete, the user sees a persistent banner on every page
+•	FR-7.6  Sessions have a deadline (default: end of Monday). Sessions completed late are flagged
+•	FR-7.7  Team Lead sees a session completion roster — who has completed, who hasn't
+
+4.8 Cross-Team View (Org Admin only)
+•	FR-8.1  Org Admin sees a portfolio dashboard with active WIG count, WIG health summary, session completion rate, and lead measure hit rate per team
+•	FR-8.2  Org Admin can drill into any team's scoreboard
+•	FR-8.3  Org Admin cannot edit team-level data — view-only
+
+4.9 Notifications
+•	FR-9.1  Email notifications: invite to join, weekly session due (Monday morning), overdue (Tuesday morning if incomplete), WIG achieved/closed
+•	FR-9.2  In-app notifications mirror the above
+•	FR-9.3  Users can configure notification preferences in their profile
+
+5. Non-Functional Requirements
+
+Category	Requirement
+Performance	Scoreboard loads in < 1.5s on standard broadband
+Availability	99.5% uptime target
+Security	All data encrypted at rest and in transit; passwords hashed (bcrypt/argon2)
+Browser support	Latest 2 versions of Chrome, Edge, Safari, Firefox
+Responsive	Works on tablet and mobile (read + log activity); session and WIG creation optimized for desktop
+Accessibility	WCAG 2.1 AA target
+Data export	Org Admin can export all org data as JSON
+Audit trail	All WIG, lead measure, and commitment changes logged with timestamp + actor
+
+6. Information Architecture
+
+/login
+/signup
+/invite/:token
+
+/                             →  redirects to default team scoreboard
+/team/:slug                   →  Team scoreboard (default landing)
+/team/:slug/wigs              →  WIG list
+/team/:slug/wigs/new          →  WIG creation wizard
+/team/:slug/wigs/:id          →  WIG detail (lead measures, activity)
+/team/:slug/wigs/:id/edit     →  Edit WIG
+/team/:slug/log               →  Quick activity logging
+/team/:slug/session           →  Active weekly session flow
+/team/:slug/session/history   →  Past sessions
+/team/:slug/members           →  Team Lead: roster management
+
+/org                          →  Org Admin: cross-team portfolio view
+/org/teams                    →  Manage teams
+/org/users                    →  Manage users
+/org/settings                 →  Org settings
+
+/profile                      →  User profile, notification settings
+/profile/sessions             →  My weekly sessions across teams
+
+7. Data Model
+
+Organization
+id, name, slug, timezone, created_at
+
+User
+id, email, name, password_hash, created_at, default_team_id
+
+OrgMembership
+id, user_id, org_id, role (admin | member)
+
+Team
+id, org_id, name, slug, lead_user_id, created_at, archived_at
+
+TeamMembership
+id, user_id, team_id, role (lead | member), joined_at
+
+WIG
+id, team_id, title, description, from_value, to_value, current_value,
+unit, deadline, status (draft | active | achieved | missed | abandoned),
+created_by_user_id, created_at, closed_at
+
+LeadMeasure
+id, wig_id, name, description, cadence (weekly | biweekly),
+target_value, unit, created_at, archived_at
+
+LeadMeasureOwner
+id, lead_measure_id, user_id
+
+ActivityLog
+id, lead_measure_id, user_id, value, logged_for_date,
+note, created_at, edited_at
+
+WeeklySession
+id, wig_id, user_id, week_starting,
+status (pending | in_progress | complete | overdue),
+account_completed_at, review_completed_at, commit_completed_at, created_at
+
+Commitment
+id, weekly_session_id, text, linked_lead_measure_id (nullable),
+status (pending | done | partial | not_done),
+not_done_reason (whirlwind | misjudged | blocked | other | null),
+reflection, resolved_at
+
+Notification
+id, user_id, type, payload_json, read_at, created_at
+
+AuditLog
+id, actor_user_id, entity_type, entity_id, action, before_json,
+after_json, created_at
+
+8. Technical Architecture
+
+Layer	Recommendation	Rationale
+Frontend	Next.js 14+ (App Router) + TypeScript	SSR, file-based routing, full-stack in one repo
+Styling	Tailwind CSS + shadcn/ui	Fast, professional, accessible primitives
+Backend	Next.js API routes + tRPC	Type-safe API, single repo
+Database	PostgreSQL (via Supabase or self-hosted)	Relational fit, mature, free tier available
+ORM	Prisma or Drizzle	Type-safe DB access
+Auth	NextAuth.js or Supabase Auth	Email/password, OAuth-ready
+Email	Resend or Postmark	Transactional email for invites + reminders
+Background jobs	Vercel Cron or node-cron	Weekly session generation, overdue notifications
+Hosting	Vercel (frontend) + Supabase (DB)	Zero-config, generous free tier
+Monitoring	Sentry	Error tracking
+
+This stack lets a solo developer ship the platform in 6–10 weeks of focused work and supports future Microsoft Teams integration without a rewrite.
+
+9. Release Plan
+Release 1.0 — Core Loop  (Weeks 1–6)
+•	Auth + org/team setup
+•	WIG creation + lead measures
+•	Activity logging
+•	Scoreboard
+•	Weekly session flow
+
+Release 1.1 — Polish & Notifications  (Weeks 7–8)
+•	Email notifications
+•	Session history view
+•	Display Mode for scoreboard
+•	Audit log
+
+Release 1.2 — Cross-Team & Insights  (Weeks 9–10)
+•	Org Admin portfolio view
+•	Per-team health metrics
+•	Data export
+
+Release 2.0 — Future
+•	Microsoft Teams integration (notifications + session reminders)
+•	Mobile app (read + log only)
+•	AI-assisted lead measure quality coaching
+•	Custom reporting
+
+10. Risks & Mitigations
+
+Risk	Likelihood	Impact	Mitigation
+Teams won't run the weekly session	High	Critical	Make session a hard gate; surface team lead non-completion to Org Admin
+Lead measures are actually lag measures	High	High	In-app coaching, examples by team type, future AI review
+Scoreboard goes stale from non-logging	Medium	High	Daily logging reminders; team lead visibility into who logs
+Whirlwind absorbs the platform itself	Medium	Critical	Keep activity logging under 30 seconds; aggressive UX simplicity
+Adoption stalls after first team	Medium	Medium	Each team's success becomes the proof case for the next
+Manager doesn't enforce discipline	High	Critical	Out of platform's control — document as known dependency
+
