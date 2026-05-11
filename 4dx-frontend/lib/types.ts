@@ -12,6 +12,7 @@ export interface User {
   email: string;
   name: string;
   role: UserRole;
+  orgSlug?: string | null;
   createdAt?: Date;
   defaultTeamId?: string | null;
   orgMemberships?: Array<{
@@ -154,6 +155,7 @@ export interface ActivityLogEntry {
   value: number;
   loggedForDate: Date;
   note: string | null;
+  status: "PENDING" | "APPROVED" | "REJECTED";
   createdAt: Date;
 }
 
@@ -198,6 +200,7 @@ export interface ActivityLog {
   value: number;
   loggedForDate: Date;
   note: string | null;
+  status: "PENDING" | "APPROVED" | "REJECTED";
   createdAt: Date;
   editedAt: Date | null;
   leadMeasureId: string;

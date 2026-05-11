@@ -20,6 +20,7 @@ model Organization {
 
   memberships OrgMembership[]
   teams       Team[]
+  invites     Invite[]
 }
 
 // ─── USER ───────────────────────────────────────────────────────────────────
@@ -39,6 +40,7 @@ model User {
   notifications   Notification[]
   auditLogs       AuditLog[]
   leadMeasures    LeadMeasureOwner[]
+  invites         Invite[]
 }
 
 // ─── ORG MEMBERSHIP ─────────────────────────────────────────────────────────
@@ -61,6 +63,24 @@ enum OrgRole {
   MEMBER
 }
 
+model Invite {
+  id              String        @id @default(cuid())
+  token           String        @unique
+  email           String?
+  expiresAt       DateTime
+  createdAt       DateTime      @default(now())
+  usedAt          DateTime?
+
+  orgId           String
+  org             Organization  @relation(fields: [orgId], references: [id])
+
+  teamId          String?
+  team            Team?         @relation(fields: [teamId], references: [id])
+
+  invitedByUserId String
+  invitedBy       User          @relation(fields: [invitedByUserId], references: [id])
+}
+
 // ─── TEAM ───────────────────────────────────────────────────────────────────
 
 model Team {
@@ -76,6 +96,7 @@ model Team {
   leadUserId String
   members    TeamMembership[]
   wigs       WIG[]
+  invites    Invite[]
 }
 
 model TeamMembership {
@@ -173,6 +194,7 @@ model ActivityLog {
   value        Float
   loggedForDate DateTime
   note         String?
+  status       ActivityLogStatus @default(PENDING)
   createdAt    DateTime @default(now())
   editedAt     DateTime?
 
@@ -181,6 +203,12 @@ model ActivityLog {
 
   userId String
   user   User   @relation(fields: [userId], references: [id])
+}
+
+enum ActivityLogStatus {
+  PENDING
+  APPROVED
+  REJECTED
 }
 
 // ─── WEEKLY SESSION ──────────────────────────────────────────────────────────

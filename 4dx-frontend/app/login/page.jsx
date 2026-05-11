@@ -10,10 +10,17 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showSignUpSnack, setShowSignUpSnack] = useState(false);
   const router = useRouter();
 
   const togglePassword = () => {
     setShowPassword(!showPassword);
+  };
+
+  const handleSignUpClick = (event) => {
+    event.preventDefault();
+    setShowSignUpSnack(true);
+    window.setTimeout(() => setShowSignUpSnack(false), 4000);
   };
 
   const handleSignIn = async () => {
@@ -73,7 +80,7 @@ export default function LoginPage() {
                 placeholder="Enter your email"
                 autoComplete="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => setEmail(e.target.value.toLowerCase())}
               />
             </div>
 
@@ -124,8 +131,23 @@ export default function LoginPage() {
             {loading ? "Signing in..." : "Sign In"}
           </button>
 
+          {showSignUpSnack && (
+            <div
+              style={{
+                padding: "12px 16px",
+                borderRadius: "12px",
+                backgroundColor: "#e0f2fe",
+                color: "#0369a1",
+                marginBottom: "16px",
+                textAlign: "center",
+                fontSize: "14px",
+              }}
+            >
+              Sign up is invite only. Use the invite link from your admin.
+            </div>
+          )}
           <p className="signup-prompt">
-            Don't have an account? <a href="#">Sign up</a>
+            Don&apos;t have an account? <a href="#" onClick={handleSignUpClick}>Sign up</a>
           </p>
         </div>
       </div>

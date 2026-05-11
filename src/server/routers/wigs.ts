@@ -93,4 +93,36 @@ export const wigsRouter = router({
         },
       });
     }),
+
+  update: protectedProcedure
+    .input(
+      z.object({
+        wigId: z.string(),
+        data: z.object({
+          title: z.string().min(3).max(200).optional(),
+          description: z.string().optional(),
+          deadline: z.date().optional(),
+        }),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const wig = await ctx.db.wIG.findUnique({
+        where: { id: input.wigId },
+        include: { team: true },
+      });
+
+      if (!wig) throw new TRPCError({ code: "NOT_FOUND" });
+
+      if (wig.team.leadUserId !== ctx.session.user.id) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Only the team lead can update WIGs.",
+        });
+      }
+
+      return ctx.db.wIG.update({
+        where: { id: input.wigId },
+        data: input.data,
+      });
+    }),
 });

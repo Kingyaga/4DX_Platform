@@ -55,24 +55,24 @@ export function AssignLeadModal({ team, onClose, onAssign, isLoading }: AssignLe
           {team.members && team.members.length > 0 ? (
             team.members.map((member: any) => (
               <label
-                key={member.id}
+                key={`${member.userId}-${member.teamId}`}
                 style={{
                   display: "flex",
                   alignItems: "center",
                   gap: "12px",
                   padding: "12px",
-                  border: selectedMemberId === member.id ? "2px solid #3b82f6" : "1px solid #e4e4e7",
+                  border: selectedMemberId === member.userId ? "2px solid #3b82f6" : "1px solid #e4e4e7",
                   borderRadius: "6px",
                   cursor: "pointer",
-                  backgroundColor: selectedMemberId === member.id ? "#eff6ff" : "white",
+                  backgroundColor: selectedMemberId === member.userId ? "#eff6ff" : "white",
                 }}
               >
                 <input
                   type="radio"
                   name="lead"
-                  value={member.id}
-                  checked={selectedMemberId === member.id}
-                  onChange={() => setSelectedMemberId(member.id)}
+                  value={member.userId}
+                  checked={selectedMemberId === member.userId}
+                  onChange={() => setSelectedMemberId(member.userId)}
                   style={{ cursor: "pointer" }}
                 />
                 <div>

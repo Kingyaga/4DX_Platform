@@ -1,6 +1,8 @@
+const BACKEND_URL = process.env.NEXTAUTH_BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3000";
+
 export async function GET(request: Request) {
   const url = new URL(request.url);
-  const backendUrl = `http://localhost:3000${url.pathname}${url.search}`;
+  const backendUrl = `${BACKEND_URL}${url.pathname}${url.search}`;
 
   const response = await fetch(backendUrl, {
     method: "GET",
@@ -10,12 +12,9 @@ export async function GET(request: Request) {
     },
   });
 
-  // Create a new response, copying headers including Set-Cookie
   const newResponse = new Response(response.body, response);
-  
-  // Explicitly forward Set-Cookie headers
   const setCookieHeaders = response.headers.getSetCookie();
-  setCookieHeaders.forEach(cookie => {
+  setCookieHeaders.forEach((cookie) => {
     newResponse.headers.append("Set-Cookie", cookie);
   });
 
@@ -24,12 +23,9 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   const url = new URL(request.url);
-  const backendUrl = `http://localhost:3000${url.pathname}${url.search}`;
+  const backendUrl = `${BACKEND_URL}${url.pathname}${url.search}`;
 
-  // Read the body once
   const body = await request.text();
-  
-  // Get the content-type from the original request
   const contentType = request.headers.get("content-type") || "application/json";
 
   const response = await fetch(backendUrl, {
@@ -38,15 +34,12 @@ export async function POST(request: Request) {
       "Content-Type": contentType,
       cookie: request.headers.get("cookie") || "",
     },
-    body: body,
+    body,
   });
 
-  // Create a new response, copying headers including Set-Cookie
   const newResponse = new Response(response.body, response);
-  
-  // Explicitly forward Set-Cookie headers
   const setCookieHeaders = response.headers.getSetCookie();
-  setCookieHeaders.forEach(cookie => {
+  setCookieHeaders.forEach((cookie) => {
     newResponse.headers.append("Set-Cookie", cookie);
   });
 

@@ -1,92 +1,248 @@
 "use client";
 
-import { useState } from "react";
-
-const members = [
-  { name: "Arthur Pendelton", role: "Lead", status: "Active", initials: "AP", color: "#16A34A" },
-  { name: "Sarah Jenkins", role: "Admin", status: "Active", initials: "SJ", color: "#16A34A" },
-  { name: "Marcus Vance", role: "Member", status: "Away", initials: "MV", color: "#e4e4e7" },
-  { name: "David Chen", role: "Member", status: "Active", initials: "DC", color: "#16A34A" },
-];
+import { useState, useEffect, type FormEvent } from "react";
+import { useAddTeamMember, useRemoveTeamMember, useRoleCheck, useTeam } from "@/lib/hooks";
+import { useTeamStore } from "@/lib/stores/team-store";
+import { ErrorState, EmptyState } from "@/lib/components/states";
 
 export default function MembersPage() {
+  const { currentTeamSlug } = useTeamStore();
+  const { team, isLoading, error, refetch } = useTeam(currentTeamSlug);
+  const { addMember, isLoading: isAdding, error: addError } = useAddTeamMember();
+  const { removeMember, isLoading: isRemoving, error: removeError } = useRemoveTeamMember();
+  const { canAddMembers } = useRoleCheck();
+
   const [hoveredRow, setHoveredRow] = useState<number | null>(null);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [newMemberId, setNewMemberId] = useState("");
+  const [newMemberRole, setNewMemberRole] = useState<"LEAD" | "MEMBER">("MEMBER");
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [formError, setFormError] = useState<string | null>(null);
+  const [removingMemberId, setRemovingMemberId] = useState<string | null>(null);
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
+
+  const handleAddMember = async (e: FormEvent) => {
+    e.preventDefault();
+
+    if (!currentTeamSlug || !newMemberId.trim()) {
+      setFormError("Enter an existing user ID to add them to the team.");
+      return;
+    }
+
+    try {
+      await addMember({
+        teamSlug: currentTeamSlug,
+        userId: newMemberId.trim(),
+        role: newMemberRole,
+      });
+
+      setSuccessMessage("Member added successfully.");
+      setFormError(null);
+      setNewMemberId("");
+      setShowAddForm(false);
+      refetch();
+    } catch {
+      setSuccessMessage(null);
+      setFormError(
+        "Unable to add member. Confirm the user exists in your organization and try again.",
+      );
+    }
+  };
+
+  const handleRemoveMember = async (memberId: string) => {
+    if (!currentTeamSlug || !window.confirm("Remove this member from the team?")) {
+      return;
+    }
+
+    try {
+      setRemovingMemberId(memberId);
+      await removeMember({
+        teamSlug: currentTeamSlug,
+        userId: memberId,
+      });
+      setSuccessMessage("Member removed successfully.");
+      setFormError(null);
+      refetch();
+    } catch {
+      setFormError("Unable to remove member. Please try again.");
+      setSuccessMessage(null);
+    } finally {
+      setRemovingMemberId(null);
+    }
+  };
+
+  const members = team?.members || [];
+
+  // Show loading state during SSR and initial hydration
+  if (!isHydrated || isLoading) {
+    return (
+      <main style={{ flex: 1, padding: "32px", fontFamily: "'Inter', sans-serif" }}>
+        <div style={{ textAlign: "center", color: "#71717a" }}>Loading team members...</div>
+      </main>
+    );
+  }
+
+  if (error) {
+    return (
+      <main style={{ flex: 1, padding: "32px", fontFamily: "'Inter', sans-serif" }}>
+        <ErrorState error={error} title="Unable to load team members" />
+      </main>
+    );
+  }
+
+  if (!currentTeamSlug) {
+    return (
+      <main style={{ flex: 1, padding: "32px", fontFamily: "'Inter', sans-serif" }}>
+        <EmptyState
+          title="Select a team first"
+          description="Choose a team from the sidebar before managing members."
+        />
+      </main>
+    );
+  }
 
   return (
     <main style={{ flex: 1, padding: "32px", fontFamily: "'Inter', sans-serif" }}>
-
-      {/* Header */}
       <div style={{ marginBottom: "32px", display: "flex", justifyContent: "space-between", alignItems: "center", paddingBottom: "16px", borderBottom: "1px solid #e4e4e7" }}>
         <div>
           <h1 style={{ fontSize: "24px", fontWeight: 600, color: "#18181b", letterSpacing: "-0.02em", textTransform: "uppercase" }}>Team Members</h1>
-          <p style={{ fontSize: "14px", color: "#71717a", marginTop: "4px" }}>Manage operational team access and roles.</p>
+          <p style={{ fontSize: "14px", color: "#71717a", marginTop: "4px" }}>
+            Manage access for your current team. You can add an existing organization member by their user ID.
+          </p>
+          {!canAddMembers && (
+            <p style={{ marginTop: "8px", color: "#d97706", fontSize: "13px" }}>
+              Only the current team lead can add members to this team.
+            </p>
+          )}
         </div>
-        <button style={{ backgroundColor: "#000000", color: "#ffffff", fontSize: "12px", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", padding: "10px 16px", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: "8px" }}>
-          <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>add</span>
-          Add Member
-        </button>
+        {canAddMembers && (
+          <button
+            onClick={() => {
+              setShowAddForm((current) => !current);
+              setFormError(null);
+              setSuccessMessage(null);
+            }}
+            style={{ backgroundColor: "#000000", color: "#ffffff", fontSize: "12px", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", padding: "10px 16px", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: "8px" }}
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>add</span>
+            {showAddForm ? "Hide Add Member" : "Add Member"}
+          </button>
+        )}
       </div>
 
-      {/* Table */}
-      <div style={{ backgroundColor: "#ffffff", border: "1px solid #e4e4e7", overflow: "hidden" }}>
-        <div style={{ overflowX: "auto" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse" }}>
-            <thead>
-              <tr style={{ backgroundColor: "#f4f4f5", borderBottom: "1px solid #e4e4e7" }}>
-                <th style={{ padding: "12px 16px", fontSize: "12px", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", color: "#71717a", textAlign: "left", width: "40%" }}>Name</th>
-                <th style={{ padding: "12px 16px", fontSize: "12px", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", color: "#71717a", textAlign: "left", width: "20%" }}>Role</th>
-                <th style={{ padding: "12px 16px", fontSize: "12px", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", color: "#71717a", textAlign: "left", width: "20%" }}>Status</th>
-                <th style={{ padding: "12px 16px", fontSize: "12px", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", color: "#71717a", textAlign: "right", width: "20%" }}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {members.map((member, i) => (
-                <tr
-                  key={i}
-                  style={{ borderBottom: "1px solid #f4f4f5", backgroundColor: hoveredRow === i ? "#f7f9fd" : "transparent", transition: "background 0.075s" }}
-                  onMouseEnter={() => setHoveredRow(i)}
-                  onMouseLeave={() => setHoveredRow(null)}
-                >
-                  <td style={{ padding: "16px", display: "flex", alignItems: "center", gap: "12px" }}>
-                    <div style={{ width: "32px", height: "32px", borderRadius: "50%", backgroundColor: "#e4e4e7", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "12px", fontWeight: 600, color: "#18181b", flexShrink: 0, border: "1px solid #e4e4e7" }}>
-                      {member.initials}
-                    </div>
-                    <span style={{ fontSize: "14px", fontWeight: 500, color: "#18181b" }}>{member.name}</span>
-                  </td>
-                  <td style={{ padding: "16px", fontSize: "14px", color: "#18181b" }}>{member.role}</td>
-                  <td style={{ padding: "16px" }}>
-                    <span style={{ display: "inline-flex", alignItems: "center", gap: "6px", fontSize: "12px", fontWeight: 500, color: member.status === "Active" ? "#18181b" : "#71717a" }}>
-                      <span style={{ width: "8px", height: "8px", borderRadius: "50%", backgroundColor: member.color, display: "inline-block" }}></span>
-                      {member.status}
-                    </span>
-                  </td>
-                  <td style={{ padding: "16px", textAlign: "right" }}>
-                    {hoveredRow === i && (
-                      <>
-                        <button style={{ fontSize: "12px", fontWeight: 500, color: "#71717a", background: "none", border: "none", cursor: "pointer", marginRight: "12px" }}>
-                          Edit Role
-                        </button>
-                        <button style={{ fontSize: "12px", fontWeight: 500, color: "#ba1a1a", background: "none", border: "none", cursor: "pointer" }}>
-                          Remove
-                        </button>
-                      </>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+      {showAddForm && (
+        <div style={{ marginBottom: "24px", backgroundColor: "#ffffff", border: "1px solid #e4e4e7", padding: "20px" }}>
+          <h2 style={{ fontSize: "18px", fontWeight: 600, margin: 0, marginBottom: "12px" }}>Add a team member</h2>
+          <p style={{ margin: 0, fontSize: "14px", color: "#71717a", marginBottom: "16px" }}>
+            Use an existing user ID to add a member to this team. We currently do not have an email lookup endpoint in the backend.
+          </p>
+          <form onSubmit={handleAddMember} style={{ display: "grid", gap: "16px" }}>
+            <div style={{ display: "grid", gap: "8px" }}>
+              <label style={{ fontSize: "12px", fontWeight: 500, color: "#18181b" }}>User ID *</label>
+              <input
+                type="text"
+                value={newMemberId}
+                onChange={(event) => setNewMemberId(event.target.value)}
+                placeholder="Enter existing user ID"
+                style={{ width: "100%", border: "1px solid #e4e4e7", backgroundColor: "#ffffff", padding: "10px", fontSize: "16px", color: "#18181b", outline: "none" }}
+              />
+            </div>
 
-        {/* Pagination */}
-        <div style={{ borderTop: "1px solid #e4e4e7", padding: "12px 16px", display: "flex", justifyContent: "space-between", alignItems: "center", backgroundColor: "#ffffff" }}>
-          <span style={{ fontSize: "14px", color: "#71717a" }}>Showing 1 to 4 of 4 members</span>
-          <div style={{ display: "flex", gap: "8px" }}>
-            <button disabled style={{ padding: "4px 12px", border: "1px solid #e4e4e7", fontSize: "12px", fontWeight: 500, color: "#71717a", backgroundColor: "transparent", cursor: "not-allowed", opacity: 0.5 }}>Prev</button>
-            <button disabled style={{ padding: "4px 12px", border: "1px solid #e4e4e7", fontSize: "12px", fontWeight: 500, color: "#71717a", backgroundColor: "transparent", cursor: "not-allowed", opacity: 0.5 }}>Next</button>
+            <div style={{ display: "grid", gap: "8px" }}>
+              <label style={{ fontSize: "12px", fontWeight: 500, color: "#18181b" }}>Role *</label>
+              <select
+                value={newMemberRole}
+                onChange={(event) => setNewMemberRole(event.target.value as "LEAD" | "MEMBER")}
+                style={{ width: "100%", border: "1px solid #e4e4e7", backgroundColor: "#ffffff", padding: "10px", fontSize: "16px", color: "#18181b", outline: "none" }}
+              >
+                <option value="MEMBER">Member</option>
+                <option value="LEAD">Lead</option>
+              </select>
+            </div>
+
+            {(formError || addError || successMessage) && (
+              <div style={{ padding: "12px", borderRadius: "8px", backgroundColor: formError || addError ? "#fee2e2" : "#ddf7e6", border: `1px solid ${formError || addError ? "#fecaca" : "#a7f3d0"}`, color: formError || addError ? "#991b1b" : "#0f5132" }}>
+                {formError || addError?.message || successMessage}
+              </div>
+            )}
+
+            <div style={{ display: "flex", gap: "12px", justifyContent: "flex-end" }}>
+              <button
+                type="button"
+                onClick={() => setShowAddForm(false)}
+                style={{ padding: "10px 16px", backgroundColor: "#f4f4f5", color: "#18181b", border: "1px solid #e4e4e7", cursor: "pointer", fontWeight: 600 }}
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={isAdding}
+                style={{ padding: "10px 16px", backgroundColor: isAdding ? "#a1a1a1" : "#000000", color: "#ffffff", border: "none", cursor: isAdding ? "not-allowed" : "pointer", fontWeight: 600 }}
+              >
+                {isAdding ? "Adding…" : "Add Member"}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {members.length === 0 ? (
+        <EmptyState
+          title="No team members"
+          description="Add an existing user to your team to begin working together."
+        />
+      ) : (
+        <div style={{ backgroundColor: "#ffffff", border: "1px solid #e4e4e7", overflow: "hidden" }}>
+          <div style={{ overflowX: "auto" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse" }}>
+              <thead>
+                <tr style={{ backgroundColor: "#f4f4f5", borderBottom: "1px solid #e4e4e7" }}>
+                  <th style={{ padding: "12px 16px", fontSize: "12px", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", color: "#71717a", textAlign: "left", width: "40%" }}>Name</th>
+                  <th style={{ padding: "12px 16px", fontSize: "12px", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", color: "#71717a", textAlign: "left", width: "20%" }}>Role</th>
+                  <th style={{ padding: "12px 16px", fontSize: "12px", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", color: "#71717a", textAlign: "left", width: "20%" }}>Email</th>
+                  <th style={{ padding: "12px 16px", fontSize: "12px", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", color: "#71717a", textAlign: "right", width: "20%" }}>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {members.map((member: any, i: number) => (
+                  <tr
+                    key={member.id}
+                    style={{ borderBottom: "1px solid #f4f4f5", backgroundColor: hoveredRow === i ? "#f7f9fd" : "transparent", transition: "background 0.075s" }}
+                    onMouseEnter={() => setHoveredRow(i)}
+                    onMouseLeave={() => setHoveredRow(null)}
+                  >
+                    <td style={{ padding: "16px", display: "grid", gap: "6px" }}>
+                      <span style={{ fontSize: "14px", fontWeight: 600, color: "#18181b" }}>
+                        {member.user?.name || member.user?.email || "Unknown user"}
+                      </span>
+                      <span style={{ fontSize: "12px", color: "#71717a" }}>
+                        Joined {new Date(member.joinedAt).toLocaleDateString()}
+                      </span>
+                    </td>
+                    <td style={{ padding: "16px", fontSize: "14px", color: "#18181b" }}>{member.role}</td>
+                    <td style={{ padding: "16px", fontSize: "14px", color: "#18181b" }}>{member.user?.email || "—"}</td>
+                    <td style={{ padding: "16px", textAlign: "right" }}>
+                      {hoveredRow === i && canAddMembers && (
+                        <button
+                          onClick={() => handleRemoveMember(member.userId)}
+                          disabled={isRemoving || removingMemberId === member.userId}
+                          style={{ fontSize: "12px", fontWeight: 500, color: isRemoving || removingMemberId === member.userId ? "#a1a1a1" : "#dc2626", background: "none", border: "none", cursor: isRemoving || removingMemberId === member.userId ? "not-allowed" : "pointer" }}
+                        >
+                          {removingMemberId === member.userId ? "Removing…" : "Remove"}
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
-      </div>
+      )}
     </main>
   );
 }

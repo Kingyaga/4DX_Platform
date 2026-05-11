@@ -93,11 +93,16 @@ async function main() {
   console.log("Team Lead membership created");
   
   // Create a team and assign team lead
-  const team = await db.team.create({
-    data: {
+  const team = await db.team.upsert({
+    where: { slug: "test-team" },
+    create: {
       name: "Test Team",
       slug: "test-team",
       orgId: org.id,
+      leadUserId: teamLeadUser.id,
+    },
+    update: {
+      name: "Test Team",
       leadUserId: teamLeadUser.id,
     },
   });
@@ -105,10 +110,19 @@ async function main() {
   console.log("Team created:", team.id);
   
   // Add team lead as team member with LEAD role
-  const teamLeadTeamMembership = await db.teamMembership.create({
-    data: {
+  const teamLeadTeamMembership = await db.teamMembership.upsert({
+    where: {
+      userId_teamId: {
+        userId: teamLeadUser.id,
+        teamId: team.id,
+      },
+    },
+    create: {
       userId: teamLeadUser.id,
       teamId: team.id,
+      role: "LEAD",
+    },
+    update: {
       role: "LEAD",
     },
   });
@@ -116,21 +130,49 @@ async function main() {
   console.log("Team lead added to team");
   
   // Add admin as team member
-  const adminTeamMembership = await db.teamMembership.create({
-    data: {
+  const adminTeamMembership = await db.teamMembership.upsert({
+    where: {
+      userId_teamId: {
+        userId: adminUser.id,
+        teamId: team.id,
+      },
+    },
+    create: {
       userId: adminUser.id,
       teamId: team.id,
+      role: "MEMBER",
+    },
+    update: {
       role: "MEMBER",
     },
   });
   
   console.log("Admin added to team");
   
+  // TODO: Create a test invite once backend pushes the Invite table migration
+  // const invite = await db.invite.create({
+  //   data: {
+  //     token: "test-invite-token-123",
+  //     email: "member@test.com",
+  //     expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+  //     orgId: org.id,
+  //     teamId: team.id,
+  //     invitedByUserId: adminUser.id,
+  //   },
+  // });
+  // 
+  // console.log("Test invite created:", invite.token);
+  
   console.log("\n✅ Seed completed!");
   console.log(`
 Test Users Created:
 - Email: dave@test.com / Password: password123 (Admin)
 - Email: team@test.com / Password: password123 (Team Lead)
+
+Test Invite:
+- Token: test-invite-token-123
+- Email: member@test.com
+- Signup URL: http://localhost:3001/signup?token=test-invite-token-123
   `);
 }
 

@@ -6,6 +6,7 @@ import { wigsRouter } from "./wigs";
 import { leadMeasuresRouter } from "./leadMeasure";
 import { activityLogsRouter } from "./activityLogs";
 import { sessionsRouter } from "./session";
+import { invitesRouter } from "./invites";
 
 export const appRouter = router({
   auth: authRouter,
@@ -15,6 +16,7 @@ export const appRouter = router({
   leadMeasures: leadMeasuresRouter,
   activityLogs: activityLogsRouter,
   sessions: sessionsRouter,
+  invites: invitesRouter,
 });
 
 export type AppRouter = typeof appRouter;

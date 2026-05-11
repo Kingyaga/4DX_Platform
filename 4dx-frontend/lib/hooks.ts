@@ -20,7 +20,7 @@ import type { Team, WIG, LeadMeasure, WeeklySession, APIError, UserRole } from "
 export function useCurrentUser() {
   const router = useRouter();
   const { data: session, status } = useAuthSession();
-  const { user, setUser, clearUser } = useUserStore();
+  const { user, setUser, setOrgSlug, clearUser } = useUserStore();
   
   // Fetch user data - refetch when session changes
   const { data: me, isLoading, error, refetch } = trpc.auth.me.useQuery(undefined, {
@@ -51,12 +51,13 @@ export function useCurrentUser() {
   }, [error, router, clearUser]);
 
   useEffect(() => {
-    if (me && (!user || user.id !== me.id)) {
+    if (me) {
       console.log("Fetched user from auth.me:", me);
       // me.role will be "ADMIN", "TEAM_LEAD", or "MEMBER"
-      setUser(me);
+      setUser(me as any);
+      setOrgSlug(me.orgSlug || null);
     }
-  }, [me, user, setUser]);
+  }, [me, setUser, setOrgSlug]);
 
   return { data: me, isLoading, error, refetch };
 }
@@ -65,15 +66,24 @@ export function useCurrentUser() {
  * Check current user's role and permissions
  */
 export function useRoleCheck() {
-  const { userRole } = useUserStore();
+  const { userRole, user } = useUserStore();
+  const { currentTeamSlug, myTeams } = useTeamStore();
+
+  const isCurrentTeamLead = Boolean(
+    userRole === "TEAM_LEAD" &&
+    user?.id &&
+    currentTeamSlug &&
+    myTeams.some((team) => team.slug === currentTeamSlug && team.leadUserId === user.id),
+  );
 
   return {
     isAdmin: userRole === "ADMIN",
     isTeamLead: userRole === "TEAM_LEAD",
     isMember: userRole === "MEMBER",
-    canCreateWIG: userRole === "ADMIN" || userRole === "TEAM_LEAD",
-    canArchiveWIG: userRole === "ADMIN" || userRole === "TEAM_LEAD",
-    canGenerateReport: userRole === "ADMIN" || userRole === "TEAM_LEAD",
+    canCreateWIG: isCurrentTeamLead,
+    canArchiveWIG: userRole === "ADMIN" || isCurrentTeamLead,
+    canGenerateReport: userRole === "ADMIN" || isCurrentTeamLead,
+    canAddMembers: isCurrentTeamLead,
     canAssignTeamLead: userRole === "ADMIN",
     role: userRole,
   };
@@ -84,7 +94,10 @@ export function useRoleCheck() {
  */
 export function useMyTeams(orgSlug: string | null) {
   const { setMyTeams } = useTeamStore();
-  const query = trpc.teams.getMyTeams.useQuery({ orgSlug: orgSlug || "" });
+  const query = (trpc.teams as any).getMyTeams.useQuery(
+    { orgSlug: orgSlug || "" },
+    { enabled: !!orgSlug },
+  );
 
   useEffect(() => {
     if (query.data && orgSlug) {
@@ -101,10 +114,30 @@ export function useMyTeams(orgSlug: string | null) {
 }
 
 /**
+ * Fetch all teams in an organization (Admin only)
+ */
+export function useAllTeams(orgSlug: string | null) {
+  const query = (trpc.teams as any).getAllTeams.useQuery(
+    { orgSlug: orgSlug || "" },
+    { enabled: !!orgSlug },
+  );
+
+  return {
+    teams: (query.data as any) || [],
+    isLoading: query.isLoading,
+    error: query.error ? parseTRPCError(query.error) : null,
+    refetch: query.refetch,
+  };
+}
+
+/**
  * Fetch a single team by slug
  */
 export function useTeam(teamSlug: string | null) {
-  const query = trpc.teams.getBySlug.useQuery({ slug: teamSlug || "" });
+  const query = (trpc.teams as any).getBySlug.useQuery(
+    { slug: teamSlug || "" },
+    { enabled: !!teamSlug },
+  );
 
   return {
     team: query.data || null,
@@ -118,7 +151,10 @@ export function useTeam(teamSlug: string | null) {
  * Fetch WIGs for a team
  */
 export function useWIGs(teamSlug: string | null) {
-  const query = trpc.wigs.getByTeam.useQuery({ teamSlug: teamSlug || "" });
+  const query = trpc.wigs.getByTeam.useQuery(
+    { teamSlug: teamSlug || "" },
+    { enabled: !!teamSlug },
+  );
 
   return {
     wigs: query.data || [],
@@ -147,7 +183,10 @@ export function useWIGs(teamSlug: string | null) {
  * Fetch lead measures for a WIG
  */
 export function useLeadMeasures(wigId: string | null) {
-  const query = trpc.leadMeasures.getByWig.useQuery({ wigId: wigId || "" });
+  const query = trpc.leadMeasures.getByWig.useQuery(
+    { wigId: wigId || "" },
+    { enabled: !!wigId },
+  );
 
   return {
     leadMeasures: query.data || [],
@@ -196,13 +235,63 @@ export function useSession(sessionId: string | null) {
  * Fetch organization dashboard (org admin only)
  */
 export function useOrgDashboard(orgSlug: string | null) {
-  const query = trpc.org.getDashboard.useQuery({ orgSlug: orgSlug || "" });
+  const query = trpc.org.getDashboard.useQuery(
+    { orgSlug: orgSlug || "" },
+    { enabled: !!orgSlug },
+  );
 
   return {
     org: query.data || null,
     isLoading: query.isLoading,
     error: query.error ? parseTRPCError(query.error) : null,
     refetch: query.refetch,
+  };
+}
+
+/**
+ * Fetch all users in the organization (Admin only)
+ */
+export function useOrgUsers(orgSlug: string | null) {
+  const query = trpc.auth.getAllUsers.useQuery(
+    { orgSlug: orgSlug || "" },
+    { enabled: !!orgSlug },
+  );
+
+  return {
+    users: query.data || [],
+    isLoading: query.isLoading,
+    error: query.error ? parseTRPCError(query.error) : null,
+    refetch: query.refetch,
+  };
+}
+
+/**
+ * Delete a user (Admin only)
+ */
+export function useDeleteUser() {
+  const mutation = trpc.auth.deleteUser.useMutation();
+
+  return {
+    deleteUser: mutation.mutateAsync,
+    isLoading: mutation.isPending,
+    error: mutation.error ? parseTRPCError(mutation.error) : null,
+    isSuccess: mutation.isSuccess,
+    reset: mutation.reset,
+  };
+}
+
+/**
+ * Delete a team (Admin only)
+ */
+export function useDeleteTeam() {
+  const mutation = (trpc.teams as any).delete.useMutation();
+
+  return {
+    deleteTeam: mutation.mutateAsync,
+    isLoading: mutation.isPending,
+    error: mutation.error ? parseTRPCError(mutation.error) : null,
+    isSuccess: mutation.isSuccess,
+    reset: mutation.reset,
   };
 }
 
@@ -244,6 +333,47 @@ export function useLogActivity() {
 
   return {
     logActivity: mutation.mutateAsync,
+    isLoading: mutation.isPending,
+    error: mutation.error ? parseTRPCError(mutation.error) : null,
+    isSuccess: mutation.isSuccess,
+    reset: mutation.reset,
+  };
+}
+
+/**
+ * Fetch pending activity requests for the selected team
+ */
+export function usePendingActivityRequests(teamSlug: string | null) {
+  const query = trpc.activityLogs.getPendingForTeam.useQuery(
+    { teamSlug: teamSlug || "" },
+    { enabled: !!teamSlug },
+  );
+
+  return {
+    pendingRequests: query.data || [],
+    isLoading: query.isLoading,
+    error: query.error ? parseTRPCError(query.error) : null,
+    refetch: query.refetch,
+  };
+}
+
+export function useApproveActivityRequest() {
+  const mutation = trpc.activityLogs.approve.useMutation();
+
+  return {
+    approveRequest: mutation.mutateAsync,
+    isLoading: mutation.isPending,
+    error: mutation.error ? parseTRPCError(mutation.error) : null,
+    isSuccess: mutation.isSuccess,
+    reset: mutation.reset,
+  };
+}
+
+export function useDeclineActivityRequest() {
+  const mutation = trpc.activityLogs.decline.useMutation();
+
+  return {
+    declineRequest: mutation.mutateAsync,
     isLoading: mutation.isPending,
     error: mutation.error ? parseTRPCError(mutation.error) : null,
     isSuccess: mutation.isSuccess,
@@ -327,13 +457,73 @@ export function useCloseWIG() {
 }
 
 /**
- * Add member to team (Team Lead only)
+ * Update a WIG (Team Lead only)
+ */
+export function useUpdateWIG() {
+  const mutation = trpc.wigs.update.useMutation();
+
+  return {
+    updateWIG: mutation.mutateAsync,
+    isLoading: mutation.isPending,
+    error: mutation.error ? parseTRPCError(mutation.error) : null,
+    isSuccess: mutation.isSuccess,
+    reset: mutation.reset,
+  };
+}
+
+/**
+ * Add member to team (Team lead or organization admin)
  */
 export function useAddTeamMember() {
-  const mutation = trpc.teams.addMember.useMutation();
+  const mutation = (trpc.teams as any).addMember.useMutation();
 
   return {
     addMember: mutation.mutateAsync,
+    isLoading: mutation.isPending,
+    error: mutation.error ? parseTRPCError(mutation.error) : null,
+    isSuccess: mutation.isSuccess,
+    reset: mutation.reset,
+  };
+}
+
+/**
+ * Remove member from team (Team Lead only)
+ */
+export function useRemoveTeamMember() {
+  const mutation = (trpc.teams as any).removeMember.useMutation();
+
+  return {
+    removeMember: mutation.mutateAsync,
+    isLoading: mutation.isPending,
+    error: mutation.error ? parseTRPCError(mutation.error) : null,
+    isSuccess: mutation.isSuccess,
+    reset: mutation.reset,
+  };
+}
+
+/**
+ * Assign a team lead (Admin only)
+ */
+export function useAssignTeamLead() {
+  const mutation = (trpc.teams as any).assignLead.useMutation();
+
+  return {
+    assignTeamLead: mutation.mutateAsync,
+    isLoading: mutation.isPending,
+    error: mutation.error ? parseTRPCError(mutation.error) : null,
+    isSuccess: mutation.isSuccess,
+    reset: mutation.reset,
+  };
+}
+
+/**
+ * Create a new team (Admin only)
+ */
+export function useCreateTeam() {
+  const mutation = (trpc.teams as any).create.useMutation();
+
+  return {
+    createTeam: mutation.mutateAsync,
     isLoading: mutation.isPending,
     error: mutation.error ? parseTRPCError(mutation.error) : null,
     isSuccess: mutation.isSuccess,

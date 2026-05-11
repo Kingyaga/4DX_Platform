@@ -19,8 +19,106 @@ export const activityLogsRouter = router({
           value: input.value,
           loggedForDate: input.loggedForDate,
           note: input.note,
+          status: "PENDING",
           userId: ctx.session.user.id,
         },
+      });
+    }),
+
+  approve: protectedProcedure
+    .input(z.object({ logId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const log = await ctx.db.activityLog.findUnique({
+        where: { id: input.logId },
+        include: {
+          leadMeasure: {
+            include: {
+              wig: {
+                include: {
+                  team: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      if (!log) throw new TRPCError({ code: "NOT_FOUND" });
+
+      if (log.leadMeasure.wig.team.leadUserId !== ctx.session.user.id) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Only the team lead can approve activity requests.",
+        });
+      }
+
+      return ctx.db.activityLog.update({
+        where: { id: input.logId },
+        data: { status: "APPROVED" },
+      });
+    }),
+
+  decline: protectedProcedure
+    .input(z.object({ logId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const log = await ctx.db.activityLog.findUnique({
+        where: { id: input.logId },
+        include: {
+          leadMeasure: {
+            include: {
+              wig: {
+                include: {
+                  team: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      if (!log) throw new TRPCError({ code: "NOT_FOUND" });
+
+      if (log.leadMeasure.wig.team.leadUserId !== ctx.session.user.id) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Only the team lead can decline activity requests.",
+        });
+      }
+
+      return ctx.db.activityLog.update({
+        where: { id: input.logId },
+        data: { status: "REJECTED" },
+      });
+    }),
+
+  getPendingForTeam: protectedProcedure
+    .input(z.object({ teamSlug: z.string() }))
+    .query(async ({ ctx, input }) => {
+      return ctx.db.activityLog.findMany({
+        where: {
+          status: "PENDING",
+          leadMeasure: {
+            wig: {
+              team: {
+                slug: input.teamSlug,
+                leadUserId: ctx.session.user.id,
+              },
+            },
+          },
+        },
+        include: {
+          user: { select: { id: true, name: true, email: true } },
+          leadMeasure: {
+            select: {
+              id: true,
+              name: true,
+              wig: {
+                select: { title: true },
+              },
+            },
+          },
+        },
+        orderBy: { createdAt: "desc" },
       });
     }),
 
@@ -71,7 +169,7 @@ export const activityLogsRouter = router({
     .input(z.object({ leadMeasureId: z.string() }))
     .query(async ({ ctx, input }) => {
       return ctx.db.activityLog.findMany({
-        where: { leadMeasureId: input.leadMeasureId },
+        where: { leadMeasureId: input.leadMeasureId, status: "APPROVED" },
         orderBy: { loggedForDate: "desc" },
         include: { user: { select: { id: true, name: true } } },
       });

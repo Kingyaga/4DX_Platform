@@ -4,8 +4,9 @@ import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useEffect } from "react";
 import { useSession } from "next-auth/react";
-import { useRoleCheck, useCurrentUser } from "@/lib/hooks";
+import { useCurrentUser, useMyTeams } from "@/lib/hooks";
 import { useUserStore } from "@/lib/stores/user-store";
+import { useTeamStore } from "@/lib/stores/team-store";
 
 interface NavItem {
   icon: string;
@@ -15,17 +16,20 @@ interface NavItem {
 }
 
 const allNavItems: NavItem[] = [
-  { icon: "analytics", label: "Scoreboard", href: "/dashboard/scoreboard", roles: ["TEAM_LEAD", "MEMBER"] },
-  { icon: "ads_click", label: "WIGs", href: "/dashboard/wigs", roles: ["TEAM_LEAD", "MEMBER"] },
+  { icon: "scoreboard", label: "Scoreboard", href: "/dashboard/scoreboard", roles: ["TEAM_LEAD", "MEMBER"] },
+  { icon: "emoji_events", label: "WIGs", href: "/dashboard/wigs", roles: ["TEAM_LEAD", "MEMBER"] },
   { icon: "history", label: "Activity Log", href: "/dashboard/activity", roles: ["TEAM_LEAD", "MEMBER"] },
-  { icon: "event_repeat", label: "Weekly Session", href: "/dashboard/session", roles: ["TEAM_LEAD", "MEMBER"] },
+  { icon: "event", label: "Weekly Session", href: "/dashboard/session", roles: ["TEAM_LEAD", "MEMBER"] },
   { icon: "groups", label: "Members", href: "/dashboard/members", roles: ["TEAM_LEAD", "MEMBER"] },
-  { icon: "corporate_fare", label: "Org Dashboard", href: "/dashboard", roles: ["ADMIN", "TEAM_LEAD"] },
-  { icon: "trending_up", label: "Team Lead Dashboard", href: "/dashboard/team-lead", roles: ["TEAM_LEAD"] },
-  { icon: "assessment", label: "Team Reports", href: "/dashboard/team-lead/reports", roles: ["TEAM_LEAD"] },
-  { icon: "admin_panel_settings", label: "Admin Dashboard", href: "/dashboard/admin", roles: ["ADMIN"] },
-  { icon: "group_add", label: "Team Management", href: "/dashboard/admin/teams", roles: ["ADMIN"] },
-  { icon: "trending_up", label: "Org Activity", href: "/dashboard/admin/activity", roles: ["ADMIN"] },
+  { icon: "dashboard_customize", label: "Org Dashboard", href: "/dashboard", roles: ["TEAM_LEAD"] },
+  { icon: "leaderboard", label: "Team Lead Dashboard", href: "/dashboard/team-lead", roles: ["TEAM_LEAD"] },
+  { icon: "pending_actions", label: "Requests", href: "/dashboard/team-lead/requests", roles: ["TEAM_LEAD"] },
+  { icon: "bar_chart", label: "Team Reports", href: "/dashboard/team-lead/reports", roles: ["TEAM_LEAD"] },
+  { icon: "admin_panel_settings", label: "Dashboard", href: "/dashboard/admin", roles: ["ADMIN"] },
+  { icon: "groups", label: "Teams", href: "/dashboard/admin/teams", roles: ["ADMIN"] },
+  { icon: "people", label: "Users", href: "/dashboard/admin/users", roles: ["ADMIN"] },
+  { icon: "person_add", label: "Create User", href: "/dashboard/admin/users/new", roles: ["ADMIN"] },
+  { icon: "insights", label: "Org Activity", href: "/dashboard/admin/activity", roles: ["ADMIN"] },
 ];
 
 export default function DashboardLayout({
@@ -35,13 +39,21 @@ export default function DashboardLayout({
 }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   
   // Fetch current user profile with role from backend
   useCurrentUser();
   
-  const { role } = useRoleCheck();
-  const { userRole, clearUser } = useUserStore();
+  const { userRole, clearUser, orgSlug } = useUserStore();
+  const { currentTeamSlug, setCurrentTeamSlug } = useTeamStore();
+  const { teams, isLoading: teamsLoading } = useMyTeams(orgSlug);
+
+  // Auto-select first team if none selected yet
+  useEffect(() => {
+    if (!currentTeamSlug && !teamsLoading && teams.length > 0) {
+      setCurrentTeamSlug(teams[0]?.slug || null);
+    }
+  }, [currentTeamSlug, teamsLoading, teams, setCurrentTeamSlug]);
 
   // Debug logging
   console.log("Dashboard layout - userRole:", userRole);
@@ -71,14 +83,27 @@ export default function DashboardLayout({
   // Filter nav items based on user role
   const navItems = allNavItems.filter((item) => {
     if (!item.roles) return true;
-    return item.roles.includes(userRole as any);
+    return userRole ? item.roles.includes(userRole) : false;
   });
 
   console.log("Filtered navItems:", navItems.map(item => item.label));
 
+  const activeHref = navItems.reduce<string | null>((currentActive, item) => {
+    if (pathname === item.href) {
+      return item.href;
+    }
+
+    if (pathname.startsWith(`${item.href}/`)) {
+      if (!currentActive || item.href.length > currentActive.length) {
+        return item.href;
+      }
+    }
+
+    return currentActive;
+  }, null);
+
   const isActive = (href: string): boolean => {
-    if (href === "/dashboard") return pathname === "/dashboard";
-    return pathname.startsWith(href);
+    return pathname === href || activeHref === href;
   };
 
   return (

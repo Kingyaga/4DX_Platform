@@ -1,15 +1,25 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useUserStore } from "@/lib/stores/user-store";
 import { useTeamStore } from "@/lib/stores/team-store";
-import { useWIGs } from "@/lib/hooks";
+import { useWIGs, useMyTeams } from "@/lib/hooks";
 import { ErrorState, EmptyState } from "@/lib/components/states";
 import Link from "next/link";
 
 export default function TeamLeadReportsPage() {
-  const { currentTeamSlug } = useTeamStore();
+  const { orgSlug } = useUserStore();
+  const { currentTeamSlug, setCurrentTeamSlug } = useTeamStore();
   const { wigs, isLoading, error } = useWIGs(currentTeamSlug);
+  const { teams, isLoading: teamsLoading, error: teamsError } = useMyTeams(orgSlug);
   const [selectedReport, setSelectedReport] = useState<"execution" | "lag" | "lead" | null>(null);
+
+  useEffect(() => {
+    if (!currentTeamSlug && !teamsLoading && teams.length > 0) {
+      // Auto-select first team if none is currently selected
+      setCurrentTeamSlug(teams[0].slug);
+    }
+  }, [currentTeamSlug, teamsLoading, teams, setCurrentTeamSlug]);
 
   if (error) return <ErrorState error={error} />;
   if (isLoading) {
@@ -21,7 +31,30 @@ export default function TeamLeadReportsPage() {
   }
 
   if (!currentTeamSlug) {
-    return <EmptyState title="No team selected" description="Select a team from the sidebar" />;
+    if (teamsLoading) {
+      return (
+        <main style={{ flex: 1, overflowY: "auto", padding: "32px" }}>
+          <div style={{ textAlign: "center", color: "#71717a" }}>Loading teams...</div>
+        </main>
+      );
+    }
+
+    if (teamsError) {
+      return (
+        <main style={{ flex: 1, overflowY: "auto", padding: "32px" }}>
+          <ErrorState error={teamsError} title="Unable to load teams" />
+        </main>
+      );
+    }
+
+    return (
+      <main style={{ flex: 1, overflowY: "auto", padding: "32px" }}>
+        <EmptyState
+          title="No team selected"
+          description="Choose your team from the Team Lead dashboard or select one in the sidebar."
+        />
+      </main>
+    );
   }
 
   // Compute report data

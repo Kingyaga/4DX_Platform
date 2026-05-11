@@ -3,27 +3,55 @@
 import { useOrgDashboard } from "@/lib/hooks";
 import { useUserStore } from "@/lib/stores/user-store";
 import { ErrorState, EmptyState } from "@/lib/components/states";
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
+
+interface ActivityLog {
+  id: string;
+  value: number;
+  loggedForDate: string;
+  user?: {
+    email?: string;
+  };
+}
+
+interface LeadMeasure {
+  id: string;
+  name: string;
+  targetValue: number;
+  activityLogs?: ActivityLog[];
+}
+
+interface Wig {
+  id: string;
+  title: string;
+  leadMeasures?: LeadMeasure[];
+}
+
+interface TeamMember {
+  id: string;
+  email?: string;
+}
+
+interface Team {
+  id: string;
+  name: string;
+  wigs?: Wig[];
+  members?: TeamMember[];
+}
+
+interface WeekBar {
+  label: string;
+  count: number;
+}
 
 export default function AdminActivityPage() {
   const { orgSlug } = useUserStore();
   const { org, isLoading, error } = useOrgDashboard(orgSlug);
 
-  if (error) return <ErrorState error={error} />;
-  if (isLoading) {
-    return (
-      <main style={{ flex: 1, overflowY: "auto", padding: "32px" }}>
-        <div style={{ textAlign: "center", color: "#71717a" }}>Loading activity...</div>
-      </main>
-    );
-  }
-
-  if (!org) {
-    return <EmptyState title="No organization" description="Unable to load organization data" />;
-  }
-
   // Collect all activity logs from all teams
   const allActivityLogs = useMemo(() => {
+    if (!org?.teams) return [];
+
     const logs: Array<{
       id: string;
       team: string;
@@ -35,10 +63,10 @@ export default function AdminActivityPage() {
       user: string;
     }> = [];
 
-    org.teams?.forEach((team: any) => {
-      team.wigs?.forEach((wig: any) => {
-        wig.leadMeasures?.forEach((lm: any) => {
-          lm.activityLogs?.forEach((log: any) => {
+    org.teams.forEach((team: Team) => {
+      team.wigs?.forEach((wig: Wig) => {
+        wig.leadMeasures?.forEach((lm: LeadMeasure) => {
+          lm.activityLogs?.forEach((log: ActivityLog) => {
             logs.push({
               id: log.id,
               team: team.name,
@@ -57,13 +85,26 @@ export default function AdminActivityPage() {
     return logs.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }, [org]);
 
-  const weekBars = useMemo(() =>
+  const weekBars: WeekBar[] = useMemo(() =>
     Array.from({ length: 6 }).map((_, i) => ({
       label: `W${i + 1}`,
-      count: Math.floor(Math.random() * 50) + 10,
+      count: 20 + (i * 8), // Predictable increasing trend
     })),
     []
   );
+
+  if (error) return <ErrorState error={error} />;
+  if (isLoading) {
+    return (
+      <main style={{ flex: 1, overflowY: "auto", padding: "32px" }}>
+        <div style={{ textAlign: "center", color: "#71717a" }}>Loading activity...</div>
+      </main>
+    );
+  }
+
+  if (!org) {
+    return <EmptyState title="No organization" description="Unable to load organization data" />;
+  }
 
   return (
     <main style={{ flex: 1, overflowY: "auto", padding: "32px" }}>
@@ -87,7 +128,7 @@ export default function AdminActivityPage() {
           <div style={{ border: "1px solid #e4e4e7", borderRadius: "8px", padding: "16px", backgroundColor: "white" }}>
             <p style={{ margin: "0 0 8px 0", fontSize: "12px", fontWeight: "500", color: "#71717a" }}>Active WIGs</p>
             <div style={{ fontSize: "32px", fontWeight: "700", color: "#18181b" }}>
-              {org.teams?.reduce((sum: number, t: any) => sum + (t.wigs?.length || 0), 0) || 0}
+              {org.teams?.reduce((sum: number, t: Team) => sum + (t.wigs?.length || 0), 0) || 0}
             </div>
           </div>
           <div style={{ border: "1px solid #e4e4e7", borderRadius: "8px", padding: "16px", backgroundColor: "white" }}>
@@ -107,7 +148,7 @@ export default function AdminActivityPage() {
         <div style={{ border: "1px solid #e4e4e7", borderRadius: "8px", padding: "20px", backgroundColor: "white" }}>
           <h2 style={{ margin: "0 0 16px 0", fontSize: "16px", fontWeight: "600" }}>6-Week Activity Trend</h2>
           <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-around", height: "160px", gap: "8px" }}>
-            {weekBars.map((bar: any, i: number) => (
+            {weekBars.map((bar: WeekBar, i: number) => (
               <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "8px", flex: 1 }}>
                 <div
                   style={{
@@ -176,7 +217,7 @@ export default function AdminActivityPage() {
         <div style={{ border: "1px solid #e4e4e7", borderRadius: "8px", padding: "20px", backgroundColor: "white" }}>
           <h2 style={{ margin: "0 0 16px 0", fontSize: "16px", fontWeight: "600" }}>Activity by Team</h2>
           <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-            {org.teams?.map((team: any) => {
+            {org.teams?.map((team: Team) => {
               const teamLogs = allActivityLogs.filter((log) => log.team === team.name);
               return (
                 <div key={team.id} style={{ padding: "12px", backgroundColor: "#f9fafb", borderRadius: "6px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>

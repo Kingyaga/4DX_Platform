@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
-import { useWIGs, useCreateWIG, useRoleCheck } from "@/lib/hooks";
+import { useEffect, useState } from "react";
+import { useWIGs, useCreateWIG, useUpdateWIG, useRoleCheck, useMyTeams } from "@/lib/hooks";
 import { useTeamStore } from "@/lib/stores/team-store";
+import { useUserStore } from "@/lib/stores/user-store";
 import { WIGListSkeleton } from "@/lib/components/skeletons";
 import { ErrorState, EmptyState } from "@/lib/components/states";
 import type { WIG } from "@/lib/types";
@@ -12,17 +13,83 @@ export default function WIGsPage() {
   const [showNew, setShowNew] = useState(false);
   const [hoveredRow, setHoveredRow] = useState<number | null>(null);
 
+  const { orgSlug } = useUserStore();
   const currentTeamSlug = useTeamStore((state) => state.currentTeamSlug);
+  const setCurrentTeamSlug = useTeamStore((state) => state.setCurrentTeamSlug);
+  const { teams, isLoading: teamsLoading, error: teamsError } = useMyTeams(orgSlug);
+
+  useEffect(() => {
+    if (!currentTeamSlug && !teamsLoading && teams.length > 0) {
+      setCurrentTeamSlug(teams[0].slug);
+    }
+  }, [currentTeamSlug, teamsLoading, teams, setCurrentTeamSlug]);
+
   const { wigs, isLoading, error, refetch } = useWIGs(currentTeamSlug);
   const { canCreateWIG } = useRoleCheck();
 
   if (!currentTeamSlug) {
+    if (teamsLoading) {
+      return (
+        <main style={{ flex: 1, padding: "32px", fontFamily: "'Inter', sans-serif" }}>
+          <div style={{ textAlign: "center", color: "#71717a" }}>Loading teams...</div>
+        </main>
+      );
+    }
+
+    if (teamsError) {
+      return (
+        <main style={{ flex: 1, padding: "32px", fontFamily: "'Inter', sans-serif" }}>
+          <ErrorState error={teamsError} title="Unable to load teams" />
+        </main>
+      );
+    }
+
+    if (!teams || teams.length === 0) {
+      return (
+        <main style={{ flex: 1, padding: "32px", fontFamily: "'Inter', sans-serif" }}>
+          <EmptyState
+            title="No teams available"
+            description="You need at least one team assigned before you can view WIGs. Contact your admin to join a team."
+          />
+        </main>
+      );
+    }
+
     return (
       <main style={{ flex: 1, padding: "32px", fontFamily: "'Inter', sans-serif" }}>
-        <ErrorState
-          error={{ code: "NOT_FOUND", httpStatus: 404, message: "No team selected. Please select a team first." }}
-          title="No Team Selected"
-        />
+        <div style={{ maxWidth: "720px", margin: "0 auto", display: "flex", flexDirection: "column", gap: "24px" }}>
+          <div>
+            <h1 style={{ fontSize: "28px", fontWeight: 700, color: "#18181b", marginBottom: "8px" }}>Select a team</h1>
+            <p style={{ fontSize: "14px", color: "#71717a" }}>
+              Pick the team you want to manage before viewing WIGs and creating new goals.
+            </p>
+          </div>
+
+          <div style={{ display: "grid", gap: "14px" }}>
+            {teams.map((team: { slug: string; name: string; wigs?: Array<unknown> }) => (
+              <button
+                key={team.slug}
+                onClick={() => setCurrentTeamSlug(team.slug)}
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  padding: "18px 20px",
+                  borderRadius: "16px",
+                  border: "1px solid #e4e4e7",
+                  backgroundColor: "#ffffff",
+                  cursor: "pointer",
+                  fontSize: "14px",
+                  fontWeight: 600,
+                  color: "#18181b",
+                }}
+              >
+                <span>{team.name}</span>
+                <span style={{ fontSize: "12px", color: "#71717a" }}>{team.wigs?.length || 0} WIGs</span>
+              </button>
+            ))}
+          </div>
+        </div>
       </main>
     );
   }
@@ -64,12 +131,20 @@ export default function WIGsPage() {
       {!isLoading && !error && wigs.length === 0 && (
         <EmptyState
           title="No WIGs yet"
-          description="Create your first Wildly Important Goal to get started."
+          description={
+            canCreateWIG
+              ? "Create your first Wildly Important Goal to get started."
+              : "Only the current team lead can create WIGs for this team."
+          }
           icon="🎯"
-          action={{
-            label: "Create WIG",
-            onClick: () => setShowNew(true),
-          }}
+          action={
+            canCreateWIG
+              ? {
+                  label: "Create WIG",
+                  onClick: () => setShowNew(true),
+                }
+              : undefined
+          }
         />
       )}
 
@@ -124,8 +199,14 @@ export default function WIGsPage() {
 }
 
 function WIGDetail({ wig, onBack }: { wig: WIG; onBack: () => void }) {
+  const [isEditing, setIsEditing] = useState(false);
+  const { canArchiveWIG } = useRoleCheck();
   const progress = ((wig.currentValue - wig.fromValue) / (wig.toValue - wig.fromValue)) * 100;
   const statusColor = wig.status === "ACTIVE" ? "#16A34A" : wig.status === "DRAFT" ? "#71717a" : "#EAB308";
+
+  if (isEditing) {
+    return <WIGEditForm wig={wig} onCancel={() => setIsEditing(false)} onSuccess={() => setIsEditing(false)} />;
+  }
 
   return (
     <main style={{ flex: 1, padding: "32px", fontFamily: "'Inter', sans-serif" }}>
@@ -139,7 +220,7 @@ function WIGDetail({ wig, onBack }: { wig: WIG; onBack: () => void }) {
       </button>
 
       {/* Header */}
-      <div style={{ marginBottom: "32px", paddingBottom: "16px", borderBottom: "1px solid #e4e4e7", display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+      <div style={{ marginBottom: "24px", paddingBottom: "16px", borderBottom: "1px solid #e4e4e7", display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
         <div style={{ flex: 1 }}>
           <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
             <span style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "2px 8px", border: "1px solid #e4e4e7", backgroundColor: "#f4f4f5", fontSize: "12px", fontWeight: 600 }}>
@@ -150,31 +231,29 @@ function WIGDetail({ wig, onBack }: { wig: WIG; onBack: () => void }) {
           </div>
           <h1 style={{ fontSize: "24px", fontWeight: 600, color: "#18181b", letterSpacing: "-0.02em" }}>{wig.title}</h1>
         </div>
-        <button style={{ display: "flex", alignItems: "center", gap: "8px", padding: "8px 16px", border: "1px solid #000000", backgroundColor: "transparent", fontSize: "12px", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", cursor: "pointer", color: "#18181b" }}>
-          <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>edit</span>
-          Edit WIG
-        </button>
+        {canArchiveWIG && (
+          <button
+            onClick={() => setIsEditing(true)}
+            style={{ backgroundColor: "#000000", color: "#ffffff", fontSize: "12px", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", padding: "10px 16px", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: "8px" }}
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>edit</span>
+            Edit WIG
+          </button>
+        )}
       </div>
 
-      {/* Progress */}
-      <div style={{ backgroundColor: "#ffffff", border: "1px solid #e4e4e7", padding: "20px", marginBottom: "32px" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "16px" }}>
-          <div>
-            <span style={{ fontSize: "12px", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", color: "#71717a", display: "block", marginBottom: "4px" }}>Lag Measure Progress</span>
-            <span style={{ fontSize: "32px", fontWeight: 700, letterSpacing: "-0.03em", color: "#18181b" }}>{wig.currentValue.toFixed(1)}</span>
-          </div>
-          <div style={{ textAlign: "right" }}>
-            <span style={{ fontSize: "12px", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", color: "#71717a", display: "block", marginBottom: "4px" }}>Target</span>
-            <span style={{ fontSize: "20px", fontWeight: 600, color: "#18181b" }}>{wig.toValue.toFixed(1)}</span>
-          </div>
-        </div>
-        <div style={{ width: "100%", height: "4px", backgroundColor: "#e4e4e7", marginBottom: "8px", position: "relative" }}>
-          <div style={{ height: "100%", backgroundColor: "#18181b", width: `${Math.min(progress, 100)}%` }}></div>
-        </div>
-        <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", color: "#71717a" }}>
-          <span>Baseline: {wig.fromValue}</span>
-          <span>Deadline: {new Date(wig.deadline).toLocaleDateString()}</span>
-        </div>
+      <div style={{ marginBottom: "24px", padding: "16px", borderRadius: "16px", backgroundColor: canArchiveWIG ? "#ecfdf5" : "#f8fafc", border: `1px solid ${canArchiveWIG ? "#10b981" : "#e4e4e7"}`, color: canArchiveWIG ? "#166534" : "#52525b" }}>
+        {canArchiveWIG
+          ? "You are the current team lead for this team, so WIG actions are available to you."
+          : "This WIG is read-only unless you are the current team lead for the selected team."}
+      </div>
+
+      <div style={{ width: "100%", height: "4px", backgroundColor: "#e4e4e7", marginBottom: "8px", position: "relative" }}>
+        <div style={{ height: "100%", backgroundColor: "#18181b", width: `${Math.min(progress, 100)}%` }}></div>
+      </div>
+      <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", color: "#71717a" }}>
+        <span>Baseline: {wig.fromValue}</span>
+        <span>Deadline: {new Date(wig.deadline).toLocaleDateString()}</span>
       </div>
 
       {/* Lead Measures */}
@@ -241,7 +320,7 @@ function WIGCreateForm({ onCancel, onSuccess }: { onCancel: () => void; onSucces
         fromValue: parseFloat(from),
         toValue: parseFloat(to),
         unit,
-        deadline: new Date(deadline).toISOString() as any,
+        deadline: new Date(deadline),
         description: description || undefined,
       });
       onSuccess();
@@ -366,6 +445,109 @@ function WIGCreateForm({ onCancel, onSuccess }: { onCancel: () => void; onSucces
               style={{ padding: "8px 16px", border: "none", backgroundColor: isLoading ? "#cccccc" : "#000000", color: "#ffffff", fontSize: "12px", fontWeight: 600, cursor: isLoading ? "not-allowed" : "pointer", textTransform: "uppercase", letterSpacing: "0.05em" }}
             >
               {isLoading ? "Creating..." : "Create WIG"}
+            </button>
+          </div>
+        </form>
+      </div>
+    </main>
+  );
+}
+
+function WIGEditForm({ wig, onCancel, onSuccess }: { wig: WIG; onCancel: () => void; onSuccess: () => void }) {
+  const [title, setTitle] = useState(wig.title);
+  const [deadline, setDeadline] = useState(wig.deadline.toISOString().split('T')[0]);
+  const [description, setDescription] = useState(wig.description || "");
+
+  const { updateWIG, isLoading, error } = useUpdateWIG();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!title || !deadline) {
+      return;
+    }
+
+    try {
+      await updateWIG({
+        wigId: wig.id,
+        data: {
+          title,
+          deadline: new Date(deadline),
+          description: description || undefined,
+        },
+      });
+      onSuccess();
+    } catch {
+      // Error is handled in the hook
+    }
+  };
+
+  return (
+    <main style={{ flex: 1, padding: "32px", fontFamily: "'Inter', sans-serif", display: "flex", justifyContent: "center" }}>
+      <div style={{ width: "100%", maxWidth: "672px", backgroundColor: "#ffffff", border: "1px solid #e4e4e7", padding: "20px", display: "flex", flexDirection: "column", gap: "32px" }}>
+        {/* Header */}
+        <div style={{ borderBottom: "1px solid #e4e4e7", paddingBottom: "16px" }}>
+          <h1 style={{ fontSize: "24px", fontWeight: 600, color: "#18181b", letterSpacing: "-0.02em" }}>Edit WIG</h1>
+          <p style={{ fontSize: "14px", color: "#71717a", marginTop: "8px" }}>Update your Wildly Important Goal details.</p>
+        </div>
+
+        {/* Error */}
+        {error && <ErrorState error={error} title="Failed to update WIG" />}
+
+        {/* Form */}
+        <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+          {/* Title */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+            <label style={{ fontSize: "12px", fontWeight: 500, color: "#18181b" }}>Title *</label>
+            <input
+              type="text"
+              placeholder="e.g., Annual Recurring Revenue"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              required
+              style={{ border: "1px solid #e4e4e7", backgroundColor: "#ffffff", padding: "8px", fontSize: "16px", color: "#18181b", outline: "none", width: "100%" }}
+            />
+          </div>
+
+          {/* Deadline */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+            <label style={{ fontSize: "12px", fontWeight: 500, color: "#18181b" }}>Deadline *</label>
+            <input
+              type="date"
+              value={deadline}
+              onChange={(e) => setDeadline(e.target.value)}
+              required
+              style={{ border: "1px solid #e4e4e7", backgroundColor: "#ffffff", padding: "8px", fontSize: "16px", color: "#18181b", outline: "none", width: "100%" }}
+            />
+          </div>
+
+          {/* Description */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+            <label style={{ fontSize: "12px", fontWeight: 500, color: "#18181b" }}>Description (optional)</label>
+            <textarea
+              placeholder="Provide context and why this WIG matters..."
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              rows={4}
+              style={{ border: "1px solid #e4e4e7", backgroundColor: "#ffffff", padding: "8px", fontSize: "16px", color: "#18181b", outline: "none", width: "100%", fontFamily: "inherit", resize: "vertical" }}
+            />
+          </div>
+
+          {/* Buttons */}
+          <div style={{ display: "flex", gap: "12px", justifyContent: "flex-end", paddingTop: "16px", borderTop: "1px solid #e4e4e7" }}>
+            <button
+              type="button"
+              onClick={onCancel}
+              style={{ padding: "8px 16px", border: "1px solid #e4e4e7", backgroundColor: "#ffffff", fontSize: "12px", fontWeight: 600, cursor: "pointer", textTransform: "uppercase", letterSpacing: "0.05em", color: "#18181b" }}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={isLoading}
+              style={{ padding: "8px 16px", border: "none", backgroundColor: isLoading ? "#cccccc" : "#000000", color: "#ffffff", fontSize: "12px", fontWeight: 600, cursor: isLoading ? "not-allowed" : "pointer", textTransform: "uppercase", letterSpacing: "0.05em" }}
+            >
+              {isLoading ? "Updating..." : "Update WIG"}
             </button>
           </div>
         </form>

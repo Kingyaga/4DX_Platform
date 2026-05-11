@@ -1,16 +1,104 @@
 "use client";
 
-import { useMemo } from "react";
-import { useOrgDashboard } from "@/lib/hooks";
+import { FormEvent, useMemo, useState } from "react";
+import Link from "next/link";
+import { useOrgDashboard, useOrgUsers, useDeleteUser } from "@/lib/hooks";
 import { useUserStore } from "@/lib/stores/user-store";
 import { ErrorState, EmptyState } from "@/lib/components/states";
-import type { WIG, LeadMeasure, Team } from "@/lib/types";
+import { trpc } from "@/lib/trpc";
+import type { WIG, LeadMeasure, User } from "@/lib/types";
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function AdminPage() {
   const { orgSlug } = useUserStore();
   const { org, isLoading, error } = useOrgDashboard(orgSlug);
+  const [newUserName, setNewUserName] = useState("");
+  const [newUserEmail, setNewUserEmail] = useState("");
+  const [newUserPassword, setNewUserPassword] = useState("");
+  const [newUserTeam, setNewUserTeam] = useState("");
+  const [adminError, setAdminError] = useState("");
+  const [adminSuccess, setAdminSuccess] = useState("");
+
+  const createUserMutation = trpc.auth.adminCreateUser.useMutation({
+    onSuccess: () => {
+      setAdminSuccess("User created successfully.");
+      setAdminError("");
+      setNewUserName("");
+      setNewUserEmail("");
+      setNewUserPassword("");
+      setNewUserTeam("");
+    },
+    onError: (err) => {
+      setAdminError(err.message || "Unable to create user.");
+      setAdminSuccess("");
+    },
+  });
+
+  const isCreatingUser = createUserMutation.status === "pending";
+
+  const {
+    users,
+    isLoading: isUsersLoading,
+    error: usersError,
+    refetch: refetchUsers,
+  } = useOrgUsers(orgSlug);
+
+  const {
+    deleteUser,
+    isLoading: isDeletingUser,
+    error: deleteUserError,
+  } = useDeleteUser();
+
+  const [userActionError, setUserActionError] = useState<string | null>(null);
+  const [userActionSuccess, setUserActionSuccess] = useState<string | null>(null);
+
+  const handleCreateUser = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setAdminError("");
+    setAdminSuccess("");
+
+    if (!newUserName || !newUserEmail || !newUserPassword) {
+      setAdminError("Name, email, and password are required.");
+      return;
+    }
+
+    if (newUserPassword.length < 8) {
+      setAdminError("Password must be at least 8 characters.");
+      return;
+    }
+
+    const activeOrgSlug = orgSlug || org?.slug;
+
+    if (!activeOrgSlug) {
+      setAdminError("Unable to determine organization.");
+      return;
+    }
+
+    createUserMutation.mutate({
+      name: newUserName,
+      email: newUserEmail,
+      password: newUserPassword,
+      orgSlug: activeOrgSlug,
+      teamSlug: newUserTeam || undefined,
+    });
+  };
+
+  const handleDeleteUser = async (userId: string, userEmail: string) => {
+    if (!window.confirm(`Delete user ${userEmail}? This cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      setUserActionError(null);
+      setUserActionSuccess(null);
+      await deleteUser({ userId });
+      setUserActionSuccess(`Deleted ${userEmail}`);
+      refetchUsers();
+    } catch (err: any) {
+      setUserActionError(err?.message || "Unable to delete user.");
+    }
+  };
 
   // Move useMemo before early returns (React Hook rules)
   const weekBars = useMemo(() => Array.from({ length: 6 }).map((_, i) => {
@@ -43,7 +131,8 @@ export default function AdminPage() {
   // ─── Compute KPIs from real data ───────────────────────────────────────────
 
   // Get all active WIGs across all teams
-  const allWIGs = (org?.teams || []).flatMap((team: any) => team.wigs || []);
+  const orgTeams = (org?.teams || []) as Array<{ id: string; slug: string; name: string; wigs?: WIG[] }>;
+  const allWIGs = orgTeams.flatMap((team) => team.wigs || []);
 
   // Global Lag Measure: aggregate current value / target
   const totalCurrentValue = allWIGs.reduce((sum: number, wig: WIG) => sum + (wig.currentValue || 0), 0);
@@ -83,7 +172,7 @@ export default function AdminPage() {
   const criticalAlerts: Array<{ tag: string; tagVariant: "error" | "default"; timestamp: string; team: string; description: string }> = [];
 
   // Alert 1: Teams with low execution score
-  const lowScoreTeams = (org?.teams || []).filter((team: any) => {
+  const lowScoreTeams = orgTeams.filter((team) => {
     const teamWIGs = team.wigs || [];
     const teamLMs = teamWIGs.flatMap((w: WIG) => w.leadMeasures || []);
     const avgScore =
@@ -109,7 +198,7 @@ export default function AdminPage() {
   }
 
   // Alert 2: Teams with stale data
-  const staleTeams = (org?.teams || []).filter((team: any) => {
+  const staleTeams = orgTeams.filter((team) => {
     const teamWIGs = team.wigs || [];
     // Calculate if team has no recent activity
     const hasRecentActivity = teamWIGs.flatMap((w: WIG) =>
@@ -153,13 +242,13 @@ export default function AdminPage() {
       tag: "INFO",
       tagVariant: "default",
       timestamp: "6h ago",
-      team: org.teams[0]?.name || "All Teams",
+      team: orgTeams[0]?.name || "All Teams",
       description: "System operational and all metrics nominal.",
     });
   }
 
   // ─── Build team health rows ────────────────────────────────────────────────
-  const teamHealthRows = (org?.teams || []).map((team: any) => {
+  const teamHealthRows = orgTeams.map((team) => {
     const teamWIGs = team.wigs || [];
     const teamLMs = teamWIGs.flatMap((w: WIG) => w.leadMeasures || []);
 
@@ -235,6 +324,118 @@ export default function AdminPage() {
           </div>
         </div>
 
+        {/* Links to dedicated admin pages */}
+        <section style={{ border: "1px solid #e4e4e7", borderRadius: "24px", padding: "24px", backgroundColor: "#ffffff", boxShadow: "0 24px 60px rgba(15, 23, 42, 0.04)" }}>
+          <div>
+            <h2 style={{ fontSize: "20px", fontWeight: 700, color: "#18181b", marginBottom: "16px" }}>Admin Tools</h2>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+              <Link
+                href="/dashboard/admin/users"
+                style={{
+                  padding: "20px",
+                  border: "1px solid #e4e4e7",
+                  borderRadius: "12px",
+                  textDecoration: "none",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "8px",
+                  backgroundColor: "#f9fafb",
+                  transition: "all 200ms",
+                }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLElement).style.backgroundColor = "#f3f4f6";
+                  (e.currentTarget as HTMLElement).style.borderColor = "#d1d5db";
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLElement).style.backgroundColor = "#f9fafb";
+                  (e.currentTarget as HTMLElement).style.borderColor = "#e4e4e7";
+                }}
+              >
+                <span style={{ fontSize: "16px", fontWeight: "600", color: "#111827" }}>👥 Manage Users</span>
+                <span style={{ fontSize: "12px", color: "#71717a" }}>View all organization users and delete as needed</span>
+              </Link>
+              <Link
+                href="/dashboard/admin/users/new"
+                style={{
+                  padding: "20px",
+                  border: "1px solid #e4e4e7",
+                  borderRadius: "12px",
+                  textDecoration: "none",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "8px",
+                  backgroundColor: "#f9fafb",
+                  transition: "all 200ms",
+                }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLElement).style.backgroundColor = "#f3f4f6";
+                  (e.currentTarget as HTMLElement).style.borderColor = "#d1d5db";
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLElement).style.backgroundColor = "#f9fafb";
+                  (e.currentTarget as HTMLElement).style.borderColor = "#e4e4e7";
+                }}
+              >
+                <span style={{ fontSize: "16px", fontWeight: "600", color: "#111827" }}>➕ Create User</span>
+                <span style={{ fontSize: "12px", color: "#71717a" }}>Register new users directly in the system</span>
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        {/* Quick admin actions */}
+        <section style={{ display: "flex", flexWrap: "wrap", gap: "14px", alignItems: "center", justifyContent: "space-between" }}>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "12px" }}>
+            <Link
+              href="#create-user"
+              style={{
+                padding: "12px 18px",
+                borderRadius: "14px",
+                backgroundColor: "#0f172a",
+                color: "#ffffff",
+                textDecoration: "none",
+                fontWeight: 700,
+                fontSize: "12px",
+                textTransform: "uppercase",
+              }}
+            >
+              Invite new user
+            </Link>
+            <Link
+              href="/dashboard/admin/teams"
+              style={{
+                padding: "12px 18px",
+                borderRadius: "14px",
+                backgroundColor: "#f8fafc",
+                color: "#0f172a",
+                textDecoration: "none",
+                border: "1px solid #e2e8f0",
+                fontWeight: 700,
+                fontSize: "12px",
+                textTransform: "uppercase",
+              }}
+            >
+              Manage teams
+            </Link>
+            <Link
+              href="/dashboard/admin/activity"
+              style={{
+                padding: "12px 18px",
+                borderRadius: "14px",
+                backgroundColor: "#f8fafc",
+                color: "#0f172a",
+                textDecoration: "none",
+                border: "1px solid #e2e8f0",
+                fontWeight: 700,
+                fontSize: "12px",
+                textTransform: "uppercase",
+              }}
+            >
+              Org activity
+            </Link>
+          </div>
+        </section>
+
         {/* KPI Cards */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "16px" }}>
           {/* Global Lag Measure */}
@@ -295,12 +496,8 @@ export default function AdminPage() {
 
           {/* Macro Execution Trends */}
           <div style={{ border: "1px solid #e4e4e7", backgroundColor: "#ffffff", display: "flex", flexDirection: "column" }}>
-            <div style={{ ...sectionHeaderStyle, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <div style={{ ...sectionHeaderStyle }}>
               <h2 style={h2Style}>Macro Execution Trends</h2>
-              <button style={{ fontSize: "12px", fontWeight: 500, color: "#18181b", background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: "4px" }}>
-                View Detailed Report
-                <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>arrow_forward</span>
-              </button>
             </div>
 
             {/* Bar Chart */}
@@ -454,23 +651,6 @@ export default function AdminPage() {
                         }}>
                           <div style={{ height: "100%", backgroundColor: barColor, width: `${row.leadMeasureHealth}%` }} />
                         </div>
-                      </td>
-                      <td style={{ padding: "20px", textAlign: "right" }}>
-                        <button
-                          style={{
-                            fontSize: "12px",
-                            fontWeight: 600,
-                            letterSpacing: "0.05em",
-                            textTransform: "uppercase",
-                            padding: "4px 12px",
-                            cursor: "pointer",
-                            backgroundColor: isCritical ? "#18181b" : "transparent",
-                            color: isCritical ? "#ffffff" : "#18181b",
-                            border: "1px solid #18181b",
-                          }}
-                        >
-                          {isCritical ? "INTERVENE" : "REVIEW"}
-                        </button>
                       </td>
                     </tr>
                   );

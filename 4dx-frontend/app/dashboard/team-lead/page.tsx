@@ -2,14 +2,24 @@
 
 import { useEffect, useMemo } from "react";
 import { useTeamStore } from "@/lib/stores/team-store";
-import { useWIGs, useCurrentSessions } from "@/lib/hooks";
+import { useUserStore } from "@/lib/stores/user-store";
+import { useWIGs, useCurrentSessions, useMyTeams } from "@/lib/hooks";
 import { ErrorState, EmptyState } from "@/lib/components/states";
 import Link from "next/link";
 
 export default function TeamLeadPage() {
-  const { currentTeamSlug } = useTeamStore();
+  const { orgSlug } = useUserStore();
+  const { currentTeamSlug, setCurrentTeamSlug } = useTeamStore();
+  const { teams, isLoading: teamsLoading, error: teamsError } = useMyTeams(orgSlug);
   const { wigs, isLoading: wigsLoading, error: wigsError } = useWIGs(currentTeamSlug);
   const { sessions, isLoading: sessionsLoading, error: sessionsError } = useCurrentSessions(currentTeamSlug);
+
+  useEffect(() => {
+    if (!currentTeamSlug && !teamsLoading && teams.length > 0) {
+      // Auto-select first team if none is currently selected
+      setCurrentTeamSlug(teams[0].slug);
+    }
+  }, [currentTeamSlug, teamsLoading, teams, setCurrentTeamSlug]);
 
   const isLoading = wigsLoading || sessionsLoading;
   const error = wigsError || sessionsError;
@@ -24,7 +34,70 @@ export default function TeamLeadPage() {
   }
 
   if (!currentTeamSlug) {
-    return <EmptyState title="No team selected" description="Select a team from the sidebar" />;
+    if (teamsLoading) {
+      return (
+        <main style={{ flex: 1, overflowY: "auto", padding: "32px" }}>
+          <div style={{ textAlign: "center", color: "#71717a" }}>Loading teams...</div>
+        </main>
+      );
+    }
+
+    if (teamsError) {
+      return (
+        <main style={{ flex: 1, overflowY: "auto", padding: "32px" }}>
+          <ErrorState error={teamsError} title="Unable to load teams" />
+        </main>
+      );
+    }
+
+    if (!teams || teams.length === 0) {
+      return (
+        <main style={{ flex: 1, overflowY: "auto", padding: "32px" }}>
+          <EmptyState
+            title="No teams assigned"
+            description="You need at least one team before you can use the team dashboard. Contact your admin to join a team."
+          />
+        </main>
+      );
+    }
+
+    return (
+      <main style={{ flex: 1, overflowY: "auto", padding: "32px" }}>
+        <div style={{ maxWidth: "720px", margin: "0 auto", display: "flex", flexDirection: "column", gap: "24px" }}>
+          <div>
+            <h1 style={{ fontSize: "28px", fontWeight: 700, color: "#18181b", marginBottom: "8px" }}>Select your team</h1>
+            <p style={{ fontSize: "14px", color: "#71717a" }}>
+              Choose the team you want to lead before reviewing WIGs, activity, and sessions.
+            </p>
+          </div>
+
+          <div style={{ display: "grid", gap: "14px" }}>
+            {teams.map((team: any) => (
+              <button
+                key={team.slug}
+                onClick={() => setCurrentTeamSlug(team.slug)}
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  padding: "18px 20px",
+                  borderRadius: "16px",
+                  border: "1px solid #e4e4e7",
+                  backgroundColor: "#ffffff",
+                  cursor: "pointer",
+                  fontSize: "14px",
+                  fontWeight: 600,
+                  color: "#18181b",
+                }}
+              >
+                <span>{team.name}</span>
+                <span style={{ fontSize: "12px", color: "#71717a" }}>{team.wigs?.length || 0} WIGs</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      </main>
+    );
   }
 
   // Compute metrics

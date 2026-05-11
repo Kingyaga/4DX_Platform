@@ -17,19 +17,39 @@ interface TeamStore {
   clearTeam: () => void;
 }
 
+const getInitialTeamSlug = (): string | null => {
+  if (typeof window === "undefined") return null;
+  return window.localStorage.getItem("currentTeamSlug");
+};
+
 export const useTeamStore = create<TeamStore>((set) => ({
   currentTeam: null,
-  currentTeamSlug: null,
+  currentTeamSlug: getInitialTeamSlug(),
   myTeams: [],
 
   setCurrentTeam: (team: Team | null, slug?: string) => {
+    const currentTeamSlug = slug || team?.slug || null;
+    if (typeof window !== "undefined") {
+      if (currentTeamSlug) {
+        window.localStorage.setItem("currentTeamSlug", currentTeamSlug);
+      } else {
+        window.localStorage.removeItem("currentTeamSlug");
+      }
+    }
     set({
       currentTeam: team,
-      currentTeamSlug: slug || team?.slug || null,
+      currentTeamSlug,
     });
   },
 
   setCurrentTeamSlug: (slug: string | null) => {
+    if (typeof window !== "undefined") {
+      if (slug) {
+        window.localStorage.setItem("currentTeamSlug", slug);
+      } else {
+        window.localStorage.removeItem("currentTeamSlug");
+      }
+    }
     set({ currentTeamSlug: slug });
   },
 
@@ -44,6 +64,9 @@ export const useTeamStore = create<TeamStore>((set) => ({
   },
 
   clearTeam: () => {
+    if (typeof window !== "undefined") {
+      window.localStorage.removeItem("currentTeamSlug");
+    }
     set({
       currentTeam: null,
       currentTeamSlug: null,
