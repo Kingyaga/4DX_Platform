@@ -173,10 +173,11 @@ model LeadMeasureOwner {
 // ─── ACTIVITY LOG ───────────────────────────────────────────────────────────
 
 model ActivityLog {
-  id           String   @id @default(cuid())
+  id           String           @id @default(cuid())
   value        Int
   loggedForDate DateTime
   note         String?
+  status       ActivityLogStatus @default(PENDING)
   createdAt    DateTime @default(now())
   editedAt     DateTime?
 
@@ -185,6 +186,12 @@ model ActivityLog {
 
   userId String
   user   User   @relation(fields: [userId], references: [id])
+}
+
+enum ActivityLogStatus {
+  PENDING
+  APPROVED
+  REJECTED
 }
 
 // ─── WEEKLY SESSION ──────────────────────────────────────────────────────────
