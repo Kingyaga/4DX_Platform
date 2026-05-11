@@ -174,7 +174,7 @@ model LeadMeasureOwner {
 
 model ActivityLog {
   id           String   @id @default(cuid())
-  value        Float
+  value        Int
   loggedForDate DateTime
   note         String?
   createdAt    DateTime @default(now())
