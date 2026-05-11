@@ -69,7 +69,6 @@ export const activityLogsRouter = router({
       return createdLog;
     }),
 
-<<<<<<< HEAD
   approve: protectedProcedure
     .input(z.object({ logId: z.string() }))
     .mutation(async ({ ctx, input }) => {
@@ -167,9 +166,7 @@ export const activityLogsRouter = router({
       });
     }),
 
-=======
   // Edit an activity log — only within 24 hours
->>>>>>> origin/main
   edit: protectedProcedure
     .input(
       z.object({

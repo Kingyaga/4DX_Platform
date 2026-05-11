@@ -19,13 +19,9 @@ model Organization {
 
   memberships OrgMembership[]
   teams       Team[]
-<<<<<<< HEAD
   invites     Invite[]
-=======
   apiKeys     ApiKey[]
   inviteTokens InviteToken[]
-  
->>>>>>> origin/main
 }
 
 // ─── USER ───────────────────────────────────────────────────────────────────
@@ -45,11 +41,8 @@ model User {
   notifications   Notification[]
   auditLogs       AuditLog[]
   leadMeasures    LeadMeasureOwner[]
-<<<<<<< HEAD
   invites         Invite[]
-=======
   createdInvites InviteToken[]
->>>>>>> origin/main
 }
 
 // ─── ORG MEMBERSHIP ─────────────────────────────────────────────────────────

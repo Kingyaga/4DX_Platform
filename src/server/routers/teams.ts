@@ -24,7 +24,6 @@ export const teamsRouter = router({
 
       if (!org) throw new TRPCError({ code: "NOT_FOUND" });
 
-      // Only org admins can create teams
       const membership = await ctx.db.orgMembership.findUnique({
         where: {
           userId_orgId: {
@@ -41,12 +40,7 @@ export const teamsRouter = router({
         });
       }
 
-<<<<<<< HEAD
-      // Create team first
       const team = await ctx.db.team.create({
-=======
-      const createdTeam = await ctx.db.team.create({
->>>>>>> origin/main
         data: {
           name: input.name,
           slug: input.slug,
@@ -55,8 +49,6 @@ export const teamsRouter = router({
         },
       });
 
-<<<<<<< HEAD
-      // Add creator as team lead
       await ctx.db.teamMembership.create({
         data: {
           userId: ctx.session.user.id,
@@ -65,23 +57,20 @@ export const teamsRouter = router({
         },
       });
 
-      return team;
-=======
       await auditLog({
         db: ctx.db,
         actorUserId: ctx.session.user.id,
         entityType: "TEAM",
-        entityId: createdTeam.id,
+        entityId: team.id,
         action: "TEAM_CREATED",
         after: {
-          name: createdTeam.name,
-          slug: createdTeam.slug,
-          orgId: createdTeam.orgId,
+          name: team.name,
+          slug: team.slug,
+          orgId: team.orgId,
         },
       });
 
-      return createdTeam;
->>>>>>> origin/main
+      return team;
     }),
 
   // Add a member to a team — org admin or current team lead only
@@ -101,25 +90,6 @@ export const teamsRouter = router({
 
       if (!team) throw new TRPCError({ code: "NOT_FOUND" });
 
-<<<<<<< HEAD
-      const orgMembership = await ctx.db.orgMembership.findUnique({
-        where: {
-          userId_orgId: {
-            userId: ctx.session.user.id,
-            orgId: team.orgId,
-          },
-        },
-      });
-
-      const isOrgAdmin = orgMembership?.role === "ADMIN";
-      const isTeamLead = team.leadUserId === ctx.session.user.id;
-
-      if (!isTeamLead && !isOrgAdmin) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "Only the team lead or organization admin can add members.",
-=======
-      // Check if requester is org admin or team lead
       const isOrgAdmin = team.org.memberships.some(
         (m) => m.userId === ctx.session.user.id && m.role === "ADMIN",
       );
@@ -129,7 +99,6 @@ export const teamsRouter = router({
         throw new TRPCError({
           code: "FORBIDDEN",
           message: "Only org admins or the team lead can add members.",
->>>>>>> origin/main
         });
       }
 
@@ -157,81 +126,80 @@ export const teamsRouter = router({
       return newMembership;
     }),
 
-<<<<<<< HEAD
+  // Assign a new team lead — org admin only
   assignLead: protectedProcedure
     .input(
       z.object({
         teamSlug: z.string(),
         userId: z.string(),
-=======
-  // ← NEW: Assign a new team lead — org admin only
-  assignTeamLead: protectedProcedure
-    .input(
-      z.object({
-        teamSlug: z.string(),
-        newLeadUserId: z.string(),
->>>>>>> origin/main
       }),
     )
     .mutation(async ({ ctx, input }) => {
       const team = await ctx.db.team.findUnique({
         where: { slug: input.teamSlug },
-<<<<<<< HEAD
-=======
         include: {
           org: { include: { memberships: true } },
           members: true,
         },
->>>>>>> origin/main
       });
 
       if (!team) throw new TRPCError({ code: "NOT_FOUND" });
 
-<<<<<<< HEAD
-      const orgMembership = await ctx.db.orgMembership.findUnique({
-        where: {
-          userId_orgId: {
-            userId: ctx.session.user.id,
-            orgId: team.orgId,
-          },
-        },
-      });
+      const isOrgAdmin = team.org.memberships.some(
+        (m) => m.userId === ctx.session.user.id && m.role === "ADMIN",
+      );
 
-      if (!orgMembership || orgMembership.role !== "ADMIN") {
+      if (!isOrgAdmin) {
         throw new TRPCError({
           code: "FORBIDDEN",
-          message: "Only organization admins can assign a team lead.",
+          message: "Only org admins can assign a team lead.",
+        });
+      }
+
+      const isMember = team.members.some((m) => m.userId === input.userId);
+      if (!isMember) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "The new team lead must already be a member of the team.",
         });
       }
 
       await ctx.db.teamMembership.updateMany({
-        where: { teamId: team.id, role: "LEAD" },
+        where: {
+          teamId: team.id,
+          userId: team.leadUserId,
+        },
         data: { role: "MEMBER" },
       });
 
-      await ctx.db.teamMembership.upsert({
+      await ctx.db.teamMembership.updateMany({
         where: {
-          userId_teamId: {
-            userId: input.userId,
-            teamId: team.id,
-          },
-        },
-        update: { role: "LEAD" },
-        create: {
-          userId: input.userId,
           teamId: team.id,
-          role: "LEAD",
+          userId: input.userId,
         },
+        data: { role: "LEAD" },
       });
 
-      await ctx.db.team.update({
+      const updatedTeam = await ctx.db.team.update({
         where: { id: team.id },
-        data: {
-          leadUserId: input.userId,
-        },
+        data: { leadUserId: input.userId },
       });
 
-      return { success: true };
+      await auditLog({
+        db: ctx.db,
+        actorUserId: ctx.session.user.id,
+        entityType: "TEAM",
+        entityId: team.id,
+        action: "TEAM_LEAD_ASSIGNED",
+        before: {
+          leadUserId: team.leadUserId,
+        } as Prisma.InputJsonValue,
+        after: {
+          leadUserId: updatedTeam.leadUserId,
+        } as Prisma.InputJsonValue,
+      });
+
+      return updatedTeam;
     }),
 
   delete: protectedProcedure
@@ -294,82 +262,6 @@ export const teamsRouter = router({
       return { success: true };
     }),
 
-=======
-      // Only org admins can reassign the team lead
-      const isOrgAdmin = team.org.memberships.some(
-        (m) => m.userId === ctx.session.user.id && m.role === "ADMIN",
-      );
-
-      if (!isOrgAdmin) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "Only org admins can assign a new team lead.",
-        });
-      }
-
-      // New lead must already be a member of the team
-      const isMember = team.members.some(
-        (m) => m.userId === input.newLeadUserId,
-      );
-      if (!isMember) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "The new team lead must already be a member of the team.",
-        });
-      }
-
-      // Step 1: Demote current lead to MEMBER
-
-      if (!isMember) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "The new team lead must already be a member of the team.",
-        });
-      }
-
-      // Step 1: Demote current lead to MEMBER
-      await ctx.db.teamMembership.updateMany({
-        where: {
-          teamId: team.id,
-          userId: team.leadUserId,
-        },
-        data: { role: "MEMBER" },
-      });
-
-      // Step 2: Promote new lead to LEAD
-      await ctx.db.teamMembership.updateMany({
-        where: {
-          teamId: team.id,
-          userId: input.newLeadUserId,
-        },
-        data: { role: "LEAD" },
-      });
-
-      // Step 3: Update the team's leadUserId
-      const updatedTeam = await ctx.db.team.update({
-        where: { id: team.id },
-        data: { leadUserId: input.newLeadUserId },
-      });
-
-      await auditLog({
-        db: ctx.db,
-        actorUserId: ctx.session.user.id,
-        entityType: "TEAM",
-        entityId: team.id,
-        action: "TEAM_LEAD_ASSIGNED",
-        before: {
-          leadUserId: team.leadUserId,
-        } as Prisma.InputJsonValue,
-        after: {
-          leadUserId: updatedTeam.leadUserId,
-        } as Prisma.InputJsonValue,
-      });
-
-      return updatedTeam;
-    }),
-
-  // Get team by slug — members and lead included
->>>>>>> origin/main
   getBySlug: protectedProcedure
     .input(z.object({ slug: z.string() }))
     .query(async ({ ctx, input }) => {
@@ -399,7 +291,6 @@ export const teamsRouter = router({
       return team;
     }),
 
-<<<<<<< HEAD
   getMyTeams: protectedProcedure
     .input(z.object({ orgSlug: z.string() }))
     .query(async ({ ctx, input }) => {
@@ -466,9 +357,6 @@ export const teamsRouter = router({
       });
     }),
 
-=======
-  // Remove a member — org admin or team lead only
->>>>>>> origin/main
   removeMember: protectedProcedure
     .input(
       z.object({
@@ -479,54 +367,11 @@ export const teamsRouter = router({
     .mutation(async ({ ctx, input }) => {
       const team = await ctx.db.team.findUnique({
         where: { slug: input.teamSlug },
-<<<<<<< HEAD
-=======
         include: { org: { include: { memberships: true } } },
->>>>>>> origin/main
       });
 
       if (!team) throw new TRPCError({ code: "NOT_FOUND" });
 
-<<<<<<< HEAD
-      // Check if user is team lead or org admin
-      const isTeamLead = team.leadUserId === ctx.session.user.id;
-      const orgMembership = await ctx.db.orgMembership.findUnique({
-        where: {
-          userId_orgId: {
-            userId: ctx.session.user.id,
-            orgId: team.orgId,
-          },
-        },
-      });
-      const isOrgAdmin = orgMembership?.role === "ADMIN";
-
-      if (!isTeamLead && !isOrgAdmin) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "Only the team lead or organization admin can remove members.",
-        });
-      }
-
-      // Team leads cannot remove themselves, but admins can remove team leads
-      if (input.userId === ctx.session.user.id && input.userId === team.leadUserId) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "Team leads cannot remove themselves from the team.",
-        });
-      }
-
-      await ctx.db.teamMembership.delete({
-        where: {
-          userId_teamId: {
-            userId: input.userId,
-            teamId: team.id,
-          },
-        },
-      });
-
-      return { success: true };
-    }),
-=======
       const isOrgAdmin = team.org.memberships.some(
         (m) => m.userId === ctx.session.user.id && m.role === "ADMIN",
       );
@@ -539,7 +384,6 @@ export const teamsRouter = router({
         });
       }
 
-      // Cannot remove the current team lead
       if (input.userId === team.leadUserId) {
         throw new TRPCError({
           code: "BAD_REQUEST",
@@ -568,7 +412,7 @@ export const teamsRouter = router({
 
       return { success: true };
     }),
-  // Get members of a team with their roles
+
   getMembers: protectedProcedure
     .input(z.object({ teamSlug: z.string() }))
     .query(async ({ ctx, input }) => {
@@ -594,7 +438,6 @@ export const teamsRouter = router({
       });
     }),
 
-  // Get team activity summary
   getActivitySummary: protectedProcedure
     .input(
       z.object({
@@ -624,12 +467,10 @@ export const teamsRouter = router({
       if (input.startDate) dateFilter.gte = new Date(input.startDate);
       if (input.endDate) dateFilter.lte = new Date(input.endDate);
 
-      // Get all lead measure IDs for this team
       const leadMeasureIds = team.wigs.flatMap((w) =>
         w.leadMeasures.map((lm) => lm.id),
       );
 
-      // Get all activity logs for those lead measures
       const activityLogs = await ctx.db.activityLog.findMany({
         where: {
           leadMeasureId: { in: leadMeasureIds },
@@ -646,7 +487,6 @@ export const teamsRouter = router({
         orderBy: { loggedForDate: "desc" },
       });
 
-      // Aggregate by lead measure
       const summaryByLeadMeasure = leadMeasureIds.map((lmId) => {
         const lm = team.wigs
           .flatMap((w) => w.leadMeasures)
@@ -676,5 +516,4 @@ export const teamsRouter = router({
         totalLogs: activityLogs.length,
       };
     }),
->>>>>>> origin/main
 });
