@@ -1,4 +1,5 @@
 import { type PrismaClient } from "@prisma/client";
+import { type JsonValue } from "@prisma/client/runtime/library";
 
 type NotificationType =
   | "SESSION_READY"
@@ -10,7 +11,7 @@ interface NotifyPayload {
   db: PrismaClient;
   userId: string;
   type: NotificationType;
-  payload: Record<string, unknown>;
+  payload: JsonValue;
 }
 
 export async function notify({ db, userId, type, payload }: NotifyPayload) {
@@ -32,7 +33,7 @@ export async function notifyMany({
   db: PrismaClient;
   userIds: string[];
   type: NotificationType;
-  payload: Record<string, unknown>;
+  payload: JsonValue;
 }) {
   return db.notification.createMany({
     data: userIds.map((userId) => ({

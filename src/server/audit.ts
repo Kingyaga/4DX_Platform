@@ -1,4 +1,5 @@
 import { type PrismaClient } from "@prisma/client";
+import { type JsonValue } from "@prisma/client/runtime/library";
 
 type AuditAction =
   | "WIG_CREATED"
@@ -25,8 +26,8 @@ interface AuditParams {
   entityType: string;
   entityId: string;
   action: AuditAction;
-  before?: Record<string, unknown>;
-  after?: Record<string, unknown>;
+  before?: JsonValue;
+  after?: JsonValue;
 }
 
 export async function auditLog({
@@ -45,12 +46,12 @@ export async function auditLog({
         entityType,
         entityId,
         action,
-        beforeJson: before ?? undefined,
-        afterJson: after ?? undefined,
+        // AFTER
+        beforeJson: before ? JSON.parse(JSON.stringify(before)) : undefined,
+        afterJson: after ? JSON.parse(JSON.stringify(after)) : undefined,
       },
     });
   } catch (error) {
-    // Never block the main request if audit logging fails
     console.error("Audit log failed:", error);
   }
 }
