@@ -1,4 +1,4 @@
-import { type PrismaClient } from "@prisma/client";
+import { Prisma, type PrismaClient } from "@prisma/client";
 import { type JsonValue } from "@prisma/client/runtime/library";
 
 type NotificationType =
@@ -19,7 +19,7 @@ export async function notify({ db, userId, type, payload }: NotifyPayload) {
     data: {
       userId,
       type,
-      payloadJson: payload,
+      payloadJson: payload === null ? Prisma.JsonNull : payload,
     },
   });
 }
@@ -39,7 +39,7 @@ export async function notifyMany({
     data: userIds.map((userId) => ({
       userId,
       type,
-      payloadJson: payload,
+      payloadJson: payload === null ? Prisma.JsonNull : payload,
     })),
   });
 }
