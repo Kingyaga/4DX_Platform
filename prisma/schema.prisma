@@ -193,7 +193,7 @@ model LeadMeasureOwner {
 // ─── ACTIVITY LOG ───────────────────────────────────────────────────────────
 
 model ActivityLog {
-  id           String   @id @default(cuid())
+  id           String           @id @default(cuid())
   value        Int
   loggedForDate DateTime
   note         String?
