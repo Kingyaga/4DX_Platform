@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: 4dx-platform-backend
+    env: node
+    branch: main
+    rootDir: .
+    buildCommand: pnpm prisma generate && pnpm build
+    releaseCommand: pnpm prisma migrate deploy
+    startCommand: pnpm start
+    autoDeploy: true
