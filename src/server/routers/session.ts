@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { router, protectedProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
-import { type PrismaClient } from "@prisma/client";
+import { type PrismaClient } from "@/generated/prisma/client";
 
 async function isObserver(db: PrismaClient, userId: string, teamId: string) {
   const membership = await db.teamMembership.findUnique({

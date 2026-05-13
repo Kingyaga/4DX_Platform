@@ -1,7 +1,13 @@
-import { PrismaClient } from "@prisma/client";
+import "dotenv/config";
+import { PrismaClient } from "../src/generated/prisma/client";
+import { PrismaPg } from "@prisma/adapter-pg";
 import bcrypt from "bcryptjs";
 
-const db = new PrismaClient();
+const databaseUrl = new URL(process.env.DATABASE_URL!);
+databaseUrl.searchParams.set("uselibpqcompat", "true");
+
+const adapter = new PrismaPg(databaseUrl.toString());
+const db = new PrismaClient({ adapter });
 
 async function main() {
   console.log("Seeding...");

@@ -1,6 +1,6 @@
-import { PrismaClient } from "@prisma/client";
+import { createPrismaClient } from "@/server/prisma-client";
 
-const db = new PrismaClient();
+const db = createPrismaClient();
 
 async function main() {
   console.log("Checking test user...");

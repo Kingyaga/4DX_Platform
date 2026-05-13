@@ -37,7 +37,7 @@ async function main() {
   console.log("Admin User created:", adminUser.email);
   
   // Create org membership for admin
-  const adminMembership = await db.orgMembership.upsert({
+  await db.orgMembership.upsert({
     where: {
       userId_orgId: {
         userId: adminUser.id,
@@ -73,7 +73,7 @@ async function main() {
   console.log("Team Lead User created:", teamLeadUser.email);
   
   // Create org membership for team lead
-  const teamLeadMembership = await db.orgMembership.upsert({
+  await db.orgMembership.upsert({
     where: {
       userId_orgId: {
         userId: teamLeadUser.id,
@@ -110,7 +110,7 @@ async function main() {
   console.log("Team created:", team.id);
   
   // Add team lead as team member with LEAD role
-  const teamLeadTeamMembership = await db.teamMembership.upsert({
+  await db.teamMembership.upsert({
     where: {
       userId_teamId: {
         userId: teamLeadUser.id,
@@ -130,7 +130,7 @@ async function main() {
   console.log("Team lead added to team");
   
   // Add admin as team member
-  const adminTeamMembership = await db.teamMembership.upsert({
+  await db.teamMembership.upsert({
     where: {
       userId_teamId: {
         userId: adminUser.id,

@@ -2,7 +2,7 @@ import NextAuth, { type NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import AzureADProvider from "next-auth/providers/azure-ad";
 import { db } from "../../../../server/db";
-import * as bcrypt from "bcryptjs";
+import bcrypt from "bcryptjs";
 import { type JWT } from "next-auth/jwt";
 import { type Session } from "next-auth";
 import { checkBooleanRateLimit, getRequestIp } from "../../../../server/rateLimit";
@@ -29,16 +29,24 @@ const providers = [
       password: { label: "Password", type: "password" },
     },
     async authorize(credentials, req) {
+      console.log("🔐 [Auth] Authorize called");
+      
       if (!credentials?.email || !credentials?.password) {
+        console.log("❌ [Auth] Missing email or password");
         return null;
       }
 
       const normalizedEmail = credentials.email.toLowerCase().trim();
+      console.log("📧 [Auth] Normalized email:", normalizedEmail);
+      
       if (!emailRegex.test(normalizedEmail)) {
+        console.log("❌ [Auth] Invalid email format");
         return null;
       }
 
       const ip = getRequestIp(req as any);
+      console.log("🌐 [Auth] IP:", ip);
+      
       const allowed = checkBooleanRateLimit({
         key: `login:${ip}:${normalizedEmail}`,
         limit: 5,
@@ -46,34 +54,40 @@ const providers = [
       });
 
       if (!allowed) {
+        console.log("❌ [Auth] Rate limit exceeded");
         return null;
       }
 
       try {
+        console.log("🔍 [Auth] Looking up user...");
         const user = await db.user.findUnique({
           where: { email: normalizedEmail },
         });
 
         if (!user) {
+          console.log("❌ [Auth] User not found");
           return null;
         }
 
+        console.log("✅ [Auth] User found, checking password...");
         const passwordMatch = await bcrypt.compare(
           credentials.password,
           user.passwordHash,
         );
 
         if (!passwordMatch) {
+          console.log("❌ [Auth] Password mismatch");
           return null;
         }
 
+        console.log("✅ [Auth] Password match! Returning user");
         return {
           id: user.id,
           email: user.email,
           name: user.name,
         };
       } catch (error) {
-        console.error("Auth error:", error);
+        console.error("❌ [Auth] Error:", error);
         return null;
       }
     },

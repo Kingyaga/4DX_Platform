@@ -1,7 +1,7 @@
-import { PrismaClient } from "@prisma/client";
+import { createPrismaClient } from "@/server/prisma-client";
 import bcrypt from "bcryptjs";
 
-const db = new PrismaClient();
+const db = createPrismaClient();
 
 async function main() {
   console.log("Creating test user and organization...");
