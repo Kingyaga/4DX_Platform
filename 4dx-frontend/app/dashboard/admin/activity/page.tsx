@@ -1,14 +1,15 @@
 "use client";
 
-import { useOrgDashboard } from "@/lib/hooks";
+import { useOrgActivityData } from "@/lib/hooks";
 import { useUserStore } from "@/lib/stores/user-store";
 import { ErrorState, EmptyState } from "@/lib/components/states";
+import { LoadingSpinner } from "@/lib/components/loading-spinner";
 import { useMemo } from "react";
 
 interface ActivityLog {
   id: string;
   value: number;
-  loggedForDate: string;
+  loggedForDate: Date;
   user?: {
     email?: string;
   };
@@ -39,14 +40,10 @@ interface Team {
   members?: TeamMember[];
 }
 
-interface WeekBar {
-  label: string;
-  count: number;
-}
 
 export default function AdminActivityPage() {
   const { orgSlug } = useUserStore();
-  const { org, isLoading, error } = useOrgDashboard(orgSlug);
+  const { org, isLoading, error } = useOrgActivityData(orgSlug);
 
   // Collect all activity logs from all teams
   const allActivityLogs = useMemo(() => {
@@ -85,19 +82,12 @@ export default function AdminActivityPage() {
     return logs.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }, [org]);
 
-  const weekBars: WeekBar[] = useMemo(() =>
-    Array.from({ length: 6 }).map((_, i) => ({
-      label: `W${i + 1}`,
-      count: 20 + (i * 8), // Predictable increasing trend
-    })),
-    []
-  );
 
   if (error) return <ErrorState error={error} />;
   if (isLoading) {
     return (
       <main style={{ flex: 1, overflowY: "auto", padding: "32px" }}>
-        <div style={{ textAlign: "center", color: "#71717a" }}>Loading activity...</div>
+        <LoadingSpinner size="large" text="Loading activity..." />
       </main>
     );
   }
@@ -141,26 +131,6 @@ export default function AdminActivityPage() {
                 return logDate >= weekAgo;
               }).length}
             </div>
-          </div>
-        </div>
-
-        {/* Activity Trend */}
-        <div style={{ border: "1px solid #e4e4e7", borderRadius: "8px", padding: "20px", backgroundColor: "white" }}>
-          <h2 style={{ margin: "0 0 16px 0", fontSize: "16px", fontWeight: "600" }}>6-Week Activity Trend</h2>
-          <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-around", height: "160px", gap: "8px" }}>
-            {weekBars.map((bar: WeekBar, i: number) => (
-              <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "8px", flex: 1 }}>
-                <div
-                  style={{
-                    width: "100%",
-                    height: `${(bar.count / 60) * 100}%`,
-                    backgroundColor: "#8b5cf6",
-                    borderRadius: "4px 4px 0 0",
-                  }}
-                />
-                <span style={{ fontSize: "12px", fontWeight: "500", color: "#71717a" }}>{bar.label}</span>
-              </div>
-            ))}
           </div>
         </div>
 

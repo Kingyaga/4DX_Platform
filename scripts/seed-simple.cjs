@@ -90,22 +90,73 @@ async function main() {
 
   console.log("✓ Member membership created");
 
-  // Create test team
-  const team = await db.team.create({
-    data: {
-      name: "Test Team",
-      orgId: org.id,
+  // Create team lead user
+  const teamLeadUser = await db.user.upsert({
+    where: { email: "teamlead@test.com" },
+    create: {
+      email: "teamlead@test.com",
+      name: "Team Lead User",
+      passwordHash,
     },
-  }).catch(() => 
-    db.team.findFirst({
-      where: {
-        name: "Test Team",
+    update: {
+      passwordHash,
+      name: "Team Lead User",
+    },
+  });
+
+  console.log("✓ Team lead user created:", teamLeadUser.email);
+
+  // Create team lead org membership
+  const teamLeadMembership = await db.orgMembership.upsert({
+    where: {
+      userId_orgId: {
+        userId: teamLeadUser.id,
         orgId: org.id,
       },
-    })
-  );
+    },
+    create: {
+      userId: teamLeadUser.id,
+      orgId: org.id,
+      role: "MEMBER",
+    },
+    update: {},
+  });
+
+  console.log("✓ Team lead membership created");
+
+  // Create test team
+  const team = await db.team.upsert({
+    where: {
+      slug: "test-team",
+    },
+    create: {
+      name: "Test Team",
+      slug: "test-team",
+      orgId: org.id,
+      leadUserId: teamLeadUser.id,
+    },
+    update: {},
+  });
 
   console.log("✓ Team created:", team.id);
+
+  // Add team lead to team
+  await db.teamMembership.upsert({
+    where: {
+      userId_teamId: {
+        userId: teamLeadUser.id,
+        teamId: team.id,
+      },
+    },
+    create: {
+      userId: teamLeadUser.id,
+      teamId: team.id,
+      role: "LEAD",
+    },
+    update: {},
+  });
+
+  console.log("✓ Team lead added to team as LEAD");
 
   // Add admin to team
   await db.teamMembership.upsert({
@@ -118,12 +169,12 @@ async function main() {
     create: {
       userId: adminUser.id,
       teamId: team.id,
-      role: "LEAD",
+      role: "MEMBER",
     },
     update: {},
   });
 
-  console.log("✓ Admin added to team as LEAD");
+  console.log("✓ Admin added to team as MEMBER");
 
   // Add member to team
   await db.teamMembership.upsert({
@@ -145,8 +196,9 @@ async function main() {
 
   console.log("\n✅ Seed completed successfully!");
   console.log("\nTest credentials:");
-  console.log("  Admin:  dave@test.com / password123 (ADMIN role)");
-  console.log("  Member: member@test.com / password123 (MEMBER role)");
+  console.log("  Admin:     dave@test.com / password123 (ADMIN role)");
+  console.log("  Team Lead: teamlead@test.com / password123 (TEAM_LEAD role)");
+  console.log("  Member:    member@test.com / password123 (MEMBER role)");
 }
 
 main()

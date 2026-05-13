@@ -5,10 +5,10 @@ import bcrypt from "bcryptjs";
 
 export const authRouter = router({
   me: protectedProcedure.query(async ({ ctx }) => {
-    const lookup = ctx.session.user.id
-      ? { id: ctx.session.user.id }
-      : ctx.session.user.email
-      ? { email: ctx.session.user.email }
+    const lookup = (ctx.session.user as any).id
+      ? { id: (ctx.session.user as any).id }
+      : (ctx.session.user as any).email
+      ? { email: (ctx.session.user as any).email }
       : null;
 
     if (!lookup) {
@@ -49,7 +49,14 @@ export const authRouter = router({
 
     // Get the first org role (users should only have one org for now)
     const hasAdminRole = user.orgMemberships.some((membership) => membership.role === "ADMIN");
-    const hasTeamLeadRole = user.teamMemberships.some((membership) => membership.role === "LEAD");
+    const hasTeamLeadRoleFromMembership = user.teamMemberships.some((membership) => membership.role === "LEAD");
+
+    const isTeamLeadViaLeadUserId = await ctx.db.team.findFirst({
+      where: { leadUserId: user.id },
+      select: { id: true },
+    });
+
+    const hasTeamLeadRole = hasTeamLeadRoleFromMembership || Boolean(isTeamLeadViaLeadUserId);
 
     const orgRole = hasAdminRole
       ? "ADMIN"
@@ -173,7 +180,7 @@ export const authRouter = router({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const actorUserId = ctx.session.user.id;
+      const actorUserId = (ctx.session.user as any).id;
 
       const org = await ctx.db.organization.findUnique({
         where: { slug: input.orgSlug },
@@ -272,7 +279,7 @@ export const authRouter = router({
       const membership = await ctx.db.orgMembership.findUnique({
         where: {
           userId_orgId: {
-            userId: ctx.session.user.id,
+            userId: (ctx.session.user as any).id,
             orgId: org.id,
           },
         },
@@ -347,7 +354,7 @@ export const authRouter = router({
       const requesterMembership = await ctx.db.orgMembership.findUnique({
         where: {
           userId_orgId: {
-            userId: ctx.session.user.id,
+            userId: (ctx.session.user as any).id,
             orgId: org.id,
           },
         },
@@ -360,7 +367,7 @@ export const authRouter = router({
         });
       }
 
-      if (input.userId === ctx.session.user.id) {
+      if (input.userId === (ctx.session.user as any).id) {
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: "Admins cannot delete their own account from this panel.",

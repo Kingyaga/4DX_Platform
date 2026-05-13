@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useState, useMemo, type FormEvent } from "react";
-import { trpcClient } from "@/lib/trpc";
 import { useWIGs, useLogActivity } from "@/lib/hooks";
 import { useTeamStore } from "@/lib/stores/team-store";
 import { ErrorState, EmptyState } from "@/lib/components/states";
+import { LoadingSpinner } from "@/lib/components/loading-spinner";
 import type { WIG, LeadMeasure, ActivityLogEntry } from "@/lib/types";
 
 type AggregatedActivityLog = ActivityLogEntry & {
@@ -24,44 +24,56 @@ export default function ActivityLogPage() {
   const [logDate, setLogDate] = useState<string>(new Date().toISOString().split("T")[0]);
   const [note, setNote] = useState<string>("");
   const [activityLogs, setActivityLogs] = useState<AggregatedActivityLog[]>([]);
-  const [logsLoading, setLogsLoading] = useState(false);
   const [logsError, setLogsError] = useState<string | null>(null);
   const [logsRefreshIndex, setLogsRefreshIndex] = useState(0);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const allLeadMeasures = useMemo(() =>
-    wigs.flatMap((wig: WIG) =>
-      wig.leadMeasures.map((lm: LeadMeasure) => ({ id: lm.id, name: lm.name, wigTitle: wig.title })),
+    (wigs as any[]).flatMap((wig) =>
+      (wig.leadMeasures || []).map((lm: LeadMeasure) => ({ id: lm.id, name: lm.name, wigTitle: wig.title })),
     ), [wigs]
   );
 
+  const hasLeadMeasures = allLeadMeasures.length > 0;
+
   // Set default selected lead measure when data loads
   useEffect(() => {
-    if (!selectedLeadMeasureId && allLeadMeasures.length > 0) {
+    if (hasLeadMeasures && !selectedLeadMeasureId) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setSelectedLeadMeasureId(allLeadMeasures[0].id);
     }
-  }, [allLeadMeasures, selectedLeadMeasureId]);
+    if (!hasLeadMeasures && selectedLeadMeasureId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setSelectedLeadMeasureId("");
+    }
+  }, [allLeadMeasures, hasLeadMeasures, selectedLeadMeasureId]);
 
   useEffect(() => {
-    if (!allLeadMeasures.length) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (!successMessage) return undefined;
+
+    const timeoutId = window.setTimeout(() => {
+      setSuccessMessage(null);
+    }, 7000);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [successMessage]);
+
+  // Extract activity logs from WIGs data
+  useEffect(() => {
+    if (!wigs.length) {
       setActivityLogs([]);
       setLogsError(null);
       return;
     }
 
-    let canceled = false;
+    try {
+      const loadedLogs: AggregatedActivityLog[] = [];
 
-    const loadLogs = async () => {
-      setLogsLoading(true);
-      setLogsError(null);
-
-      try {
-        const loadedLogs: AggregatedActivityLog[] = [];
-
-        for (const wig of wigs) {
-          for (const lm of wig.leadMeasures) {
-            const logs = await trpcClient.activityLogs.getByLeadMeasure.query({ leadMeasureId: lm.id });
+      for (const wig of wigs as any[]) {
+        for (const lm of (wig.leadMeasures || []) as any[]) {
+          // Activity logs might not be included in the response depending on backend query
+          const logs = lm.activityLogs;
+          if (logs && Array.isArray(logs)) {
             const aggregatedLogs = logs.map((log: ActivityLogEntry) => ({
               ...log,
               leadMeasureId: lm.id,
@@ -71,28 +83,15 @@ export default function ActivityLogPage() {
             loadedLogs.push(...aggregatedLogs);
           }
         }
-
-        if (!canceled) {
-          setActivityLogs(loadedLogs);
-        }
-      } catch (err: unknown) {
-        if (!canceled) {
-          const errorMessage = err instanceof Error ? err.message : "Unable to load activity logs.";
-          setLogsError(errorMessage);
-        }
-      } finally {
-        if (!canceled) {
-          setLogsLoading(false);
-        }
       }
-    };
 
-    loadLogs();
-
-    return () => {
-      canceled = true;
-    };
-  }, [allLeadMeasures, logsRefreshIndex, wigs]);
+      setActivityLogs(loadedLogs);
+      setLogsError(null);
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : "Unable to load activity logs.";
+      setLogsError(errorMessage);
+    }
+  }, [wigs, logsRefreshIndex]);
 
   const sortedLogs = [...activityLogs].sort((a: AggregatedActivityLog, b: AggregatedActivityLog) =>
     new Date(b.loggedForDate).getTime() - new Date(a.loggedForDate).getTime(),
@@ -110,6 +109,7 @@ export default function ActivityLogPage() {
         note: note || undefined,
       });
 
+      setSuccessMessage("Your request has been sent, awaiting confirmation.");
       setSelectedLeadMeasureId("");
       setValue("");
       setLogDate(new Date().toISOString().split("T")[0]);
@@ -131,6 +131,12 @@ export default function ActivityLogPage() {
         </div>
         {error && <ErrorState error={error} onRetry={() => window.location.reload()} />}
 
+        {successMessage && (
+          <div style={{ padding: "16px", borderRadius: "16px", backgroundColor: "#ecfdf5", color: "#166534", fontWeight: 600, marginBottom: "16px" }}>
+            {successMessage}
+          </div>
+        )}
+
         <div style={{ display: "flex", justifyContent: "center" }}>
         <div style={{ width: "100%", maxWidth: "560px", border: "1px solid #e4e4e7", backgroundColor: "#ffffff", padding: "20px", display: "flex", flexDirection: "column", gap: "24px" }}>
           <div style={{ paddingBottom: "16px", borderBottom: "1px solid #e4e4e7" }}>
@@ -146,11 +152,11 @@ export default function ActivityLogPage() {
               <select
                 value={selectedLeadMeasureId}
                 onChange={(e) => setSelectedLeadMeasureId(e.target.value)}
-                disabled={isLoading}
-                style={{ width: "100%", height: "48px", padding: "0 16px", border: "1px solid #e4e4e7", backgroundColor: isLoading ? "#f4f4f5" : "#ffffff", fontSize: "16px", color: "#18181b", outline: "none", borderRadius: "0", appearance: "none", cursor: isLoading ? "not-allowed" : "pointer" }}
+                disabled={isLoading || !hasLeadMeasures}
+                style={{ width: "100%", height: "48px", padding: "0 16px", border: "1px solid #e4e4e7", backgroundColor: isLoading || !hasLeadMeasures ? "#f4f4f5" : "#ffffff", fontSize: "16px", color: "#18181b", outline: "none", borderRadius: "0", appearance: "none", cursor: isLoading || !hasLeadMeasures ? "not-allowed" : "pointer" }}
               >
-                <option value="">
-                  {isLoading ? "Loading lead measures..." : "Select a lead measure"}
+                <option value="" disabled>
+                  {isLoading ? "Loading lead measures..." : hasLeadMeasures ? "Select a lead measure" : "No lead measures available"}
                 </option>
                 {allLeadMeasures.map((lm) => (
                   <option key={lm.id} value={lm.id}>
@@ -212,10 +218,16 @@ export default function ActivityLogPage() {
             </div>
           )}
 
+          {!hasLeadMeasures && (
+            <div style={{ padding: "12px", backgroundColor: "#f8fafc", border: "1px solid #e2e8f0", color: "#475569", fontSize: "14px", borderRadius: "4px" }}>
+              Your team does not have any lead measures yet. Ask your team lead to create one before submitting activity.
+            </div>
+          )}
+
           <button
             onClick={handleSubmit}
-            disabled={isSubmitting || isLoading || !selectedLeadMeasureId || !value}
-            style={{ height: "56px", width: "100%", backgroundColor: isSubmitting || isLoading ? "#a1a1a1" : "#000000", color: "#ffffff", fontSize: "12px", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", border: "none", cursor: isSubmitting || isLoading ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "12px", marginTop: "16px" }}
+            disabled={isSubmitting || isLoading || !hasLeadMeasures || !selectedLeadMeasureId || !value}
+            style={{ height: "56px", width: "100%", backgroundColor: isSubmitting || isLoading || !hasLeadMeasures ? "#a1a1a1" : "#000000", color: "#ffffff", fontSize: "12px", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", border: "none", cursor: isSubmitting || isLoading || !hasLeadMeasures ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "12px", marginTop: "16px" }}
           >
             <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>
               {isSubmitting ? "hourglass_empty" : "pending_actions"}
@@ -231,8 +243,10 @@ export default function ActivityLogPage() {
             Recent Logs
           </h2>
 
-          {logsLoading ? (
-            <div style={{ padding: "48px", textAlign: "center", color: "#71717a" }}>Loading activity history...</div>
+          {isLoading ? (
+            <div style={{ padding: "48px", textAlign: "center" }}>
+              <LoadingSpinner size="medium" text="Loading activity history..." />
+            </div>
           ) : sortedLogs.length === 0 ? (
             <EmptyState title="No activity logs yet" description="Start logging lead measure values to build your activity history." />
           ) : (

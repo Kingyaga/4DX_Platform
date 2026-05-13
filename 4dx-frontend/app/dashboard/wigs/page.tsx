@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useWIGs, useCreateWIG, useUpdateWIG, useRoleCheck, useMyTeams } from "@/lib/hooks";
+import { useWIGs, useCreateWIG, useUpdateWIG, useCreateLeadMeasure, useRoleCheck, useMyTeams } from "@/lib/hooks";
 import { useTeamStore } from "@/lib/stores/team-store";
 import { useUserStore } from "@/lib/stores/user-store";
 import { WIGListSkeleton } from "@/lib/components/skeletons";
 import { ErrorState, EmptyState } from "@/lib/components/states";
-import type { WIG } from "@/lib/types";
+import type { WIG, LeadMeasure } from "@/lib/types";
 
 export default function WIGsPage() {
   const [selectedWIG, setSelectedWIG] = useState<WIG | null>(null);
@@ -17,15 +17,20 @@ export default function WIGsPage() {
   const currentTeamSlug = useTeamStore((state) => state.currentTeamSlug);
   const setCurrentTeamSlug = useTeamStore((state) => state.setCurrentTeamSlug);
   const { teams, isLoading: teamsLoading, error: teamsError } = useMyTeams(orgSlug);
+  const [selectedTab, setSelectedTab] = useState<"current" | "history">("current");
 
   useEffect(() => {
-    if (!currentTeamSlug && !teamsLoading && teams.length > 0) {
+    if (!teamsLoading && teams.length > 0 && (!currentTeamSlug || !teams.some((team: any) => team.slug === currentTeamSlug))) {
       setCurrentTeamSlug(teams[0].slug);
     }
   }, [currentTeamSlug, teamsLoading, teams, setCurrentTeamSlug]);
 
   const { wigs, isLoading, error, refetch } = useWIGs(currentTeamSlug);
   const { canCreateWIG } = useRoleCheck();
+
+  const currentWigs = (wigs as any[]).filter((wig) => !["ACHIEVED", "MISSED", "ABANDONED"].includes(wig.status));
+  const historyWigs = (wigs as any[]).filter((wig) => ["ACHIEVED", "MISSED", "ABANDONED"].includes(wig.status));
+  const displayedWigs = selectedTab === "current" ? currentWigs : historyWigs;
 
   if (!currentTeamSlug) {
     if (teamsLoading) {
@@ -105,7 +110,7 @@ export default function WIGsPage() {
   return (
     <main style={{ flex: 1, padding: "32px", fontFamily: "'Inter', sans-serif" }}>
       {/* Header */}
-      <div style={{ marginBottom: "32px", display: "flex", justifyContent: "space-between", alignItems: "center", paddingBottom: "16px", borderBottom: "1px solid #e4e4e7" }}>
+      <div style={{ marginBottom: "24px", display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "24px", flexWrap: "wrap", paddingBottom: "16px", borderBottom: "1px solid #e4e4e7" }}>
         <div>
           <h1 style={{ fontSize: "24px", fontWeight: 600, color: "#18181b", letterSpacing: "-0.02em", textTransform: "uppercase" }}>WIGs</h1>
           <p style={{ fontSize: "14px", color: "#71717a", marginTop: "4px" }}>Wildly Important Goals &mdash; your team&apos;s highest priorities.</p>
@@ -119,6 +124,43 @@ export default function WIGsPage() {
             Create WIG
           </button>
         )}
+      </div>
+
+      <div style={{ display: "flex", gap: "12px", marginBottom: "32px", flexWrap: "wrap" }}>
+        <button
+          onClick={() => setSelectedTab("current")}
+          style={{
+            padding: "12px 16px",
+            borderRadius: "12px",
+            border: selectedTab === "current" ? "1px solid #18181b" : "1px solid #e4e4e7",
+            backgroundColor: selectedTab === "current" ? "#18181b" : "#ffffff",
+            color: selectedTab === "current" ? "#ffffff" : "#18181b",
+            cursor: "pointer",
+            fontWeight: 700,
+            fontSize: "12px",
+            textTransform: "uppercase",
+            letterSpacing: "0.05em",
+          }}
+        >
+          Current WIGs ({currentWigs.length})
+        </button>
+        <button
+          onClick={() => setSelectedTab("history")}
+          style={{
+            padding: "12px 16px",
+            borderRadius: "12px",
+            border: selectedTab === "history" ? "1px solid #18181b" : "1px solid #e4e4e7",
+            backgroundColor: selectedTab === "history" ? "#18181b" : "#ffffff",
+            color: selectedTab === "history" ? "#ffffff" : "#18181b",
+            cursor: "pointer",
+            fontWeight: 700,
+            fontSize: "12px",
+            textTransform: "uppercase",
+            letterSpacing: "0.05em",
+          }}
+        >
+          Closed History ({historyWigs.length})
+        </button>
       </div>
 
       {/* Loading */}
@@ -137,62 +179,68 @@ export default function WIGsPage() {
               : "Only the current team lead can create WIGs for this team."
           }
           icon="🎯"
-          action={
-            canCreateWIG
-              ? {
-                  label: "Create WIG",
-                  onClick: () => setShowNew(true),
-                }
-              : undefined
-          }
         />
       )}
 
       {/* WIG List */}
       {!isLoading && wigs.length > 0 && (
-        <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-          {wigs.map((wig: WIG, i: number) => {
-            const statusColor = wig.status === "ACTIVE" ? "#16A34A" : wig.status === "DRAFT" ? "#71717a" : "#EAB308";
-            const progress = ((wig.currentValue - wig.fromValue) / (wig.toValue - wig.fromValue)) * 100;
+        <>
+          {displayedWigs.length === 0 ? (
+            <EmptyState
+              title={selectedTab === "current" ? "No current WIGs" : "No closed WIGs yet"}
+              description={
+                selectedTab === "current"
+                  ? "This team has no active or draft WIGs right now. Create one to start tracking progress."
+                  : "Closed WIGs are archived here once they are achieved, missed, or abandoned."
+              }
+              icon={selectedTab === "current" ? "🎯" : "📚"}
+            />
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+              {displayedWigs.map((wig: WIG, i: number) => {
+                const statusColor = wig.status === "ACTIVE" ? "#16A34A" : wig.status === "DRAFT" ? "#71717a" : "#EAB308";
+                const progress = ((wig.currentValue - wig.fromValue) / (wig.toValue - wig.fromValue)) * 100;
 
-            return (
-              <div
-                key={wig.id}
-                onClick={() => setSelectedWIG(wig)}
-                onMouseEnter={() => setHoveredRow(i)}
-                onMouseLeave={() => setHoveredRow(null)}
-                style={{
-                  backgroundColor: hoveredRow === i ? "#f7f9fd" : "#ffffff",
-                  border: "1px solid #e4e4e7",
-                  padding: "20px",
-                  cursor: "pointer",
-                  transition: "background 0.075s",
-                }}
-              >
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "16px" }}>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
-                      <span style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "2px 8px", border: "1px solid #e4e4e7", backgroundColor: "#f4f4f5", fontSize: "12px", fontWeight: 600 }}>
-                        <span style={{ width: "8px", height: "8px", borderRadius: "50%", backgroundColor: statusColor, display: "inline-block" }}></span>
-                        {wig.status}
-                      </span>
-                      <span style={{ fontSize: "12px", color: "#71717a", textTransform: "uppercase", letterSpacing: "0.05em" }}>Wildly Important Goal</span>
+                return (
+                  <div
+                    key={wig.id}
+                    onClick={() => setSelectedWIG(wig)}
+                    onMouseEnter={() => setHoveredRow(i)}
+                    onMouseLeave={() => setHoveredRow(null)}
+                    style={{
+                      backgroundColor: hoveredRow === i ? "#f7f9fd" : "#ffffff",
+                      border: "1px solid #e4e4e7",
+                      padding: "20px",
+                      cursor: "pointer",
+                      transition: "background 0.075s",
+                    }}
+                  >
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "16px" }}>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
+                          <span style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "2px 8px", border: "1px solid #e4e4e7", backgroundColor: "#f4f4f5", fontSize: "12px", fontWeight: 600 }}>
+                            <span style={{ width: "8px", height: "8px", borderRadius: "50%", backgroundColor: statusColor, display: "inline-block" }}></span>
+                            {wig.status}
+                          </span>
+                          <span style={{ fontSize: "12px", color: "#71717a", textTransform: "uppercase", letterSpacing: "0.05em" }}>Wildly Important Goal</span>
+                        </div>
+                        <h2 style={{ fontSize: "20px", fontWeight: 600, color: "#18181b", letterSpacing: "-0.01em" }}>{wig.title}</h2>
+                      </div>
+                      <span className="material-symbols-outlined" style={{ fontSize: "20px", color: "#71717a", marginLeft: "16px" }}>chevron_right</span>
                     </div>
-                    <h2 style={{ fontSize: "20px", fontWeight: 600, color: "#18181b", letterSpacing: "-0.01em" }}>{wig.title}</h2>
+                    <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                      <span style={{ fontSize: "12px", color: "#71717a" }}>Deadline: {new Date(wig.deadline).toLocaleDateString()}</span>
+                      <div style={{ flex: 1, height: "4px", backgroundColor: "#e4e4e7" }}>
+                        <div style={{ height: "100%", backgroundColor: "#18181b", width: `${Math.min(progress, 100)}%` }}></div>
+                      </div>
+                      <span style={{ fontSize: "12px", fontWeight: 600, color: "#18181b" }}>{wig.leadMeasures.length} Lead Measures</span>
+                    </div>
                   </div>
-                  <span className="material-symbols-outlined" style={{ fontSize: "20px", color: "#71717a", marginLeft: "16px" }}>chevron_right</span>
-                </div>
-                <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                  <span style={{ fontSize: "12px", color: "#71717a" }}>Deadline: {new Date(wig.deadline).toLocaleDateString()}</span>
-                  <div style={{ flex: 1, height: "4px", backgroundColor: "#e4e4e7" }}>
-                    <div style={{ height: "100%", backgroundColor: "#18181b", width: `${Math.min(progress, 100)}%` }}></div>
-                  </div>
-                  <span style={{ fontSize: "12px", fontWeight: 600, color: "#18181b" }}>{wig.leadMeasures.length} Lead Measures</span>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+                );
+              })}
+            </div>
+          )}
+        </>
       )}
     </main>
   );
@@ -200,9 +248,57 @@ export default function WIGsPage() {
 
 function WIGDetail({ wig, onBack }: { wig: WIG; onBack: () => void }) {
   const [isEditing, setIsEditing] = useState(false);
-  const { canArchiveWIG } = useRoleCheck();
+  const [showAddLeadMeasure, setShowAddLeadMeasure] = useState(false);
+  const [leadMeasureName, setLeadMeasureName] = useState("");
+  const [leadMeasureDescription, setLeadMeasureDescription] = useState("");
+  const [cadence, setCadence] = useState<"WEEKLY" | "BIWEEKLY">("WEEKLY");
+  const [targetValue, setTargetValue] = useState("");
+  const [leadMeasureUnit, setLeadMeasureUnit] = useState(wig.unit || "");
+  const [activeWig, setActiveWig] = useState<WIG>(wig);
+
+  const { createLeadMeasure, isLoading: isCreatingLeadMeasure, error: createLeadMeasureError } = useCreateLeadMeasure();
+  const { canArchiveWIG, canCreateWIG } = useRoleCheck();
   const progress = ((wig.currentValue - wig.fromValue) / (wig.toValue - wig.fromValue)) * 100;
   const statusColor = wig.status === "ACTIVE" ? "#16A34A" : wig.status === "DRAFT" ? "#71717a" : "#EAB308";
+
+  useEffect(() => {
+    setActiveWig(wig);
+    setLeadMeasureUnit(wig.unit || "");
+  }, [wig]);
+
+  const canAddLeadMeasure = canCreateWIG && activeWig.leadMeasures.length < 3;
+
+  const handleCreateLeadMeasure = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!leadMeasureName || !cadence || !targetValue || !leadMeasureUnit) {
+      return;
+    }
+
+    try {
+      const created = await createLeadMeasure({
+        wigId: activeWig.id,
+        name: leadMeasureName,
+        description: leadMeasureDescription || undefined,
+        cadence,
+        targetValue: parseFloat(targetValue),
+        unit: leadMeasureUnit,
+      });
+
+      setActiveWig((prev) => ({
+        ...prev,
+        leadMeasures: [...prev.leadMeasures, created],
+      }));
+      setShowAddLeadMeasure(false);
+      setLeadMeasureName("");
+      setLeadMeasureDescription("");
+      setCadence("WEEKLY");
+      setTargetValue("");
+      setLeadMeasureUnit(wig.unit || "");
+    } catch {
+      // Error is surfaced by hook state
+    }
+  };
 
   if (isEditing) {
     return <WIGEditForm wig={wig} onCancel={() => setIsEditing(false)} onSuccess={() => setIsEditing(false)} />;
@@ -258,15 +354,124 @@ function WIGDetail({ wig, onBack }: { wig: WIG; onBack: () => void }) {
 
       {/* Lead Measures */}
       <div>
-        <h2 style={{ fontSize: "20px", fontWeight: 600, color: "#18181b", marginBottom: "16px", paddingBottom: "8px", borderBottom: "1px solid #e4e4e7" }}>Lead Measures ({wig.leadMeasures.length})</h2>
-        {wig.leadMeasures.length === 0 ? (
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "16px", paddingBottom: "8px", borderBottom: "1px solid #e4e4e7" }}>
+          <h2 style={{ fontSize: "20px", fontWeight: 600, color: "#18181b" }}>Lead Measures ({activeWig.leadMeasures.length})</h2>
+          {canCreateWIG && (
+            <button
+              onClick={() => setShowAddLeadMeasure((current) => !current)}
+              disabled={!canAddLeadMeasure}
+              style={{
+                backgroundColor: canAddLeadMeasure ? "#000000" : "#d4d4d8",
+                color: canAddLeadMeasure ? "#ffffff" : "#71717a",
+                fontSize: "12px",
+                fontWeight: 600,
+                letterSpacing: "0.05em",
+                textTransform: "uppercase",
+                padding: "10px 16px",
+                border: "none",
+                cursor: canAddLeadMeasure ? "pointer" : "not-allowed",
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+              }}
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>add</span>
+              Add Lead Measure
+            </button>
+          )}
+        </div>
+
+        {showAddLeadMeasure && (
+          <form onSubmit={handleCreateLeadMeasure} style={{ display: "grid", gap: "16px", marginBottom: "24px", padding: "20px", backgroundColor: "#ffffff", border: "1px solid #e4e4e7", borderRadius: "16px" }}>
+            {createLeadMeasureError && <ErrorState error={createLeadMeasureError} title="Unable to add lead measure" />}
+
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                <label style={{ fontSize: "12px", fontWeight: 600, color: "#18181b" }}>Name *</label>
+                <input
+                  value={leadMeasureName}
+                  onChange={(e) => setLeadMeasureName(e.target.value)}
+                  placeholder="e.g., Weekly outbound calls"
+                  required
+                  style={{ border: "1px solid #e4e4e7", backgroundColor: "#ffffff", padding: "10px", fontSize: "14px", outline: "none" }}
+                />
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                <label style={{ fontSize: "12px", fontWeight: 600, color: "#18181b" }}>Target Value *</label>
+                <input
+                  type="number"
+                  value={targetValue}
+                  onChange={(e) => setTargetValue(e.target.value)}
+                  placeholder="0"
+                  required
+                  style={{ border: "1px solid #e4e4e7", backgroundColor: "#ffffff", padding: "10px", fontSize: "14px", outline: "none" }}
+                />
+              </div>
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                <label style={{ fontSize: "12px", fontWeight: 600, color: "#18181b" }}>Unit *</label>
+                <input
+                  value={leadMeasureUnit}
+                  onChange={(e) => setLeadMeasureUnit(e.target.value)}
+                  placeholder="e.g., calls, demos"
+                  required
+                  style={{ border: "1px solid #e4e4e7", backgroundColor: "#ffffff", padding: "10px", fontSize: "14px", outline: "none" }}
+                />
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                <label style={{ fontSize: "12px", fontWeight: 600, color: "#18181b" }}>Cadence *</label>
+                <select
+                  value={cadence}
+                  onChange={(e) => setCadence(e.target.value as "WEEKLY" | "BIWEEKLY")}
+                  required
+                  style={{ border: "1px solid #e4e4e7", backgroundColor: "#ffffff", padding: "10px", fontSize: "14px", outline: "none" }}
+                >
+                  <option value="WEEKLY">Weekly</option>
+                  <option value="BIWEEKLY">Biweekly</option>
+                </select>
+              </div>
+            </div>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+              <label style={{ fontSize: "12px", fontWeight: 600, color: "#18181b" }}>Description</label>
+              <textarea
+                value={leadMeasureDescription}
+                onChange={(e) => setLeadMeasureDescription(e.target.value)}
+                placeholder="Optional details to explain how this lead measure moves the needle."
+                rows={4}
+                style={{ border: "1px solid #e4e4e7", backgroundColor: "#ffffff", padding: "10px", fontSize: "14px", outline: "none" }}
+              />
+            </div>
+
+            <div style={{ display: "flex", justifyContent: "flex-end", gap: "12px" }}>
+              <button
+                type="button"
+                onClick={() => setShowAddLeadMeasure(false)}
+                style={{ backgroundColor: "#f4f4f5", color: "#18181b", fontSize: "12px", fontWeight: 600, padding: "10px 16px", border: "1px solid #e4e4e7", cursor: "pointer" }}
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={isCreatingLeadMeasure}
+                style={{ backgroundColor: "#000000", color: "#ffffff", fontSize: "12px", fontWeight: 600, textTransform: "uppercase", padding: "10px 16px", border: "none", cursor: "pointer" }}
+              >
+                {isCreatingLeadMeasure ? "Saving..." : "Save lead measure"}
+              </button>
+            </div>
+          </form>
+        )}
+
+        {activeWig.leadMeasures.length === 0 ? (
           <EmptyState
             title="No lead measures yet"
             description="Add lead measures to track progress toward this WIG."
           />
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-            {wig.leadMeasures.map((lm) => {
+            {activeWig.leadMeasures.map((lm) => {
               const totalLogged = (lm.activityLogs || []).reduce((sum, log) => sum + log.value, 0);
 
               return (

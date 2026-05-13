@@ -18,7 +18,7 @@ export const queryClient = new QueryClient({
 export const trpcClient = trpc.createClient({
   links: [
     httpBatchLink({
-      url: `${typeof window === "undefined" ? process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000" : window.location.origin}/api/trpc`,
+      url: "/api/trpc",
       transformer: superjson,
       fetch: async (input, init) => {
         return fetch(input, { ...init, credentials: "include" });

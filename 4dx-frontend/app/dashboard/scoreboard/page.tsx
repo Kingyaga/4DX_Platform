@@ -12,7 +12,7 @@ export default function ScoreboardPage() {
   const [selectedWigId, setSelectedWigId] = useState<string>("");
 
   // Auto-select first WIG when data loads
-  const selected = selectedWigId ? wigs.find((w: WIG) => w.id === selectedWigId) : wigs[0];
+  const selected = selectedWigId ? (wigs as any[]).find((w) => w.id === selectedWigId) : wigs[0];
 
   // Helper: compute status color based on progress
   const getStatusColor = (current: number, target: number, baseline: number): string => {
@@ -56,7 +56,7 @@ export default function ScoreboardPage() {
         <>
           {/* WIG Selector Tabs */}
           <div style={{ display: "flex", gap: "0", marginBottom: "32px", border: "1px solid #e4e4e7", backgroundColor: "#ffffff", overflowX: "auto" }}>
-            {wigs.map((wig: WIG) => {
+            {(wigs as any[]).map((wig) => {
               const statusColor = getStatusColor(wig.currentValue, wig.toValue, wig.fromValue);
               return (
                 <button

@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useUserStore } from "@/lib/stores/user-store";
+import { LoadingSpinner } from "@/lib/components/loading-spinner";
 
 export default function RootPage() {
   const router = useRouter();
@@ -30,9 +31,7 @@ export default function RootPage() {
 
   return (
     <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh" }}>
-      <div style={{ textAlign: "center" }}>
-        <div style={{ fontSize: "18px", color: "#71717a" }}>Loading...</div>
-      </div>
+      <LoadingSpinner size="large" text="Loading..." />
     </div>
   );
 }

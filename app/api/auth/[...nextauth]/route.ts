@@ -11,7 +11,10 @@ export const authOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
+        console.log("Authorize called with:", credentials?.email);
+        console.log("Raw credentials:", credentials);
         if (!credentials?.email || !credentials?.password) {
+          console.log("Missing credentials");
           return null;
         }
 
@@ -19,6 +22,7 @@ export const authOptions = {
           where: { email: credentials.email },
         });
 
+        console.log("User found:", !!user);
         if (!user) return null;
 
         const isPasswordValid = await bcrypt.compare(
@@ -26,6 +30,7 @@ export const authOptions = {
           user.passwordHash,
         );
 
+        console.log("Password valid:", isPasswordValid);
         if (!isPasswordValid) return null;
 
         return { id: user.id, email: user.email, name: user.name };

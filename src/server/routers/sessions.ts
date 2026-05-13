@@ -20,7 +20,7 @@ export const sessionsRouter = router({
 
       if (!team) throw new TRPCError({ code: "NOT_FOUND" });
 
-      if (team.leadUserId !== ctx.session.user.id) {
+      if (team.leadUserId !== (ctx.session.user as any).id) {
         throw new TRPCError({ code: "FORBIDDEN" });
       }
 
@@ -58,7 +58,7 @@ export const sessionsRouter = router({
       if (sessionsToCreate.length > 0) {
         await auditLog({
           db: ctx.db,
-          actorUserId: ctx.session.user.id,
+          actorUserId: (ctx.session.user as any).id,
           entityType: "TEAM_SESSION_GENERATION",
           entityId: input.teamSlug,
           action: "SESSION_GENERATED",
@@ -127,7 +127,7 @@ export const sessionsRouter = router({
       });
 
       if (!session) throw new TRPCError({ code: "NOT_FOUND" });
-      if (session.userId !== ctx.session.user.id)
+      if (session.userId !== (ctx.session.user as any).id)
         throw new TRPCError({ code: "FORBIDDEN" });
       if (session.accountDoneAt)
         throw new TRPCError({
@@ -145,7 +145,7 @@ export const sessionsRouter = router({
         const teamMembership = await ctx.db.teamMembership.findUnique({
           where: {
             userId_teamId: {
-              userId: ctx.session.user.id,
+              userId: (ctx.session.user as any).id,
               teamId: sessionWig.team.id,
             },
           },
@@ -184,7 +184,7 @@ export const sessionsRouter = router({
 
       await auditLog({
         db: ctx.db,
-        actorUserId: ctx.session.user.id,
+        actorUserId: (ctx.session.user as any).id,
         entityType: "WEEKLY_SESSION",
         entityId: input.sessionId,
         action: "SESSION_ACCOUNT_COMPLETED",
@@ -207,7 +207,7 @@ export const sessionsRouter = router({
       });
 
       if (!session) throw new TRPCError({ code: "NOT_FOUND" });
-      if (session.userId !== ctx.session.user.id)
+      if (session.userId !== (ctx.session.user as any).id)
         throw new TRPCError({ code: "FORBIDDEN" });
 
       // Verify user is a team member
@@ -220,7 +220,7 @@ export const sessionsRouter = router({
         const teamMembership = await ctx.db.teamMembership.findUnique({
           where: {
             userId_teamId: {
-              userId: ctx.session.user.id,
+              userId: (ctx.session.user as any).id,
               teamId: sessionWig.team.id,
             },
           },
@@ -256,7 +256,7 @@ export const sessionsRouter = router({
 
       await auditLog({
         db: ctx.db,
-        actorUserId: ctx.session.user.id,
+        actorUserId: (ctx.session.user as any).id,
         entityType: "WEEKLY_SESSION",
         entityId: input.sessionId,
         action: "SESSION_REVIEW_COMPLETED",
@@ -291,7 +291,7 @@ export const sessionsRouter = router({
       });
 
       if (!session) throw new TRPCError({ code: "NOT_FOUND" });
-      if (session.userId !== ctx.session.user.id)
+      if (session.userId !== (ctx.session.user as any).id)
         throw new TRPCError({ code: "FORBIDDEN" });
 
       // Verify user is a team member
@@ -304,7 +304,7 @@ export const sessionsRouter = router({
         const teamMembership = await ctx.db.teamMembership.findUnique({
           where: {
             userId_teamId: {
-              userId: ctx.session.user.id,
+              userId: (ctx.session.user as any).id,
               teamId: sessionWig.team.id,
             },
           },
@@ -351,7 +351,7 @@ export const sessionsRouter = router({
 
       await auditLog({
         db: ctx.db,
-        actorUserId: ctx.session.user.id,
+        actorUserId: (ctx.session.user as any).id,
         entityType: "WEEKLY_SESSION",
         entityId: input.sessionId,
         action: "SESSION_COMMIT_COMPLETED",
@@ -386,6 +386,38 @@ export const sessionsRouter = router({
       return updatedCommitSession;
     }),
 
+  // Get current week sessions for the logged in user in a team
+  getCurrentSession: protectedProcedure
+    .input(z.object({ teamSlug: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const team = await ctx.db.team.findUnique({
+        where: { slug: input.teamSlug },
+        include: { wigs: { where: { status: "ACTIVE" } } },
+      });
+
+      if (!team) throw new TRPCError({ code: "NOT_FOUND" });
+
+      const monday = getThisMonday();
+
+      return ctx.db.weeklySession.findMany({
+        where: {
+          userId: (ctx.session.user as any).id,
+          wig: { teamId: team.id },
+          weekStarting: monday,
+        },
+        include: {
+          commitments: true,
+          wig: {
+            include: {
+              leadMeasures: {
+                where: { archivedAt: null },
+              },
+            },
+          },
+        },
+      });
+    }),
+
   // Get a single session for the logged in user
   getMySession: protectedProcedure
     .input(z.object({ sessionId: z.string() }))
@@ -399,7 +431,7 @@ export const sessionsRouter = router({
       });
 
       if (!session) throw new TRPCError({ code: "NOT_FOUND" });
-      if (session.userId !== ctx.session.user.id)
+      if (session.userId !== (ctx.session.user as any).id)
         throw new TRPCError({ code: "FORBIDDEN" });
 
       return session;
@@ -421,10 +453,10 @@ export const sessionsRouter = router({
 
       if (!team) throw new TRPCError({ code: "NOT_FOUND" });
 
-      const isTeamLead = team.leadUserId === ctx.session.user.id;
+      const isTeamLead = team.leadUserId === (ctx.session.user as any).id;
       const isOrgAdmin = await ctx.db.orgMembership.findFirst({
         where: {
-          userId: ctx.session.user.id,
+          userId: (ctx.session.user as any).id,
           orgId: team.orgId,
           role: "ADMIN",
         },

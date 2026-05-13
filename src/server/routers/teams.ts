@@ -27,7 +27,7 @@ export const teamsRouter = router({
       const membership = await ctx.db.orgMembership.findUnique({
         where: {
           userId_orgId: {
-            userId: ctx.session.user.id,
+            userId: (ctx.session.user as any).id,
             orgId: org.id,
           },
         },
@@ -40,18 +40,35 @@ export const teamsRouter = router({
         });
       }
 
+      const existingTeamMembership = await ctx.db.teamMembership.findFirst({
+        where: {
+          userId: (ctx.session.user as any).id,
+          team: {
+            orgId: org.id,
+          },
+        },
+      });
+
+      if (existingTeamMembership) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "A user can represent only one team. Leave the current team before creating a new one.",
+        });
+      }
+
+      const teamLeadUserId = (ctx.session.user as any).id;
       const team = await ctx.db.team.create({
         data: {
           name: input.name,
           slug: input.slug,
           orgId: org.id,
-          leadUserId: ctx.session.user.id,
+          leadUserId: teamLeadUserId,
         },
       });
 
       await ctx.db.teamMembership.create({
         data: {
-          userId: ctx.session.user.id,
+          userId: teamLeadUserId,
           teamId: team.id,
           role: "LEAD",
         },
@@ -59,7 +76,7 @@ export const teamsRouter = router({
 
       await auditLog({
         db: ctx.db,
-        actorUserId: ctx.session.user.id,
+        actorUserId: teamLeadUserId,
         entityType: "TEAM",
         entityId: team.id,
         action: "TEAM_CREATED",
@@ -67,6 +84,7 @@ export const teamsRouter = router({
           name: team.name,
           slug: team.slug,
           orgId: team.orgId,
+          leadUserId: team.leadUserId,
         },
       });
 
@@ -91,14 +109,30 @@ export const teamsRouter = router({
       if (!team) throw new TRPCError({ code: "NOT_FOUND" });
 
       const isOrgAdmin = team.org.memberships.some(
-        (m) => m.userId === ctx.session.user.id && m.role === "ADMIN",
+        (m) => m.userId === (ctx.session.user as any).id && m.role === "ADMIN",
       );
-      const isTeamLead = team.leadUserId === ctx.session.user.id;
+      const isTeamLead = team.leadUserId === (ctx.session.user as any).id;
 
       if (!isOrgAdmin && !isTeamLead) {
         throw new TRPCError({
           code: "FORBIDDEN",
           message: "Only org admins or the team lead can add members.",
+        });
+      }
+
+      const existingUserTeam = await ctx.db.teamMembership.findFirst({
+        where: {
+          userId: input.userId,
+          team: {
+            orgId: team.orgId,
+          },
+        },
+      });
+
+      if (existingUserTeam) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "This user is already assigned to another team in the organization.",
         });
       }
 
@@ -112,7 +146,7 @@ export const teamsRouter = router({
 
       await auditLog({
         db: ctx.db,
-        actorUserId: ctx.session.user.id,
+        actorUserId: (ctx.session.user as any).id,
         entityType: "TEAM_MEMBER",
         entityId: newMembership.id,
         action: "TEAM_MEMBER_ADDED",
@@ -146,7 +180,7 @@ export const teamsRouter = router({
       if (!team) throw new TRPCError({ code: "NOT_FOUND" });
 
       const isOrgAdmin = team.org.memberships.some(
-        (m) => m.userId === ctx.session.user.id && m.role === "ADMIN",
+        (m) => m.userId === (ctx.session.user as any).id && m.role === "ADMIN",
       );
 
       if (!isOrgAdmin) {
@@ -187,7 +221,7 @@ export const teamsRouter = router({
 
       await auditLog({
         db: ctx.db,
-        actorUserId: ctx.session.user.id,
+        actorUserId: (ctx.session.user as any).id,
         entityType: "TEAM",
         entityId: team.id,
         action: "TEAM_LEAD_ASSIGNED",
@@ -216,7 +250,7 @@ export const teamsRouter = router({
       const orgMembership = await ctx.db.orgMembership.findUnique({
         where: {
           userId_orgId: {
-            userId: ctx.session.user.id,
+            userId: (ctx.session.user as any).id,
             orgId: team.orgId,
           },
         },
@@ -251,13 +285,21 @@ export const teamsRouter = router({
         ctx.db.teamMembership.deleteMany({
           where: { teamId: team.id },
         }),
-        ctx.db.invite.deleteMany({
-          where: { teamId: team.id },
-        }),
         ctx.db.team.delete({
           where: { id: team.id },
         }),
       ]);
+
+      // Handle invite deletion separately with error handling
+      // (table might not exist or be incomplete in some environments)
+      try {
+        await ctx.db.invite.deleteMany({
+          where: { teamId: team.id },
+        });
+      } catch (error) {
+        console.warn("Could not delete team invites - table may not exist", error);
+        // Don't fail the deletion if invites can't be cleaned up
+      }
 
       return { success: true };
     }),
@@ -300,20 +342,28 @@ export const teamsRouter = router({
 
       if (!org) throw new TRPCError({ code: "NOT_FOUND" });
 
+      const userId = (ctx.session.user as any).id;
       return ctx.db.team.findMany({
         where: {
           orgId: org.id,
-          members: {
-            some: { userId: ctx.session.user.id },
-          },
+          OR: [
+            { members: { some: { userId } } },
+            { leadUserId: userId },
+          ],
         },
-        include: {
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          leadUserId: true,
+          createdAt: true,
           members: {
-            where: { userId: ctx.session.user.id },
+            where: { userId },
             select: { role: true },
           },
           wigs: {
             where: { status: "ACTIVE" },
+            select: { id: true },
           },
         },
       });
@@ -331,7 +381,7 @@ export const teamsRouter = router({
       const membership = await ctx.db.orgMembership.findUnique({
         where: {
           userId_orgId: {
-            userId: ctx.session.user.id,
+            userId: (ctx.session.user as any).id,
             orgId: org.id,
           },
         },
@@ -373,9 +423,9 @@ export const teamsRouter = router({
       if (!team) throw new TRPCError({ code: "NOT_FOUND" });
 
       const isOrgAdmin = team.org.memberships.some(
-        (m) => m.userId === ctx.session.user.id && m.role === "ADMIN",
+        (m) => m.userId === (ctx.session.user as any).id && m.role === "ADMIN",
       );
-      const isTeamLead = team.leadUserId === ctx.session.user.id;
+      const isTeamLead = team.leadUserId === (ctx.session.user as any).id;
 
       if (!isOrgAdmin && !isTeamLead) {
         throw new TRPCError({
@@ -400,7 +450,7 @@ export const teamsRouter = router({
 
       await auditLog({
         db: ctx.db,
-        actorUserId: ctx.session.user.id,
+        actorUserId: (ctx.session.user as any).id,
         entityType: "TEAM_MEMBER",
         entityId: `${team.id}-${input.userId}`,
         action: "TEAM_MEMBER_REMOVED",

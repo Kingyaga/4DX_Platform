@@ -4,9 +4,10 @@ import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useEffect } from "react";
 import { useSession } from "next-auth/react";
-import { useCurrentUser, useMyTeams } from "@/lib/hooks";
+import { useCurrentUser, useMyTeams, usePendingActivityRequests } from "@/lib/hooks";
 import { useUserStore } from "@/lib/stores/user-store";
 import { useTeamStore } from "@/lib/stores/team-store";
+import { LoadingSpinner } from "@/lib/components/loading-spinner";
 
 interface NavItem {
   icon: string;
@@ -42,22 +43,20 @@ export default function DashboardLayout({
   const { status } = useSession();
   
   // Fetch current user profile with role from backend
-  useCurrentUser();
+  const { isLoading: userLoading } = useCurrentUser();
   
-  const { userRole, clearUser, orgSlug } = useUserStore();
+  const { user, userRole, clearUser, orgSlug } = useUserStore();
   const { currentTeamSlug, setCurrentTeamSlug } = useTeamStore();
   const { teams, isLoading: teamsLoading } = useMyTeams(orgSlug);
+  const { pendingRequests } = usePendingActivityRequests(currentTeamSlug);
+  const pendingRequestCount = pendingRequests.length;
 
-  // Auto-select first team if none selected yet
+  // Auto-select first team if none selected yet or if the selected team is no longer valid
   useEffect(() => {
-    if (!currentTeamSlug && !teamsLoading && teams.length > 0) {
+    if (!teamsLoading && teams.length > 0 && (!currentTeamSlug || !teams.some((team: any) => team.slug === currentTeamSlug))) {
       setCurrentTeamSlug(teams[0]?.slug || null);
     }
   }, [currentTeamSlug, teamsLoading, teams, setCurrentTeamSlug]);
-
-  // Debug logging
-  console.log("Dashboard layout - userRole:", userRole);
-  console.log("Dashboard layout - pathname:", pathname);
 
   // Clear user store if session is lost
   useEffect(() => {
@@ -79,6 +78,15 @@ export default function DashboardLayout({
       }
     }
   }, [pathname, userRole, router]);
+
+  // Show loading spinner while session or user data is loading
+  if (status === "loading" || userLoading || (userRole && teamsLoading)) {
+    return <LoadingSpinner size="large" text="Loading dashboard..." className="min-h-screen flex items-center justify-center" />;
+  }
+
+  // Debug logging
+  console.log("Dashboard layout - userRole:", userRole);
+  console.log("Dashboard layout - pathname:", pathname);
 
   // Filter nav items based on user role
   const navItems = allNavItems.filter((item) => {
@@ -115,6 +123,17 @@ export default function DashboardLayout({
         backgroundColor: "#f7f9fd",
       }}
     >
+      <style jsx global>{`
+        .click-animation {
+          transition: transform 0.1s ease-in-out;
+        }
+        .click-animation:active {
+          transform: scale(0.95);
+        }
+        .click-animation:hover {
+          cursor: pointer;
+        }
+      `}</style>
       {/* Sidebar */}
       <nav
         style={{
@@ -161,6 +180,19 @@ export default function DashboardLayout({
           >
             Operational Discipline
           </p>
+          {user?.name && (
+            <p
+              style={{
+                fontSize: "14px",
+                fontWeight: 500,
+                color: "#18181b",
+                marginTop: "12px",
+                textTransform: "none",
+              }}
+            >
+              Welcome, {user.name}
+            </p>
+          )}
         </div>
 
         <div style={{ flex: 1, overflowY: "auto" }}>
@@ -169,6 +201,7 @@ export default function DashboardLayout({
               <li key={item.label}>
                 <Link
                   href={item.href}
+                  className="click-animation"
                   style={{
                     display: "flex",
                     alignItems: "center",
@@ -194,7 +227,25 @@ export default function DashboardLayout({
                   >
                     {item.icon}
                   </span>
-                  {item.label}
+                  <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    {item.label}
+                    {item.href === "/dashboard/team-lead/requests" && pendingRequestCount > 0 && (
+                      <span
+                        style={{
+                          minWidth: "24px",
+                          borderRadius: "999px",
+                          backgroundColor: "#ef4444",
+                          color: "#ffffff",
+                          fontSize: "11px",
+                          fontWeight: 700,
+                          padding: "2px 8px",
+                          textAlign: "center",
+                        }}
+                      >
+                        {pendingRequestCount}
+                      </span>
+                    )}
+                  </span>
                 </Link>
               </li>
             ))}
@@ -205,6 +256,7 @@ export default function DashboardLayout({
         <div style={{ borderTop: "1px solid #e4e4e7" }}>
           <Link
             href="/dashboard/settings"
+            className="click-animation"
             style={{
               display: "flex",
               alignItems: "center",

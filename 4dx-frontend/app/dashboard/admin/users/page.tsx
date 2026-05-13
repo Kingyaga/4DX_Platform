@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useOrgUsers, useDeleteUser } from "@/lib/hooks";
+import { useTimedMessage } from "@/lib/useTimedMessage";
 import { useUserStore } from "@/lib/stores/user-store";
 import { ErrorState, EmptyState } from "@/lib/components/states";
 import Link from "next/link";
@@ -11,7 +12,7 @@ export default function AdminUsersPage() {
   const { users, isLoading, error, refetch } = useOrgUsers(orgSlug);
   const { deleteUser, isLoading: isDeletingUser, error: deleteUserError } = useDeleteUser();
   const [userActionError, setUserActionError] = useState<string | null>(null);
-  const [userActionSuccess, setUserActionSuccess] = useState<string | null>(null);
+  const [userActionSuccess, setUserActionSuccess] = useTimedMessage<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [roleFilter, setRoleFilter] = useState("ALL");
 

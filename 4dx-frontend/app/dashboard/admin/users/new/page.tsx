@@ -3,8 +3,10 @@
 import { FormEvent, useState } from "react";
 import Link from "next/link";
 import { useOrgUsers } from "@/lib/hooks";
+import { useTimedMessage } from "@/lib/useTimedMessage";
 import { useUserStore } from "@/lib/stores/user-store";
 import { ErrorState } from "@/lib/components/states";
+import { parseTRPCError } from "@/lib/api-client";
 import { trpc } from "@/lib/trpc";
 import type { Team } from "@/lib/types";
 
@@ -25,7 +27,7 @@ export default function CreateUserPage() {
   const [newUserPassword, setNewUserPassword] = useState("");
   const [newUserTeam, setNewUserTeam] = useState("");
   const [adminError, setAdminError] = useState("");
-  const [adminSuccess, setAdminSuccess] = useState("");
+  const [adminSuccess, setAdminSuccess] = useTimedMessage("");
 
   const createUserMutation = trpc.auth.adminCreateUser.useMutation({
     onSuccess: () => {
@@ -74,7 +76,7 @@ export default function CreateUserPage() {
     });
   };
 
-  if (orgError) return <ErrorState error={orgError} />;
+  if (orgError) return <ErrorState error={parseTRPCError(orgError)} />;
 
   return (
     <main style={{ flex: 1, overflowY: "auto", padding: "32px" }}>

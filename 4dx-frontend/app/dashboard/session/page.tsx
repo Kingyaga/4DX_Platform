@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useCurrentSessions, useCompleteAccount, useCompleteReview, useCompleteCommit } from "@/lib/hooks";
 import { useTeamStore } from "@/lib/stores/team-store";
 import { ErrorState } from "@/lib/components/states";
+import { LoadingSpinner } from "@/lib/components/loading-spinner";
 import type { WeeklySession, LeadMeasure } from "@/lib/types";
 
 export default function WeeklySessionPage() {
@@ -52,7 +53,7 @@ export default function WeeklySessionPage() {
   const steps = ["ACCOUNT", "REVIEW", "COMMIT"];
 
   if (error) return <ErrorState error={error} />;
-  if (isLoading) return <div style={{ padding: "48px", textAlign: "center", color: "#71717a" }}>Loading session...</div>;
+  if (isLoading) return <LoadingSpinner size="large" text="Loading session..." className="min-h-[400px] flex items-center justify-center" />;
   if (!selectedSession) return <div style={{ padding: "48px", textAlign: "center", color: "#71717a" }}>No active session for this week.</div>;
 
   return (

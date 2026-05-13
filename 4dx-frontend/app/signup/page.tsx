@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { trpc } from "@/lib/trpc";
+import { LoadingSpinner } from "@/lib/components/loading-spinner";
 
 export default function SignupPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -279,7 +280,14 @@ export default function SignupPage() {
             disabled={loading}
             style={{ opacity: loading ? 0.7 : 1, marginTop: "28px" }}
           >
-            {loading ? "Creating Account..." : "Create Account"}
+            {loading ? (
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
+                <LoadingSpinner size="small" />
+                Creating Account...
+              </div>
+            ) : (
+              "Create Account"
+            )}
           </button>
 
           <p className="signup-prompt">

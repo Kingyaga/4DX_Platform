@@ -1,6 +1,15 @@
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resendApiKey = process.env.RESEND_API_KEY;
+const hasResendApiKey = Boolean(resendApiKey && resendApiKey !== "undefined");
+const resend = hasResendApiKey ? new Resend(resendApiKey as string) : null;
+
+function getEmailClient() {
+  if (!resend) {
+    console.warn("Resend API key not configured. Email sends are disabled.");
+  }
+  return resend;
+}
 
 export async function sendSessionReadyEmail({
   to,
@@ -12,7 +21,10 @@ export async function sendSessionReadyEmail({
   teamName: string;
 }) {
   try {
-    await resend.emails.send({
+    const client = getEmailClient();
+    if (!client) return;
+
+    await client.emails.send({
       from: "4DX Platform <onboarding@resend.dev>",
       to,
       subject: "Your weekly session is ready",
@@ -38,7 +50,10 @@ export async function sendSessionOverdueEmail({
   teamName: string;
 }) {
   try {
-    await resend.emails.send({
+    const client = getEmailClient();
+    if (!client) return;
+
+    await client.emails.send({
       from: "4DX Platform <onboarding@resend.dev>",
       to,
       subject: "You have an overdue session",
@@ -65,7 +80,10 @@ export async function sendWigClosedEmail({
   status: string;
 }) {
   try {
-    await resend.emails.send({
+    const client = getEmailClient();
+    if (!client) return;
+
+    await client.emails.send({
       from: "4DX Platform <onboarding@resend.dev>",
       to,
       subject: `WIG "${wigTitle}" has been closed`,

@@ -25,7 +25,7 @@ export const leadMeasuresRouter = router({
 
       if (!wig) throw new TRPCError({ code: "NOT_FOUND" });
 
-      if (wig.team.leadUserId !== ctx.session.user.id) {
+      if (wig.team.leadUserId !== (ctx.session.user as any).id) {
         throw new TRPCError({
           code: "FORBIDDEN",
           message: "Only the team lead can add lead measures.",
@@ -40,13 +40,13 @@ export const leadMeasuresRouter = router({
       }
       const isOrgAdmin = await ctx.db.orgMembership.findFirst({
         where: {
-          userId: ctx.session.user.id,
+          userId: (ctx.session.user as any).id,
           orgId: wig.team.orgId,
           role: "ADMIN",
         },
       });
 
-      if (isOrgAdmin && wig.team.leadUserId !== ctx.session.user.id) {
+      if (isOrgAdmin && wig.team.leadUserId !== (ctx.session.user as any).id) {
         throw new TRPCError({
           code: "FORBIDDEN",
           message:
@@ -94,7 +94,7 @@ export const leadMeasuresRouter = router({
 
       if (!leadMeasure) throw new TRPCError({ code: "NOT_FOUND" });
 
-      if (leadMeasure.wig.team.leadUserId !== ctx.session.user.id) {
+      if (leadMeasure.wig.team.leadUserId !== (ctx.session.user as any).id) {
         throw new TRPCError({
           code: "FORBIDDEN",
           message: "Only the team lead can update lead measures.",
@@ -120,7 +120,7 @@ export const leadMeasuresRouter = router({
 
       if (!leadMeasure) throw new TRPCError({ code: "NOT_FOUND" });
 
-      if (leadMeasure.wig.team.leadUserId !== ctx.session.user.id) {
+      if (leadMeasure.wig.team.leadUserId !== (ctx.session.user as any).id) {
         throw new TRPCError({
           code: "FORBIDDEN",
           message: "Only the team lead can archive lead measures.",

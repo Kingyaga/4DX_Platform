@@ -3,7 +3,7 @@
 import { useEffect, useMemo } from "react";
 import { useTeamStore } from "@/lib/stores/team-store";
 import { useUserStore } from "@/lib/stores/user-store";
-import { useWIGs, useCurrentSessions, useMyTeams } from "@/lib/hooks";
+import { useWIGs, useTeamSessions, useMyTeams } from "@/lib/hooks";
 import { ErrorState, EmptyState } from "@/lib/components/states";
 import Link from "next/link";
 
@@ -12,17 +12,25 @@ export default function TeamLeadPage() {
   const { currentTeamSlug, setCurrentTeamSlug } = useTeamStore();
   const { teams, isLoading: teamsLoading, error: teamsError } = useMyTeams(orgSlug);
   const { wigs, isLoading: wigsLoading, error: wigsError } = useWIGs(currentTeamSlug);
-  const { sessions, isLoading: sessionsLoading, error: sessionsError } = useCurrentSessions(currentTeamSlug);
+  const { sessions, isLoading: sessionsLoading, error: sessionsError } = useTeamSessions(currentTeamSlug);
 
   useEffect(() => {
-    if (!currentTeamSlug && !teamsLoading && teams.length > 0) {
-      // Auto-select first team if none is currently selected
+    if (!teamsLoading && teams.length > 0 && (!currentTeamSlug || !teams.some((team: any) => team.slug === currentTeamSlug))) {
+      // Auto-select first team if none is currently selected or the stored team is invalid
       setCurrentTeamSlug(teams[0].slug);
     }
   }, [currentTeamSlug, teamsLoading, teams, setCurrentTeamSlug]);
 
   const isLoading = wigsLoading || sessionsLoading;
   const error = wigsError || sessionsError;
+
+  const weekBars = useMemo(() =>
+    Array.from({ length: 6 }).map((_, i) => ({
+      label: `W${i + 1}`,
+      value: 40 + ((i * 15 + Math.sin(i) * 25) % 60),
+    })),
+    []
+  );
 
   if (error) return <ErrorState error={error} />;
   if (isLoading) {
@@ -108,21 +116,36 @@ export default function TeamLeadPage() {
   const onTrackCount = allLeadMeasures.filter((lm: any) => (lm.activityLogs?.[0]?.value || 0) >= lm.targetValue).length;
   const executionScore = allLeadMeasures.length > 0 ? Math.round((onTrackCount / allLeadMeasures.length) * 100) : 0;
 
-  const weekBars = useMemo(() =>
-    Array.from({ length: 6 }).map((_, i) => ({
-      label: `W${i + 1}`,
-      value: 40 + ((i * 15 + Math.sin(i) * 25) % 60),
-    })),
-    []
-  );
-
   return (
     <main style={{ flex: 1, overflowY: "auto", padding: "32px" }}>
       <div style={{ maxWidth: "1200px", margin: "0 auto", display: "flex", flexDirection: "column", gap: "32px" }}>
         {/* Header */}
-        <div>
-          <h1 style={{ fontSize: "28px", fontWeight: "700", margin: "0 0 8px 0" }}>Team Dashboard</h1>
-          <p style={{ margin: 0, color: "#71717a", fontSize: "14px" }}>Manage WIGs and lead measures for your team</p>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div>
+            <h1 style={{ fontSize: "28px", fontWeight: "700", margin: "0 0 8px 0" }}>Team Dashboard</h1>
+            <p style={{ margin: 0, color: "#71717a", fontSize: "14px" }}>Manage WIGs and lead measures for your team</p>
+          </div>
+          <Link
+            href="/dashboard/wigs"
+            style={{
+              backgroundColor: "#000000",
+              color: "#ffffff",
+              fontSize: "12px",
+              fontWeight: 600,
+              letterSpacing: "0.05em",
+              textTransform: "uppercase",
+              padding: "10px 16px",
+              border: "none",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              textDecoration: "none",
+            }}
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>add</span>
+            Create WIG
+          </Link>
         </div>
 
         {/* KPI Grid */}
@@ -159,17 +182,7 @@ export default function TeamLeadPage() {
         </div>
 
         {/* Trend Chart Placeholder */}
-        <div style={{ border: "1px solid #e4e4e7", borderRadius: "8px", padding: "20px", backgroundColor: "white" }}>
-          <h2 style={{ margin: "0 0 16px 0", fontSize: "16px", fontWeight: "600" }}>6-Week Trend</h2>
-          <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-around", height: "160px", gap: "8px" }}>
-            {weekBars.map((bar: any, i: number) => (
-              <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "8px", flex: 1 }}>
-                <div style={{ width: "100%", height: `${bar.value}%`, backgroundColor: "#3b82f6", borderRadius: "4px 4px 0 0" }} />
-                <span style={{ fontSize: "12px", fontWeight: "500", color: "#71717a" }}>{bar.label}</span>
-              </div>
-            ))}
-          </div>
-        </div>
+        {/* Removed 6-week trend chart as requested */}
 
         {/* Active WIGs List */}
         <div style={{ border: "1px solid #e4e4e7", borderRadius: "8px", padding: "20px", backgroundColor: "white" }}>

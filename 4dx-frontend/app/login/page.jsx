@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
+import { LoadingSpinner } from "@/lib/components/loading-spinner";
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -24,24 +25,41 @@ export default function LoginPage() {
   };
 
   const handleSignIn = async () => {
-  setError("");
-  setLoading(true);
+    setError("");
+    setLoading(true);
 
-  const result = await signIn("credentials", {
-    email,
-    password,
-    redirect: false,
-    callbackUrl: "http://localhost:3001/dashboard",
-  });
+    try {
+      const result = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+        callbackUrl: "/dashboard",
+      });
 
-  setLoading(false);
+      if (!result) {
+        setError("Login failed. Please try again.");
+        return;
+      }
 
-  if (result?.error) {
-    setError("Invalid email or password. Please try again.");
-  } else {
-    router.push("/dashboard");
-  }
-};
+      if (!result.ok || result.error) {
+        const backendError = result.error?.includes("Unable to reach auth backend")
+          ? "Unable to reach the authentication service. Please try again later."
+          : result.error?.includes("CredentialsSignin")
+          ? "Unable to sign in. Please verify your email and password and try again."
+          : "Unable to sign in. Please verify your credentials and try again.";
+
+        setError(backendError);
+        return;
+      }
+
+      router.push(result.url || "/dashboard");
+    } catch (err) {
+      console.error("Login error:", err);
+      setError("Login failed. Please try again. If the backend server is not running, start it and try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="container">
@@ -76,6 +94,7 @@ export default function LoginPage() {
           <div className="fields">
             <div className="input-wrapper">
               <input
+                name="email"
                 type="email"
                 placeholder="Enter your email"
                 autoComplete="email"
@@ -86,6 +105,7 @@ export default function LoginPage() {
 
             <div className="input-wrapper">
               <input
+                name="password"
                 type={showPassword ? "text" : "password"}
                 placeholder="Enter your password"
                 autoComplete="current-password"
@@ -128,7 +148,14 @@ export default function LoginPage() {
             disabled={loading}
             style={{ opacity: loading ? 0.7 : 1 }}
           >
-            {loading ? "Signing in..." : "Sign In"}
+            {loading ? (
+              <div className="flex items-center justify-center gap-2">
+                <LoadingSpinner size="small" text="" />
+                <span>Signing in...</span>
+              </div>
+            ) : (
+              "Sign In"
+            )}
           </button>
 
           {showSignUpSnack && (

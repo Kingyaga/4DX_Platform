@@ -15,8 +15,8 @@ export default function TeamLeadReportsPage() {
   const [selectedReport, setSelectedReport] = useState<"execution" | "lag" | "lead" | null>(null);
 
   useEffect(() => {
-    if (!currentTeamSlug && !teamsLoading && teams.length > 0) {
-      // Auto-select first team if none is currently selected
+    if (!teamsLoading && teams.length > 0 && (!currentTeamSlug || !teams.some((team: any) => team.slug === currentTeamSlug))) {
+      // Auto-select first team if none is currently selected or if the selected team is no longer valid
       setCurrentTeamSlug(teams[0].slug);
     }
   }, [currentTeamSlug, teamsLoading, teams, setCurrentTeamSlug]);

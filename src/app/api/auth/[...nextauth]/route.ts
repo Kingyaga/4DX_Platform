@@ -1,7 +1,7 @@
 import NextAuth, { type NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { db } from "../../../../server/db";
-import bcrypt from "bcryptjs";
+import * as bcrypt from "bcryptjs";
 import { type JWT } from "next-auth/jwt";
 import { type Session } from "next-auth";
 
@@ -14,36 +14,56 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) return null;
+        console.log("Authorize called with:", { email: credentials?.email });
+        if (!credentials?.email || !credentials?.password) {
+          console.log("Missing credentials");
+          return null;
+        }
 
         try {
           const normalizedEmail = credentials.email.toLowerCase();
+          console.log("Looking up user:", normalizedEmail);
 
           const user = await db.user.findUnique({
             where: { email: normalizedEmail },
           });
 
-          if (!user) return null;
+          if (!user) {
+            console.log("User not found");
+            return null;
+          }
+
+          console.log("User found:", user.id);
 
           const passwordMatch = await bcrypt.compare(
             credentials.password,
             user.passwordHash,
           );
 
-          if (!passwordMatch) return null;
+          console.log("Password match:", passwordMatch);
 
+          if (!passwordMatch) {
+            console.log("Password doesn't match");
+            return null;
+          }
+
+          console.log("Authentication successful");
           return {
             id: user.id,
             email: user.email,
             name: user.name,
           };
-        } catch {
+        } catch (error) {
+          console.error("Auth error:", error);
           return null;
         }
       },
     }),
   ],
-  session: { strategy: "jwt" },
+  session: { 
+    strategy: "jwt",
+    maxAge: 10 * 60, // 10 minutes
+  },
   callbacks: {
     jwt({ token, user }) {
       if (user) token.id = user.id;
@@ -63,4 +83,6 @@ export const authOptions: NextAuthOptions = {
 };
 
 const handler = NextAuth(authOptions);
-export { handler as GET, handler as POST };
+export const GET = handler;
+export const POST = handler;
+export const HEAD = handler;

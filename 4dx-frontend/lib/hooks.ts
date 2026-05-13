@@ -5,7 +5,7 @@
 
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useSession as useAuthSession } from "next-auth/react";
 import { trpc, parseTRPCError } from "./api-client";
@@ -70,7 +70,7 @@ export function useRoleCheck() {
   const { currentTeamSlug, myTeams } = useTeamStore();
 
   const isCurrentTeamLead = Boolean(
-    userRole === "TEAM_LEAD" &&
+    (userRole === "TEAM_LEAD" || userRole === "ADMIN") &&
     user?.id &&
     currentTeamSlug &&
     myTeams.some((team) => team.slug === currentTeamSlug && team.leadUserId === user.id),
@@ -201,16 +201,36 @@ export function useLeadMeasures(wigId: string | null) {
  */
 export function useCurrentSessions(teamSlug: string | null) {
   const { setCurrentSessions } = useSessionStore();
-  const query = trpc.sessions.getCurrentSession.useQuery({ teamSlug: teamSlug || "" });
+  const query = trpc.sessions.getCurrentSession.useQuery(
+    { teamSlug: teamSlug || "" },
+    { enabled: !!teamSlug },
+  );
 
   useEffect(() => {
     if (query.data && teamSlug) {
-      setCurrentSessions([(query.data as any) as WeeklySession]);
+      setCurrentSessions(query.data as WeeklySession[]);
     }
   }, [query.data, teamSlug, setCurrentSessions]);
 
   return {
-    sessions: query.data ? [(query.data as any) as WeeklySession] : [],
+    sessions: query.data || [],
+    isLoading: query.isLoading,
+    error: query.error ? parseTRPCError(query.error) : null,
+    refetch: query.refetch,
+  };
+}
+
+/**
+ * Fetch all sessions for a team (Team Lead only)
+ */
+export function useTeamSessions(teamSlug: string | null) {
+  const query = trpc.sessions.getTeamSessions.useQuery(
+    { teamSlug: teamSlug || "" },
+    { enabled: !!teamSlug },
+  );
+
+  return {
+    sessions: query.data || [],
     isLoading: query.isLoading,
     error: query.error ? parseTRPCError(query.error) : null,
     refetch: query.refetch,
@@ -236,6 +256,23 @@ export function useSession(sessionId: string | null) {
  */
 export function useOrgDashboard(orgSlug: string | null) {
   const query = trpc.org.getDashboard.useQuery(
+    { orgSlug: orgSlug || "" },
+    { enabled: !!orgSlug },
+  );
+
+  return {
+    org: query.data || null,
+    isLoading: query.isLoading,
+    error: query.error ? parseTRPCError(query.error) : null,
+    refetch: query.refetch,
+  };
+}
+
+/**
+ * Fetch organization activity data for admin activity page (optimized)
+ */
+export function useOrgActivityData(orgSlug: string | null) {
+  const query = trpc.org.getActivityData.useQuery(
     { orgSlug: orgSlug || "" },
     { enabled: !!orgSlug },
   );
@@ -357,6 +394,20 @@ export function usePendingActivityRequests(teamSlug: string | null) {
   };
 }
 
+export function useActivityLogsByUser(userId: string | null) {
+  const query = trpc.activityLogs.getByUser.useQuery(
+    { userId: userId || undefined },
+    { enabled: !!userId },
+  );
+
+  return {
+    activityLogs: query.data || [],
+    isLoading: query.isLoading,
+    error: query.error ? parseTRPCError(query.error) : null,
+    refetch: query.refetch,
+  };
+}
+
 export function useApproveActivityRequest() {
   const mutation = trpc.activityLogs.approve.useMutation();
 
@@ -453,6 +504,26 @@ export function useCloseWIG() {
     error: mutation.error ? parseTRPCError(mutation.error) : null,
     isSuccess: mutation.isSuccess,
     reset: mutation.reset,
+  };
+}
+
+/**
+ * Hook for displaying temporary messages with auto-dismiss
+ */
+export function useTimedMessage(duration: number = 3000) {
+  const [message, setMessage] = useState<string | null>(null);
+
+  const showMessage = useCallback((msg: string) => {
+    setMessage(msg);
+    setTimeout(() => setMessage(null), duration);
+  }, [duration]);
+
+  const clearMessage = useCallback(() => setMessage(null), []);
+
+  return {
+    message,
+    showMessage,
+    clearMessage,
   };
 }
 

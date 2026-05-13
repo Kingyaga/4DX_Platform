@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTimedMessage } from "@/lib/useTimedMessage";
 import { useAssignTeamLead, useAddTeamMember, useAllTeams, useCreateTeam, useDeleteTeam, useOrgUsers, useRemoveTeamMember } from "@/lib/hooks";
 import { useUserStore } from "@/lib/stores/user-store";
 import { ErrorState, EmptyState } from "@/lib/components/states";
@@ -40,13 +41,13 @@ export default function AdminTeamsPage() {
   const [selectedTeamSlug, setSelectedTeamSlug] = useState<string | null>(null);
   const [assignLeadTeam, setAssignLeadTeam] = useState<Team | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [teamActionMessage, setTeamActionMessage] = useState<string | null>(null);
+  const [teamActionMessage, setTeamActionMessage] = useTimedMessage<string | null>(null);
   const [teamActionError, setTeamActionError] = useState<string | null>(null);
-  const [memberActionMessage, setMemberActionMessage] = useState<string | null>(null);
+  const [memberActionMessage, setMemberActionMessage] = useTimedMessage<string | null>(null);
   const [memberActionError, setMemberActionError] = useState<string | null>(null);
   const [newMemberId, setNewMemberId] = useState<string>("");
   const [newMemberRole, setNewMemberRole] = useState<"LEAD" | "MEMBER">("MEMBER");
-  const [successBannerMessage, setSuccessBannerMessage] = useState<string | null>(null);
+  const [successBannerMessage, setSuccessBannerMessage] = useTimedMessage<string | null>(null);
 
   const handleDeleteTeam = async (team: Team) => {
     const confirmed = window.confirm(`Are you sure you want to delete the team "${team.name}"? This action cannot be undone and will remove all associated data including WIGs, lead measures, sessions, and memberships.`);
@@ -174,13 +175,20 @@ export default function AdminTeamsPage() {
             const teamLeads = (team.members || []).filter((m: TeamMember) => m.role === "LEAD");
             const memberCount = team.members?.length || 0;
             const isExpanded = selectedTeamSlug === team.slug;
-            const existingMemberIds = new Set(team.members.map((member) => member.userId));
-            const availableUsers = orgUsers.filter((user) => !existingMemberIds.has(user.id));
+            const allAssignedUserIds = new Set(teams.flatMap((t: Team) => t.members.map((member) => member.userId)));
+            const availableUsers = orgUsers.filter((user) => !allAssignedUserIds.has(user.id));
 
             return (
               <div
                 key={team.slug}
-                onClick={() => setSelectedTeamSlug(isExpanded ? null : team.slug)}
+                onClick={() => {
+                  setSelectedTeamSlug(isExpanded ? null : team.slug);
+                  setMemberActionError(null);
+                  setMemberActionMessage(null);
+                  setSuccessBannerMessage(null);
+                  setNewMemberId("");
+                  setNewMemberRole("MEMBER");
+                }}
                 style={{
                   border: "1px solid #e4e4e7",
                   borderRadius: "8px",
@@ -324,10 +332,10 @@ export default function AdminTeamsPage() {
                                     await removeMember({ teamSlug: team.slug, userId: member.userId });
                                     setMemberActionMessage("Member removed successfully.");
                                     setSuccessBannerMessage(`Removed from ${team.name}`);
-                                    setTimeout(() => setSuccessBannerMessage(null), 4000);
                                     refetch();
                                   } catch (error) {
-                                    setMemberActionError("Unable to remove member. Please try again.");
+                                    const message = error instanceof Error ? error.message : "Unable to remove member. Please try again.";
+                                    setMemberActionError(message);
                                     console.error("Failed to remove member", error);
                                   }
                                 }}
@@ -364,7 +372,9 @@ export default function AdminTeamsPage() {
                       {isOrgUsersLoading ? (
                         <p style={{ margin: 0, color: "#6b7280", fontSize: "13px" }}>Loading organization users...</p>
                       ) : availableUsers.length === 0 ? (
-                        <p style={{ margin: 0, color: "#6b7280", fontSize: "13px" }}>All organization users are already on this team.</p>
+                        <p style={{ margin: 0, color: "#6b7280", fontSize: "13px" }}>
+                          No eligible users available. Users already assigned to another team cannot be added here.
+                        </p>
                       ) : (
                         <form
                           onSubmit={async (event) => {
@@ -385,10 +395,10 @@ export default function AdminTeamsPage() {
                               setSuccessBannerMessage(`Added to ${team.name}`);
                               setNewMemberId("");
                               setNewMemberRole("MEMBER");
-                              setTimeout(() => setSuccessBannerMessage(null), 4000);
                               refetch();
                             } catch (error) {
-                              setMemberActionError("Unable to add member. Please try again.");
+                              const message = error instanceof Error ? error.message : "Unable to add member. Please try again.";
+                              setMemberActionError(message);
                               console.error("Failed to add member", error);
                             }
                           }}
@@ -442,7 +452,7 @@ export default function AdminTeamsPage() {
 
                       {(memberActionError || addMemberError || removeMemberError) && (
                         <div style={{ marginTop: "12px", padding: "10px 12px", backgroundColor: "#fee2e2", color: "#991b1b", borderRadius: "8px", fontSize: "13px" }}>
-                          {memberActionError || String(addMemberError) || String(removeMemberError)}
+                          {memberActionError || addMemberError?.message || removeMemberError?.message}
                         </div>
                       )}
                       {memberActionMessage && (
@@ -485,6 +495,7 @@ export default function AdminTeamsPage() {
               try {
                 await createTeam({ orgSlug: orgSlug!, name, slug });
                 setShowCreateModal(false);
+                setSuccessBannerMessage(`Team "${name}" has been successfully created.`);
                 refetch();
               } catch {
                 console.error("Failed to create team", createError);

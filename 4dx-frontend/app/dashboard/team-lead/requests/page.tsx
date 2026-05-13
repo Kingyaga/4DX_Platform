@@ -1,17 +1,23 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useTeamStore } from "@/lib/stores/team-store";
+import { trpc } from "@/lib/api-client";
 import { usePendingActivityRequests, useApproveActivityRequest, useDeclineActivityRequest } from "@/lib/hooks";
 import { ErrorState, EmptyState } from "@/lib/components/states";
 
 export default function TeamLeadRequestsPage() {
   const { currentTeamSlug } = useTeamStore();
+  const trpcCtx = trpc.useContext();
   const { pendingRequests, isLoading, error, refetch } = usePendingActivityRequests(currentTeamSlug);
   const { approveRequest, isLoading: approving, error: approveError } = useApproveActivityRequest();
   const { declineRequest, isLoading: declining, error: declineError } = useDeclineActivityRequest();
 
-  const actionInProgress = approving || declining;
+  const [processingRequestId, setProcessingRequestId] = useState<string | null>(null);
+  const [processingRequestAction, setProcessingRequestAction] = useState<"approve" | "decline" | null>(null);
+  const [requestStatusMessage, setRequestStatusMessage] = useState<string | null>(null);
+
+  const actionInProgress = Boolean(processingRequestId);
 
   const hasRequests = pendingRequests.length > 0;
 
@@ -21,13 +27,45 @@ export default function TeamLeadRequestsPage() {
   );
 
   const handleApprove = async (requestId: string) => {
-    await approveRequest({ logId: requestId });
-    refetch();
+    setProcessingRequestId(requestId);
+    setProcessingRequestAction("approve");
+    setRequestStatusMessage(null);
+
+    try {
+      await approveRequest({ logId: requestId });
+      await Promise.all([
+        refetch(),
+        trpcCtx.activityLogs.getPendingForTeam.invalidate({ teamSlug: currentTeamSlug || "" }),
+        trpcCtx.wigs.getByTeam.invalidate({ teamSlug: currentTeamSlug || "" }),
+        trpcCtx.activityLogs.getByUser.invalidate(),
+        trpcCtx.sessions.getCurrentSession.invalidate({ teamSlug: currentTeamSlug || "" }),
+      ]);
+      setRequestStatusMessage("Request approved — activity log is now active.");
+    } finally {
+      setProcessingRequestId(null);
+      setProcessingRequestAction(null);
+    }
   };
 
   const handleDecline = async (requestId: string) => {
-    await declineRequest({ logId: requestId });
-    refetch();
+    setProcessingRequestId(requestId);
+    setProcessingRequestAction("decline");
+    setRequestStatusMessage(null);
+
+    try {
+      await declineRequest({ logId: requestId });
+      await Promise.all([
+        refetch(),
+        trpcCtx.activityLogs.getPendingForTeam.invalidate({ teamSlug: currentTeamSlug || "" }),
+        trpcCtx.wigs.getByTeam.invalidate({ teamSlug: currentTeamSlug || "" }),
+        trpcCtx.activityLogs.getByUser.invalidate(),
+        trpcCtx.sessions.getCurrentSession.invalidate({ teamSlug: currentTeamSlug || "" }),
+      ]);
+      setRequestStatusMessage("Request declined.");
+    } finally {
+      setProcessingRequestId(null);
+      setProcessingRequestAction(null);
+    }
   };
 
   return (
@@ -45,6 +83,12 @@ export default function TeamLeadRequestsPage() {
             error={error || approveError || declineError}
             title="Unable to load or update requests"
           />
+        )}
+
+        {requestStatusMessage && (
+          <div style={{ padding: "16px", borderRadius: "16px", backgroundColor: "#ecfdf5", color: "#166534", fontWeight: 600, marginBottom: "16px" }}>
+            {requestStatusMessage}
+          </div>
         )}
 
         {isLoading ? (
@@ -96,34 +140,56 @@ export default function TeamLeadRequestsPage() {
                   <button
                     type="button"
                     onClick={() => handleApprove(request.id)}
-                    disabled={actionInProgress}
+                    disabled={processingRequestId !== null && processingRequestId !== request.id}
                     style={{
                       padding: "14px 16px",
                       backgroundColor: "#16a34a",
                       color: "#ffffff",
                       border: "none",
                       borderRadius: "10px",
-                      cursor: actionInProgress ? "not-allowed" : "pointer",
+                      cursor: processingRequestId !== null && processingRequestId !== request.id ? "not-allowed" : "pointer",
                       fontWeight: 700,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "8px",
                     }}
                   >
-                    Approve
+                    {processingRequestId === request.id && processingRequestAction === "approve" ? (
+                      <>
+                        <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>hourglass_top</span>
+                        Approving...
+                      </>
+                    ) : (
+                      "Approve"
+                    )}
                   </button>
                   <button
                     type="button"
                     onClick={() => handleDecline(request.id)}
-                    disabled={actionInProgress}
+                    disabled={processingRequestId !== null && processingRequestId !== request.id}
                     style={{
                       padding: "14px 16px",
                       backgroundColor: "#ef4444",
                       color: "#ffffff",
                       border: "none",
                       borderRadius: "10px",
-                      cursor: actionInProgress ? "not-allowed" : "pointer",
+                      cursor: processingRequestId !== null && processingRequestId !== request.id ? "not-allowed" : "pointer",
                       fontWeight: 700,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "8px",
                     }}
                   >
-                    Decline
+                    {processingRequestId === request.id && processingRequestAction === "decline" ? (
+                      <>
+                        <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>hourglass_top</span>
+                        Declining...
+                      </>
+                    ) : (
+                      "Decline"
+                    )}
                   </button>
                 </div>
               </div>

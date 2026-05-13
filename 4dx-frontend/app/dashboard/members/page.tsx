@@ -1,11 +1,14 @@
 "use client";
 
 import { useState, useEffect, type FormEvent } from "react";
+import { useRouter } from "next/navigation";
+import { useTimedMessage } from "@/lib/useTimedMessage";
 import { useAddTeamMember, useRemoveTeamMember, useRoleCheck, useTeam } from "@/lib/hooks";
 import { useTeamStore } from "@/lib/stores/team-store";
 import { ErrorState, EmptyState } from "@/lib/components/states";
 
 export default function MembersPage() {
+  const router = useRouter();
   const { currentTeamSlug } = useTeamStore();
   const { team, isLoading, error, refetch } = useTeam(currentTeamSlug);
   const { addMember, isLoading: isAdding, error: addError } = useAddTeamMember();
@@ -16,7 +19,7 @@ export default function MembersPage() {
   const [showAddForm, setShowAddForm] = useState(false);
   const [newMemberId, setNewMemberId] = useState("");
   const [newMemberRole, setNewMemberRole] = useState<"LEAD" | "MEMBER">("MEMBER");
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useTimedMessage<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
   const [removingMemberId, setRemovingMemberId] = useState<string | null>(null);
   const [isHydrated, setIsHydrated] = useState(false);
@@ -45,11 +48,9 @@ export default function MembersPage() {
       setNewMemberId("");
       setShowAddForm(false);
       refetch();
-    } catch {
+    } catch (error) {
       setSuccessMessage(null);
-      setFormError(
-        "Unable to add member. Confirm the user exists in your organization and try again.",
-      );
+      setFormError(error instanceof Error ? error.message : "Unable to add member. Confirm the user exists in your organization and try again.");
     }
   };
 
@@ -67,8 +68,8 @@ export default function MembersPage() {
       setSuccessMessage("Member removed successfully.");
       setFormError(null);
       refetch();
-    } catch {
-      setFormError("Unable to remove member. Please try again.");
+    } catch (error) {
+      setFormError(error instanceof Error ? error.message : "Unable to remove member. Please try again.");
       setSuccessMessage(null);
     } finally {
       setRemovingMemberId(null);
@@ -113,6 +114,11 @@ export default function MembersPage() {
           <p style={{ fontSize: "14px", color: "#71717a", marginTop: "4px" }}>
             Manage access for your current team. You can add an existing organization member by their user ID.
           </p>
+          {canAddMembers && (
+            <p style={{ fontSize: "13px", color: "#52525b", marginTop: "8px" }}>
+              Click any member row to view that member's activity log history.
+            </p>
+          )}
           {!canAddMembers && (
             <p style={{ marginTop: "8px", color: "#d97706", fontSize: "13px" }}>
               Only the current team lead can add members to this team.
@@ -211,9 +217,19 @@ export default function MembersPage() {
                 {members.map((member: any, i: number) => (
                   <tr
                     key={member.id}
-                    style={{ borderBottom: "1px solid #f4f4f5", backgroundColor: hoveredRow === i ? "#f7f9fd" : "transparent", transition: "background 0.075s" }}
+                    style={{
+                      borderBottom: "1px solid #f4f4f5",
+                      backgroundColor: hoveredRow === i ? "#f7f9fd" : "transparent",
+                      transition: "background 0.075s",
+                      cursor: canAddMembers ? "pointer" : "default",
+                    }}
                     onMouseEnter={() => setHoveredRow(i)}
                     onMouseLeave={() => setHoveredRow(null)}
+                    onClick={() => {
+                      if (canAddMembers) {
+                        router.push(`/dashboard/members/${member.userId}`);
+                      }
+                    }}
                   >
                     <td style={{ padding: "16px", display: "grid", gap: "6px" }}>
                       <span style={{ fontSize: "14px", fontWeight: 600, color: "#18181b" }}>
@@ -228,7 +244,10 @@ export default function MembersPage() {
                     <td style={{ padding: "16px", textAlign: "right" }}>
                       {hoveredRow === i && canAddMembers && (
                         <button
-                          onClick={() => handleRemoveMember(member.userId)}
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            handleRemoveMember(member.userId);
+                          }}
                           disabled={isRemoving || removingMemberId === member.userId}
                           style={{ fontSize: "12px", fontWeight: 500, color: isRemoving || removingMemberId === member.userId ? "#a1a1a1" : "#dc2626", background: "none", border: "none", cursor: isRemoving || removingMemberId === member.userId ? "not-allowed" : "pointer" }}
                         >

@@ -3,6 +3,7 @@
 import { FormEvent, useMemo, useState } from "react";
 import Link from "next/link";
 import { useOrgDashboard, useOrgUsers, useDeleteUser } from "@/lib/hooks";
+import { useTimedMessage } from "@/lib/useTimedMessage";
 import { useUserStore } from "@/lib/stores/user-store";
 import { ErrorState, EmptyState } from "@/lib/components/states";
 import { trpc } from "@/lib/trpc";
@@ -18,7 +19,7 @@ export default function AdminPage() {
   const [newUserPassword, setNewUserPassword] = useState("");
   const [newUserTeam, setNewUserTeam] = useState("");
   const [adminError, setAdminError] = useState("");
-  const [adminSuccess, setAdminSuccess] = useState("");
+  const [adminSuccess, setAdminSuccess] = useTimedMessage("");
 
   const createUserMutation = trpc.auth.adminCreateUser.useMutation({
     onSuccess: () => {
@@ -51,7 +52,7 @@ export default function AdminPage() {
   } = useDeleteUser();
 
   const [userActionError, setUserActionError] = useState<string | null>(null);
-  const [userActionSuccess, setUserActionSuccess] = useState<string | null>(null);
+  const [userActionSuccess, setUserActionSuccess] = useTimedMessage<string | null>(null);
 
   const handleCreateUser = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -68,7 +69,7 @@ export default function AdminPage() {
       return;
     }
 
-    const activeOrgSlug = orgSlug || org?.slug;
+    const activeOrgSlug = orgSlug || org?.org?.slug;
 
     if (!activeOrgSlug) {
       setAdminError("Unable to determine organization.");
@@ -134,12 +135,11 @@ export default function AdminPage() {
   const orgTeams = (org?.teams || []) as Array<{ id: string; slug: string; name: string; wigs?: WIG[] }>;
   const allWIGs = orgTeams.flatMap((team) => team.wigs || []);
 
-  // Global Lag Measure: aggregate current value / target
+  // Global Lag Measure: aggregate current value / target as a percent
   const totalCurrentValue = allWIGs.reduce((sum: number, wig: WIG) => sum + (wig.currentValue || 0), 0);
   const totalTargetValue = allWIGs.reduce((sum: number, wig: WIG) => sum + (wig.toValue || 0), 0);
   const globalLagPercent = totalTargetValue > 0 ? Math.round((totalCurrentValue / totalTargetValue) * 100) : 0;
-  const globalLagDisplay = `$${(totalCurrentValue / 1000000).toFixed(1)}M`;
-  const globalLagTarget = `$${(totalTargetValue / 1000000).toFixed(1)}M`;
+  const globalLagDisplay = `${globalLagPercent}%`;
 
   // Execution Score: calculate from lead measure completion
   const allLeadMeasures = allWIGs.flatMap((wig: WIG) => wig.leadMeasures || []);
@@ -169,9 +169,9 @@ export default function AdminPage() {
   const completionRate = allLeadMeasures.length > 0 ? Math.round((onTrackCount / allLeadMeasures.length) * 100) : 0;
 
   // ─── Generate critical alerts ─────────────────────────────────────────────
-  const criticalAlerts: Array<{ tag: string; tagVariant: "error" | "default"; timestamp: string; team: string; description: string }> = [];
+  const criticalAlerts: Array<{ tag: string; tagVariant: "error" | "default"; timestamp: string; team: string; description: string; href?: string }> = [];
 
-  // Alert 1: Teams with low execution score
+  // Alert 1: Teams with low execution score (< 60%)
   const lowScoreTeams = orgTeams.filter((team) => {
     const teamWIGs = team.wigs || [];
     const teamLMs = teamWIGs.flatMap((w: WIG) => w.leadMeasures || []);
@@ -188,16 +188,29 @@ export default function AdminPage() {
   });
 
   if (lowScoreTeams.length > 0) {
+    const worstTeam = lowScoreTeams[0];
+    const teamWIGs = worstTeam.wigs || [];
+    const teamLMs = teamWIGs.flatMap((w: WIG) => w.leadMeasures || []);
+    const avgScore = teamLMs.length > 0
+      ? Math.round(
+          teamLMs.reduce((sum: number, lm: LeadMeasure) => {
+            const current = lm.activityLogs?.[0]?.value || 0;
+            return sum + Math.min((current / (lm.targetValue || 1)) * 100, 100);
+          }, 0) / teamLMs.length
+        )
+      : 0;
+
     criticalAlerts.push({
-      tag: "BEHIND PACE",
+      tag: "EXECUTION BEHIND",
       tagVariant: "error",
-      timestamp: "1d ago",
-      team: lowScoreTeams[0].name,
-      description: `Execution score low. Multiple lead measures not on track.`,
+      timestamp: "Just now",
+      team: worstTeam.name,
+      description: `Execution score is ${avgScore}%. ${teamLMs.filter((lm: LeadMeasure) => (lm.activityLogs?.[0]?.value || 0) < lm.targetValue).length} lead measures need attention.`,
+      href: "/dashboard/admin/execution-details",
     });
   }
 
-  // Alert 2: Teams with stale data
+  // Alert 2: Teams with stale data (no activity in 7 days)
   const staleTeams = orgTeams.filter((team) => {
     const teamWIGs = team.wigs || [];
     // Calculate if team has no recent activity
@@ -206,44 +219,46 @@ export default function AdminPage() {
         lm.activityLogs?.[0]?.loggedForDate ? new Date(lm.activityLogs[0].loggedForDate).getTime() : 0
       )
     ).some((date: number) => date > Date.now() - 7 * 24 * 60 * 60 * 1000);
-    return !hasRecentActivity;
+    return !hasRecentActivity && teamWIGs.length > 0;
   });
 
   if (staleTeams.length > 0) {
     criticalAlerts.push({
-      tag: "SCOREBOARD STALE",
+      tag: "STALE DATA",
       tagVariant: "default",
       timestamp: "3d ago",
       team: staleTeams[0].name,
-      description: "No activity logged in past 7 days. Session data may be outdated.",
+      description: `No activity logged in the past 7 days. ${staleTeams.length} team(s) affected.`,
+      href: "/dashboard/admin/activity",
     });
   }
 
-  // Alert 3: WIGs at risk
+  // Alert 3: WIGs at risk (progress < 30% with < 30 days left - simplified for demo)
   const riskyWIGs = allWIGs.filter((wig: WIG) => {
-    const daysLeft = wig.deadline ? 25 : 999; // Placeholder: computed server-side in production
-    const currentProgress = wig.toValue > wig.fromValue ? (wig.currentValue - wig.fromValue) / (wig.toValue - wig.fromValue) : 0;
-    return currentProgress < 0.3 && daysLeft < 30;
+    const progressPercent = wig.toValue > wig.fromValue ? (wig.currentValue - wig.fromValue) / (wig.toValue - wig.fromValue) : 0;
+    return progressPercent < 0.3;
   });
 
   if (riskyWIGs.length > 0) {
     criticalAlerts.push({
-      tag: "LAG MEASURE RISK",
+      tag: "WIG AT RISK",
       tagVariant: "error",
       timestamp: "2d ago",
-      team: "High-Risk WIG",
-      description: `WIG "${riskyWIGs[0].title}" at risk. Progress behind target.`,
+      team: riskyWIGs[0].title.substring(0, 20) + "...",
+      description: `${riskyWIGs.length} WIG(s) have less than 30% progress toward target.`,
+      href: "/dashboard/admin/at-risk-details",
     });
   }
 
   // Ensure 3 alerts
   while (criticalAlerts.length < 3) {
     criticalAlerts.push({
-      tag: "INFO",
+      tag: "SYSTEM OK",
       tagVariant: "default",
       timestamp: "6h ago",
-      team: orgTeams[0]?.name || "All Teams",
+      team: "All Systems",
       description: "System operational and all metrics nominal.",
+      href: "/dashboard/admin",
     });
   }
 
@@ -280,6 +295,17 @@ export default function AdminPage() {
 
   return (
     <main style={{ flex: 1, overflowY: "auto", padding: "32px" }}>
+      <style jsx global>{`
+        .click-animation {
+          transition: transform 0.1s ease-in-out;
+        }
+        .click-animation:active {
+          transform: scale(0.95);
+        }
+        .click-animation:hover {
+          cursor: pointer;
+        }
+      `}</style>
       <div style={{ maxWidth: "1200px", margin: "0 auto", display: "flex", flexDirection: "column", gap: "32px" }}>
 
         {/* Page Header */}
@@ -301,27 +327,6 @@ export default function AdminPage() {
             </p>
           </div>
 
-          {/* Quarter Selector - Placeholder */}
-          <div style={{ display: "flex", alignItems: "center", gap: "4px", border: "1px solid #e4e4e7", padding: "4px", backgroundColor: "#ffffff" }}>
-            {["Q3 2023", "Q2 2023", "YTD"].map((q, i) => (
-              <button
-                key={q}
-                style={{
-                  padding: "6px 16px",
-                  fontSize: "12px",
-                  fontWeight: 600,
-                  letterSpacing: "0.05em",
-                  textTransform: "uppercase",
-                  backgroundColor: i === 0 ? "#18181b" : "transparent",
-                  color: i === 0 ? "#ffffff" : "#71717a",
-                  border: "none",
-                  cursor: "pointer",
-                }}
-              >
-                {q}
-              </button>
-            ))}
-          </div>
         </div>
 
         {/* Links to dedicated admin pages */}
@@ -331,6 +336,7 @@ export default function AdminPage() {
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
               <Link
                 href="/dashboard/admin/users"
+                className="click-animation"
                 style={{
                   padding: "20px",
                   border: "1px solid #e4e4e7",
@@ -356,6 +362,7 @@ export default function AdminPage() {
               </Link>
               <Link
                 href="/dashboard/admin/users/new"
+                className="click-animation"
                 style={{
                   padding: "20px",
                   border: "1px solid #e4e4e7",
@@ -388,6 +395,7 @@ export default function AdminPage() {
           <div style={{ display: "flex", flexWrap: "wrap", gap: "12px" }}>
             <Link
               href="#create-user"
+              className="click-animation"
               style={{
                 padding: "12px 18px",
                 borderRadius: "14px",
@@ -403,6 +411,7 @@ export default function AdminPage() {
             </Link>
             <Link
               href="/dashboard/admin/teams"
+              className="click-animation"
               style={{
                 padding: "12px 18px",
                 borderRadius: "14px",
@@ -419,6 +428,7 @@ export default function AdminPage() {
             </Link>
             <Link
               href="/dashboard/admin/activity"
+              className="click-animation"
               style={{
                 padding: "12px 18px",
                 borderRadius: "14px",
@@ -439,108 +449,78 @@ export default function AdminPage() {
         {/* KPI Cards */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "16px" }}>
           {/* Global Lag Measure */}
-          <div style={cardStyle}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-              <span style={labelCapsStyle}>GLOBAL LAG MEASURE</span>
-              <span className="material-symbols-outlined" style={{ color: "#18181b" }}>monitoring</span>
-            </div>
-            <div>
-              <div style={dataDisplayStyle}>{globalLagDisplay}</div>
-              <div style={{ display: "flex", alignItems: "center", gap: "8px", marginTop: "8px" }}>
-                <div style={{ flex: 1, height: "4px", backgroundColor: "#e0e2e6" }}>
-                  <div style={{ height: "100%", backgroundColor: "#18181b", width: `${Math.min(globalLagPercent, 100)}%` }} />
+          <Link
+            href="/dashboard/admin/lag-details"
+            style={{ textDecoration: "none" }}
+            className="click-animation"
+          >
+            <div style={cardStyle}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                <span style={labelCapsStyle}>GLOBAL LAG MEASURE</span>
+                <span className="material-symbols-outlined" style={{ color: "#18181b" }}>monitoring</span>
+              </div>
+              <div>
+                <div style={dataDisplayStyle}>{globalLagDisplay}</div>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px", marginTop: "8px" }}>
+                  <div style={{ flex: 1, height: "4px", backgroundColor: "#e0e2e6" }}>
+                    <div style={{ height: "100%", backgroundColor: "#18181b", width: `${Math.min(globalLagPercent, 100)}%` }} />
+                  </div>
+                  <span style={{ fontSize: "12px", fontWeight: 500, color: "#18181b" }}>Target: 100%</span>
                 </div>
-                <span style={{ fontSize: "12px", fontWeight: 500, color: "#18181b" }}>Target: {globalLagTarget}</span>
               </div>
             </div>
-          </div>
+          </Link>
 
           {/* Execution Score */}
-          <div style={cardStyle}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-              <span style={labelCapsStyle}>EXECUTION SCORE</span>
-              <span className="material-symbols-outlined" style={{ color: "#18181b" }}>fact_check</span>
-            </div>
-            <div>
-              <div style={dataDisplayStyle}>{executionScore}%</div>
-              <div style={{ display: "flex", alignItems: "center", gap: "4px", marginTop: "8px", fontSize: "14px", color: "#71717a" }}>
-                <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>
-                  {executionScore >= 80 ? "arrow_upward" : "arrow_downward"}
-                </span>
-                <span>{executionScore >= 80 ? "+" : ""}3% vs last week</span>
+          <Link
+            href="/dashboard/admin/execution-details"
+            style={{ textDecoration: "none" }}
+            className="click-animation"
+          >
+            <div style={cardStyle}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                <span style={labelCapsStyle}>EXECUTION SCORE</span>
+                <span className="material-symbols-outlined" style={{ color: "#18181b" }}>fact_check</span>
+              </div>
+              <div>
+                <div style={dataDisplayStyle}>{executionScore}%</div>
+                <div style={{ display: "flex", alignItems: "center", gap: "4px", marginTop: "8px", fontSize: "14px", color: "#71717a" }}>
+                  <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>
+                    {executionScore >= 80 ? "arrow_upward" : "arrow_downward"}
+                  </span>
+                  <span>{executionScore >= 80 ? "+" : ""}3% vs last week</span>
+                </div>
               </div>
             </div>
-          </div>
+          </Link>
 
           {/* At Risk WIGs */}
-          <div style={{ ...cardStyle, position: "relative", overflow: "hidden" }}>
-            <div style={{
-              position: "absolute", top: 0, right: 0,
-              width: "64px", height: "64px",
-              backgroundColor: "#ba1a1a",
-              transform: "rotate(45deg) translate(32px, -32px)",
-            }} />
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", position: "relative", zIndex: 1 }}>
-              <span style={labelCapsStyle}>AT RISK WIGS</span>
-              <span className="material-symbols-outlined" style={{ color: "#ba1a1a" }}>warning</span>
+          <Link
+            href="/dashboard/admin/at-risk-details"
+            style={{ textDecoration: "none" }}
+            className="click-animation"
+          >
+            <div style={{ ...cardStyle, position: "relative", overflow: "hidden" }}>
+              <div style={{
+                position: "absolute", top: 0, right: 0,
+                width: "64px", height: "64px",
+                backgroundColor: "#ba1a1a",
+                transform: "rotate(45deg) translate(32px, -32px)",
+              }} />
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", position: "relative", zIndex: 1 }}>
+                <span style={labelCapsStyle}>AT RISK WIGS</span>
+                <span className="material-symbols-outlined" style={{ color: "#ba1a1a" }}>warning</span>
+              </div>
+              <div style={{ position: "relative", zIndex: 1 }}>
+                <div style={{ ...dataDisplayStyle, color: "#ba1a1a" }}>{atRiskWIGs}</div>
+                <div style={{ fontSize: "14px", color: "#71717a", marginTop: "8px" }}>Requires immediate attention</div>
+              </div>
             </div>
-            <div style={{ position: "relative", zIndex: 1 }}>
-              <div style={{ ...dataDisplayStyle, color: "#ba1a1a" }}>{atRiskWIGs}</div>
-              <div style={{ fontSize: "14px", color: "#71717a", marginTop: "8px" }}>Requires immediate attention</div>
-            </div>
-          </div>
+          </Link>
         </div>
 
         {/* Trends + Alerts Row */}
-        <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: "16px" }}>
-
-          {/* Macro Execution Trends */}
-          <div style={{ border: "1px solid #e4e4e7", backgroundColor: "#ffffff", display: "flex", flexDirection: "column" }}>
-            <div style={{ ...sectionHeaderStyle }}>
-              <h2 style={h2Style}>Macro Execution Trends</h2>
-            </div>
-
-            {/* Bar Chart */}
-            <div style={{ padding: "20px", borderBottom: "1px solid #e4e4e7" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", height: "200px", padding: "0 16px" }}>
-                {weekBars.map((bar) => (
-                  <div key={bar.label} style={{ width: "48px", position: "relative", display: "flex", flexDirection: "column", justifyContent: "flex-end", height: "100%" }}>
-                    <div style={{ width: "100%", backgroundColor: "#e0e2e6", height: "100%", display: "flex", flexDirection: "column", justifyContent: "flex-end" }}>
-                      <div style={{ width: "100%", backgroundColor: "#18181b", height: `${bar.heightPercent}%` }} />
-                    </div>
-                    <div style={{
-                      position: "absolute",
-                      bottom: "-24px",
-                      left: "50%",
-                      transform: "translateX(-50%)",
-                      fontSize: "12px",
-                      fontWeight: bar.isActive ? 700 : 500,
-                      color: bar.isActive ? "#18181b" : "#71717a",
-                      whiteSpace: "nowrap",
-                    }}>
-                      {bar.label}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Stats Row */}
-            <div style={{ padding: "20px", display: "flex", gap: "32px", marginTop: "8px" }}>
-              <div>
-                <div style={labelCapsStyle}>TOTAL LEAD MEASURES</div>
-                <div style={{ fontSize: "24px", fontWeight: 600, color: "#18181b", letterSpacing: "-0.02em", marginTop: "4px" }}>
-                  {allLeadMeasures.length}
-                </div>
-              </div>
-              <div>
-                <div style={labelCapsStyle}>ON TRACK RATE</div>
-                <div style={{ fontSize: "24px", fontWeight: 600, color: "#18181b", letterSpacing: "-0.02em", marginTop: "4px" }}>
-                  {completionRate}%
-                </div>
-              </div>
-            </div>
-          </div>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "16px" }}>
 
           {/* Critical Alerts */}
           <div style={{ border: "1px solid #e4e4e7", backgroundColor: "#ffffff", display: "flex", flexDirection: "column" }}>
@@ -552,12 +532,16 @@ export default function AdminPage() {
             </div>
             <div style={{ flex: 1, overflowY: "auto" }}>
               {criticalAlerts.map((alert, i) => (
-                <div
+                <Link
                   key={i}
+                  href={alert.href || "#"}
+                  className="click-animation"
                   style={{
                     padding: "20px",
                     borderBottom: i < criticalAlerts.length - 1 ? "1px solid #e4e4e7" : "none",
-                    cursor: "pointer",
+                    textDecoration: "none",
+                    color: "inherit",
+                    display: "block",
                   }}
                 >
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "8px" }}>
@@ -576,7 +560,7 @@ export default function AdminPage() {
                   </div>
                   <h3 style={{ fontSize: "16px", fontWeight: 600, color: "#18181b" }}>{alert.team}</h3>
                   <p style={{ fontSize: "14px", color: "#71717a", marginTop: "4px" }}>{alert.description}</p>
-                </div>
+                </Link>
               ))}
             </div>
           </div>
@@ -606,7 +590,7 @@ export default function AdminPage() {
             <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left" }}>
               <thead>
                 <tr style={{ borderBottom: "1px solid #e4e4e7", backgroundColor: "#f7f9fd" }}>
-                  {(["TEAM", "ACTIVE WIGS", "EXECUTION SCORE", "LEAD MEASURE HEALTH", "ACTION"] as const).map((h, i) => (
+                  {(["TEAM", "ACTIVE WIGS", "EXECUTION SCORE", "LEAD MEASURE HEALTH"] as const).map((h, i) => (
                     <th key={h} style={{
                       padding: "20px",
                       fontSize: "12px",
@@ -614,7 +598,7 @@ export default function AdminPage() {
                       letterSpacing: "0.05em",
                       textTransform: "uppercase",
                       color: "#71717a",
-                      textAlign: i === 4 ? "right" : "left",
+                      textAlign: i === 3 ? "right" : "left",
                     }}>
                       {h}
                     </th>
@@ -631,6 +615,7 @@ export default function AdminPage() {
                   return (
                     <tr
                       key={row.name}
+                      className="click-animation"
                       style={{ borderBottom: isLast ? "none" : "1px solid #e4e4e7" }}
                       onMouseEnter={(e) => { (e.currentTarget as HTMLTableRowElement).style.backgroundColor = "#f7f9fd"; }}
                       onMouseLeave={(e) => { (e.currentTarget as HTMLTableRowElement).style.backgroundColor = "transparent"; }}

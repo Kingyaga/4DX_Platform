@@ -12,7 +12,7 @@
     "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
   },
   "dependencies": {
-    "@prisma/client": "^6.19.3",
+    "@prisma/client": "6.19.3",
     "@trpc/client": "^11.16.0",
     "@trpc/next": "^11.16.0",
     "@trpc/server": "^11.16.0",

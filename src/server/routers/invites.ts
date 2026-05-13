@@ -25,7 +25,7 @@ export const invitesRouter = router({
       const membership = await ctx.db.orgMembership.findUnique({
         where: {
           userId_orgId: {
-            userId: ctx.session.user.id,
+            userId: (ctx.session.user as any).id,
             orgId: org.id,
           },
         },
@@ -65,7 +65,7 @@ export const invitesRouter = router({
           orgId: org.id,
           teamId,
           expiresAt,
-          createdByUserId: ctx.session.user.id,
+          createdByUserId: (ctx.session.user as any).id,
         },
       });
 
@@ -132,7 +132,7 @@ export const invitesRouter = router({
       const membership = await ctx.db.orgMembership.findUnique({
         where: {
           userId_orgId: {
-            userId: ctx.session.user.id,
+            userId: (ctx.session.user as any).id,
             orgId: org.id,
           },
         },
@@ -164,7 +164,7 @@ export const invitesRouter = router({
       const membership = await ctx.db.orgMembership.findUnique({
         where: {
           userId_orgId: {
-            userId: ctx.session.user.id,
+            userId: (ctx.session.user as any).id,
             orgId: invite.orgId,
           },
         },
