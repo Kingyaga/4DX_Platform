@@ -78,3 +78,28 @@ export async function sendWigClosedEmail({
     console.error("Email send failed:", error);
   }
 }
+
+export async function sendWigAtRiskEmail({
+  to,
+  name,
+  wigTitle,
+}: {
+  to: string;
+  name: string;
+  wigTitle: string;
+}) {
+  try {
+    await resend.emails.send({
+      from: "4DX Platform <onboarding@resend.dev>",
+      to,
+      subject: `WIG "${wigTitle}" is at risk`,
+      html: `
+        <h2>Hi ${name},</h2>
+        <p>The WIG <strong>"${wigTitle}"</strong> is currently at risk.</p>
+        <p>Please review and take necessary actions to get it back on track.</p>
+      `,
+    });
+  } catch (error) {
+    console.error("Email send failed:", error);
+  }
+}

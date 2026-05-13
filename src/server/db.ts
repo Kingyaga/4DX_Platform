@@ -1,7 +1,7 @@
-import { PrismaClient } from "@prisma/client";
+import { createPrismaClient } from "./prisma-client";
 
 export function getDb() {
-  return new PrismaClient({
+  return createPrismaClient({
     log: process.env.NODE_ENV === "development" ? ["error"] : [],
   });
 }

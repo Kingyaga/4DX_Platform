@@ -1,4 +1,4 @@
-import { type PrismaClient, type Prisma } from "@prisma/client";
+import { type PrismaClient, type Prisma } from "@/generated/prisma/client";
 
 type AuditAction =
   | "WIG_CREATED"
