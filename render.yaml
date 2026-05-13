@@ -8,3 +8,12 @@ services:
     releaseCommand: pnpm prisma migrate deploy
     startCommand: pnpm start
     autoDeploy: true
+
+  - type: cron
+    name: 4dx-wigs-at-risk-notifications
+    env: node
+    branch: main
+    rootDir: .
+    schedule: "0 8 * * *"
+    buildCommand: pnpm prisma generate
+    startCommand: pnpm notify:wigs-at-risk

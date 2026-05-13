@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "notify:wigs-at-risk": "ts-node --compiler-options {\"module\":\"CommonJS\"} -r tsconfig-paths/register scripts/check-wigs-at-risk.ts"
   },
   "prisma": {
     "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
