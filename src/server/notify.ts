@@ -4,7 +4,11 @@ type NotificationType =
   | "SESSION_READY"
   | "SESSION_OVERDUE"
   | "WIG_CLOSED"
-  | "TEAM_INVITE";
+  | "TEAM_INVITE"
+  | "TEAM_MEMBER_ADDED"
+  | "TEAM_MEMBER_REMOVED"
+  | "WIG_AT_RISK"
+  | "PASSWORD_CHANGED";
 
 interface NotifyPayload {
   db: PrismaClient;

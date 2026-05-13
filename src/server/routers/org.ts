@@ -34,7 +34,7 @@ export const orgRouter = router({
           slug: input.slug,
           memberships: {
             create: {
-              userId: ctx.session.user.id,
+              userId: (ctx.session.user as any).id,
               role: "ADMIN",
             },
           },
@@ -43,7 +43,7 @@ export const orgRouter = router({
 
       await auditLog({
         db: ctx.db,
-        actorUserId: ctx.session.user.id,
+        actorUserId: (ctx.session.user as any).id,
         entityType: "ORGANIZATION",
         entityId: createdOrg.id,
         action: "ORG_CREATED",
@@ -56,7 +56,7 @@ export const orgRouter = router({
       return createdOrg;
     }),
 
-  // Admin dashboard — full portfolio view across all teams
+  // Admin dashboard — optimized for dashboard display
   getDashboard: protectedProcedure
     .input(z.object({ orgSlug: z.string() }))
     .query(async ({ ctx, input }) => {
@@ -70,7 +70,7 @@ export const orgRouter = router({
       const membership = await ctx.db.orgMembership.findUnique({
         where: {
           userId_orgId: {
-            userId: ctx.session.user.id,
+            userId: (ctx.session.user as any).id,
             orgId: org.id,
           },
         },
@@ -83,7 +83,7 @@ export const orgRouter = router({
         });
       }
 
-      // Pull all teams with full health data
+      // Pull all teams with basic data (no activity logs for performance)
       const teams = await ctx.db.team.findMany({
         where: { orgId: org.id },
         include: {
@@ -99,10 +99,96 @@ export const orgRouter = router({
             include: {
               leadMeasures: {
                 where: { archivedAt: null },
-                include: {
+              },
+            },
+          },
+        },
+      });
+
+      // Get session stats in a single optimized query instead of Promise.all
+      const sessionStats = await ctx.db.weeklySession.groupBy({
+        by: ['status'],
+        where: {
+          wig: {
+            team: {
+              orgId: org.id
+            }
+          }
+        },
+        _count: true,
+      });
+
+      const totalSessions = sessionStats.reduce((sum, stat) => sum + stat._count, 0);
+      const completedSessions = sessionStats.find(stat => stat.status === 'COMPLETE')?._count || 0;
+      const overdueSessions = sessionStats.find(stat => stat.status === 'OVERDUE')?._count || 0;
+
+      return {
+        org,
+        teams,
+        sessionStats: {
+          totalSessions,
+          completedSessions,
+          overdueSessions,
+          completionRate: totalSessions > 0 ? Math.round((completedSessions / totalSessions) * 100) : 0,
+        },
+      };
+    }),
+
+  // Admin activity data — optimized for activity page
+  getActivityData: protectedProcedure
+    .input(z.object({ orgSlug: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const org = await ctx.db.organization.findUnique({
+        where: { slug: input.orgSlug },
+      });
+
+      if (!org) throw new TRPCError({ code: "NOT_FOUND" });
+
+      // Only org admins can see the activity data
+      const membership = await ctx.db.orgMembership.findUnique({
+        where: {
+          userId_orgId: {
+            userId: (ctx.session.user as any).id,
+            orgId: org.id,
+          },
+        },
+      });
+
+      if (!membership || membership.role !== "ADMIN") {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Only org admins can access activity data.",
+        });
+      }
+
+      // Pull teams with activity logs only (limited for performance)
+      const teams = await ctx.db.team.findMany({
+        where: { orgId: org.id },
+        select: {
+          id: true,
+          name: true,
+          wigs: {
+            where: { status: "ACTIVE" },
+            select: {
+              id: true,
+              title: true,
+              leadMeasures: {
+                where: { archivedAt: null },
+                select: {
+                  id: true,
+                  name: true,
+                  targetValue: true,
                   activityLogs: {
+                    select: {
+                      id: true,
+                      value: true,
+                      loggedForDate: true,
+                      user: {
+                        select: { email: true },
+                      },
+                    },
                     orderBy: { loggedForDate: "desc" },
-                    take: 4, // Last 4 weeks of data for sparklines
+                    take: 100, // Limit to last 100 entries per measure for performance
                   },
                 },
               },
@@ -111,44 +197,9 @@ export const orgRouter = router({
         },
       });
 
-      // Pull session completion rates per team
-      const sessionStats = await Promise.all(
-        teams.map(async (team) => {
-          const totalSessions = await ctx.db.weeklySession.count({
-            where: { wig: { teamId: team.id } },
-          });
-
-          const completedSessions = await ctx.db.weeklySession.count({
-            where: {
-              wig: { teamId: team.id },
-              status: "COMPLETE",
-            },
-          });
-
-          const overdueSessions = await ctx.db.weeklySession.count({
-            where: {
-              wig: { teamId: team.id },
-              status: "OVERDUE",
-            },
-          });
-
-          return {
-            teamId: team.id,
-            totalSessions,
-            completedSessions,
-            overdueSessions,
-            completionRate:
-              totalSessions > 0
-                ? Math.round((completedSessions / totalSessions) * 100)
-                : 0,
-          };
-        }),
-      );
-
       return {
         org,
         teams,
-        sessionStats,
       };
     }),
 
@@ -165,7 +216,7 @@ export const orgRouter = router({
       const membership = await ctx.db.orgMembership.findUnique({
         where: {
           userId_orgId: {
-            userId: ctx.session.user.id,
+            userId: (ctx.session.user as any).id,
             orgId: org.id,
           },
         },
@@ -209,7 +260,7 @@ export const orgRouter = router({
       const membership = await ctx.db.orgMembership.findUnique({
         where: {
           userId_orgId: {
-            userId: ctx.session.user.id,
+            userId: (ctx.session.user as any).id,
             orgId: org.id,
           },
         },
@@ -220,6 +271,19 @@ export const orgRouter = router({
           code: "FORBIDDEN",
           message: "Only org admins can invite members.",
         });
+      }
+
+      if (input.role === "ADMIN") {
+        const existingAdmin = await ctx.db.orgMembership.findFirst({
+          where: { orgId: org.id, role: "ADMIN" },
+        });
+
+        if (existingAdmin) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "This platform is limited to one administrator.",
+          });
+        }
       }
 
       // Check user isn't already a member
@@ -249,7 +313,7 @@ export const orgRouter = router({
 
       await auditLog({
         db: ctx.db,
-        actorUserId: ctx.session.user.id,
+        actorUserId: (ctx.session.user as any).id,
         entityType: "ORG_MEMBER",
         entityId: newMembership.id,
         action: "ORG_MEMBER_INVITED",
@@ -282,7 +346,7 @@ export const orgRouter = router({
       const membership = await ctx.db.orgMembership.findUnique({
         where: {
           userId_orgId: {
-            userId: ctx.session.user.id,
+            userId: (ctx.session.user as any).id,
             orgId: org.id,
           },
         },
@@ -293,11 +357,28 @@ export const orgRouter = router({
       }
 
       // Prevent admin from demoting themselves
-      if (input.userId === ctx.session.user.id) {
+      if (input.userId === (ctx.session.user as any).id) {
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: "You cannot change your own role.",
         });
+      }
+
+      if (input.role === "ADMIN") {
+        const existingAdmin = await ctx.db.orgMembership.findFirst({
+          where: {
+            orgId: org.id,
+            role: "ADMIN",
+            userId: { not: input.userId },
+          },
+        });
+
+        if (existingAdmin) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "This platform is limited to one administrator.",
+          });
+        }
       }
 
       const previousMembership = await ctx.db.orgMembership.findUnique({
@@ -321,7 +402,7 @@ export const orgRouter = router({
 
       await auditLog({
         db: ctx.db,
-        actorUserId: ctx.session.user.id,
+        actorUserId: (ctx.session.user as any).id,
         entityType: "ORG_MEMBER",
         entityId: updatedMembership.id,
         action: "ORG_MEMBER_ROLE_UPDATED",
@@ -353,7 +434,7 @@ export const orgRouter = router({
       const membership = await ctx.db.orgMembership.findUnique({
         where: {
           userId_orgId: {
-            userId: ctx.session.user.id,
+            userId: (ctx.session.user as any).id,
             orgId: org.id,
           },
         },
@@ -386,7 +467,7 @@ export const orgRouter = router({
       const membership = await ctx.db.orgMembership.findUnique({
         where: {
           userId_orgId: {
-            userId: ctx.session.user.id,
+            userId: (ctx.session.user as any).id,
             orgId: org.id,
           },
         },

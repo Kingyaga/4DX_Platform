@@ -57,6 +57,11 @@ export type User = Prisma.UserModel
  */
 export type OrgMembership = Prisma.OrgMembershipModel
 /**
+ * Model Invite
+ * 
+ */
+export type Invite = Prisma.InviteModel
+/**
  * Model Team
  * 
  */
@@ -116,3 +121,8 @@ export type ApiKey = Prisma.ApiKeyModel
  * 
  */
 export type InviteToken = Prisma.InviteTokenModel
+/**
+ * Model PasswordResetToken
+ * 
+ */
+export type PasswordResetToken = Prisma.PasswordResetTokenModel

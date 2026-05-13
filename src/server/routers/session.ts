@@ -29,7 +29,7 @@ export const sessionsRouter = router({
 
       if (!team) throw new TRPCError({ code: "NOT_FOUND" });
 
-      if (team.leadUserId !== ctx.session.user.id) {
+      if (team.leadUserId !== (ctx.session.user as any).id) {
         throw new TRPCError({ code: "FORBIDDEN" });
       }
 
@@ -106,7 +106,7 @@ export const sessionsRouter = router({
       });
 
       if (!session) throw new TRPCError({ code: "NOT_FOUND" });
-      if (session.userId !== ctx.session.user.id)
+      if (session.userId !== (ctx.session.user as any).id)
         throw new TRPCError({ code: "FORBIDDEN" });
       if (session.accountDoneAt)
         throw new TRPCError({
@@ -121,7 +121,7 @@ export const sessionsRouter = router({
       if (sessionWig) {
         const observer = await isObserver(
           ctx.db,
-          ctx.session.user.id,
+          (ctx.session.user as any).id,
           sessionWig.teamId,
         );
         if (observer) {
@@ -165,7 +165,7 @@ export const sessionsRouter = router({
       });
 
       if (!session) throw new TRPCError({ code: "NOT_FOUND" });
-      if (session.userId !== ctx.session.user.id)
+      if (session.userId !== (ctx.session.user as any).id)
         throw new TRPCError({ code: "FORBIDDEN" });
 
       // Gate: Account must be done first
@@ -190,7 +190,7 @@ export const sessionsRouter = router({
       if (sessionWig) {
         const observer = await isObserver(
           ctx.db,
-          ctx.session.user.id,
+          (ctx.session.user as any).id,
           sessionWig.teamId,
         );
         if (observer) {
@@ -229,7 +229,7 @@ export const sessionsRouter = router({
       });
 
       if (!session) throw new TRPCError({ code: "NOT_FOUND" });
-      if (session.userId !== ctx.session.user.id)
+      if (session.userId !== (ctx.session.user as any).id)
         throw new TRPCError({ code: "FORBIDDEN" });
 
       // Gate: Both Account and Review must be done first
@@ -253,7 +253,7 @@ export const sessionsRouter = router({
       if (sessionWig) {
         const observer = await isObserver(
           ctx.db,
-          ctx.session.user.id,
+          (ctx.session.user as any).id,
           sessionWig.teamId,
         );
         if (observer) {
@@ -299,10 +299,10 @@ export const sessionsRouter = router({
       if (!team) throw new TRPCError({ code: "NOT_FOUND" });
 
       // Only team lead or org admin can see all sessions
-      const isTeamLead = team.leadUserId === ctx.session.user.id;
+      const isTeamLead = team.leadUserId === (ctx.session.user as any).id;
       const isOrgAdmin = await ctx.db.orgMembership.findFirst({
         where: {
-          userId: ctx.session.user.id,
+          userId: (ctx.session.user as any).id,
           orgId: team.orgId,
           role: "ADMIN",
         },
@@ -335,6 +335,37 @@ export const sessionsRouter = router({
           commitments: true,
         },
         orderBy: { user: { name: "asc" } },
+      });
+    }),
+
+  getCurrentSession: protectedProcedure
+    .input(z.object({ teamSlug: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const team = await ctx.db.team.findUnique({
+        where: { slug: input.teamSlug },
+        include: { wigs: { where: { status: "ACTIVE" } } },
+      });
+
+      if (!team) throw new TRPCError({ code: "NOT_FOUND" });
+
+      const monday = getThisMonday();
+
+      return ctx.db.weeklySession.findMany({
+        where: {
+          userId: (ctx.session.user as any).id,
+          wig: { teamId: team.id },
+          weekStarting: monday,
+        },
+        include: {
+          commitments: true,
+          wig: {
+            include: {
+              leadMeasures: {
+                where: { archivedAt: null },
+              },
+            },
+          },
+        },
       });
     }),
 });

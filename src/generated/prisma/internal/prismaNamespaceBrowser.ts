@@ -54,6 +54,7 @@ export const ModelName = {
   Organization: 'Organization',
   User: 'User',
   OrgMembership: 'OrgMembership',
+  Invite: 'Invite',
   Team: 'Team',
   TeamMembership: 'TeamMembership',
   WIG: 'WIG',
@@ -65,7 +66,8 @@ export const ModelName = {
   Notification: 'Notification',
   AuditLog: 'AuditLog',
   ApiKey: 'ApiKey',
-  InviteToken: 'InviteToken'
+  InviteToken: 'InviteToken',
+  PasswordResetToken: 'PasswordResetToken'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -115,6 +117,21 @@ export const OrgMembershipScalarFieldEnum = {
 } as const
 
 export type OrgMembershipScalarFieldEnum = (typeof OrgMembershipScalarFieldEnum)[keyof typeof OrgMembershipScalarFieldEnum]
+
+
+export const InviteScalarFieldEnum = {
+  id: 'id',
+  token: 'token',
+  email: 'email',
+  expiresAt: 'expiresAt',
+  createdAt: 'createdAt',
+  usedAt: 'usedAt',
+  orgId: 'orgId',
+  teamId: 'teamId',
+  invitedByUserId: 'invitedByUserId'
+} as const
+
+export type InviteScalarFieldEnum = (typeof InviteScalarFieldEnum)[keyof typeof InviteScalarFieldEnum]
 
 
 export const TeamScalarFieldEnum = {
@@ -282,6 +299,18 @@ export const InviteTokenScalarFieldEnum = {
 } as const
 
 export type InviteTokenScalarFieldEnum = (typeof InviteTokenScalarFieldEnum)[keyof typeof InviteTokenScalarFieldEnum]
+
+
+export const PasswordResetTokenScalarFieldEnum = {
+  id: 'id',
+  tokenHash: 'tokenHash',
+  expiresAt: 'expiresAt',
+  usedAt: 'usedAt',
+  createdAt: 'createdAt',
+  userId: 'userId'
+} as const
+
+export type PasswordResetTokenScalarFieldEnum = (typeof PasswordResetTokenScalarFieldEnum)[keyof typeof PasswordResetTokenScalarFieldEnum]
 
 
 export const SortOrder = {

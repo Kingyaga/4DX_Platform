@@ -1,0 +1,118 @@
+4dx-frontend/app/dashboard/activity/page.tsx(4,41): error TS2307: Cannot find module '@/lib/hooks' or its corresponding type declarations.
+4dx-frontend/app/dashboard/activity/page.tsx(5,30): error TS2307: Cannot find module '@/lib/stores/team-store' or its corresponding type declarations.
+4dx-frontend/app/dashboard/activity/page.tsx(6,40): error TS2307: Cannot find module '@/lib/components/states' or its corresponding type declarations.
+4dx-frontend/app/dashboard/activity/page.tsx(7,32): error TS2307: Cannot find module '@/lib/components/loading-spinner' or its corresponding type declarations.
+4dx-frontend/app/dashboard/activity/page.tsx(8,57): error TS2307: Cannot find module '@/lib/types' or its corresponding type declarations.
+4dx-frontend/app/dashboard/admin/activity/page.tsx(3,36): error TS2307: Cannot find module '@/lib/hooks' or its corresponding type declarations.
+4dx-frontend/app/dashboard/admin/activity/page.tsx(4,30): error TS2307: Cannot find module '@/lib/stores/user-store' or its corresponding type declarations.
+4dx-frontend/app/dashboard/admin/activity/page.tsx(5,40): error TS2307: Cannot find module '@/lib/components/states' or its corresponding type declarations.
+4dx-frontend/app/dashboard/admin/activity/page.tsx(6,32): error TS2307: Cannot find module '@/lib/components/loading-spinner' or its corresponding type declarations.
+4dx-frontend/app/dashboard/admin/at-risk-details/page.tsx(5,30): error TS2307: Cannot find module '@/lib/stores/user-store' or its corresponding type declarations.
+4dx-frontend/app/dashboard/admin/at-risk-details/page.tsx(6,33): error TS2307: Cannot find module '@/lib/hooks' or its corresponding type declarations.
+4dx-frontend/app/dashboard/admin/at-risk-details/page.tsx(7,40): error TS2307: Cannot find module '@/lib/components/states' or its corresponding type declarations.
+4dx-frontend/app/dashboard/admin/execution-details/page.tsx(5,30): error TS2307: Cannot find module '@/lib/stores/user-store' or its corresponding type declarations.
+4dx-frontend/app/dashboard/admin/execution-details/page.tsx(6,33): error TS2307: Cannot find module '@/lib/hooks' or its corresponding type declarations.
+4dx-frontend/app/dashboard/admin/execution-details/page.tsx(7,40): error TS2307: Cannot find module '@/lib/components/states' or its corresponding type declarations.
+4dx-frontend/app/dashboard/admin/lag-details/page.tsx(5,30): error TS2307: Cannot find module '@/lib/stores/user-store' or its corresponding type declarations.
+4dx-frontend/app/dashboard/admin/lag-details/page.tsx(6,33): error TS2307: Cannot find module '@/lib/hooks' or its corresponding type declarations.
+4dx-frontend/app/dashboard/admin/lag-details/page.tsx(7,40): error TS2307: Cannot find module '@/lib/components/states' or its corresponding type declarations.
+4dx-frontend/app/dashboard/admin/page.tsx(5,61): error TS2307: Cannot find module '@/lib/hooks' or its corresponding type declarations.
+4dx-frontend/app/dashboard/admin/page.tsx(6,33): error TS2307: Cannot find module '@/lib/useTimedMessage' or its corresponding type declarations.
+4dx-frontend/app/dashboard/admin/page.tsx(7,30): error TS2307: Cannot find module '@/lib/stores/user-store' or its corresponding type declarations.
+4dx-frontend/app/dashboard/admin/page.tsx(8,40): error TS2307: Cannot find module '@/lib/components/states' or its corresponding type declarations.
+4dx-frontend/app/dashboard/admin/page.tsx(9,22): error TS2307: Cannot find module '@/lib/trpc' or its corresponding type declarations.
+4dx-frontend/app/dashboard/admin/page.tsx(10,45): error TS2307: Cannot find module '@/lib/types' or its corresponding type declarations.
+4dx-frontend/app/dashboard/admin/page.tsx(33,15): error TS7006: Parameter 'err' implicitly has an 'any' type.
+4dx-frontend/app/dashboard/admin/teams/page.tsx(4,33): error TS2307: Cannot find module '@/lib/useTimedMessage' or its corresponding type declarations.
+4dx-frontend/app/dashboard/admin/teams/page.tsx(5,130): error TS2307: Cannot find module '@/lib/hooks' or its corresponding type declarations.
+4dx-frontend/app/dashboard/admin/teams/page.tsx(6,30): error TS2307: Cannot find module '@/lib/stores/user-store' or its corresponding type declarations.
+4dx-frontend/app/dashboard/admin/teams/page.tsx(7,40): error TS2307: Cannot find module '@/lib/components/states' or its corresponding type declarations.
+4dx-frontend/app/dashboard/admin/teams/page.tsx(8,27): error TS2307: Cannot find module '@/lib/components/role-badge' or its corresponding type declarations.
+4dx-frontend/app/dashboard/admin/teams/page.tsx(9,33): error TS2307: Cannot find module '@/lib/components/assign-lead-modal' or its corresponding type declarations.
+4dx-frontend/app/dashboard/admin/teams/page.tsx(10,33): error TS2307: Cannot find module '@/lib/components/create-team-modal' or its corresponding type declarations.
+4dx-frontend/app/dashboard/admin/teams/page.tsx(11,26): error TS2307: Cannot find module '@/lib/types' or its corresponding type declarations.
+4dx-frontend/app/dashboard/admin/teams/page.tsx(108,30): error TS7006: Parameter 'name' implicitly has an 'any' type.
+4dx-frontend/app/dashboard/admin/teams/page.tsx(108,36): error TS7006: Parameter 'slug' implicitly has an 'any' type.
+4dx-frontend/app/dashboard/admin/teams/page.tsx(179,53): error TS7006: Parameter 'user' implicitly has an 'any' type.
+4dx-frontend/app/dashboard/admin/teams/page.tsx(415,54): error TS7006: Parameter 'user' implicitly has an 'any' type.
+4dx-frontend/app/dashboard/admin/teams/page.tsx(476,30): error TS7006: Parameter 'userId' implicitly has an 'any' type.
+4dx-frontend/app/dashboard/admin/teams/page.tsx(476,38): error TS7006: Parameter 'teamSlug' implicitly has an 'any' type.
+4dx-frontend/app/dashboard/admin/teams/page.tsx(494,30): error TS7006: Parameter 'name' implicitly has an 'any' type.
+4dx-frontend/app/dashboard/admin/teams/page.tsx(494,36): error TS7006: Parameter 'slug' implicitly has an 'any' type.
+4dx-frontend/app/dashboard/admin/users/new/page.tsx(5,29): error TS2307: Cannot find module '@/lib/hooks' or its corresponding type declarations.
+4dx-frontend/app/dashboard/admin/users/new/page.tsx(6,33): error TS2307: Cannot find module '@/lib/useTimedMessage' or its corresponding type declarations.
+4dx-frontend/app/dashboard/admin/users/new/page.tsx(7,30): error TS2307: Cannot find module '@/lib/stores/user-store' or its corresponding type declarations.
+4dx-frontend/app/dashboard/admin/users/new/page.tsx(8,28): error TS2307: Cannot find module '@/lib/components/states' or its corresponding type declarations.
+4dx-frontend/app/dashboard/admin/users/new/page.tsx(9,32): error TS2307: Cannot find module '@/lib/api-client' or its corresponding type declarations.
+4dx-frontend/app/dashboard/admin/users/new/page.tsx(10,22): error TS2307: Cannot find module '@/lib/trpc' or its corresponding type declarations.
+4dx-frontend/app/dashboard/admin/users/new/page.tsx(11,27): error TS2307: Cannot find module '@/lib/types' or its corresponding type declarations.
+4dx-frontend/app/dashboard/admin/users/new/page.tsx(42,15): error TS7006: Parameter 'err' implicitly has an 'any' type.
+4dx-frontend/app/dashboard/admin/users/page.tsx(4,44): error TS2307: Cannot find module '@/lib/hooks' or its corresponding type declarations.
+4dx-frontend/app/dashboard/admin/users/page.tsx(5,33): error TS2307: Cannot find module '@/lib/useTimedMessage' or its corresponding type declarations.
+4dx-frontend/app/dashboard/admin/users/page.tsx(6,30): error TS2307: Cannot find module '@/lib/stores/user-store' or its corresponding type declarations.
+4dx-frontend/app/dashboard/admin/users/page.tsx(7,40): error TS2307: Cannot find module '@/lib/components/states' or its corresponding type declarations.
+4dx-frontend/app/dashboard/admin/users/page.tsx(20,26): error TS7006: Parameter 'user' implicitly has an 'any' type.
+4dx-frontend/app/dashboard/admin/users/page.tsx(158,37): error TS7006: Parameter 'user' implicitly has an 'any' type.
+4dx-frontend/app/dashboard/layout.tsx(7,72): error TS2307: Cannot find module '@/lib/hooks' or its corresponding type declarations.
+4dx-frontend/app/dashboard/layout.tsx(8,30): error TS2307: Cannot find module '@/lib/stores/user-store' or its corresponding type declarations.
+4dx-frontend/app/dashboard/layout.tsx(9,30): error TS2307: Cannot find module '@/lib/stores/team-store' or its corresponding type declarations.
+4dx-frontend/app/dashboard/layout.tsx(10,32): error TS2307: Cannot find module '@/lib/components/loading-spinner' or its corresponding type declarations.
+4dx-frontend/app/dashboard/members/[memberId]/page.tsx(6,30): error TS2307: Cannot find module '@/lib/stores/team-store' or its corresponding type declarations.
+4dx-frontend/app/dashboard/members/[memberId]/page.tsx(7,62): error TS2307: Cannot find module '@/lib/hooks' or its corresponding type declarations.
+4dx-frontend/app/dashboard/members/[memberId]/page.tsx(8,40): error TS2307: Cannot find module '@/lib/components/states' or its corresponding type declarations.
+4dx-frontend/app/dashboard/members/page.tsx(5,33): error TS2307: Cannot find module '@/lib/useTimedMessage' or its corresponding type declarations.
+4dx-frontend/app/dashboard/members/page.tsx(6,78): error TS2307: Cannot find module '@/lib/hooks' or its corresponding type declarations.
+4dx-frontend/app/dashboard/members/page.tsx(7,30): error TS2307: Cannot find module '@/lib/stores/team-store' or its corresponding type declarations.
+4dx-frontend/app/dashboard/members/page.tsx(8,40): error TS2307: Cannot find module '@/lib/components/states' or its corresponding type declarations.
+4dx-frontend/app/dashboard/page.tsx(5,30): error TS2307: Cannot find module '@/lib/stores/user-store' or its corresponding type declarations.
+4dx-frontend/app/dashboard/scoreboard/page.tsx(4,25): error TS2307: Cannot find module '@/lib/hooks' or its corresponding type declarations.
+4dx-frontend/app/dashboard/scoreboard/page.tsx(5,30): error TS2307: Cannot find module '@/lib/stores/team-store' or its corresponding type declarations.
+4dx-frontend/app/dashboard/scoreboard/page.tsx(6,40): error TS2307: Cannot find module '@/lib/components/states' or its corresponding type declarations.
+4dx-frontend/app/dashboard/scoreboard/page.tsx(7,57): error TS2307: Cannot find module '@/lib/types' or its corresponding type declarations.
+4dx-frontend/app/dashboard/session/page.tsx(4,94): error TS2307: Cannot find module '@/lib/hooks' or its corresponding type declarations.
+4dx-frontend/app/dashboard/session/page.tsx(5,30): error TS2307: Cannot find module '@/lib/stores/team-store' or its corresponding type declarations.
+4dx-frontend/app/dashboard/session/page.tsx(6,28): error TS2307: Cannot find module '@/lib/components/states' or its corresponding type declarations.
+4dx-frontend/app/dashboard/session/page.tsx(7,32): error TS2307: Cannot find module '@/lib/components/loading-spinner' or its corresponding type declarations.
+4dx-frontend/app/dashboard/session/page.tsx(8,49): error TS2307: Cannot find module '@/lib/types' or its corresponding type declarations.
+4dx-frontend/app/dashboard/session/page.tsx(121,35): error TS7006: Parameter 'commitment' implicitly has an 'any' type.
+4dx-frontend/app/dashboard/settings/page.tsx(5,30): error TS2307: Cannot find module '@/lib/stores/user-store' or its corresponding type declarations.
+4dx-frontend/app/dashboard/settings/page.tsx(6,30): error TS2307: Cannot find module '@/lib/hooks' or its corresponding type declarations.
+4dx-frontend/app/dashboard/settings/page.tsx(7,27): error TS2307: Cannot find module '@/lib/components/role-badge' or its corresponding type declarations.
+4dx-frontend/app/dashboard/team-lead/page.tsx(4,30): error TS2307: Cannot find module '@/lib/stores/team-store' or its corresponding type declarations.
+4dx-frontend/app/dashboard/team-lead/page.tsx(5,30): error TS2307: Cannot find module '@/lib/stores/user-store' or its corresponding type declarations.
+4dx-frontend/app/dashboard/team-lead/page.tsx(6,54): error TS2307: Cannot find module '@/lib/hooks' or its corresponding type declarations.
+4dx-frontend/app/dashboard/team-lead/page.tsx(7,40): error TS2307: Cannot find module '@/lib/components/states' or its corresponding type declarations.
+4dx-frontend/app/dashboard/team-lead/reports/page.tsx(4,30): error TS2307: Cannot find module '@/lib/stores/user-store' or its corresponding type declarations.
+4dx-frontend/app/dashboard/team-lead/reports/page.tsx(5,30): error TS2307: Cannot find module '@/lib/stores/team-store' or its corresponding type declarations.
+4dx-frontend/app/dashboard/team-lead/reports/page.tsx(6,37): error TS2307: Cannot find module '@/lib/hooks' or its corresponding type declarations.
+4dx-frontend/app/dashboard/team-lead/reports/page.tsx(7,40): error TS2307: Cannot find module '@/lib/components/states' or its corresponding type declarations.
+4dx-frontend/app/dashboard/team-lead/requests/page.tsx(4,30): error TS2307: Cannot find module '@/lib/stores/team-store' or its corresponding type declarations.
+4dx-frontend/app/dashboard/team-lead/requests/page.tsx(5,22): error TS2307: Cannot find module '@/lib/api-client' or its corresponding type declarations.
+4dx-frontend/app/dashboard/team-lead/requests/page.tsx(6,98): error TS2307: Cannot find module '@/lib/hooks' or its corresponding type declarations.
+4dx-frontend/app/dashboard/team-lead/requests/page.tsx(7,40): error TS2307: Cannot find module '@/lib/components/states' or its corresponding type declarations.
+4dx-frontend/app/dashboard/wigs/page.tsx(4,101): error TS2307: Cannot find module '@/lib/hooks' or its corresponding type declarations.
+4dx-frontend/app/dashboard/wigs/page.tsx(5,30): error TS2307: Cannot find module '@/lib/stores/team-store' or its corresponding type declarations.
+4dx-frontend/app/dashboard/wigs/page.tsx(6,30): error TS2307: Cannot find module '@/lib/stores/user-store' or its corresponding type declarations.
+4dx-frontend/app/dashboard/wigs/page.tsx(7,33): error TS2307: Cannot find module '@/lib/components/skeletons' or its corresponding type declarations.
+4dx-frontend/app/dashboard/wigs/page.tsx(8,40): error TS2307: Cannot find module '@/lib/components/states' or its corresponding type declarations.
+4dx-frontend/app/dashboard/wigs/page.tsx(9,39): error TS2307: Cannot find module '@/lib/types' or its corresponding type declarations.
+4dx-frontend/app/dashboard/wigs/page.tsx(17,41): error TS7006: Parameter 'state' implicitly has an 'any' type.
+4dx-frontend/app/dashboard/wigs/page.tsx(18,44): error TS7006: Parameter 'state' implicitly has an 'any' type.
+4dx-frontend/app/dashboard/wigs/page.tsx(288,21): error TS7006: Parameter 'prev' implicitly has an 'any' type.
+4dx-frontend/app/dashboard/wigs/page.tsx(474,42): error TS7006: Parameter 'lm' implicitly has an 'any' type.
+4dx-frontend/app/dashboard/wigs/page.tsx(475,67): error TS7006: Parameter 'sum' implicitly has an 'any' type.
+4dx-frontend/app/dashboard/wigs/page.tsx(475,72): error TS7006: Parameter 'log' implicitly has an 'any' type.
+4dx-frontend/app/dashboard/wigs/page.tsx(511,41): error TS7006: Parameter 'state' implicitly has an 'any' type.
+4dx-frontend/app/page.tsx(6,30): error TS2307: Cannot find module '@/lib/stores/user-store' or its corresponding type declarations.
+4dx-frontend/app/page.tsx(7,32): error TS2307: Cannot find module '@/lib/components/loading-spinner' or its corresponding type declarations.
+4dx-frontend/app/providers.tsx(5,47): error TS2307: Cannot find module '@/lib/trpc' or its corresponding type declarations.
+4dx-frontend/app/providers.tsx(6,33): error TS2307: Cannot find module '@/lib/components/user-initializer' or its corresponding type declarations.
+4dx-frontend/app/signup/page.tsx(5,22): error TS2307: Cannot find module '@/lib/trpc' or its corresponding type declarations.
+4dx-frontend/app/signup/page.tsx(6,32): error TS2307: Cannot find module '@/lib/components/loading-spinner' or its corresponding type declarations.
+4dx-frontend/app/signup/page.tsx(43,15): error TS7006: Parameter 'err' implicitly has an 'any' type.
+4dx-frontend/lib/components/assign-lead-modal.tsx(2,27): error TS2307: Cannot find module '@/lib/types' or its corresponding type declarations.
+4dx-frontend/lib/components/user-initializer.tsx(4,49): error TS2307: Cannot find module '@/lib/hooks' or its corresponding type declarations.
+app/api/auth/[...nextauth]/route.ts(45,17): error TS7031: Binding element 'token' implicitly has an 'any' type.
+app/api/auth/[...nextauth]/route.ts(45,24): error TS7031: Binding element 'user' implicitly has an 'any' type.
+app/api/auth/[...nextauth]/route.ts(51,21): error TS7031: Binding element 'session' implicitly has an 'any' type.
+app/api/auth/[...nextauth]/route.ts(51,30): error TS7031: Binding element 'token' implicitly has an 'any' type.

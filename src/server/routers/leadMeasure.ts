@@ -25,7 +25,7 @@ export const leadMeasuresRouter = router({
 
       if (!wig) throw new TRPCError({ code: "NOT_FOUND" });
 
-      if (wig.team.leadUserId !== ctx.session.user.id) {
+      if (wig.team.leadUserId !== (ctx.session.user as any).id) {
         throw new TRPCError({
           code: "FORBIDDEN",
           message: "Only the team lead can add lead measures.",

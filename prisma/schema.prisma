@@ -16,9 +16,10 @@ model Organization {
   timezone  String   @default("UTC")
   createdAt DateTime @default(now())
 
-  memberships  OrgMembership[]
-  teams        Team[]
-  apiKeys      ApiKey[]
+  memberships OrgMembership[]
+  teams       Team[]
+  invites     Invite[]
+  apiKeys     ApiKey[]
   inviteTokens InviteToken[]
 }
 
@@ -40,6 +41,8 @@ model User {
   auditLogs       AuditLog[]
   leadMeasures    LeadMeasureOwner[]
   createdInvites  InviteToken[]
+  invites         Invite[]
+  passwordResetTokens PasswordResetToken[]
 }
 
 // ─── ORG MEMBERSHIP ─────────────────────────────────────────────────────────
@@ -62,6 +65,24 @@ enum OrgRole {
   MEMBER
 }
 
+model Invite {
+  id              String        @id @default(cuid())
+  token           String        @unique
+  email           String?
+  expiresAt       DateTime
+  createdAt       DateTime      @default(now())
+  usedAt          DateTime?
+
+  orgId           String
+  org             Organization  @relation(fields: [orgId], references: [id])
+
+  teamId          String?
+  team            Team?         @relation(fields: [teamId], references: [id])
+
+  invitedByUserId String
+  invitedBy       User          @relation(fields: [invitedByUserId], references: [id])
+}
+
 // ─── TEAM ───────────────────────────────────────────────────────────────────
 
 model Team {
@@ -77,6 +98,7 @@ model Team {
   leadUserId String
   members    TeamMembership[]
   wigs       WIG[]
+  invites    Invite[]
 }
 
 model TeamMembership {
@@ -305,6 +327,20 @@ model InviteToken {
   createdAt       DateTime  @default(now())
   createdByUserId String
 
-  org       Organization @relation(fields: [orgId], references: [id])
-  createdBy User         @relation(fields: [createdByUserId], references: [id])
+  org             Organization @relation(fields: [orgId], references: [id])
+  createdBy       User         @relation(fields: [createdByUserId], references: [id])
+}
+
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
 }

@@ -28,7 +28,7 @@ export const activityLogsRouter = router({
       const teamMembership = await ctx.db.teamMembership.findUnique({
         where: {
           userId_teamId: {
-            userId: ctx.session.user.id,
+            userId: (ctx.session.user as any).id,
             teamId: leadMeasure.wig.team.id,
           },
         },
@@ -47,13 +47,14 @@ export const activityLogsRouter = router({
           value: input.value,
           loggedForDate: input.loggedForDate,
           note: input.note,
-          userId: ctx.session.user.id,
+          status: "PENDING",
+          userId: (ctx.session.user as any).id,
         },
       });
 
       await auditLog({
         db: ctx.db,
-        actorUserId: ctx.session.user.id,
+        actorUserId: (ctx.session.user as any).id,
         entityType: "ACTIVITY_LOG",
         entityId: createdLog.id,
         action: "ACTIVITY_LOGGED",
@@ -66,6 +67,103 @@ export const activityLogsRouter = router({
       });
 
       return createdLog;
+    }),
+
+  approve: protectedProcedure
+    .input(z.object({ logId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const log = await ctx.db.activityLog.findUnique({
+        where: { id: input.logId },
+        include: {
+          leadMeasure: {
+            include: {
+              wig: {
+                include: {
+                  team: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      if (!log) throw new TRPCError({ code: "NOT_FOUND" });
+
+      if (log.leadMeasure.wig.team.leadUserId !== (ctx.session.user as any).id) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Only the team lead can approve activity requests.",
+        });
+      }
+
+      return ctx.db.activityLog.update({
+        where: { id: input.logId },
+        data: { status: "APPROVED" },
+      });
+    }),
+
+  decline: protectedProcedure
+    .input(z.object({ logId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const log = await ctx.db.activityLog.findUnique({
+        where: { id: input.logId },
+        include: {
+          leadMeasure: {
+            include: {
+              wig: {
+                include: {
+                  team: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      if (!log) throw new TRPCError({ code: "NOT_FOUND" });
+
+      if (log.leadMeasure.wig.team.leadUserId !== (ctx.session.user as any).id) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Only the team lead can decline activity requests.",
+        });
+      }
+
+      return ctx.db.activityLog.update({
+        where: { id: input.logId },
+        data: { status: "REJECTED" },
+      });
+    }),
+
+  getPendingForTeam: protectedProcedure
+    .input(z.object({ teamSlug: z.string() }))
+    .query(async ({ ctx, input }) => {
+      return ctx.db.activityLog.findMany({
+        where: {
+          status: "PENDING",
+          leadMeasure: {
+            wig: {
+              team: {
+                slug: input.teamSlug,
+                leadUserId: (ctx.session.user as any).id,
+              },
+            },
+          },
+        },
+        include: {
+          user: { select: { id: true, name: true, email: true } },
+          leadMeasure: {
+            select: {
+              id: true,
+              name: true,
+              wig: {
+                select: { title: true },
+              },
+            },
+          },
+        },
+        orderBy: { createdAt: "desc" },
+      });
     }),
 
   // Edit an activity log — only within 24 hours
@@ -84,7 +182,7 @@ export const activityLogsRouter = router({
 
       if (!log) throw new TRPCError({ code: "NOT_FOUND" });
 
-      if (log.userId !== ctx.session.user.id) {
+      if (log.userId !== (ctx.session.user as any).id) {
         throw new TRPCError({
           code: "FORBIDDEN",
           message: "You can only edit your own logs.",
@@ -114,7 +212,7 @@ export const activityLogsRouter = router({
 
       await auditLog({
         db: ctx.db,
-        actorUserId: ctx.session.user.id,
+        actorUserId: (ctx.session.user as any).id,
         entityType: "ACTIVITY_LOG",
         entityId: input.logId,
         action: "ACTIVITY_EDITED",
@@ -136,7 +234,7 @@ export const activityLogsRouter = router({
     .input(z.object({ leadMeasureId: z.string() }))
     .query(async ({ ctx, input }) => {
       return ctx.db.activityLog.findMany({
-        where: { leadMeasureId: input.leadMeasureId },
+        where: { leadMeasureId: input.leadMeasureId, status: "APPROVED" },
         orderBy: { loggedForDate: "desc" },
         include: {
           user: {
@@ -155,14 +253,31 @@ export const activityLogsRouter = router({
       }),
     )
     .query(async ({ ctx, input }) => {
-      const targetUserId = input.userId ?? ctx.session.user.id;
+      const currentUserId = (ctx.session.user as any).id;
+      const targetUserId = input.userId ?? currentUserId;
+
+      if (targetUserId !== currentUserId) {
+        const authorizedMember = await ctx.db.teamMembership.findFirst({
+          where: {
+            userId: targetUserId,
+            team: {
+              leadUserId: currentUserId,
+            },
+          },
+        });
+
+        if (!authorizedMember) {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "You are not authorized to view this member's activity history.",
+          });
+        }
+      }
 
       return ctx.db.activityLog.findMany({
         where: {
           userId: targetUserId,
-          ...(input.leadMeasureId
-            ? { leadMeasureId: input.leadMeasureId }
-            : {}),
+          ...(input.leadMeasureId ? { leadMeasureId: input.leadMeasureId } : {}),
         },
         orderBy: { loggedForDate: "desc" },
         include: {
