@@ -46,6 +46,7 @@ export default function DashboardLayout({
   const { isLoading: userLoading } = useCurrentUser();
   
   const { user, userRole, clearUser, orgSlug } = useUserStore();
+  const setUserRole = useUserStore((state) => state.setUserRole);
   const { currentTeamSlug, setCurrentTeamSlug } = useTeamStore();
   const { teams, isLoading: teamsLoading } = useMyTeams(orgSlug);
   const { pendingRequests } = usePendingActivityRequests(currentTeamSlug);
@@ -57,6 +58,14 @@ export default function DashboardLayout({
       setCurrentTeamSlug(teams[0]?.slug || null);
     }
   }, [currentTeamSlug, teamsLoading, teams, setCurrentTeamSlug]);
+
+  useEffect(() => {
+    if (!user || user.role === "ADMIN" || teamsLoading) return;
+
+    const activeTeam = teams.find((team: any) => team.slug === currentTeamSlug) || teams[0];
+    const activeMembershipRole = activeTeam?.members?.[0]?.role;
+    setUserRole(activeMembershipRole === "LEAD" ? "TEAM_LEAD" : "MEMBER");
+  }, [currentTeamSlug, setUserRole, teams, teamsLoading, user]);
 
   // Clear user store if session is lost
   useEffect(() => {
@@ -192,6 +201,46 @@ export default function DashboardLayout({
             >
               Welcome, {user.name}
             </p>
+          )}
+          {teams.length > 0 && (
+            <label
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "6px",
+                marginTop: "16px",
+                fontSize: "11px",
+                fontWeight: 700,
+                color: "#71717a",
+                textTransform: "uppercase",
+              }}
+            >
+              Active team
+              <select
+                value={currentTeamSlug || ""}
+                onChange={(event) => setCurrentTeamSlug(event.target.value || null)}
+                style={{
+                  width: "100%",
+                  border: "1px solid #d4d4d8",
+                  borderRadius: "6px",
+                  padding: "9px 10px",
+                  backgroundColor: "#ffffff",
+                  color: "#18181b",
+                  fontSize: "13px",
+                  fontWeight: 600,
+                  textTransform: "none",
+                }}
+              >
+                {teams.map((team: any) => {
+                  const role = team.members?.[0]?.role === "LEAD" ? "Lead" : "Member";
+                  return (
+                    <option key={team.slug} value={team.slug}>
+                      {team.name} - {role}
+                    </option>
+                  );
+                })}
+              </select>
+            </label>
           )}
         </div>
 

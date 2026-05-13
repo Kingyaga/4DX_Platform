@@ -601,3 +601,39 @@ export function useCreateTeam() {
     reset: mutation.reset,
   };
 }
+
+export function useRequestPasswordReset() {
+  const mutation = (trpc.auth as any).requestPasswordReset.useMutation();
+
+  return {
+    requestPasswordReset: mutation.mutateAsync,
+    isLoading: mutation.isPending,
+    error: mutation.error ? parseTRPCError(mutation.error) : null,
+    isSuccess: mutation.isSuccess,
+    reset: mutation.reset,
+  };
+}
+
+export function useResetPassword() {
+  const mutation = (trpc.auth as any).resetPassword.useMutation();
+
+  return {
+    resetPassword: mutation.mutateAsync,
+    isLoading: mutation.isPending,
+    error: mutation.error ? parseTRPCError(mutation.error) : null,
+    isSuccess: mutation.isSuccess,
+    reset: mutation.reset,
+  };
+}
+
+export function useChangePassword() {
+  const mutation = (trpc.auth as any).changePassword.useMutation();
+
+  return {
+    changePassword: mutation.mutateAsync,
+    isLoading: mutation.isPending,
+    error: mutation.error ? parseTRPCError(mutation.error) : null,
+    isSuccess: mutation.isSuccess,
+    reset: mutation.reset,
+  };
+}

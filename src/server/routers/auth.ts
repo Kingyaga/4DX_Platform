@@ -2,6 +2,26 @@ import { z } from "zod";
 import { router, publicProcedure, protectedProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
 import bcrypt from "bcryptjs";
+import crypto from "crypto";
+import { sendPasswordResetEmail } from "../email";
+import { checkRateLimit, getRequestIp } from "../rateLimit";
+
+const emailSchema = z.string().trim().toLowerCase().email();
+const passwordSchema = z.string().min(8);
+
+function hashToken(token: string) {
+  return crypto.createHash("sha256").update(token).digest("hex");
+}
+
+function getFrontendUrl() {
+  return (
+    process.env.PASSWORD_RESET_BASE_URL ||
+    process.env.NEXT_PUBLIC_APP_URL ||
+    process.env.NEXT_PUBLIC_NEXTAUTH_URL ||
+    process.env.NEXTAUTH_URL ||
+    "http://localhost:3001"
+  ).replace(/\/$/, "");
+}
 
 export const authRouter = router({
   me: protectedProcedure.query(async ({ ctx }) => {
@@ -35,6 +55,13 @@ export const authRouter = router({
         teamMemberships: {
           select: {
             role: true,
+            team: {
+              select: {
+                id: true,
+                name: true,
+                slug: true,
+              },
+            },
           },
         },
       },
@@ -72,15 +99,141 @@ export const authRouter = router({
       name: user.name,
       role: orgRole,
       orgSlug,
+      teamMemberships: user.teamMemberships,
     };
   }),
+
+  requestPasswordReset: publicProcedure
+    .input(z.object({ email: emailSchema }))
+    .mutation(async ({ ctx, input }) => {
+      const ip = getRequestIp(ctx.req);
+      checkRateLimit({
+        key: `password-reset:ip:${ip}`,
+        limit: 8,
+        windowMs: 15 * 60 * 1000,
+      });
+      checkRateLimit({
+        key: `password-reset:email:${input.email}`,
+        limit: 3,
+        windowMs: 60 * 60 * 1000,
+      });
+
+      const user = await ctx.db.user.findUnique({ where: { email: input.email } });
+
+      if (user) {
+        const token = crypto.randomBytes(32).toString("base64url");
+        const tokenHash = hashToken(token);
+        await ctx.db.passwordResetToken.create({
+          data: {
+            tokenHash,
+            userId: user.id,
+            expiresAt: new Date(Date.now() + 30 * 60 * 1000),
+          },
+        });
+
+        const resetUrl = `${getFrontendUrl()}/reset-password?token=${encodeURIComponent(token)}`;
+        await sendPasswordResetEmail({
+          to: user.email,
+          name: user.name,
+          resetUrl,
+        });
+      }
+
+      return {
+        success: true,
+        message: "If an account exists for that email, a reset link has been sent.",
+      };
+    }),
+
+  resetPassword: publicProcedure
+    .input(
+      z.object({
+        token: z.string().min(20),
+        password: passwordSchema,
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const tokenHash = hashToken(input.token);
+      const resetToken = await ctx.db.passwordResetToken.findUnique({
+        where: { tokenHash },
+      });
+
+      if (!resetToken || resetToken.usedAt || resetToken.expiresAt < new Date()) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "This reset link is invalid or has expired.",
+        });
+      }
+
+      const passwordHash = await bcrypt.hash(input.password, 12);
+
+      await ctx.db.$transaction([
+        ctx.db.user.update({
+          where: { id: resetToken.userId },
+          data: { passwordHash },
+        }),
+        ctx.db.passwordResetToken.update({
+          where: { id: resetToken.id },
+          data: { usedAt: new Date() },
+        }),
+        ctx.db.passwordResetToken.deleteMany({
+          where: {
+            userId: resetToken.userId,
+            usedAt: null,
+            id: { not: resetToken.id },
+          },
+        }),
+      ]);
+
+      return { success: true };
+    }),
+
+  changePassword: protectedProcedure
+    .input(
+      z.object({
+        currentPassword: z.string().min(1),
+        newPassword: passwordSchema,
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const userId = (ctx.session.user as any).id;
+      const user = await ctx.db.user.findUnique({ where: { id: userId } });
+
+      if (!user) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "User not found." });
+      }
+
+      const passwordMatch = await bcrypt.compare(input.currentPassword, user.passwordHash);
+      if (!passwordMatch) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Current password is incorrect.",
+        });
+      }
+
+      const passwordHash = await bcrypt.hash(input.newPassword, 12);
+      await ctx.db.user.update({
+        where: { id: user.id },
+        data: { passwordHash },
+      });
+
+      await ctx.db.notification.create({
+        data: {
+          userId: user.id,
+          type: "PASSWORD_CHANGED",
+          payloadJson: { changedAt: new Date().toISOString() },
+        },
+      });
+
+      return { success: true };
+    }),
 
   signup: publicProcedure
     .input(
       z.object({
         name: z.string().min(1),
-        email: z.string().email(),
-        password: z.string().min(8),
+        email: emailSchema,
+        password: passwordSchema,
         token: z.string().min(1),
       }),
     )
@@ -114,7 +267,7 @@ export const authRouter = router({
         });
       }
 
-      const normalizedEmail = input.email.toLowerCase();
+      const normalizedEmail = input.email;
 
       if (invite.email && invite.email.toLowerCase() !== normalizedEmail) {
         throw new TRPCError({
@@ -173,8 +326,8 @@ export const authRouter = router({
     .input(
       z.object({
         name: z.string().min(1),
-        email: z.string().email(),
-        password: z.string().min(8),
+        email: emailSchema,
+        password: passwordSchema,
         orgSlug: z.string().min(1),
         teamSlug: z.string().optional(),
       }),
@@ -209,7 +362,7 @@ export const authRouter = router({
         });
       }
 
-      const normalizedEmail = input.email.toLowerCase();
+      const normalizedEmail = input.email;
 
       const existing = await ctx.db.user.findUnique({
         where: { email: normalizedEmail },

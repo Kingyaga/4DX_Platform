@@ -1,7 +1,6 @@
 const BACKEND_URL =
   process.env.NEXT_PUBLIC_BACKEND_URL ||
   process.env.NEXTAUTH_BACKEND_URL ||
-  process.env.NEXTAUTH_URL ||
   "http://localhost:3000";
 
 function buildResponse(response: Response) {

@@ -3,6 +3,8 @@ import { Prisma } from "@prisma/client";
 import { router, protectedProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
 import { auditLog } from "../audit";
+import { notify } from "../notify";
+import { sendTeamMembershipEmail } from "../email";
 
 export const teamsRouter = router({
   // Org admin creates a team
@@ -37,22 +39,6 @@ export const teamsRouter = router({
         throw new TRPCError({
           code: "FORBIDDEN",
           message: "Only org admins can create teams.",
-        });
-      }
-
-      const existingTeamMembership = await ctx.db.teamMembership.findFirst({
-        where: {
-          userId: (ctx.session.user as any).id,
-          team: {
-            orgId: org.id,
-          },
-        },
-      });
-
-      if (existingTeamMembership) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "A user can represent only one team. Leave the current team before creating a new one.",
         });
       }
 
@@ -123,16 +109,14 @@ export const teamsRouter = router({
       const existingUserTeam = await ctx.db.teamMembership.findFirst({
         where: {
           userId: input.userId,
-          team: {
-            orgId: team.orgId,
-          },
+          teamId: team.id,
         },
       });
 
       if (existingUserTeam) {
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: "This user is already assigned to another team in the organization.",
+          message: "This user is already assigned to this team.",
         });
       }
 
@@ -143,6 +127,26 @@ export const teamsRouter = router({
           role: input.role,
         },
       });
+
+      const addedUser = await ctx.db.user.findUnique({
+        where: { id: input.userId },
+        select: { id: true, name: true, email: true },
+      });
+
+      if (addedUser) {
+        await notify({
+          db: ctx.db,
+          userId: addedUser.id,
+          type: "TEAM_MEMBER_ADDED",
+          payload: { teamId: team.id, teamName: team.name, role: input.role },
+        });
+        await sendTeamMembershipEmail({
+          to: addedUser.email,
+          name: addedUser.name,
+          teamName: team.name,
+          action: "added",
+        });
+      }
 
       await auditLog({
         db: ctx.db,
@@ -441,12 +445,32 @@ export const teamsRouter = router({
         });
       }
 
+      const removedUser = await ctx.db.user.findUnique({
+        where: { id: input.userId },
+        select: { id: true, name: true, email: true },
+      });
+
       await ctx.db.teamMembership.deleteMany({
         where: {
           teamId: team.id,
           userId: input.userId,
         },
       });
+
+      if (removedUser) {
+        await notify({
+          db: ctx.db,
+          userId: removedUser.id,
+          type: "TEAM_MEMBER_REMOVED",
+          payload: { teamId: team.id, teamName: team.name },
+        });
+        await sendTeamMembershipEmail({
+          to: removedUser.email,
+          name: removedUser.name,
+          teamName: team.name,
+          action: "removed",
+        });
+      }
 
       await auditLog({
         db: ctx.db,

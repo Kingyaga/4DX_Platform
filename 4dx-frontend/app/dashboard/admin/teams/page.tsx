@@ -175,8 +175,8 @@ export default function AdminTeamsPage() {
             const teamLeads = (team.members || []).filter((m: TeamMember) => m.role === "LEAD");
             const memberCount = team.members?.length || 0;
             const isExpanded = selectedTeamSlug === team.slug;
-            const allAssignedUserIds = new Set(teams.flatMap((t: Team) => t.members.map((member) => member.userId)));
-            const availableUsers = orgUsers.filter((user) => !allAssignedUserIds.has(user.id));
+            const assignedToThisTeam = new Set(team.members.map((member) => member.userId));
+            const availableUsers = orgUsers.filter((user) => !assignedToThisTeam.has(user.id));
 
             return (
               <div
@@ -196,6 +196,7 @@ export default function AdminTeamsPage() {
                   cursor: "pointer",
                   backgroundColor: isExpanded ? "#f4f4f5" : "white",
                   transition: "all 200ms",
+                  gridColumn: isExpanded ? "1 / -1" : undefined,
                 }}
               >
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "start", marginBottom: "12px" }}>
@@ -373,7 +374,7 @@ export default function AdminTeamsPage() {
                         <p style={{ margin: 0, color: "#6b7280", fontSize: "13px" }}>Loading organization users...</p>
                       ) : availableUsers.length === 0 ? (
                         <p style={{ margin: 0, color: "#6b7280", fontSize: "13px" }}>
-                          No eligible users available. Users already assigned to another team cannot be added here.
+                          All organization users are already members of this team.
                         </p>
                       ) : (
                         <form

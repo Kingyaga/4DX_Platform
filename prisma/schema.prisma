@@ -43,6 +43,7 @@ model User {
   leadMeasures    LeadMeasureOwner[]
   invites         Invite[]
   createdInvites InviteToken[]
+  passwordResetTokens PasswordResetToken[]
 }
 
 // ─── ORG MEMBERSHIP ─────────────────────────────────────────────────────────
@@ -328,4 +329,18 @@ model InviteToken {
 
   org             Organization @relation(fields: [orgId], references: [id])
   createdBy       User         @relation(fields: [createdByUserId], references: [id])
+}
+
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
 }

@@ -273,6 +273,19 @@ export const orgRouter = router({
         });
       }
 
+      if (input.role === "ADMIN") {
+        const existingAdmin = await ctx.db.orgMembership.findFirst({
+          where: { orgId: org.id, role: "ADMIN" },
+        });
+
+        if (existingAdmin) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "This platform is limited to one administrator.",
+          });
+        }
+      }
+
       // Check user isn't already a member
       const existing = await ctx.db.orgMembership.findUnique({
         where: {
@@ -349,6 +362,23 @@ export const orgRouter = router({
           code: "BAD_REQUEST",
           message: "You cannot change your own role.",
         });
+      }
+
+      if (input.role === "ADMIN") {
+        const existingAdmin = await ctx.db.orgMembership.findFirst({
+          where: {
+            orgId: org.id,
+            role: "ADMIN",
+            userId: { not: input.userId },
+          },
+        });
+
+        if (existingAdmin) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "This platform is limited to one administrator.",
+          });
+        }
       }
 
       const previousMembership = await ctx.db.orgMembership.findUnique({

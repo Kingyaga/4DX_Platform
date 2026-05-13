@@ -501,18 +501,12 @@ export default function AdminPage() {
             className="click-animation"
           >
             <div style={{ ...cardStyle, position: "relative", overflow: "hidden" }}>
-              <div style={{
-                position: "absolute", top: 0, right: 0,
-                width: "64px", height: "64px",
-                backgroundColor: "#ba1a1a",
-                transform: "rotate(45deg) translate(32px, -32px)",
-              }} />
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", position: "relative", zIndex: 1 }}>
                 <span style={labelCapsStyle}>AT RISK WIGS</span>
-                <span className="material-symbols-outlined" style={{ color: "#ba1a1a" }}>warning</span>
+                <span className="material-symbols-outlined" style={{ color: "#71717a" }}>warning</span>
               </div>
               <div style={{ position: "relative", zIndex: 1 }}>
-                <div style={{ ...dataDisplayStyle, color: "#ba1a1a" }}>{atRiskWIGs}</div>
+                <div style={{ ...dataDisplayStyle, color: "#18181b" }}>{atRiskWIGs}</div>
                 <div style={{ fontSize: "14px", color: "#71717a", marginTop: "8px" }}>Requires immediate attention</div>
               </div>
             </div>

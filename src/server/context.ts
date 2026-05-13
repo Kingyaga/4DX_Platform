@@ -8,6 +8,7 @@ export async function createContext(req: NextRequest) {
   return {
     db,
     session,
+    req,
   };
 }
 

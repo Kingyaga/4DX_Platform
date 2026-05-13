@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useWIGs } from "@/lib/hooks";
 import { useTeamStore } from "@/lib/stores/team-store";
 import { ErrorState, EmptyState } from "@/lib/components/states";
+import { LoadingSpinner } from "@/lib/components/loading-spinner";
 import type { WIG, LeadMeasure, ActivityLogEntry } from "@/lib/types";
 
 export default function ScoreboardPage() {
@@ -43,7 +44,7 @@ export default function ScoreboardPage() {
 
       {/* Loading State */}
       {isLoading && (
-        <div style={{ padding: "48px", textAlign: "center", color: "#71717a" }}>Loading scoreboard...</div>
+        <LoadingSpinner size="large" text="" className="min-h-[420px] flex items-center justify-center" />
       )}
 
       {/* Empty State */}

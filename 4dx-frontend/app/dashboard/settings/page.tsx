@@ -3,8 +3,9 @@
 import { useState } from "react";
 import { useSession, signOut } from "next-auth/react";
 import { useUserStore } from "@/lib/stores/user-store";
-import { useRoleCheck } from "@/lib/hooks";
+import { useChangePassword, useRoleCheck } from "@/lib/hooks";
 import { RoleBadge } from "@/lib/components/role-badge";
+import { LoadingSpinner } from "@/lib/components/loading-spinner";
 import Link from "next/link";
 
 export default function SettingsPage() {
@@ -12,6 +13,12 @@ export default function SettingsPage() {
   const { user, clearUser } = useUserStore();
   const { isAdmin, isTeamLead } = useRoleCheck();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordMessage, setPasswordMessage] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const { changePassword, isLoading: isChangingPassword } = useChangePassword();
 
   const handleLogout = async () => {
     setIsLoggingOut(true);
@@ -26,10 +33,36 @@ export default function SettingsPage() {
   if (!session?.user) {
     return (
       <main style={{ flex: 1, padding: "32px" }}>
-        <div style={{ textAlign: "center", color: "#71717a" }}>Loading...</div>
+        <LoadingSpinner size="large" text="" className="min-h-screen flex items-center justify-center" />
       </main>
     );
   }
+
+  const handleChangePassword = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setPasswordError("");
+    setPasswordMessage("");
+
+    if (newPassword.length < 8) {
+      setPasswordError("New password must be at least 8 characters.");
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setPasswordError("New passwords do not match.");
+      return;
+    }
+
+    try {
+      await changePassword({ currentPassword, newPassword });
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      setPasswordMessage("Password updated successfully.");
+    } catch (error) {
+      setPasswordError(error instanceof Error ? error.message : "Unable to update password.");
+    }
+  };
 
   return (
     <main style={{ flex: 1, overflowY: "auto", padding: "32px" }}>
@@ -86,8 +119,72 @@ export default function SettingsPage() {
           </div>
         </div>
 
+        {/* Password Section */}
+        <form
+          onSubmit={handleChangePassword}
+          style={{ border: "1px solid #e4e4e7", borderRadius: "8px", padding: "24px", backgroundColor: "white", boxShadow: "0 1px 2px rgba(15, 23, 42, 0.04)" }}
+        >
+          <h2 style={{ margin: "0 0 8px 0", fontSize: "18px", fontWeight: "600" }}>Security</h2>
+          <p style={{ margin: "0 0 20px 0", fontSize: "14px", color: "#71717a" }}>
+            Change your password here when you know your current password. Forgotten passwords should use the email reset flow.
+          </p>
+
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "16px" }}>
+            <label style={{ display: "flex", flexDirection: "column", gap: "8px", fontSize: "13px", fontWeight: 600, color: "#3f3f46" }}>
+              Current password
+              <input
+                type="password"
+                value={currentPassword}
+                onChange={(event) => setCurrentPassword(event.target.value)}
+                autoComplete="current-password"
+                style={{ padding: "12px", border: "1px solid #d4d4d8", borderRadius: "6px", fontSize: "14px" }}
+              />
+            </label>
+            <label style={{ display: "flex", flexDirection: "column", gap: "8px", fontSize: "13px", fontWeight: 600, color: "#3f3f46" }}>
+              New password
+              <input
+                type="password"
+                value={newPassword}
+                onChange={(event) => setNewPassword(event.target.value)}
+                autoComplete="new-password"
+                style={{ padding: "12px", border: "1px solid #d4d4d8", borderRadius: "6px", fontSize: "14px" }}
+              />
+            </label>
+            <label style={{ display: "flex", flexDirection: "column", gap: "8px", fontSize: "13px", fontWeight: 600, color: "#3f3f46" }}>
+              Confirm new password
+              <input
+                type="password"
+                value={confirmPassword}
+                onChange={(event) => setConfirmPassword(event.target.value)}
+                autoComplete="new-password"
+                style={{ padding: "12px", border: "1px solid #d4d4d8", borderRadius: "6px", fontSize: "14px" }}
+              />
+            </label>
+          </div>
+
+          {passwordError && <p style={{ margin: "14px 0 0 0", color: "#b91c1c", fontSize: "13px" }}>{passwordError}</p>}
+          {passwordMessage && <p style={{ margin: "14px 0 0 0", color: "#047857", fontSize: "13px" }}>{passwordMessage}</p>}
+
+          <button
+            type="submit"
+            disabled={isChangingPassword}
+            style={{
+              marginTop: "20px",
+              padding: "11px 16px",
+              border: "none",
+              borderRadius: "6px",
+              backgroundColor: isChangingPassword ? "#71717a" : "#18181b",
+              color: "#ffffff",
+              fontWeight: 700,
+              cursor: isChangingPassword ? "not-allowed" : "pointer",
+            }}
+          >
+            {isChangingPassword ? "Updating..." : "Change password"}
+          </button>
+        </form>
+
         {/* Permissions Section */}
-        <div style={{ border: "1px solid #e4e4e7", borderRadius: "8px", padding: "24px", backgroundColor: "white" }}>
+        <div style={{ border: "1px solid #e4e4e7", borderRadius: "8px", padding: "24px", backgroundColor: "white", boxShadow: "0 1px 2px rgba(15, 23, 42, 0.04)" }}>
           <h2 style={{ margin: "0 0 20px 0", fontSize: "18px", fontWeight: "600" }}>Your Permissions</h2>
 
           <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>

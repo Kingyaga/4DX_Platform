@@ -11,26 +11,32 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [showSignUpSnack, setShowSignUpSnack] = useState(false);
   const router = useRouter();
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   const togglePassword = () => {
     setShowPassword(!showPassword);
   };
 
-  const handleSignUpClick = (event) => {
-    event.preventDefault();
-    setShowSignUpSnack(true);
-    window.setTimeout(() => setShowSignUpSnack(false), 4000);
-  };
-
   const handleSignIn = async () => {
     setError("");
+
+    const normalizedEmail = email.trim().toLowerCase();
+    if (!emailPattern.test(normalizedEmail)) {
+      setError("Enter a valid email address.");
+      return;
+    }
+
+    if (!password) {
+      setError("Enter your password.");
+      return;
+    }
+
     setLoading(true);
 
     try {
       const result = await signIn("credentials", {
-        email,
+        email: normalizedEmail,
         password,
         redirect: false,
         callbackUrl: "/dashboard",
@@ -59,6 +65,11 @@ export default function LoginPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleMicrosoftSignIn = async () => {
+    setError("");
+    await signIn("azure-ad", { callbackUrl: "/dashboard" });
   };
 
   return (
@@ -99,7 +110,16 @@ export default function LoginPage() {
                 placeholder="Enter your email"
                 autoComplete="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value.toLowerCase())}
+                onChange={(e) => {
+                  setEmail(e.target.value.toLowerCase());
+                  if (error === "Enter a valid email address.") setError("");
+                }}
+                onBlur={() => {
+                  if (email && !emailPattern.test(email.trim().toLowerCase())) {
+                    setError("Enter a valid email address.");
+                  }
+                }}
+                aria-invalid={Boolean(email && !emailPattern.test(email.trim().toLowerCase()))}
               />
             </div>
 
@@ -138,7 +158,7 @@ export default function LoginPage() {
           </div>
 
           <div className="forgot">
-            <a href="#">Forgot password?</a>
+            <a href="/forgot-password">Forgot password?</a>
           </div>
 
           <button
@@ -158,23 +178,17 @@ export default function LoginPage() {
             )}
           </button>
 
-          {showSignUpSnack && (
-            <div
-              style={{
-                padding: "12px 16px",
-                borderRadius: "12px",
-                backgroundColor: "#e0f2fe",
-                color: "#0369a1",
-                marginBottom: "16px",
-                textAlign: "center",
-                fontSize: "14px",
-              }}
-            >
-              Sign up is invite only. Use the invite link from your admin.
-            </div>
-          )}
+          <button
+            className="btn-signin"
+            type="button"
+            onClick={handleMicrosoftSignIn}
+            style={{ marginTop: "12px", backgroundColor: "#ffffff", color: "#111827", border: "1px solid #d4d4d8" }}
+          >
+            Sign in with Outlook
+          </button>
+
           <p className="signup-prompt">
-            Don&apos;t have an account? <a href="#" onClick={handleSignUpClick}>Sign up</a>
+            Access to this platform is invite only. Ask your administrator to create your account or send an invite.
           </p>
         </div>
       </div>
