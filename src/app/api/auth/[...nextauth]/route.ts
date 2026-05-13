@@ -62,6 +62,11 @@ const providers = [
         console.log("🔍 [Auth] Looking up user...");
         const user = await db.user.findUnique({
           where: { email: normalizedEmail },
+          include: {
+            orgMemberships: {
+              select: { role: true },
+            },
+          },
         });
 
         if (!user) {
@@ -81,10 +86,15 @@ const providers = [
         }
 
         console.log("✅ [Auth] Password match! Returning user");
+
+        const hasAdminRole = user.orgMemberships.some((m) => m.role === "ADMIN");
+        const role = hasAdminRole ? "ADMIN" : "MEMBER";
+
         return {
           id: user.id,
           email: user.email,
           name: user.name,
+          role,
         };
       } catch (error) {
         console.error("❌ [Auth] Error:", error);
@@ -113,8 +123,28 @@ export const authOptions: NextAuthOptions = {
       const existingUser = await db.user.findUnique({ where: { email } });
       return Boolean(existingUser);
     },
-    async jwt({ token, user }) {
-      if (user?.id) token.id = user.id;
+    async jwt({ token, user }: { token: JWT; user?: any }) {
+      if (user) {
+        token.id = user.id;
+        token.role = user.role;
+      }
+
+      if (!token.role && token.id) {
+        const dbUser = await db.user.findUnique({
+          where: { id: token.id },
+          include: {
+            orgMemberships: {
+              select: { role: true },
+            },
+          },
+        });
+
+        if (dbUser) {
+          const hasAdminRole = dbUser.orgMemberships.some((m) => m.role === "ADMIN");
+          token.role = hasAdminRole ? "ADMIN" : "MEMBER";
+        }
+      }
+
       if (!token.id && token.email) {
         const existingUser = await db.user.findUnique({
           where: { email: token.email.toLowerCase() },
@@ -128,12 +158,10 @@ export const authOptions: NextAuthOptions = {
       }
       return token;
     },
-    session({ session, token }: { session: Session; token: JWT }) {
+    async session({ session, token }: { session: Session; token: JWT }) {
       if (session.user) {
-        session.user = {
-          ...(session.user as any),
-          id: token.id as string,
-        } as any;
+        session.user.id = token.id;
+        session.user.role = token.role || "MEMBER";
       }
       return session;
     },
