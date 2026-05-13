@@ -232,6 +232,8 @@ model WeeklySession {
   user   User   @relation(fields: [userId], references: [id])
 
   commitments Commitment[]
+
+  @@unique([userId, wigId, weekStarting])
 }
 
 enum SessionStatus {

@@ -99,6 +99,7 @@ export const authRouter = router({
       name: user.name,
       role: orgRole,
       orgSlug,
+      defaultTeamId: user.defaultTeamId,
       teamMemberships: user.teamMemberships,
     };
   }),

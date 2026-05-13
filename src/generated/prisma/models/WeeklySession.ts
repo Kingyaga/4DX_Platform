@@ -236,6 +236,7 @@ export type WeeklySessionOrderByWithRelationInput = {
 
 export type WeeklySessionWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  userId_wigId_weekStarting?: Prisma.WeeklySessionUserIdWigIdWeekStartingCompoundUniqueInput
   AND?: Prisma.WeeklySessionWhereInput | Prisma.WeeklySessionWhereInput[]
   OR?: Prisma.WeeklySessionWhereInput[]
   NOT?: Prisma.WeeklySessionWhereInput | Prisma.WeeklySessionWhereInput[]
@@ -250,7 +251,7 @@ export type WeeklySessionWhereUniqueInput = Prisma.AtLeast<{
   wig?: Prisma.XOR<Prisma.WIGScalarRelationFilter, Prisma.WIGWhereInput>
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   commitments?: Prisma.CommitmentListRelationFilter
-}, "id">
+}, "id" | "userId_wigId_weekStarting">
 
 export type WeeklySessionOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -376,6 +377,12 @@ export type WeeklySessionListRelationFilter = {
 
 export type WeeklySessionOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
+}
+
+export type WeeklySessionUserIdWigIdWeekStartingCompoundUniqueInput = {
+  userId: string
+  wigId: string
+  weekStarting: Date | string
 }
 
 export type WeeklySessionCountOrderByAggregateInput = {
