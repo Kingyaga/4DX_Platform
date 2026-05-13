@@ -53,8 +53,28 @@ export function checkBooleanRateLimit({
   return bucket.count <= limit;
 }
 
-export function getRequestIp(req?: Request | { headers?: Headers } | null) {
+type HeaderLike = Headers | Record<string, string | string[] | undefined>;
+
+function readHeader(headers: HeaderLike | undefined, name: string) {
+  if (!headers) return undefined;
+
+  if (typeof (headers as Headers).get === "function") {
+    return (headers as Headers).get(name) ?? undefined;
+  }
+
+  const value =
+    (headers as Record<string, string | string[] | undefined>)[name] ??
+    (headers as Record<string, string | string[] | undefined>)[
+      name.toLowerCase()
+    ];
+
+  return Array.isArray(value) ? value[0] : value;
+}
+
+export function getRequestIp(req?: Request | { headers?: HeaderLike } | null) {
   const headers = req?.headers;
-  const forwarded = headers?.get("x-forwarded-for")?.split(",")[0]?.trim();
-  return forwarded || headers?.get("x-real-ip") || "unknown";
+  const forwarded = readHeader(headers, "x-forwarded-for")
+    ?.split(",")[0]
+    ?.trim();
+  return forwarded || readHeader(headers, "x-real-ip") || "unknown";
 }

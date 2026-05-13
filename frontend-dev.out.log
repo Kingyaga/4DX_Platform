@@ -1,0 +1,17 @@
+
+> 4dx-frontend@0.1.0 dev
+> next dev -p 3001
+
+▲ Next.js 16.2.4 (Turbopack)
+- Local:         http://localhost:3001
+- Network:       http://192.168.1.10:3001
+✓ Ready in 311ms
+Creating turbopack project {
+  dir: 'C:\\Users\\uhufe\\4dx-platform\\4dx-platform\\4DX_Platform\\4dx-frontend',
+  testMode: true
+}
+
+○ Compiling / ...
+ GET / 200 in 4.5s (next.js: 4.2s, application-code: 239ms)
+Proxying request to: http://localhost:3000/api/auth/session method: GET
+ GET /api/auth/session 200 in 1635ms (next.js: 1556ms, application-code: 79ms)

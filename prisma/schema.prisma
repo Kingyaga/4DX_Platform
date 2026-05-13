@@ -16,10 +16,10 @@ model Organization {
   timezone  String   @default("UTC")
   createdAt DateTime @default(now())
 
-  memberships OrgMembership[]
-  teams       Team[]
-  invites     Invite[]
-  apiKeys     ApiKey[]
+  memberships  OrgMembership[]
+  teams        Team[]
+  invites      Invite[]
+  apiKeys      ApiKey[]
   inviteTokens InviteToken[]
 }
 
@@ -33,15 +33,15 @@ model User {
   createdAt     DateTime @default(now())
   defaultTeamId String?
 
-  orgMemberships  OrgMembership[]
-  teamMemberships TeamMembership[]
-  activityLogs    ActivityLog[]
-  weeklySessions  WeeklySession[]
-  notifications   Notification[]
-  auditLogs       AuditLog[]
-  leadMeasures    LeadMeasureOwner[]
-  createdInvites  InviteToken[]
-  invites         Invite[]
+  orgMemberships      OrgMembership[]
+  teamMemberships     TeamMembership[]
+  activityLogs        ActivityLog[]
+  weeklySessions      WeeklySession[]
+  notifications       Notification[]
+  auditLogs           AuditLog[]
+  leadMeasures        LeadMeasureOwner[]
+  createdInvites      InviteToken[]
+  invites             Invite[]
   passwordResetTokens PasswordResetToken[]
 }
 
@@ -58,6 +58,7 @@ model OrgMembership {
   org   Organization @relation(fields: [orgId], references: [id])
 
   @@unique([userId, orgId])
+  @@index([orgId])
 }
 
 enum OrgRole {
@@ -66,21 +67,26 @@ enum OrgRole {
 }
 
 model Invite {
-  id              String        @id @default(cuid())
-  token           String        @unique
-  email           String?
-  expiresAt       DateTime
-  createdAt       DateTime      @default(now())
-  usedAt          DateTime?
+  id        String    @id @default(cuid())
+  token     String    @unique
+  email     String?
+  expiresAt DateTime
+  createdAt DateTime  @default(now())
+  usedAt    DateTime?
 
-  orgId           String
-  org             Organization  @relation(fields: [orgId], references: [id])
+  orgId String
+  org   Organization @relation(fields: [orgId], references: [id])
 
-  teamId          String?
-  team            Team?         @relation(fields: [teamId], references: [id])
+  teamId String?
+  team   Team?   @relation(fields: [teamId], references: [id])
 
   invitedByUserId String
-  invitedBy       User          @relation(fields: [invitedByUserId], references: [id])
+  invitedBy       User   @relation(fields: [invitedByUserId], references: [id])
+
+  @@index([orgId])
+  @@index([teamId])
+  @@index([invitedByUserId])
+  @@index([expiresAt])
 }
 
 // ─── TEAM ───────────────────────────────────────────────────────────────────
@@ -99,6 +105,9 @@ model Team {
   members    TeamMembership[]
   wigs       WIG[]
   invites    Invite[]
+
+  @@index([orgId])
+  @@index([leadUserId])
 }
 
 model TeamMembership {
@@ -113,6 +122,7 @@ model TeamMembership {
   team   Team   @relation(fields: [teamId], references: [id])
 
   @@unique([userId, teamId])
+  @@index([teamId])
 }
 
 enum TeamRole {
@@ -143,6 +153,10 @@ model WIG {
 
   leadMeasures   LeadMeasure[]
   weeklySessions WeeklySession[]
+
+  @@index([teamId])
+  @@index([createdByUserId])
+  @@index([status])
 }
 
 enum WIGStatus {
@@ -171,6 +185,8 @@ model LeadMeasure {
   owners       LeadMeasureOwner[]
   activityLogs ActivityLog[]
   commitments  Commitment[]
+
+  @@index([wigId])
 }
 
 enum Cadence {
@@ -188,6 +204,7 @@ model LeadMeasureOwner {
   user   User   @relation(fields: [userId], references: [id])
 
   @@unique([leadMeasureId, userId])
+  @@index([userId])
 }
 
 // ─── ACTIVITY LOG ───────────────────────────────────────────────────────────
@@ -206,6 +223,10 @@ model ActivityLog {
 
   userId String
   user   User   @relation(fields: [userId], references: [id])
+
+  @@index([leadMeasureId])
+  @@index([userId])
+  @@index([loggedForDate])
 }
 
 enum ActivityLogStatus {
@@ -232,6 +253,10 @@ model WeeklySession {
   user   User   @relation(fields: [userId], references: [id])
 
   commitments Commitment[]
+
+  @@index([wigId])
+  @@index([userId])
+  @@index([wigId, userId, weekStarting])
 }
 
 enum SessionStatus {
@@ -256,6 +281,9 @@ model Commitment {
 
   linkedLeadMeasureId String?
   linkedLeadMeasure   LeadMeasure? @relation(fields: [linkedLeadMeasureId], references: [id])
+
+  @@index([weeklySessionId])
+  @@index([linkedLeadMeasureId])
 }
 
 enum CommitmentStatus {
@@ -283,6 +311,9 @@ model Notification {
 
   userId String
   user   User   @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([readAt])
 }
 
 // ─── AUDIT LOG ───────────────────────────────────────────────────────────────
@@ -298,6 +329,9 @@ model AuditLog {
 
   actorUserId String
   actor       User   @relation(fields: [actorUserId], references: [id])
+
+  @@index([actorUserId])
+  @@index([entityType, entityId])
 }
 
 // ─── API KEY ─────────────────────────────────────────────────────────────────
@@ -313,6 +347,8 @@ model ApiKey {
 
   orgId String
   org   Organization @relation(fields: [orgId], references: [id])
+
+  @@index([orgId])
 }
 
 model InviteToken {
@@ -327,8 +363,13 @@ model InviteToken {
   createdAt       DateTime  @default(now())
   createdByUserId String
 
-  org             Organization @relation(fields: [orgId], references: [id])
-  createdBy       User         @relation(fields: [createdByUserId], references: [id])
+  org       Organization @relation(fields: [orgId], references: [id])
+  createdBy User         @relation(fields: [createdByUserId], references: [id])
+
+  @@index([orgId])
+  @@index([teamId])
+  @@index([createdByUserId])
+  @@index([expiresAt])
 }
 
 model PasswordResetToken {
