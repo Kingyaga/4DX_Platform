@@ -1,17 +1,17 @@
 services:
   - type: web
     name: 4dx-platform-backend
-    env: node
+    runtime: node
     branch: main
     rootDir: .
     buildCommand: pnpm prisma generate && pnpm build
-    releaseCommand: pnpm prisma migrate deploy
+    preDeployCommand: pnpm prisma migrate deploy
     startCommand: pnpm exec next start -p $PORT
     autoDeploy: true
 
   - type: web
     name: 4dx-platform-frontend
-    env: node
+    runtime: node
     branch: main
     rootDir: .
     buildCommand: npm ci && npm --prefix 4dx-frontend ci && npm --prefix 4dx-frontend run build
@@ -23,7 +23,7 @@ services:
 
   - type: cron
     name: 4dx-wigs-at-risk-notifications
-    env: node
+    runtime: node
     branch: main
     rootDir: .
     schedule: "0 8 * * *"
