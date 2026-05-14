@@ -30,7 +30,7 @@ export default function AdminPage() {
       setNewUserPassword("");
       setNewUserTeam("");
     },
-    onError: (err) => {
+    onError: (err: { message?: string }) => {
       setAdminError(err.message || "Unable to create user.");
       setAdminSuccess("");
     },
