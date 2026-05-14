@@ -11,11 +11,11 @@ export default function DashboardPage() {
   useEffect(() => {
     if (userRole) {
       if (userRole === "ADMIN") {
-        router.push("/dashboard/admin");
+        router.replace("/dashboard/admin");
       } else if (userRole === "TEAM_LEAD") {
-        router.push("/dashboard/team-lead");
+        router.replace("/dashboard/team-lead");
       } else if (userRole === "MEMBER") {
-        router.push("/dashboard/scoreboard");
+        router.replace("/dashboard/scoreboard");
       }
     }
   }, [userRole, router]);

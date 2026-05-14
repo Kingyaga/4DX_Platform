@@ -8,7 +8,7 @@ import { LoadingSpinner } from "@/lib/components/loading-spinner";
 
 export default function RootPage() {
   const router = useRouter();
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const { userRole } = useUserStore();
 
   useEffect(() => {
@@ -21,11 +21,11 @@ export default function RootPage() {
 
     // User is authenticated
     if (userRole === "ADMIN") {
-      router.push("/dashboard/admin");
+      router.replace("/dashboard/admin");
     } else if (userRole === "TEAM_LEAD") {
-      router.push("/dashboard/team-lead");
+      router.replace("/dashboard/team-lead");
     } else {
-      router.push("/dashboard/scoreboard");
+      router.replace("/dashboard/scoreboard");
     }
   }, [status, userRole, router]);
 

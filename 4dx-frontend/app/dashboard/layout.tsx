@@ -8,6 +8,7 @@ import { useCurrentUser, useMyTeams, usePendingActivityRequests } from "@/lib/ho
 import { useUserStore } from "@/lib/stores/user-store";
 import { useTeamStore } from "@/lib/stores/team-store";
 import { LoadingSpinner } from "@/lib/components/loading-spinner";
+import type { MyTeamsResponse, UserRole } from "@/lib/types";
 
 interface NavItem {
   icon: string;
@@ -33,6 +34,25 @@ const allNavItems: NavItem[] = [
   { icon: "insights", label: "Org Activity", href: "/dashboard/admin/activity", roles: ["ADMIN"] },
 ];
 
+function getTeamRole(team?: MyTeamsResponse | null): UserRole | null {
+  if (!team) return null;
+  return team.members?.[0]?.role === "LEAD" ? "TEAM_LEAD" : "MEMBER";
+}
+
+function getDefaultRouteForRole(role: UserRole | null) {
+  if (role === "ADMIN") return "/dashboard/admin";
+  if (role === "TEAM_LEAD") return "/dashboard/team-lead";
+  return "/dashboard/scoreboard";
+}
+
+function isRouteAllowedForRole(pathname: string, role: UserRole | null) {
+  if (!role) return true;
+  if (pathname === "/dashboard/settings") return true;
+  if (role === "ADMIN") return pathname.startsWith("/dashboard/admin");
+  if (role === "TEAM_LEAD") return !pathname.startsWith("/dashboard/admin");
+  return !pathname.startsWith("/dashboard/admin") && !pathname.startsWith("/dashboard/team-lead");
+}
+
 export default function DashboardLayout({
   children,
 }: {
@@ -52,6 +72,19 @@ export default function DashboardLayout({
   const { pendingRequests } = usePendingActivityRequests(currentTeamSlug);
   const pendingRequestCount = pendingRequests.length;
 
+  const handleTeamChange = (nextTeamSlug: string) => {
+    const nextTeam = teams.find((team: MyTeamsResponse) => team.slug === nextTeamSlug);
+    const nextRole = getTeamRole(nextTeam);
+
+    setCurrentTeamSlug(nextTeamSlug || null);
+
+    if (nextRole) {
+      setUserRole(nextRole);
+      router.replace(getDefaultRouteForRole(nextRole));
+      router.refresh();
+    }
+  };
+
   // Auto-select first team if none selected yet or if the selected team is no longer valid
   useEffect(() => {
     if (!teamsLoading && teams.length > 0 && (!currentTeamSlug || !teams.some((team: any) => team.slug === currentTeamSlug))) {
@@ -62,34 +95,35 @@ export default function DashboardLayout({
   useEffect(() => {
     if (!user || user.role === "ADMIN" || teamsLoading) return;
 
-    const activeTeam = teams.find((team: any) => team.slug === currentTeamSlug) || teams[0];
-    const activeMembershipRole = activeTeam?.members?.[0]?.role;
-    setUserRole(activeMembershipRole === "LEAD" ? "TEAM_LEAD" : "MEMBER");
+    const activeTeam = teams.find((team: MyTeamsResponse) => team.slug === currentTeamSlug) || teams[0];
+    const activeRole = getTeamRole(activeTeam);
+    if (activeRole) {
+      setUserRole(activeRole);
+    }
   }, [currentTeamSlug, setUserRole, teams, teamsLoading, user]);
 
   // Clear user store if session is lost
   useEffect(() => {
     if (status === "unauthenticated") {
       clearUser();
-      router.push("/login");
+      router.replace("/login");
     }
   }, [status, clearUser, router]);
 
   // Redirect to appropriate dashboard based on role
   useEffect(() => {
     if (pathname === "/dashboard" && userRole) {
-      if (userRole === "ADMIN") {
-        router.push("/dashboard/admin");
-      } else if (userRole === "TEAM_LEAD") {
-        router.push("/dashboard/team-lead");
-      } else if (userRole === "MEMBER") {
-        router.push("/dashboard/scoreboard");
-      }
+      router.replace(getDefaultRouteForRole(userRole));
+      return;
+    }
+
+    if (userRole && !isRouteAllowedForRole(pathname, userRole)) {
+      router.replace(getDefaultRouteForRole(userRole));
     }
   }, [pathname, userRole, router]);
 
   // Show loading spinner while session or user data is loading
-  if (status === "loading" || userLoading || (userRole && teamsLoading)) {
+  if (status === "loading" || userLoading || (status === "authenticated" && !userRole) || (userRole && teamsLoading)) {
     return <LoadingSpinner size="large" text="Loading dashboard..." className="min-h-screen flex items-center justify-center" />;
   }
 
@@ -218,7 +252,7 @@ export default function DashboardLayout({
               Active team
               <select
                 value={currentTeamSlug || ""}
-                onChange={(event) => setCurrentTeamSlug(event.target.value || null)}
+                onChange={(event) => handleTeamChange(event.target.value)}
                 style={{
                   width: "100%",
                   border: "1px solid #d4d4d8",
@@ -231,8 +265,8 @@ export default function DashboardLayout({
                   textTransform: "none",
                 }}
               >
-                {teams.map((team: any) => {
-                  const role = team.members?.[0]?.role === "LEAD" ? "Lead" : "Member";
+                {teams.map((team: MyTeamsResponse) => {
+                  const role = getTeamRole(team) === "TEAM_LEAD" ? "Lead" : "Member";
                   return (
                     <option key={team.slug} value={team.slug}>
                       {team.name} - {role}

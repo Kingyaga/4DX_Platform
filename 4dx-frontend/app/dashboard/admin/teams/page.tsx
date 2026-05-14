@@ -8,7 +8,7 @@ import { ErrorState, EmptyState } from "@/lib/components/states";
 import { RoleBadge } from "@/lib/components/role-badge";
 import { AssignLeadModal } from "@/lib/components/assign-lead-modal";
 import { CreateTeamModal } from "@/lib/components/create-team-modal";
-import type { WIG } from "@/lib/types";
+import type { OrgUser, WIG } from "@/lib/types";
 
 interface TeamMember {
   userId: string;
@@ -176,7 +176,7 @@ export default function AdminTeamsPage() {
             const memberCount = team.members?.length || 0;
             const isExpanded = selectedTeamSlug === team.slug;
             const assignedToThisTeam = new Set(team.members.map((member) => member.userId));
-            const availableUsers = orgUsers.filter((user) => !assignedToThisTeam.has(user.id));
+            const availableUsers: OrgUser[] = orgUsers.filter((user: OrgUser) => !assignedToThisTeam.has(user.id));
 
             return (
               <div

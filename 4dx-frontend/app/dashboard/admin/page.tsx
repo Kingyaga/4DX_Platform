@@ -69,7 +69,7 @@ export default function AdminPage() {
       return;
     }
 
-    const activeOrgSlug = orgSlug || org?.org?.slug;
+    const activeOrgSlug = orgSlug || org?.slug;
 
     if (!activeOrgSlug) {
       setAdminError("Unable to determine organization.");
@@ -357,7 +357,7 @@ export default function AdminPage() {
                   (e.currentTarget as HTMLElement).style.borderColor = "#e4e4e7";
                 }}
               >
-                <span style={{ fontSize: "16px", fontWeight: "600", color: "#111827" }}>👥 Manage Users</span>
+                <span style={{ fontSize: "16px", fontWeight: "600", color: "#111827" }}>Manage Users</span>
                 <span style={{ fontSize: "12px", color: "#71717a" }}>View all organization users and delete as needed</span>
               </Link>
               <Link
@@ -383,7 +383,7 @@ export default function AdminPage() {
                   (e.currentTarget as HTMLElement).style.borderColor = "#e4e4e7";
                 }}
               >
-                <span style={{ fontSize: "16px", fontWeight: "600", color: "#111827" }}>➕ Create User</span>
+                <span style={{ fontSize: "16px", fontWeight: "600", color: "#111827" }}>Create User</span>
                 <span style={{ fontSize: "12px", color: "#71717a" }}>Register new users directly in the system</span>
               </Link>
             </div>

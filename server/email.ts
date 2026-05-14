@@ -29,9 +29,9 @@ async function sendEmail({
   to: string;
   subject: string;
   html: string;
-}) {
+}): Promise<boolean> {
   const client = getEmailClient();
-  if (!client) return;
+  if (!client) return false;
 
   await client.emails.send({
     from: emailFrom,
@@ -39,6 +39,7 @@ async function sendEmail({
     subject,
     html,
   });
+  return true;
 }
 
 export async function sendSessionReadyEmail({
@@ -61,7 +62,7 @@ export async function sendSessionReadyEmail({
       html: `
         <h2>Hi ${name},</h2>
         <p>Your weekly 4DX session for <strong>${teamName}</strong> is ready.</p>
-        <p>Complete your Account → Review → Commit steps before the end of the week.</p>
+        <p>Complete your Account, Review, and Commit steps before the end of the week.</p>
       `,
     });
   } catch (error) {
@@ -135,9 +136,9 @@ export async function sendPasswordResetEmail({
   to: string;
   name: string;
   resetUrl: string;
-}) {
+}): Promise<boolean> {
   try {
-    await sendEmail({
+    return await sendEmail({
       to,
       subject: "Reset your 4DX password",
       html: `
@@ -149,6 +150,7 @@ export async function sendPasswordResetEmail({
     });
   } catch (error) {
     console.error("Password reset email failed:", error);
+    return false;
   }
 }
 

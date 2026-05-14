@@ -99,6 +99,12 @@ export const orgRouter = router({
             include: {
               leadMeasures: {
                 where: { archivedAt: null },
+                include: {
+                  activityLogs: {
+                    orderBy: { loggedForDate: "desc" },
+                    take: 1,
+                  },
+                },
               },
             },
           },

@@ -178,7 +178,7 @@ export default function WIGsPage() {
               ? "Create your first Wildly Important Goal to get started."
               : "Only the current team lead can create WIGs for this team."
           }
-          icon="🎯"
+          icon={<span className="material-symbols-outlined">flag</span>}
         />
       )}
 
@@ -193,7 +193,7 @@ export default function WIGsPage() {
                   ? "This team has no active or draft WIGs right now. Create one to start tracking progress."
                   : "Closed WIGs are archived here once they are achieved, missed, or abandoned."
               }
-              icon={selectedTab === "current" ? "🎯" : "📚"}
+              icon={<span className="material-symbols-outlined">{selectedTab === "current" ? "flag" : "inventory_2"}</span>}
             />
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>

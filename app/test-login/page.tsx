@@ -17,10 +17,10 @@ export default function TestLogin() {
 
     if (result?.ok) {
       setStatus(
-        "✅ Logged in successfully. You can now test protected endpoints.",
+        "Logged in successfully. You can now test protected endpoints.",
       );
     } else {
-      setStatus("❌ Login failed. Check email and password.");
+      setStatus("Login failed. Check email and password.");
     }
   }
 

@@ -1,4 +1,4 @@
 {
   "prisma.pinToPrisma6": true,
-  "chat.agent.maxRequests": 40
+  "chat.agent.maxRequests": 80
 }

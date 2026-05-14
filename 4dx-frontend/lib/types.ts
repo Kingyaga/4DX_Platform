@@ -35,6 +35,28 @@ export interface User {
   }>;
 }
 
+export interface OrgUser {
+  id: string;
+  email: string;
+  name: string | null;
+  orgMemberships?: Array<{
+    role: "ADMIN" | "MEMBER";
+    org?: {
+      id: string;
+      name: string;
+      slug: string;
+    };
+  }>;
+  teamMemberships?: Array<{
+    role: "LEAD" | "MEMBER" | "OBSERVER";
+    team?: {
+      id: string;
+      name: string;
+      slug: string;
+    };
+  }>;
+}
+
 export interface Organization {
   id: string;
   name: string;

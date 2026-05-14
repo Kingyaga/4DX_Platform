@@ -31,7 +31,7 @@ export default function AdminUsersPage() {
       }
 
       return [user.name, user.email, userRole, teamName]
-        .filter(Boolean)
+        .filter((value): value is string => Boolean(value))
         .some((value) => value.toLowerCase().includes(query));
     });
   }, [users, roleFilter, searchTerm]);

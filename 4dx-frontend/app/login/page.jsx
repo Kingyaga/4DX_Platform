@@ -1,9 +1,55 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { signIn } from "next-auth/react";
 import { LoadingSpinner } from "@/lib/components/loading-spinner";
+
+async function fetchCsrfToken() {
+  const response = await fetch("/api/auth/csrf", {
+    cache: "no-store",
+    credentials: "same-origin",
+  });
+
+  if (!response.ok) {
+    throw new Error(`Unable to reach authentication service (${response.status}).`);
+  }
+
+  const data = await response.json();
+  if (!data?.csrfToken) {
+    throw new Error("Unable to start the login session.");
+  }
+
+  return data.csrfToken;
+}
+
+async function fetchCurrentSession() {
+  const response = await fetch("/api/auth/session", {
+    cache: "no-store",
+    credentials: "same-origin",
+  });
+
+  if (!response.ok) {
+    throw new Error(`Unable to verify session (${response.status}).`);
+  }
+
+  return response.json();
+}
+
+function getLoginFailureMessage(result, status) {
+  if (status === 401 || result?.url?.includes("error=CredentialsSignin")) {
+    return "The email or password you entered is incorrect.";
+  }
+
+  if (status === 429) {
+    return "Too many login attempts. Wait a few minutes and try again.";
+  }
+
+  if (result?.url?.includes("csrf=true")) {
+    return "Your login session expired. Refresh the page and try again.";
+  }
+
+  return "We could not sign you in right now. Please try again.";
+}
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -11,8 +57,36 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
+  const [outlookEnabled, setOutlookEnabled] = useState(false);
+  const [providersLoaded, setProvidersLoaded] = useState(false);
   const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadProviders() {
+      try {
+        const response = await fetch("/api/auth/providers", {
+          cache: "no-store",
+          credentials: "same-origin",
+        });
+        const providers = response.ok ? await response.json() : {};
+        if (!cancelled) {
+          setOutlookEnabled(Boolean(providers?.["azure-ad"]));
+        }
+      } catch {
+        if (!cancelled) setOutlookEnabled(false);
+      } finally {
+        if (!cancelled) setProvidersLoaded(true);
+      }
+    }
+
+    loadProviders();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const togglePassword = () => {
     setShowPassword(!showPassword);
@@ -35,33 +109,39 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const result = await signIn("credentials", {
-        email: normalizedEmail,
-        password,
-        redirect: false,
-        callbackUrl: "/dashboard",
+      const csrfToken = await fetchCsrfToken();
+      const response = await fetch("/api/auth/callback/credentials", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: new URLSearchParams({
+          csrfToken,
+          email: normalizedEmail,
+          password,
+          redirect: "false",
+          json: "true",
+        }),
+        cache: "no-store",
       });
 
-      if (!result) {
-        setError("Login failed. Please try again.");
+      const result = await response.json().catch(() => null);
+      if (!response.ok || result?.url?.includes("error=")) {
+        setError(getLoginFailureMessage(result, response.status));
         return;
       }
 
-      if (!result.ok || result.error) {
-        const backendError = result.error?.includes("Unable to reach auth backend")
-          ? "Unable to reach the authentication service. Please try again later."
-          : result.error?.includes("CredentialsSignin")
-          ? "Unable to sign in. Please verify your email and password and try again."
-          : "Unable to sign in. Please verify your credentials and try again.";
-
-        setError(backendError);
+      const session = await fetchCurrentSession();
+      if (!session?.user?.id) {
+        setError("Your details were accepted, but the secure session could not be loaded. Please try again.");
         return;
       }
 
-      router.push(result.url || "/dashboard");
+      window.location.assign("/dashboard");
     } catch (err) {
       console.error("Login error:", err);
-      setError("Login failed. Please try again. If the backend server is not running, start it and try again.");
+      setError(err instanceof Error ? err.message : "Login failed. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -69,6 +149,11 @@ export default function LoginPage() {
 
   const handleMicrosoftSignIn = async () => {
     setError("");
+    if (!outlookEnabled) {
+      setError("Outlook sign-in is not configured. Add Microsoft OAuth credentials to enable it.");
+      return;
+    }
+
     await signIn("azure-ad", { callbackUrl: "/dashboard" });
   };
 
@@ -97,7 +182,20 @@ export default function LoginPage() {
           <p className="subtitle">Sign in to your account</p>
 
           {error && (
-            <p style={{ color: "red", textAlign: "center", marginTop: "12px", fontSize: "14px" }}>
+            <p
+              role="alert"
+              style={{
+                color: "#991b1b",
+                backgroundColor: "#fef2f2",
+                border: "1px solid #fecaca",
+                borderRadius: "6px",
+                textAlign: "left",
+                marginTop: "16px",
+                padding: "12px 14px",
+                fontSize: "14px",
+                lineHeight: 1.5,
+              }}
+            >
               {error}
             </p>
           )}
@@ -112,7 +210,7 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => {
                   setEmail(e.target.value.toLowerCase());
-                  if (error === "Enter a valid email address.") setError("");
+                  if (error) setError("");
                 }}
                 onBlur={() => {
                   if (email && !emailPattern.test(email.trim().toLowerCase())) {
@@ -130,7 +228,10 @@ export default function LoginPage() {
                 placeholder="Enter your password"
                 autoComplete="current-password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  if (error) setError("");
+                }}
               />
               <button
                 className="eye-toggle"
@@ -182,7 +283,15 @@ export default function LoginPage() {
             className="btn-signin"
             type="button"
             onClick={handleMicrosoftSignIn}
-            style={{ marginTop: "12px", backgroundColor: "#ffffff", color: "#111827", border: "1px solid #d4d4d8" }}
+            disabled={!providersLoaded || !outlookEnabled}
+            style={{
+              marginTop: "12px",
+              backgroundColor: "#ffffff",
+              color: !providersLoaded || !outlookEnabled ? "#71717a" : "#111827",
+              border: "1px solid #d4d4d8",
+              cursor: !providersLoaded || !outlookEnabled ? "not-allowed" : "pointer",
+              opacity: !providersLoaded || !outlookEnabled ? 0.75 : 1,
+            }}
           >
             Sign in with Outlook
           </button>

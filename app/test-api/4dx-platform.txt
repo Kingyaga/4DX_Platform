@@ -61,16 +61,16 @@ Executes against assigned lead measures, logs activity, completes weekly session
 2.2 Role Permissions Matrix
 
 Action	Org Admin	Team Lead	Member
-Create/edit organization	✅	❌	❌
-Create teams	✅	❌	❌
-Invite users	✅	✅ (own team)	❌
-Create/edit WIGs	✅	✅ (own team)	❌
-Define lead measures	✅	✅ (own team)	❌
-Log activity	✅	✅	✅ (own)
-Complete weekly session	✅	✅	✅
-View team scoreboard	✅	✅	✅
-View cross-team scoreboard	✅	❌	❌
-Archive/close WIG	✅	✅ (own team)	❌
+Create/edit organization	Yes	No	No
+Create teams	Yes	No	No
+Invite users	Yes	Yes (own team)	No
+Create/edit WIGs	Yes	Yes (own team)	No
+Define lead measures	Yes	Yes (own team)	No
+Log activity	Yes	Yes	Yes (own)
+Complete weekly session	Yes	Yes	Yes
+View team scoreboard	Yes	Yes	Yes
+View cross-team scoreboard	Yes	No	No
+Archive/close WIG	Yes	Yes (own team)	No
 
 3. Core Concepts (Domain Model)
 3.1 Organization
@@ -312,4 +312,3 @@ Scoreboard goes stale from non-logging	Medium	High	Daily logging reminders; team
 Whirlwind absorbs the platform itself	Medium	Critical	Keep activity logging under 30 seconds; aggressive UX simplicity
 Adoption stalls after first team	Medium	Medium	Each team's success becomes the proof case for the next
 Manager doesn't enforce discipline	High	Critical	Out of platform's control — document as known dependency
-

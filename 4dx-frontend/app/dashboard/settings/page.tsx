@@ -262,7 +262,7 @@ export default function SettingsPage() {
                     fontSize: "12px",
                   }}
                 >
-                  👥
+                  <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>groups</span>
                 </div>
                 <span style={{ fontSize: "14px", color: "#18181b", fontWeight: "500" }}>Manage Team</span>
               </div>

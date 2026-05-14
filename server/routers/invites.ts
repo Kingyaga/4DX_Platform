@@ -70,7 +70,7 @@ export const invitesRouter = router({
       });
 
       // Return the full invite URL
-      const baseUrl = process.env.NEXTAUTH_URL ?? "http://localhost:3000";
+      const baseUrl = process.env.NEXTAUTH_URL ?? "http://localhost:3001";
       return {
         token: invite.token,
         inviteUrl: `${baseUrl}/signup?token=${invite.token}`,

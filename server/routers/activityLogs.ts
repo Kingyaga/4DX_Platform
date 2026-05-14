@@ -102,6 +102,36 @@ export const activityLogsRouter = router({
       });
     }),
 
+  approveAllForTeam: protectedProcedure
+    .input(z.object({ teamSlug: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const team = await ctx.db.team.findUnique({
+        where: { slug: input.teamSlug },
+        select: { id: true, leadUserId: true },
+      });
+
+      if (!team) throw new TRPCError({ code: "NOT_FOUND", message: "Team not found." });
+
+      if (team.leadUserId !== (ctx.session.user as any).id) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Only the team lead can approve activity requests.",
+        });
+      }
+
+      return ctx.db.activityLog.updateMany({
+        where: {
+          status: "PENDING",
+          leadMeasure: {
+            wig: {
+              teamId: team.id,
+            },
+          },
+        },
+        data: { status: "APPROVED" },
+      });
+    }),
+
   decline: protectedProcedure
     .input(z.object({ logId: z.string() }))
     .mutation(async ({ ctx, input }) => {

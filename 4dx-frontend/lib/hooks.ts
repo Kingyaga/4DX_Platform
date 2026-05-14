@@ -12,18 +12,20 @@ import { trpc, parseTRPCError } from "./api-client";
 import { useUserStore } from "./stores/user-store";
 import { useTeamStore } from "./stores/team-store";
 import { useSessionStore } from "./stores/session-store";
-import type { Team, WIG, LeadMeasure, WeeklySession, APIError, UserRole } from "./types";
+import type { Team, WIG, LeadMeasure, WeeklySession, APIError, UserRole, OrgUser } from "./types";
 
 /**
  * Fetch and sync current user's profile and role from backend
  */
 export function useCurrentUser() {
   const router = useRouter();
-  const { data: session, status } = useAuthSession();
-  const { user, setUser, setOrgSlug, clearUser } = useUserStore();
+  const { status } = useAuthSession();
+  const { setUser, setOrgSlug, clearUser } = useUserStore();
+  const isAuthenticated = status === "authenticated";
   
-  // Fetch user data - refetch when session changes
+  // Fetch user data only after NextAuth has confirmed the session.
   const { data: me, isLoading, error, refetch } = trpc.auth.me.useQuery(undefined, {
+    enabled: isAuthenticated,
     retry: false,
     staleTime: 0, // Always refetch to get latest data
     gcTime: 0, // Don't cache the data
@@ -31,24 +33,25 @@ export function useCurrentUser() {
 
   // Refetch when session status changes
   useEffect(() => {
-    if (status === "authenticated") {
+    if (isAuthenticated) {
       console.log("Session authenticated, refetching user data");
       refetch();
     } else if (status === "unauthenticated") {
       console.log("Session unauthenticated, clearing user");
       clearUser();
+      setOrgSlug(null);
     }
-  }, [status, refetch, clearUser]);
+  }, [isAuthenticated, status, refetch, clearUser, setOrgSlug]);
 
   useEffect(() => {
     // Handle unauthorized error - user not logged in
-    if (error?.data?.code === "UNAUTHORIZED") {
+    if (isAuthenticated && error?.data?.code === "UNAUTHORIZED") {
       console.log("User not authenticated, clearing store and redirecting to login");
       clearUser();
-      router.push("/login");
+      router.replace("/login");
       return;
     }
-  }, [error, router, clearUser]);
+  }, [isAuthenticated, error, router, clearUser]);
 
   useEffect(() => {
     if (me) {
@@ -59,7 +62,12 @@ export function useCurrentUser() {
     }
   }, [me, setUser, setOrgSlug]);
 
-  return { data: me, isLoading, error, refetch };
+  return {
+    data: me,
+    isLoading: status === "loading" || (isAuthenticated && isLoading),
+    error,
+    refetch,
+  };
 }
 
 /**
@@ -259,9 +267,16 @@ export function useOrgDashboard(orgSlug: string | null) {
     { orgSlug: orgSlug || "" },
     { enabled: !!orgSlug },
   );
+  const dashboard = query.data
+    ? {
+        ...query.data.org,
+        teams: query.data.teams,
+        sessionStats: query.data.sessionStats,
+      }
+    : null;
 
   return {
-    org: query.data || null,
+    org: dashboard,
     isLoading: query.isLoading,
     error: query.error ? parseTRPCError(query.error) : null,
     refetch: query.refetch,
@@ -276,9 +291,15 @@ export function useOrgActivityData(orgSlug: string | null) {
     { orgSlug: orgSlug || "" },
     { enabled: !!orgSlug },
   );
+  const activityData = query.data
+    ? {
+        ...query.data.org,
+        teams: query.data.teams,
+      }
+    : null;
 
   return {
-    org: query.data || null,
+    org: activityData,
     isLoading: query.isLoading,
     error: query.error ? parseTRPCError(query.error) : null,
     refetch: query.refetch,
@@ -295,7 +316,7 @@ export function useOrgUsers(orgSlug: string | null) {
   );
 
   return {
-    users: query.data || [],
+    users: (query.data || []) as OrgUser[],
     isLoading: query.isLoading,
     error: query.error ? parseTRPCError(query.error) : null,
     refetch: query.refetch,
@@ -413,6 +434,18 @@ export function useApproveActivityRequest() {
 
   return {
     approveRequest: mutation.mutateAsync,
+    isLoading: mutation.isPending,
+    error: mutation.error ? parseTRPCError(mutation.error) : null,
+    isSuccess: mutation.isSuccess,
+    reset: mutation.reset,
+  };
+}
+
+export function useApproveAllActivityRequests() {
+  const mutation = trpc.activityLogs.approveAllForTeam.useMutation();
+
+  return {
+    approveAllRequests: mutation.mutateAsync,
     isLoading: mutation.isPending,
     error: mutation.error ? parseTRPCError(mutation.error) : null,
     isSuccess: mutation.isSuccess,

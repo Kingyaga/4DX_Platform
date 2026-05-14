@@ -402,7 +402,17 @@ export const teamsRouter = router({
         where: { orgId: org.id },
         include: {
           members: {
-            include: { user: true },
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  name: true,
+                  email: true,
+                  createdAt: true,
+                  defaultTeamId: true,
+                },
+              },
+            },
           },
           wigs: {
             where: { status: "ACTIVE" },

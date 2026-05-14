@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { useTeamStore } from "@/lib/stores/team-store";
 import { trpc } from "@/lib/api-client";
-import { usePendingActivityRequests, useApproveActivityRequest, useDeclineActivityRequest } from "@/lib/hooks";
+import { usePendingActivityRequests, useApproveActivityRequest, useApproveAllActivityRequests, useDeclineActivityRequest } from "@/lib/hooks";
 import { ErrorState, EmptyState } from "@/lib/components/states";
 
 export default function TeamLeadRequestsPage() {
@@ -11,13 +11,14 @@ export default function TeamLeadRequestsPage() {
   const trpcCtx = trpc.useContext();
   const { pendingRequests, isLoading, error, refetch } = usePendingActivityRequests(currentTeamSlug);
   const { approveRequest, isLoading: approving, error: approveError } = useApproveActivityRequest();
+  const { approveAllRequests, isLoading: approvingAll, error: approveAllError } = useApproveAllActivityRequests();
   const { declineRequest, isLoading: declining, error: declineError } = useDeclineActivityRequest();
 
   const [processingRequestId, setProcessingRequestId] = useState<string | null>(null);
   const [processingRequestAction, setProcessingRequestAction] = useState<"approve" | "decline" | null>(null);
   const [requestStatusMessage, setRequestStatusMessage] = useState<string | null>(null);
 
-  const actionInProgress = Boolean(processingRequestId);
+  const actionInProgress = Boolean(processingRequestId) || approving || approvingAll || declining;
 
   const hasRequests = pendingRequests.length > 0;
 
@@ -68,19 +69,78 @@ export default function TeamLeadRequestsPage() {
     }
   };
 
+  const handleApproveAll = async () => {
+    if (!currentTeamSlug || pendingRequests.length === 0) return;
+
+    setProcessingRequestId("all");
+    setProcessingRequestAction("approve");
+    setRequestStatusMessage(null);
+
+    try {
+      const result = await approveAllRequests({ teamSlug: currentTeamSlug });
+      await Promise.all([
+        refetch(),
+        trpcCtx.activityLogs.getPendingForTeam.invalidate({ teamSlug: currentTeamSlug }),
+        trpcCtx.wigs.getByTeam.invalidate({ teamSlug: currentTeamSlug }),
+        trpcCtx.activityLogs.getByUser.invalidate(),
+        trpcCtx.sessions.getCurrentSession.invalidate({ teamSlug: currentTeamSlug }),
+      ]);
+      setRequestStatusMessage(`${result.count} request${result.count === 1 ? "" : "s"} approved.`);
+    } finally {
+      setProcessingRequestId(null);
+      setProcessingRequestAction(null);
+    }
+  };
+
   return (
     <main style={{ flex: 1, overflowY: "auto", padding: "32px" }}>
       <div style={{ maxWidth: "1200px", margin: "0 auto", display: "flex", flexDirection: "column", gap: "32px" }}>
-        <div>
-          <h1 style={{ fontSize: "28px", fontWeight: 700, margin: "0 0 8px 0" }}>Requests</h1>
-          <p style={{ margin: 0, color: "#71717a", fontSize: "14px" }}>
-            Review and approve pending activity logging requests from your team members.
-          </p>
+        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "16px", flexWrap: "wrap" }}>
+          <div>
+            <h1 style={{ fontSize: "28px", fontWeight: 700, margin: "0 0 8px 0" }}>Requests</h1>
+            <p style={{ margin: 0, color: "#71717a", fontSize: "14px" }}>
+              Review and approve pending activity logging requests from your team members.
+            </p>
+          </div>
+          {hasRequests && (
+            <button
+              type="button"
+              onClick={handleApproveAll}
+              disabled={actionInProgress}
+              style={{
+                padding: "12px 16px",
+                backgroundColor: actionInProgress ? "#71717a" : "#18181b",
+                color: "#ffffff",
+                border: "none",
+                borderRadius: "8px",
+                cursor: actionInProgress ? "not-allowed" : "pointer",
+                fontWeight: 700,
+                fontSize: "13px",
+                letterSpacing: "0.04em",
+                textTransform: "uppercase",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "8px",
+              }}
+            >
+              {processingRequestId === "all" ? (
+                <>
+                  <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>hourglass_top</span>
+                  Approving all...
+                </>
+              ) : (
+                <>
+                  <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>done_all</span>
+                  Approve all
+                </>
+              )}
+            </button>
+          )}
         </div>
 
-        {(error || approveError || declineError) && (
+        {(error || approveError || approveAllError || declineError) && (
           <ErrorState
-            error={error || approveError || declineError}
+            error={error || approveError || approveAllError || declineError}
             title="Unable to load or update requests"
           />
         )}
@@ -140,14 +200,14 @@ export default function TeamLeadRequestsPage() {
                   <button
                     type="button"
                     onClick={() => handleApprove(request.id)}
-                    disabled={processingRequestId !== null && processingRequestId !== request.id}
+                    disabled={actionInProgress && processingRequestId !== request.id}
                     style={{
                       padding: "14px 16px",
                       backgroundColor: "#16a34a",
                       color: "#ffffff",
                       border: "none",
                       borderRadius: "10px",
-                      cursor: processingRequestId !== null && processingRequestId !== request.id ? "not-allowed" : "pointer",
+                      cursor: actionInProgress && processingRequestId !== request.id ? "not-allowed" : "pointer",
                       fontWeight: 700,
                       display: "flex",
                       alignItems: "center",
@@ -167,14 +227,14 @@ export default function TeamLeadRequestsPage() {
                   <button
                     type="button"
                     onClick={() => handleDecline(request.id)}
-                    disabled={processingRequestId !== null && processingRequestId !== request.id}
+                    disabled={actionInProgress && processingRequestId !== request.id}
                     style={{
                       padding: "14px 16px",
                       backgroundColor: "#ef4444",
                       color: "#ffffff",
                       border: "none",
                       borderRadius: "10px",
-                      cursor: processingRequestId !== null && processingRequestId !== request.id ? "not-allowed" : "pointer",
+                      cursor: actionInProgress && processingRequestId !== request.id ? "not-allowed" : "pointer",
                       fontWeight: 700,
                       display: "flex",
                       alignItems: "center",

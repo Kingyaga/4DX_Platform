@@ -132,15 +132,25 @@ export const authRouter = router({
         });
 
         const resetUrl = `${getFrontendUrl()}/reset-password?token=${encodeURIComponent(token)}`;
-        await sendPasswordResetEmail({
+        const emailSent = await sendPasswordResetEmail({
           to: user.email,
           name: user.name,
           resetUrl,
         });
+
+        if (!emailSent && process.env.NODE_ENV !== "production") {
+          return {
+            success: true,
+            emailSent: false,
+            resetUrl,
+            message: "Email delivery is not configured. Use the local reset link below.",
+          };
+        }
       }
 
       return {
         success: true,
+        emailSent: true,
         message: "If an account exists for that email, a reset link has been sent.",
       };
     }),
@@ -453,7 +463,12 @@ export const authRouter = router({
             },
           },
         },
-        include: {
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          createdAt: true,
+          defaultTeamId: true,
           orgMemberships: {
             select: {
               role: true,
@@ -467,7 +482,12 @@ export const authRouter = router({
             },
           },
           teamMemberships: {
-            include: {
+            select: {
+              id: true,
+              role: true,
+              joinedAt: true,
+              userId: true,
+              teamId: true,
               team: {
                 select: { id: true, name: true, slug: true },
               },
