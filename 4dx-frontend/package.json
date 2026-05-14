@@ -3,10 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "node scripts/ensure-port-free.mjs 3000 && next dev",
+    "dev:raw": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "qa:routing": "node scripts/verify-routing-rules.mjs"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.100.9",

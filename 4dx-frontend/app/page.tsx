@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useUserStore } from "@/lib/stores/user-store";
 import { LoadingSpinner } from "@/lib/components/loading-spinner";
+import { getDefaultRouteForRole } from "@/lib/team-routing";
 
 export default function RootPage() {
   const router = useRouter();
@@ -19,14 +20,7 @@ export default function RootPage() {
       return;
     }
 
-    // User is authenticated
-    if (userRole === "ADMIN") {
-      router.replace("/dashboard/admin");
-    } else if (userRole === "TEAM_LEAD") {
-      router.replace("/dashboard/team-lead");
-    } else {
-      router.replace("/dashboard/scoreboard");
-    }
+    router.replace(getDefaultRouteForRole(userRole));
   }, [status, userRole, router]);
 
   return (

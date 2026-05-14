@@ -8,7 +8,8 @@ import { useCurrentUser, useMyTeams, usePendingActivityRequests } from "@/lib/ho
 import { useUserStore } from "@/lib/stores/user-store";
 import { useTeamStore } from "@/lib/stores/team-store";
 import { LoadingSpinner } from "@/lib/components/loading-spinner";
-import type { MyTeamsResponse, UserRole } from "@/lib/types";
+import { getDefaultRouteForRole, getTeamRole, isRouteAllowedForRole } from "@/lib/team-routing";
+import type { MyTeamsResponse } from "@/lib/types";
 
 interface NavItem {
   icon: string;
@@ -33,25 +34,6 @@ const allNavItems: NavItem[] = [
   { icon: "person_add", label: "Create User", href: "/dashboard/admin/users/new", roles: ["ADMIN"] },
   { icon: "insights", label: "Org Activity", href: "/dashboard/admin/activity", roles: ["ADMIN"] },
 ];
-
-function getTeamRole(team?: MyTeamsResponse | null): UserRole | null {
-  if (!team) return null;
-  return team.members?.[0]?.role === "LEAD" ? "TEAM_LEAD" : "MEMBER";
-}
-
-function getDefaultRouteForRole(role: UserRole | null) {
-  if (role === "ADMIN") return "/dashboard/admin";
-  if (role === "TEAM_LEAD") return "/dashboard/team-lead";
-  return "/dashboard/scoreboard";
-}
-
-function isRouteAllowedForRole(pathname: string, role: UserRole | null) {
-  if (!role) return true;
-  if (pathname === "/dashboard/settings") return true;
-  if (role === "ADMIN") return pathname.startsWith("/dashboard/admin");
-  if (role === "TEAM_LEAD") return !pathname.startsWith("/dashboard/admin");
-  return !pathname.startsWith("/dashboard/admin") && !pathname.startsWith("/dashboard/team-lead");
-}
 
 export default function DashboardLayout({
   children,
@@ -87,7 +69,7 @@ export default function DashboardLayout({
 
   // Auto-select first team if none selected yet or if the selected team is no longer valid
   useEffect(() => {
-    if (!teamsLoading && teams.length > 0 && (!currentTeamSlug || !teams.some((team: any) => team.slug === currentTeamSlug))) {
+    if (!teamsLoading && teams.length > 0 && (!currentTeamSlug || !teams.some((team: MyTeamsResponse) => team.slug === currentTeamSlug))) {
       setCurrentTeamSlug(teams[0]?.slug || null);
     }
   }, [currentTeamSlug, teamsLoading, teams, setCurrentTeamSlug]);
@@ -127,17 +109,11 @@ export default function DashboardLayout({
     return <LoadingSpinner size="large" text="Loading dashboard..." className="min-h-screen flex items-center justify-center" />;
   }
 
-  // Debug logging
-  console.log("Dashboard layout - userRole:", userRole);
-  console.log("Dashboard layout - pathname:", pathname);
-
   // Filter nav items based on user role
   const navItems = allNavItems.filter((item) => {
     if (!item.roles) return true;
     return userRole ? item.roles.includes(userRole) : false;
   });
-
-  console.log("Filtered navItems:", navItems.map(item => item.label));
 
   const activeHref = navItems.reduce<string | null>((currentActive, item) => {
     if (pathname === item.href) {

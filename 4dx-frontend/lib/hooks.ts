@@ -34,10 +34,8 @@ export function useCurrentUser() {
   // Refetch when session status changes
   useEffect(() => {
     if (isAuthenticated) {
-      console.log("Session authenticated, refetching user data");
       refetch();
     } else if (status === "unauthenticated") {
-      console.log("Session unauthenticated, clearing user");
       clearUser();
       setOrgSlug(null);
     }
@@ -46,7 +44,6 @@ export function useCurrentUser() {
   useEffect(() => {
     // Handle unauthorized error - user not logged in
     if (isAuthenticated && error?.data?.code === "UNAUTHORIZED") {
-      console.log("User not authenticated, clearing store and redirecting to login");
       clearUser();
       router.replace("/login");
       return;
@@ -55,7 +52,6 @@ export function useCurrentUser() {
 
   useEffect(() => {
     if (me) {
-      console.log("Fetched user from auth.me:", me);
       // me.role will be "ADMIN", "TEAM_LEAD", or "MEMBER"
       setUser(me as any);
       setOrgSlug(me.orgSlug || null);

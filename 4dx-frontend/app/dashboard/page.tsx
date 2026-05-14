@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useUserStore } from "@/lib/stores/user-store";
+import { getDefaultRouteForRole } from "@/lib/team-routing";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -10,13 +11,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (userRole) {
-      if (userRole === "ADMIN") {
-        router.replace("/dashboard/admin");
-      } else if (userRole === "TEAM_LEAD") {
-        router.replace("/dashboard/team-lead");
-      } else if (userRole === "MEMBER") {
-        router.replace("/dashboard/scoreboard");
-      }
+      router.replace(getDefaultRouteForRole(userRole));
     }
   }, [userRole, router]);
 
