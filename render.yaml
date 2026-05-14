@@ -6,7 +6,7 @@ services:
     rootDir: .
     buildCommand: pnpm prisma generate && pnpm build
     releaseCommand: pnpm prisma migrate deploy
-    startCommand: pnpm start
+    startCommand: pnpm exec next start -p $PORT
     autoDeploy: true
 
   - type: cron
