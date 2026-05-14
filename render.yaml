@@ -9,6 +9,18 @@ services:
     startCommand: pnpm exec next start -p $PORT
     autoDeploy: true
 
+  - type: web
+    name: 4dx-platform-frontend
+    env: node
+    branch: main
+    rootDir: .
+    buildCommand: npm ci && npm --prefix 4dx-frontend ci && npm --prefix 4dx-frontend run build
+    startCommand: npm --prefix 4dx-frontend run start -- -p $PORT
+    autoDeploy: true
+    envVars:
+      - key: NEXT_PUBLIC_BACKEND_URL
+        sync: false
+
   - type: cron
     name: 4dx-wigs-at-risk-notifications
     env: node
