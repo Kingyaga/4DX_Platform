@@ -29,6 +29,19 @@ export default function WeeklySessionPage() {
     }
   }, [isLoading, selectedSession, sessions]);
 
+  // Resume step from server state
+  useEffect(() => {
+    if (!selectedSession) return;
+    if (selectedSession.commitDoneAt) {
+      setStep(3); // fully complete
+    } else if (selectedSession.reviewDoneAt) {
+      setStep(2); // at commit
+    } else if (selectedSession.accountDoneAt) {
+      setStep(1); // at review
+    }
+    // else step stays 0
+  }, [selectedSession?.id]); // only re-run when session changes, not on every render
+
   const handleStepComplete = async (stepNum: number) => {
     if (!selectedSession || !currentTeamSlug) return;
 
@@ -83,7 +96,7 @@ export default function WeeklySessionPage() {
           commitments: cleanedCommitments,
         });
       }
-      setStep(Math.min(2, step + 1));
+      setStep((prev) => (stepNum === 2 ? 3 : Math.min(2, prev + 1)));
     } catch (error) {
       setFormError(error instanceof Error ? error.message : "Unable to save this step.");
       // Error handled in hook
@@ -94,10 +107,39 @@ export default function WeeklySessionPage() {
 
   if (error) return <ErrorState error={error} />;
   if (isLoading) return <LoadingSpinner size="large" text="Loading session..." className="min-h-[400px] flex items-center justify-center" />;
-  if (!selectedSession) return <div style={{ padding: "48px", textAlign: "center", color: "#71717a" }}>No active session for this week.</div>;
+  if (!selectedSession) return (
+    <div style={{ padding: "48px", textAlign: "center" }}>
+      <p style={{ fontSize: "16px", fontWeight: 600, color: "#18181b", marginBottom: "8px" }}>No session for this week yet</p>
+      <p style={{ fontSize: "14px", color: "#71717a" }}>
+        Sessions are generated every Monday. If your team lead hasn&apos;t started this week&apos;s session, ask them to generate it from their dashboard.
+      </p>
+    </div>
+  );
 
   return (
     <div style={{ flex: 1, display: "flex", flexDirection: "column", fontFamily: "'Inter', sans-serif", minHeight: "100vh" }}>
+      {sessions.length > 1 && (
+        <div style={{ backgroundColor: "#f8fafc", borderBottom: "1px solid #e4e4e7", padding: "12px 24px", display: "flex", alignItems: "center", gap: "12px" }}>
+          <span style={{ fontSize: "12px", fontWeight: 600, color: "#71717a", textTransform: "uppercase" }}>Session for:</span>
+          {(sessions as any[]).map((s: any) => (
+            <button
+              key={s.id}
+              onClick={() => { setSelectedSession(s as any); setStep(0); }}
+              style={{
+                padding: "6px 16px",
+                border: "1px solid #e4e4e7",
+                backgroundColor: selectedSession?.id === s.id ? "#18181b" : "#ffffff",
+                color: selectedSession?.id === s.id ? "#ffffff" : "#18181b",
+                fontSize: "13px",
+                fontWeight: 600,
+                cursor: "pointer",
+              }}
+            >
+              {s.wig?.title ?? "WIG"}
+            </button>
+          ))}
+        </div>
+      )}
       <header style={{ backgroundColor: "#ffffff", borderBottom: "1px solid #e4e4e7", padding: "0 24px", height: "56px", display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, zIndex: 10 }}>
         <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
           <span className="material-symbols-outlined" style={{ fontSize: "24px", cursor: "pointer", color: "#18181b" }}>close</span>
@@ -134,17 +176,30 @@ export default function WeeklySessionPage() {
         {step === 0 && <StepAccount session={selectedSession} accountUpdates={accountUpdates} onAccountUpdatesChange={setAccountUpdates} />}
         {step === 1 && <StepReview session={selectedSession} />}
         {step === 2 && <StepCommit session={selectedSession} commitments={commitments} onCommitmentsChange={setCommitments} />}
+        {step >= 3 && (
+          <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "64px 32px", textAlign: "center" }}>
+            <span className="material-symbols-outlined" style={{ fontSize: "64px", color: "#16A34A", marginBottom: "24px" }}>check_circle</span>
+            <h2 style={{ fontSize: "28px", fontWeight: 700, color: "#18181b", marginBottom: "12px", letterSpacing: "-0.02em" }}>
+              Session Complete
+            </h2>
+            <p style={{ fontSize: "16px", color: "#71717a", maxWidth: "400px", lineHeight: "1.6" }}>
+              You&apos;ve completed your weekly session. Your commitments are locked in — see you next week.
+            </p>
+          </div>
+        )}
       </div>
 
-      <footer style={{ backgroundColor: "#ffffff", borderTop: "1px solid #e4e4e7", padding: "16px 24px", display: "flex", justifyContent: "space-between", alignItems: "center", position: "sticky", bottom: 0 }}>
-        <button onClick={() => setStep(Math.max(0, step - 1))} disabled={step === 0} style={{ padding: "10px 24px", border: "1px solid #000000", backgroundColor: "transparent", fontSize: "12px", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", cursor: step === 0 ? "not-allowed" : "pointer", color: "#18181b", opacity: step === 0 ? 0.4 : 1 }}>
-          Back
-        </button>
-        <button onClick={() => handleStepComplete(step)} style={{ padding: "10px 24px", border: "none", backgroundColor: "#000000", fontSize: "12px", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", cursor: "pointer", color: "#ffffff", display: "flex", alignItems: "center", gap: "8px" }}>
-          {step === steps.length - 1 ? "Finish Session" : "Next Step"}
-          <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>arrow_forward</span>
-        </button>
-      </footer>
+      {step < 3 && (
+        <footer style={{ backgroundColor: "#ffffff", borderTop: "1px solid #e4e4e7", padding: "16px 24px", display: "flex", justifyContent: "space-between", alignItems: "center", position: "sticky", bottom: 0 }}>
+          <button onClick={() => setStep(Math.max(0, step - 1))} disabled={step === 0} style={{ padding: "10px 24px", border: "1px solid #000000", backgroundColor: "transparent", fontSize: "12px", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", cursor: step === 0 ? "not-allowed" : "pointer", color: "#18181b", opacity: step === 0 ? 0.4 : 1 }}>
+            Back
+          </button>
+          <button onClick={() => handleStepComplete(step)} style={{ padding: "10px 24px", border: "none", backgroundColor: "#000000", fontSize: "12px", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", cursor: "pointer", color: "#ffffff", display: "flex", alignItems: "center", gap: "8px" }}>
+            {step === steps.length - 1 ? "Finish Session" : "Next Step"}
+            <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>arrow_forward</span>
+          </button>
+        </footer>
+      )}
     </div>
   );
 }
@@ -160,8 +215,17 @@ function StepAccount({
 }) {
   if (!session.commitments || session.commitments.length === 0) {
     return (
-      <div style={{ maxWidth: "800px", margin: "0 auto", textAlign: "center", color: "#71717a" }}>
-        <p>No prior commitments to report on.</p>
+      <div style={{ maxWidth: "800px", margin: "0 auto" }}>
+        <h1 style={{ fontSize: "24px", fontWeight: 600, color: "#18181b", marginBottom: "8px" }}>Report on Last Week</h1>
+        <p style={{ fontSize: "16px", color: "#71717a", marginBottom: "32px" }}>Review what was committed last week and mark completion.</p>
+        <div style={{ padding: "32px", textAlign: "center", border: "1px solid #e4e4e7", backgroundColor: "#f8fafc" }}>
+          <p style={{ fontSize: "16px", fontWeight: 600, color: "#18181b", marginBottom: "8px" }}>
+            First session — no prior commitments
+          </p>
+          <p style={{ fontSize: "14px", color: "#71717a" }}>
+            This is your first session. Skip to Review and Commit to make your commitments for next week.
+          </p>
+        </div>
       </div>
     );
   }

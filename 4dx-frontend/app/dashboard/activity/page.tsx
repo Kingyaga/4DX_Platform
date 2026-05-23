@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useMemo, type FormEvent } from "react";
-import { useWIGs, useLogActivity } from "@/lib/hooks";
+import { useWIGs, useLogActivity, useActivityLogsByUser, useEditActivity } from "@/lib/hooks";
 import { useTeamStore } from "@/lib/stores/team-store";
 import { useUserStore } from "@/lib/stores/user-store";
 import { ErrorState, EmptyState } from "@/lib/components/states";
@@ -19,7 +19,12 @@ export default function ActivityLogPage() {
   const { user } = useUserStore();
   const { wigs, isLoading, error } = useWIGs(currentTeamSlug);
   const { logActivity, isLoading: isSubmitting, error: submitError } = useLogActivity();
+  const { activityLogs: myAllLogs } = useActivityLogsByUser(user?.id ?? null);
+  const { editActivity } = useEditActivity();
 
+  const [editingLogId, setEditingLogId] = useState<string | null>(null);
+  const [editValue, setEditValue] = useState<string>("");
+  const [editNote, setEditNote] = useState<string>("");
   const [hoveredRow, setHoveredRow] = useState<number | null>(null);
   const [selectedLeadMeasureId, setSelectedLeadMeasureId] = useState<string>("");
   const [value, setValue] = useState<string>("");
@@ -98,6 +103,8 @@ export default function ActivityLogPage() {
       setLogsError(errorMessage);
     }
   }, [wigs, logsRefreshIndex]);
+
+  const pendingLogs = (myAllLogs as any[]).filter((log: any) => log.status === "PENDING");
 
   const sortedLogs = [...activityLogs].sort((a: AggregatedActivityLog, b: AggregatedActivityLog) =>
     new Date(b.loggedForDate).getTime() - new Date(a.loggedForDate).getTime(),
@@ -246,6 +253,70 @@ export default function ActivityLogPage() {
 
       <div style={{ display: "flex", justifyContent: "center" }}>
         <div style={{ width: "100%", maxWidth: "900px", marginTop: "48px", marginBottom: "48px" }}>
+          {pendingLogs.length > 0 && (
+            <div style={{ marginBottom: "24px" }}>
+              <h3 style={{ fontSize: "14px", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em", color: "#71717a", marginBottom: "12px" }}>
+                Awaiting Approval ({pendingLogs.length})
+              </h3>
+              {pendingLogs.map((log: any) => {
+                const isEditable = Date.now() - new Date(log.createdAt).getTime() < 24 * 60 * 60 * 1000;
+                return (
+                  <div key={log.id} style={{ marginBottom: "8px" }}>
+                    <div style={{ padding: "12px 16px", border: "1px solid #e4e4e7", backgroundColor: "#fffbeb", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <div>
+                        <span style={{ fontSize: "13px", fontWeight: 600, color: "#18181b" }}>{log.leadMeasure?.name ?? "Lead Measure"}</span>
+                        <span style={{ fontSize: "12px", color: "#71717a", marginLeft: "8px" }}>{new Date(log.loggedForDate).toLocaleDateString()}</span>
+                      </div>
+                      <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                        <span style={{ fontSize: "14px", fontWeight: 700, color: "#18181b" }}>{log.value} {log.leadMeasure?.unit ?? ""}</span>
+                        <span style={{ fontSize: "11px", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em", color: "#B45309", backgroundColor: "#FEF3C7", padding: "2px 8px", borderRadius: "4px" }}>Pending</span>
+                        {isEditable && (
+                          <button
+                            onClick={() => { setEditingLogId(log.id); setEditValue(String(log.value)); setEditNote(log.note ?? ""); }}
+                            style={{ fontSize: "12px", color: "#71717a", background: "none", border: "none", cursor: "pointer", textDecoration: "underline" }}
+                          >
+                            Edit
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                    {editingLogId === log.id && (
+                      <div style={{ marginTop: "8px", display: "flex", gap: "8px", alignItems: "center", padding: "8px 16px", border: "1px solid #e4e4e7", backgroundColor: "#f8fafc" }}>
+                        <input
+                          type="number"
+                          value={editValue}
+                          onChange={(e) => setEditValue(e.target.value)}
+                          style={{ width: "80px", padding: "4px 8px", border: "1px solid #e4e4e7", fontSize: "13px" }}
+                        />
+                        <input
+                          type="text"
+                          value={editNote}
+                          onChange={(e) => setEditNote(e.target.value)}
+                          placeholder="Note (optional)"
+                          style={{ flex: 1, padding: "4px 8px", border: "1px solid #e4e4e7", fontSize: "13px" }}
+                        />
+                        <button
+                          onClick={async () => {
+                            try {
+                              await editActivity({ logId: log.id, value: parseFloat(editValue), note: editNote || undefined });
+                              setEditingLogId(null);
+                            } catch {}
+                          }}
+                          style={{ padding: "4px 12px", backgroundColor: "#18181b", color: "#fff", border: "none", fontSize: "12px", cursor: "pointer" }}
+                        >
+                          Save
+                        </button>
+                        <button onClick={() => setEditingLogId(null)} style={{ padding: "4px 12px", border: "1px solid #e4e4e7", background: "none", fontSize: "12px", cursor: "pointer" }}>
+                          Cancel
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
           <h2 style={{ fontSize: "20px", fontWeight: 600, color: "#18181b", marginBottom: "24px", paddingBottom: "8px", borderBottom: "1px solid #e4e4e7" }}>
             Recent Logs
           </h2>

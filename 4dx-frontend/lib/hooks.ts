@@ -382,6 +382,18 @@ export function useCreateLeadMeasure() {
 }
 
 /**
+ * Update owners of a lead measure (Team Lead only)
+ */
+export function useUpdateLeadMeasureOwners() {
+  const mutation = (trpc as any).leadMeasures.updateOwners.useMutation();
+  return {
+    updateOwners: mutation.mutateAsync as (input: { leadMeasureId: string; ownerUserIds: string[] }) => Promise<LeadMeasure>,
+    isLoading: mutation.isPending,
+    error: mutation.error ? parseTRPCError(mutation.error) : null,
+  };
+}
+
+/**
  * Activate a draft WIG after lead measure gates are satisfied
  */
 export function useActivateWIG() {

@@ -450,13 +450,19 @@ export const orgRouter = router({
         throw new TRPCError({ code: "FORBIDDEN" });
       }
 
+      // Scope audit logs to this org's members only to prevent cross-org data leak
+      const orgMemberships = await ctx.db.orgMembership.findMany({
+        where: { orgId: org.id },
+        select: { userId: true },
+      });
+      const orgMemberIds = orgMemberships.map((m) => m.userId);
+
       return ctx.db.auditLog.findMany({
+        where: { actorUserId: { in: orgMemberIds } },
+        take: input.limit ?? 50,
         orderBy: { createdAt: "desc" },
-        take: input.limit,
         include: {
-          actor: {
-            select: { id: true, name: true, email: true },
-          },
+          actor: { select: { id: true, name: true, email: true } },
         },
       });
     }),

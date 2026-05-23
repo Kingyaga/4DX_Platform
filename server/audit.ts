@@ -19,7 +19,8 @@ type AuditAction =
   | "TEAM_LEAD_ASSIGNED"
   | "ORG_CREATED"
   | "ORG_MEMBER_INVITED"
-  | "ORG_MEMBER_ROLE_UPDATED";
+  | "ORG_MEMBER_ROLE_UPDATED"
+  | "LEAD_MEASURE_OWNERS_UPDATED";
 
 interface AuditParams {
   db: PrismaClient;

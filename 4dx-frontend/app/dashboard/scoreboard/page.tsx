@@ -114,6 +114,9 @@ export default function ScoreboardPage() {
           <span>Baseline: {formatValue(selected.fromValue, selected.unit)}</span>
           <span>Deadline: {new Date(selected.deadline).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</span>
         </div>
+        <p style={{ fontSize: "12px", color: "#71717a", marginTop: "8px", fontStyle: "italic" }}>
+          Progress reflects approved activity only. Pending logs appear on your Activity page.
+        </p>
       </div>
 
       {/* Lead Measures */}

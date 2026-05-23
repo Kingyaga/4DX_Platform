@@ -356,6 +356,23 @@ export const sessionsRouter = router({
         });
       }
 
+      // Validate that any linked lead measures belong to this session's WIG
+      const linkedIds = input.commitments
+        .map((c) => c.linkedLeadMeasureId)
+        .filter((id): id is string => Boolean(id));
+
+      if (linkedIds.length > 0) {
+        const validCount = await ctx.db.leadMeasure.count({
+          where: { id: { in: linkedIds }, wigId: session.wigId },
+        });
+        if (validCount !== linkedIds.length) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Linked lead measures must belong to this session's WIG.",
+          });
+        }
+      }
+
       if (session.commitDoneAt)
         throw new TRPCError({
           code: "BAD_REQUEST",

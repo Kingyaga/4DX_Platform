@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useWIGs, useCreateWIG, useUpdateWIG, useCreateLeadMeasure, useRoleCheck, useMyTeams, useActivateWIG, useTeam, useCloseWIG } from "@/lib/hooks";
+import { useWIGs, useCreateWIG, useUpdateWIG, useCreateLeadMeasure, useRoleCheck, useMyTeams, useActivateWIG, useTeam, useCloseWIG, useUpdateLeadMeasureOwners } from "@/lib/hooks";
 import { useTeamStore } from "@/lib/stores/team-store";
 import { useUserStore } from "@/lib/stores/user-store";
 import { WIGListSkeleton } from "@/lib/components/skeletons";
@@ -258,8 +258,11 @@ function WIGDetail({ wig, onBack }: { wig: WIG; onBack: () => void }) {
   const [activeWig, setActiveWig] = useState<WIG>(wig);
   const [showCloseModal, setShowCloseModal] = useState(false);
   const [closeStatus, setCloseStatus] = useState<"ACHIEVED" | "MISSED" | "ABANDONED">("ACHIEVED");
+  const [editingOwnersForLm, setEditingOwnersForLm] = useState<string | null>(null);
+  const [newOwnerIds, setNewOwnerIds] = useState<string[]>([]);
 
   const { createLeadMeasure, isLoading: isCreatingLeadMeasure, error: createLeadMeasureError } = useCreateLeadMeasure();
+  const { updateOwners, isLoading: isUpdatingOwners } = useUpdateLeadMeasureOwners();
   const { activateWIG, isLoading: isActivatingWIG, error: activateWIGError } = useActivateWIG();
   const { closeWIG, isLoading: isClosingWIG, error: closeWIGError } = useCloseWIG();
   const { canArchiveWIG, canCreateWIG } = useRoleCheck();
@@ -615,6 +618,62 @@ function WIGDetail({ wig, onBack }: { wig: WIG; onBack: () => void }) {
                     <p style={{ fontSize: "12px", color: "#52525b", marginBottom: "8px" }}>
                       Owners: {lm.owners?.map((owner) => owner.user.name).join(", ")}
                     </p>
+                  )}
+                  {canCreateWIG && (
+                    <button
+                      onClick={() => {
+                        setEditingOwnersForLm(lm.id);
+                        setNewOwnerIds(lm.owners?.map((o: any) => o.userId) ?? []);
+                      }}
+                      style={{ fontSize: "12px", color: "#71717a", background: "none", border: "none", cursor: "pointer", textDecoration: "underline", padding: 0, marginBottom: "8px", display: "block" }}
+                    >
+                      Edit owners
+                    </button>
+                  )}
+                  {editingOwnersForLm === lm.id && (
+                    <div style={{ marginTop: "8px", marginBottom: "12px", padding: "12px", border: "1px solid #e4e4e7", backgroundColor: "#f8fafc" }}>
+                      <p style={{ fontSize: "12px", fontWeight: 600, color: "#71717a", marginBottom: "8px", textTransform: "uppercase" }}>Select owners</p>
+                      {(team?.members || []).map((member: any) => {
+                        const userId = member.userId || member.id;
+                        const name = member.user?.name || member.user?.email || userId;
+                        const isChecked = newOwnerIds.includes(userId);
+                        return (
+                          <label key={userId} style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "6px", cursor: "pointer" }}>
+                            <input
+                              type="checkbox"
+                              checked={isChecked}
+                              onChange={() => setNewOwnerIds((prev) => isChecked ? prev.filter((id) => id !== userId) : [...prev, userId])}
+                            />
+                            <span style={{ fontSize: "13px", color: "#18181b" }}>{name}</span>
+                          </label>
+                        );
+                      })}
+                      <div style={{ display: "flex", gap: "8px", marginTop: "12px" }}>
+                        <button
+                          onClick={async () => {
+                            if (newOwnerIds.length === 0) return;
+                            try {
+                              const updated = await updateOwners({ leadMeasureId: lm.id, ownerUserIds: newOwnerIds });
+                              setActiveWig((prev) => ({
+                                ...prev,
+                                leadMeasures: prev.leadMeasures.map((m) => m.id === lm.id ? { ...m, owners: (updated as any).owners } : m),
+                              }));
+                              setEditingOwnersForLm(null);
+                            } catch {}
+                          }}
+                          disabled={isUpdatingOwners || newOwnerIds.length === 0}
+                          style={{ padding: "6px 16px", backgroundColor: "#18181b", color: "#ffffff", border: "none", fontSize: "12px", fontWeight: 600, cursor: isUpdatingOwners || newOwnerIds.length === 0 ? "not-allowed" : "pointer" }}
+                        >
+                          {isUpdatingOwners ? "Saving…" : "Save owners"}
+                        </button>
+                        <button
+                          onClick={() => setEditingOwnersForLm(null)}
+                          style={{ padding: "6px 16px", backgroundColor: "transparent", border: "1px solid #e4e4e7", fontSize: "12px", cursor: "pointer" }}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
                   )}
                   {lm.description && (
                     <p style={{ fontSize: "14px", color: "#71717a", marginBottom: "12px" }}>{lm.description}</p>

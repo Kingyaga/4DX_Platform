@@ -3,8 +3,8 @@ import { Prisma } from "@/generated/prisma/client";
 import { router, protectedProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
 import { auditLog } from "../audit";
-import { sendWigClosedEmail } from "../email";
-import { notifyMany } from "../notify";
+import { sendWigClosedEmail, sendWigDeadlinePassedEmail } from "../email";
+import { notify, notifyMany } from "../notify";
 
 export const wigsRouter = router({
   create: protectedProcedure
@@ -116,7 +116,6 @@ export const wigsRouter = router({
                   user: { select: { id: true, name: true, email: true } },
                 },
                 orderBy: { loggedForDate: "desc" },
-                take: 10,
               },
             },
           },
@@ -287,16 +286,6 @@ export const wigsRouter = router({
     .input(z.object({ wigId: z.string() }))
     .query(async ({ ctx, input }) => {
       const currentUserId = (ctx.session.user as any).id;
-      const wig = await ctx.db.wIG.findUnique({
-        where: { id: input.wigId },
-        include: {
-          team: {
-            select: { id: true, name: true, slug: true, leadUserId: true },
-          },
-        },
-      });
-
-      if (!wig) throw new TRPCError({ code: "NOT_FOUND" });
 
       const wigWithDetails = await ctx.db.wIG.findUnique({
         where: { id: input.wigId },
@@ -313,11 +302,7 @@ export const wigsRouter = router({
                 },
               },
               activityLogs: {
-                where: wig.team.leadUserId === currentUserId
-                  ? undefined
-                  : { userId: currentUserId },
                 orderBy: { loggedForDate: "desc" },
-                take: 10,
               },
             },
           },
@@ -325,6 +310,18 @@ export const wigsRouter = router({
       });
 
       if (!wigWithDetails) throw new TRPCError({ code: "NOT_FOUND" });
+
+      // Filter activity logs to current user's logs unless they are the team lead
+      if (wigWithDetails.team.leadUserId !== currentUserId) {
+        return {
+          ...wigWithDetails,
+          leadMeasures: wigWithDetails.leadMeasures.map((lm) => ({
+            ...lm,
+            activityLogs: lm.activityLogs.filter((al) => al.userId === currentUserId),
+          })),
+        };
+      }
+
       return wigWithDetails;
     }),
 
@@ -358,5 +355,43 @@ export const wigsRouter = router({
         where: { id: input.wigId },
         data: input.data,
       });
+    }),
+
+  checkAndNotifyExpired: protectedProcedure
+    .mutation(async ({ ctx }) => {
+      // Only org admins or system (called from cron) can trigger this
+      const isAdmin = await ctx.db.orgMembership.findFirst({
+        where: { userId: (ctx.session.user as any).id, role: "ADMIN" },
+      });
+      if (!isAdmin) throw new TRPCError({ code: "FORBIDDEN" });
+
+      const expiredWigs = await ctx.db.wIG.findMany({
+        where: { status: "ACTIVE", deadline: { lt: new Date() } },
+        include: {
+          team: {
+            include: {
+              members: { include: { user: { select: { id: true, name: true, email: true } } } },
+            },
+          },
+        },
+      });
+
+      for (const wig of expiredWigs) {
+        await notify({
+          db: ctx.db,
+          userId: wig.team.leadUserId,
+          type: "WIG_DEADLINE_PASSED",
+          payload: { wigTitle: wig.title, wigId: wig.id, deadline: wig.deadline.toISOString() },
+        });
+
+        sendWigDeadlinePassedEmail({
+          to: wig.team.members.find((m) => m.userId === wig.team.leadUserId)?.user.email ?? "",
+          name: wig.team.members.find((m) => m.userId === wig.team.leadUserId)?.user.name ?? "Team Lead",
+          wigTitle: wig.title,
+          teamName: wig.team.name ?? "",
+        }).catch(() => {});
+      }
+
+      return { notified: expiredWigs.length };
     }),
 });
