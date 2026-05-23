@@ -12,6 +12,7 @@ export const leadMeasuresRouter = router({
         cadence: z.enum(["WEEKLY", "BIWEEKLY"]),
         targetValue: z.number(),
         unit: z.string().min(1),
+        ownerUserIds: z.array(z.string()).min(1).max(10),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -54,6 +55,22 @@ export const leadMeasuresRouter = router({
         });
       }
 
+      const uniqueOwnerUserIds = [...new Set(input.ownerUserIds)];
+      const teamOwners = await ctx.db.teamMembership.findMany({
+        where: {
+          teamId: wig.team.id,
+          userId: { in: uniqueOwnerUserIds },
+        },
+        select: { userId: true },
+      });
+
+      if (teamOwners.length !== uniqueOwnerUserIds.length) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Lead measure owners must be members of this team.",
+        });
+      }
+
       return ctx.db.leadMeasure.create({
         data: {
           wigId: input.wigId,
@@ -62,6 +79,15 @@ export const leadMeasuresRouter = router({
           cadence: input.cadence,
           targetValue: input.targetValue,
           unit: input.unit,
+          owners: {
+            create: uniqueOwnerUserIds.map((userId) => ({ userId })),
+          },
+        },
+        include: {
+          owners: {
+            include: { user: { select: { id: true, name: true, email: true } } },
+          },
+          activityLogs: true,
         },
       });
     }),

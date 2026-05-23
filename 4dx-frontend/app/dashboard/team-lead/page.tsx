@@ -237,6 +237,72 @@ export default function TeamLeadPage() {
           )}
         </div>
 
+        {/* Session Roster — who completed vs pending this week */}
+        <div style={{ border: "1px solid #e4e4e7", borderRadius: "8px", padding: "20px", backgroundColor: "white" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+            <h2 style={{ margin: 0, fontSize: "16px", fontWeight: "600" }}>Weekly Session Roster</h2>
+            <span style={{ fontSize: "12px", color: "#71717a" }}>
+              {sessions.filter((s: any) => s.status === "COMPLETE").length} / {sessions.length} complete
+            </span>
+          </div>
+
+          {sessions.length === 0 ? (
+            <p style={{ margin: 0, color: "#a1a1aa", fontSize: "14px" }}>No sessions generated for this week yet.</p>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+              {sessions.map((session: any) => {
+                const statusColor =
+                  session.status === "COMPLETE" ? "#16A34A" :
+                  session.status === "OVERDUE"  ? "#ef4444" :
+                  session.status === "IN_PROGRESS" ? "#EAB308" : "#71717a";
+                const statusLabel =
+                  session.status === "COMPLETE" ? "Complete" :
+                  session.status === "OVERDUE"  ? "Overdue" :
+                  session.status === "IN_PROGRESS" ? "In Progress" : "Pending";
+
+                return (
+                  <div
+                    key={session.id}
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      padding: "10px 14px",
+                      border: "1px solid #e4e4e7",
+                      borderRadius: "6px",
+                      backgroundColor: "#fafafa",
+                    }}
+                  >
+                    <div>
+                      <p style={{ margin: 0, fontWeight: "500", fontSize: "14px" }}>
+                        {session.user?.name || session.user?.email || "Unknown"}
+                      </p>
+                      {session.wig?.title && (
+                        <p style={{ margin: "2px 0 0 0", fontSize: "11px", color: "#71717a" }}>{session.wig.title}</p>
+                      )}
+                    </div>
+                    <span
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: "5px",
+                        fontSize: "12px",
+                        fontWeight: 600,
+                        color: statusColor,
+                        textTransform: "uppercase",
+                        letterSpacing: "0.04em",
+                      }}
+                    >
+                      <span style={{ width: "7px", height: "7px", borderRadius: "50%", backgroundColor: statusColor, display: "inline-block" }} />
+                      {statusLabel}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
         {/* Quick Actions */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "12px" }}>
           <Link

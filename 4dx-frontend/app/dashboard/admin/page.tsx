@@ -485,10 +485,7 @@ export default function AdminPage() {
               <div>
                 <div style={dataDisplayStyle}>{executionScore}%</div>
                 <div style={{ display: "flex", alignItems: "center", gap: "4px", marginTop: "8px", fontSize: "14px", color: "#71717a" }}>
-                  <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>
-                    {executionScore >= 80 ? "arrow_upward" : "arrow_downward"}
-                  </span>
-                  <span>{executionScore >= 80 ? "+" : ""}3% vs last week</span>
+                  <span>{org?.sessionStats?.completionRate ?? 0}% session completion rate</span>
                 </div>
               </div>
             </div>

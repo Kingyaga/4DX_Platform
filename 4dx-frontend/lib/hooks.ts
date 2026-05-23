@@ -5,7 +5,7 @@
 
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession as useAuthSession } from "next-auth/react";
 import { trpc, parseTRPCError } from "./api-client";
@@ -169,19 +169,21 @@ export function useWIGs(teamSlug: string | null) {
 }
 
 /**
- * Fetch a single WIG by ID
- * NOTE: Backend doesn't have this endpoint yet - commenting out
+ * Fetch a single WIG by ID with full lead measure and activity log detail
  */
-// export function useWIG(wigId: string | null) {
-//   const query = trpc.wigs.getById.useQuery({ wigId: wigId || "" });
-//
-//   return {
-//     wig: query.data || null,
-//     isLoading: query.isLoading,
-//     error: query.error ? parseTRPCError(query.error) : null,
-//     refetch: query.refetch,
-//   };
-// }
+export function useWIG(wigId: string | null) {
+  const query = trpc.wigs.getById.useQuery(
+    { wigId: wigId || "" },
+    { enabled: !!wigId },
+  );
+
+  return {
+    wig: query.data || null,
+    isLoading: query.isLoading,
+    error: query.error ? parseTRPCError(query.error) : null,
+    refetch: query.refetch,
+  };
+}
 
 /**
  * Fetch lead measures for a WIG
@@ -380,6 +382,21 @@ export function useCreateLeadMeasure() {
 }
 
 /**
+ * Activate a draft WIG after lead measure gates are satisfied
+ */
+export function useActivateWIG() {
+  const mutation = trpc.wigs.activate.useMutation();
+
+  return {
+    activateWIG: mutation.mutateAsync,
+    isLoading: mutation.isPending,
+    error: mutation.error ? parseTRPCError(mutation.error) : null,
+    isSuccess: mutation.isSuccess,
+    reset: mutation.reset,
+  };
+}
+
+/**
  * Log activity
  */
 export function useLogActivity() {
@@ -537,26 +554,6 @@ export function useCloseWIG() {
 }
 
 /**
- * Hook for displaying temporary messages with auto-dismiss
- */
-export function useTimedMessage(duration: number = 3000) {
-  const [message, setMessage] = useState<string | null>(null);
-
-  const showMessage = useCallback((msg: string) => {
-    setMessage(msg);
-    setTimeout(() => setMessage(null), duration);
-  }, [duration]);
-
-  const clearMessage = useCallback(() => setMessage(null), []);
-
-  return {
-    message,
-    showMessage,
-    clearMessage,
-  };
-}
-
-/**
  * Update a WIG (Team Lead only)
  */
 export function useUpdateWIG() {
@@ -663,6 +660,81 @@ export function useChangePassword() {
     isLoading: mutation.isPending,
     error: mutation.error ? parseTRPCError(mutation.error) : null,
     isSuccess: mutation.isSuccess,
+    reset: mutation.reset,
+  };
+}
+
+/**
+ * Fetch unread notifications for the current user
+ */
+export function useNotifications() {
+  const query = (trpc.notifications as any).getUnread.useQuery(undefined, {
+    refetchInterval: 30_000,
+  });
+
+  return {
+    notifications: (query.data || []) as Array<{
+      id: string;
+      type: string;
+      message: string;
+      createdAt: string;
+      read: boolean;
+    }>,
+    isLoading: query.isLoading,
+    error: query.error ? parseTRPCError(query.error) : null,
+    refetch: query.refetch,
+  };
+}
+
+/**
+ * Get unread notification count (lightweight — polls every 30s)
+ */
+export function useNotificationCount() {
+  const query = (trpc.notifications as any).getUnreadCount.useQuery(undefined, {
+    refetchInterval: 30_000,
+  });
+
+  return {
+    count: (query.data?.count as number) ?? 0,
+    refetch: query.refetch,
+  };
+}
+
+/**
+ * Mark a single notification as read
+ */
+export function useMarkNotificationRead() {
+  const mutation = (trpc.notifications as any).markRead.useMutation();
+
+  return {
+    markRead: mutation.mutateAsync,
+    isLoading: mutation.isPending,
+  };
+}
+
+/**
+ * Mark all notifications as read
+ */
+export function useMarkAllNotificationsRead() {
+  const mutation = (trpc.notifications as any).markAllRead.useMutation();
+
+  return {
+    markAllRead: mutation.mutateAsync,
+    isLoading: mutation.isPending,
+  };
+}
+
+/**
+ * Find a user by email (for team member lookup)
+ */
+export function useFindUserByEmail() {
+  const mutation = (trpc.auth as any).findByEmail.useMutation();
+
+  return {
+    findUserByEmail: mutation.mutateAsync,
+    user: mutation.data as { id: string; name: string; email: string } | null,
+    isLoading: mutation.isPending,
+    error: mutation.error ? parseTRPCError(mutation.error) : null,
     reset: mutation.reset,
   };
 }

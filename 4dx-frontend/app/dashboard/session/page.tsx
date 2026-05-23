@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import type { Dispatch, SetStateAction } from "react";
 import { useCurrentSessions, useCompleteAccount, useCompleteReview, useCompleteCommit } from "@/lib/hooks";
 import { useTeamStore } from "@/lib/stores/team-store";
 import { ErrorState } from "@/lib/components/states";
@@ -16,21 +17,42 @@ export default function WeeklySessionPage() {
 
   const [step, setStep] = useState(0);
   const [selectedSession, setSelectedSession] = useState<WeeklySession | null>(null);
+  const [commitments, setCommitments] = useState<Array<{ text: string; linkedLeadMeasureId: string }>>([
+    { text: "", linkedLeadMeasureId: "" },
+  ]);
+  const [accountUpdates, setAccountUpdates] = useState<Record<string, { status: "DONE" | "PARTIAL" | "NOT_DONE"; notDoneReason?: string; reflection?: string }>>({});
+  const [formError, setFormError] = useState<string | null>(null);
 
-  // Auto-select first session when loaded
-  if (isLoading === false && !selectedSession && sessions.length > 0) {
-    setSelectedSession(sessions[0] as any as WeeklySession);
-  }
+  useEffect(() => {
+    if (!isLoading && !selectedSession && sessions.length > 0) {
+      setSelectedSession(sessions[0] as any as WeeklySession);
+    }
+  }, [isLoading, selectedSession, sessions]);
 
   const handleStepComplete = async (stepNum: number) => {
     if (!selectedSession || !currentTeamSlug) return;
 
     try {
+      setFormError(null);
+
       if (stepNum === 0) {
+        const updates = (selectedSession.commitments || []).map((commitment) => ({
+          commitmentId: commitment.id,
+          status: accountUpdates[commitment.id]?.status || "DONE",
+          notDoneReason: accountUpdates[commitment.id]?.notDoneReason as any,
+          reflection: accountUpdates[commitment.id]?.reflection,
+        }));
+
+        const missingReason = updates.some((update) => update.status === "NOT_DONE" && !update.notDoneReason);
+        if (missingReason) {
+          setFormError("Choose a reason for every commitment marked Not Done.");
+          return;
+        }
+
         // Complete Account step
         await completeAccount({
           sessionId: selectedSession.id,
-          commitmentUpdates: [],
+          commitmentUpdates: updates,
         });
       } else if (stepNum === 1) {
         // Complete Review step
@@ -38,14 +60,32 @@ export default function WeeklySessionPage() {
           sessionId: selectedSession.id,
         });
       } else if (stepNum === 2) {
+        const cleanedCommitments = commitments
+          .map((commitment) => ({
+            text: commitment.text.trim(),
+            linkedLeadMeasureId: commitment.linkedLeadMeasureId || undefined,
+          }))
+          .filter((commitment) => commitment.text.length > 0);
+
+        if (cleanedCommitments.length < 1 || cleanedCommitments.length > 3) {
+          setFormError("Enter 1-3 specific commitments before finishing.");
+          return;
+        }
+
+        if (cleanedCommitments.some((commitment) => commitment.text.split(/\s+/).filter(Boolean).length < 5)) {
+          setFormError("Each commitment needs at least 5 words.");
+          return;
+        }
+
         // Complete Commit step
         await completeCommit({
           sessionId: selectedSession.id,
-          commitments: [],
+          commitments: cleanedCommitments,
         });
       }
       setStep(Math.min(2, step + 1));
-    } catch {
+    } catch (error) {
+      setFormError(error instanceof Error ? error.message : "Unable to save this step.");
       // Error handled in hook
     }
   };
@@ -86,9 +126,14 @@ export default function WeeklySessionPage() {
       </header>
 
       <div style={{ flex: 1, overflowY: "auto", padding: "32px", backgroundColor: "#f7f9fd" }}>
-        {step === 0 && <StepAccount session={selectedSession} />}
+        {formError && (
+          <div style={{ maxWidth: "900px", margin: "0 auto 16px auto", padding: "12px 16px", backgroundColor: "#fee2e2", color: "#991b1b", border: "1px solid #fecaca" }}>
+            {formError}
+          </div>
+        )}
+        {step === 0 && <StepAccount session={selectedSession} accountUpdates={accountUpdates} onAccountUpdatesChange={setAccountUpdates} />}
         {step === 1 && <StepReview session={selectedSession} />}
-        {step === 2 && <StepCommit session={selectedSession} />}
+        {step === 2 && <StepCommit session={selectedSession} commitments={commitments} onCommitmentsChange={setCommitments} />}
       </div>
 
       <footer style={{ backgroundColor: "#ffffff", borderTop: "1px solid #e4e4e7", padding: "16px 24px", display: "flex", justifyContent: "space-between", alignItems: "center", position: "sticky", bottom: 0 }}>
@@ -104,7 +149,15 @@ export default function WeeklySessionPage() {
   );
 }
 
-function StepAccount({ session }: { session: WeeklySession }) {
+function StepAccount({
+  session,
+  accountUpdates,
+  onAccountUpdatesChange,
+}: {
+  session: WeeklySession;
+  accountUpdates: Record<string, { status: "DONE" | "PARTIAL" | "NOT_DONE"; notDoneReason?: string; reflection?: string }>;
+  onAccountUpdatesChange: Dispatch<SetStateAction<Record<string, { status: "DONE" | "PARTIAL" | "NOT_DONE"; notDoneReason?: string; reflection?: string }>>>;
+}) {
   if (!session.commitments || session.commitments.length === 0) {
     return (
       <div style={{ maxWidth: "800px", margin: "0 auto", textAlign: "center", color: "#71717a" }}>
@@ -119,21 +172,85 @@ function StepAccount({ session }: { session: WeeklySession }) {
       <p style={{ fontSize: "16px", color: "#71717a", marginBottom: "32px" }}>Review what was committed last week and mark completion.</p>
       <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
         {session.commitments.map((commitment) => {
-          const isDone = commitment.status === "DONE";
+          const update = accountUpdates[commitment.id] || { status: "DONE" as const };
+          const isNotDone = update.status === "NOT_DONE";
           return (
-            <div key={commitment.id} style={{ backgroundColor: "#ffffff", border: "1px solid #e4e4e7", padding: "20px", display: "flex", alignItems: "center", gap: "16px" }}>
-              <div style={{ width: "36px", height: "36px", borderRadius: "50%", backgroundColor: isDone ? "#18181b" : "#e4e4e7", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, cursor: "not-allowed" }}>
-                {isDone && <span className="material-symbols-outlined" style={{ fontSize: "18px", color: "#ffffff" }}>check</span>}
-              </div>
+            <div key={commitment.id} style={{ backgroundColor: "#ffffff", border: "1px solid #e4e4e7", padding: "20px", display: "grid", gap: "16px" }}>
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: "14px", fontWeight: 600, color: "#18181b", marginBottom: "2px" }}>{commitment.text}</div>
                 {commitment.linkedLeadMeasureId && (
                   <div style={{ fontSize: "12px", color: "#71717a" }}>Linked to lead measure</div>
                 )}
               </div>
-              <span style={{ fontSize: "12px", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em", color: isDone ? "#16A34A" : "#ba1a1a" }}>
-                {isDone ? "Done" : "Not Done"}
-              </span>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: "8px" }}>
+                {(["DONE", "PARTIAL", "NOT_DONE"] as const).map((status) => (
+                  <button
+                    key={status}
+                    type="button"
+                    onClick={() => {
+                      onAccountUpdatesChange((current) => ({
+                        ...current,
+                        [commitment.id]: {
+                          ...current[commitment.id],
+                          status,
+                          notDoneReason: status === "NOT_DONE" ? current[commitment.id]?.notDoneReason : undefined,
+                        },
+                      }));
+                    }}
+                    style={{
+                      padding: "10px 12px",
+                      border: "1px solid #e4e4e7",
+                      backgroundColor: update.status === status ? "#18181b" : "#ffffff",
+                      color: update.status === status ? "#ffffff" : "#18181b",
+                      fontSize: "12px",
+                      fontWeight: 600,
+                      cursor: "pointer",
+                    }}
+                  >
+                    {status.replace("_", " ")}
+                  </button>
+                ))}
+              </div>
+              {isNotDone && (
+                <div style={{ display: "grid", gap: "10px" }}>
+                  <select
+                    value={update.notDoneReason || ""}
+                    onChange={(event) => {
+                      onAccountUpdatesChange((current) => ({
+                        ...current,
+                        [commitment.id]: {
+                          ...current[commitment.id],
+                          status: "NOT_DONE",
+                          notDoneReason: event.target.value,
+                        },
+                      }));
+                    }}
+                    style={{ border: "1px solid #e4e4e7", padding: "10px", fontSize: "14px" }}
+                  >
+                    <option value="">Choose reason...</option>
+                    <option value="WHIRLWIND">Whirlwind</option>
+                    <option value="MISJUDGED">Misjudged effort</option>
+                    <option value="BLOCKED">Blocked</option>
+                    <option value="OTHER">Other</option>
+                  </select>
+                  <textarea
+                    value={update.reflection || ""}
+                    onChange={(event) => {
+                      onAccountUpdatesChange((current) => ({
+                        ...current,
+                        [commitment.id]: {
+                          ...current[commitment.id],
+                          status: "NOT_DONE",
+                          reflection: event.target.value,
+                        },
+                      }));
+                    }}
+                    placeholder="Brief reflection"
+                    rows={2}
+                    style={{ border: "1px solid #e4e4e7", padding: "10px", fontSize: "14px", fontFamily: "'Inter', sans-serif" }}
+                  />
+                </div>
+              )}
             </div>
           );
         })}
@@ -214,10 +331,15 @@ function StepReview({ session }: { session: WeeklySession }) {
   );
 }
 
-function StepCommit({ session }: { session: WeeklySession }) {
-  const [commitmentText, setCommitmentText] = useState("");
-  const [selectedLM, setSelectedLM] = useState("");
-
+function StepCommit({
+  session,
+  commitments,
+  onCommitmentsChange,
+}: {
+  session: WeeklySession;
+  commitments: Array<{ text: string; linkedLeadMeasureId: string }>;
+  onCommitmentsChange: Dispatch<SetStateAction<Array<{ text: string; linkedLeadMeasureId: string }>>>;
+}) {
   const allLeadMeasures = session.wig?.leadMeasures.map((lm: LeadMeasure) => ({ id: lm.id, name: lm.name, wigTitle: session.wig?.title })) || [];
 
   return (
@@ -225,38 +347,70 @@ function StepCommit({ session }: { session: WeeklySession }) {
       <h1 style={{ fontSize: "24px", fontWeight: 600, color: "#18181b", marginBottom: "8px" }}>Make Commitments</h1>
       <p style={{ fontSize: "16px", color: "#71717a", marginBottom: "32px" }}>What are the 1-2 most important things you can do this week to impact the lead measures?</p>
       <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-        <div style={{ backgroundColor: "#ffffff", border: "1px solid #e4e4e7", padding: "20px", display: "flex", flexDirection: "column", gap: "16px" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <span style={{ fontSize: "12px", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", color: "#71717a" }}>New Commitment</span>
-          </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-            <label style={{ fontSize: "12px", fontWeight: 500, color: "#18181b" }}>Action</label>
-            <textarea
-              value={commitmentText}
-              onChange={(e) => setCommitmentText(e.target.value)}
-              placeholder="e.g., Complete 10 customer calls and document feedback"
-              style={{ border: "1px solid #e4e4e7", backgroundColor: "#ffffff", padding: "8px 12px", fontSize: "14px", color: "#18181b", outline: "none", borderRadius: "0", width: "100%", minHeight: "60px", fontFamily: "'Inter', sans-serif" }}
-            />
-          </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-            <label style={{ fontSize: "12px", fontWeight: 500, color: "#18181b" }}>Link to Lead Measure (Optional)</label>
-            <div style={{ position: "relative" }}>
-              <select
-                value={selectedLM}
-                onChange={(e) => setSelectedLM(e.target.value)}
-                style={{ width: "100%", border: "1px solid #e4e4e7", backgroundColor: "#ffffff", padding: "8px 12px", fontSize: "16px", color: "#18181b", outline: "none", borderRadius: "0", appearance: "none" }}
-              >
-                <option value="">Select a lead measure...</option>
-                {allLeadMeasures.map((lm: { id: string; name: string; wigTitle: string | undefined }) => (
-                  <option key={lm.id} value={lm.id}>
-                    {lm.name} ({lm.wigTitle})
-                  </option>
-                ))}
-              </select>
-              <span className="material-symbols-outlined" style={{ position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)", pointerEvents: "none", color: "#71717a" }}>arrow_drop_down</span>
+        {commitments.map((commitment, index) => (
+          <div key={index} style={{ backgroundColor: "#ffffff", border: "1px solid #e4e4e7", padding: "20px", display: "flex", flexDirection: "column", gap: "16px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <span style={{ fontSize: "12px", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", color: "#71717a" }}>Commitment {index + 1}</span>
+              {commitments.length > 1 && (
+                <button
+                  type="button"
+                  onClick={() => onCommitmentsChange((current) => current.filter((_, itemIndex) => itemIndex !== index))}
+                  style={{ border: "none", backgroundColor: "transparent", color: "#ba1a1a", cursor: "pointer", fontSize: "12px", fontWeight: 700 }}
+                >
+                  Remove
+                </button>
+              )}
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+              <label style={{ fontSize: "12px", fontWeight: 500, color: "#18181b" }}>Action</label>
+              <textarea
+                value={commitment.text}
+                onChange={(event) => {
+                  onCommitmentsChange((current) =>
+                    current.map((item, itemIndex) =>
+                      itemIndex === index ? { ...item, text: event.target.value } : item,
+                    ),
+                  );
+                }}
+                placeholder="e.g., Complete 10 customer calls and document feedback"
+                style={{ border: "1px solid #e4e4e7", backgroundColor: "#ffffff", padding: "8px 12px", fontSize: "14px", color: "#18181b", outline: "none", borderRadius: "0", width: "100%", minHeight: "60px", fontFamily: "'Inter', sans-serif" }}
+              />
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+              <label style={{ fontSize: "12px", fontWeight: 500, color: "#18181b" }}>Link to Lead Measure (Optional)</label>
+              <div style={{ position: "relative" }}>
+                <select
+                  value={commitment.linkedLeadMeasureId}
+                  onChange={(event) => {
+                    onCommitmentsChange((current) =>
+                      current.map((item, itemIndex) =>
+                        itemIndex === index ? { ...item, linkedLeadMeasureId: event.target.value } : item,
+                      ),
+                    );
+                  }}
+                  style={{ width: "100%", border: "1px solid #e4e4e7", backgroundColor: "#ffffff", padding: "8px 12px", fontSize: "16px", color: "#18181b", outline: "none", borderRadius: "0", appearance: "none" }}
+                >
+                  <option value="">Select a lead measure...</option>
+                  {allLeadMeasures.map((lm: { id: string; name: string; wigTitle: string | undefined }) => (
+                    <option key={lm.id} value={lm.id}>
+                      {lm.name} ({lm.wigTitle})
+                    </option>
+                  ))}
+                </select>
+                <span className="material-symbols-outlined" style={{ position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)", pointerEvents: "none", color: "#71717a" }}>arrow_drop_down</span>
+              </div>
             </div>
           </div>
-        </div>
+        ))}
+        {commitments.length < 3 && (
+          <button
+            type="button"
+            onClick={() => onCommitmentsChange((current) => [...current, { text: "", linkedLeadMeasureId: "" }])}
+            style={{ padding: "10px 16px", border: "1px solid #18181b", backgroundColor: "#ffffff", color: "#18181b", fontSize: "12px", fontWeight: 700, textTransform: "uppercase", cursor: "pointer" }}
+          >
+            Add Commitment
+          </button>
+        )}
         <div style={{ textAlign: "center", color: "#71717a", fontSize: "12px" }}>
           Commitments will be saved when you complete this step.
         </div>

@@ -19,7 +19,10 @@ export const activityLogsRouter = router({
       // Verify the lead measure exists and get team info
       const leadMeasure = await ctx.db.leadMeasure.findUnique({
         where: { id: input.leadMeasureId },
-        include: { wig: { include: { team: true } } },
+        include: {
+          owners: true,
+          wig: { include: { team: true } },
+        },
       });
 
       if (!leadMeasure) throw new TRPCError({ code: "NOT_FOUND" });
@@ -38,6 +41,17 @@ export const activityLogsRouter = router({
         throw new TRPCError({
           code: "FORBIDDEN",
           message: "You must be a team member to log activity.",
+        });
+      }
+
+      const isOwner = leadMeasure.owners.some(
+        (owner) => owner.userId === (ctx.session.user as any).id,
+      );
+
+      if (!isOwner) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "You can only log activity against lead measures you own.",
         });
       }
 
@@ -96,10 +110,33 @@ export const activityLogsRouter = router({
         });
       }
 
-      return ctx.db.activityLog.update({
+      const approved = await ctx.db.activityLog.update({
         where: { id: input.logId },
         data: { status: "APPROVED" },
       });
+
+      // Update the WIG's currentValue by summing all approved activity logs
+      // for this lead measure's WIG, so the scoreboard stays current.
+      const wig = await ctx.db.wIG.findFirst({
+        where: { leadMeasures: { some: { id: log.leadMeasureId } } },
+        select: { id: true, fromValue: true },
+      });
+
+      if (wig) {
+        const aggregate = await ctx.db.activityLog.aggregate({
+          where: {
+            status: "APPROVED",
+            leadMeasure: { wigId: wig.id },
+          },
+          _sum: { value: true },
+        });
+        await ctx.db.wIG.update({
+          where: { id: wig.id },
+          data: { currentValue: wig.fromValue + (aggregate._sum.value ?? 0) },
+        });
+      }
+
+      return approved;
     }),
 
   approveAllForTeam: protectedProcedure
@@ -119,17 +156,34 @@ export const activityLogsRouter = router({
         });
       }
 
-      return ctx.db.activityLog.updateMany({
+      await ctx.db.activityLog.updateMany({
         where: {
           status: "PENDING",
-          leadMeasure: {
-            wig: {
-              teamId: team.id,
-            },
-          },
+          leadMeasure: { wig: { teamId: team.id } },
         },
         data: { status: "APPROVED" },
       });
+
+      // Recompute currentValue for every active WIG on this team
+      const wigs = await ctx.db.wIG.findMany({
+        where: { teamId: team.id, status: "ACTIVE" },
+        select: { id: true, fromValue: true },
+      });
+
+      await Promise.all(
+        wigs.map(async (wig) => {
+          const aggregate = await ctx.db.activityLog.aggregate({
+            where: { status: "APPROVED", leadMeasure: { wigId: wig.id } },
+            _sum: { value: true },
+          });
+          return ctx.db.wIG.update({
+            where: { id: wig.id },
+            data: { currentValue: wig.fromValue + (aggregate._sum.value ?? 0) },
+          });
+        }),
+      );
+
+      return { success: true };
     }),
 
   decline: protectedProcedure

@@ -3,6 +3,7 @@
 import { useEffect, useState, useMemo, type FormEvent } from "react";
 import { useWIGs, useLogActivity } from "@/lib/hooks";
 import { useTeamStore } from "@/lib/stores/team-store";
+import { useUserStore } from "@/lib/stores/user-store";
 import { ErrorState, EmptyState } from "@/lib/components/states";
 import { LoadingSpinner } from "@/lib/components/loading-spinner";
 import type { WIG, LeadMeasure, ActivityLogEntry } from "@/lib/types";
@@ -15,6 +16,7 @@ type AggregatedActivityLog = ActivityLogEntry & {
 
 export default function ActivityLogPage() {
   const { currentTeamSlug } = useTeamStore();
+  const { user } = useUserStore();
   const { wigs, isLoading, error } = useWIGs(currentTeamSlug);
   const { logActivity, isLoading: isSubmitting, error: submitError } = useLogActivity();
 
@@ -27,11 +29,15 @@ export default function ActivityLogPage() {
   const [logsError, setLogsError] = useState<string | null>(null);
   const [logsRefreshIndex, setLogsRefreshIndex] = useState(0);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [showAllLogs, setShowAllLogs] = useState(false);
+  const PREVIEW_COUNT = 10;
 
   const allLeadMeasures = useMemo(() =>
     (wigs as any[]).flatMap((wig) =>
-      (wig.leadMeasures || []).map((lm: LeadMeasure) => ({ id: lm.id, name: lm.name, wigTitle: wig.title })),
-    ), [wigs]
+      (wig.leadMeasures || [])
+        .filter((lm: LeadMeasure) => !user?.id || (lm.owners || []).some((owner) => owner.userId === user.id))
+        .map((lm: LeadMeasure) => ({ id: lm.id, name: lm.name, wigTitle: wig.title })),
+    ), [wigs, user?.id]
   );
 
   const hasLeadMeasures = allLeadMeasures.length > 0;
@@ -96,6 +102,7 @@ export default function ActivityLogPage() {
   const sortedLogs = [...activityLogs].sort((a: AggregatedActivityLog, b: AggregatedActivityLog) =>
     new Date(b.loggedForDate).getTime() - new Date(a.loggedForDate).getTime(),
   );
+  const visibleLogs = showAllLogs ? sortedLogs : sortedLogs.slice(0, PREVIEW_COUNT);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -220,7 +227,7 @@ export default function ActivityLogPage() {
 
           {!hasLeadMeasures && (
             <div style={{ padding: "12px", backgroundColor: "#f8fafc", border: "1px solid #e2e8f0", color: "#475569", fontSize: "14px", borderRadius: "4px" }}>
-              Your team does not have any lead measures yet. Ask your team lead to create one before submitting activity.
+              You do not own any lead measures on this team yet. Ask your team lead to assign you before submitting activity.
             </div>
           )}
 
@@ -269,7 +276,7 @@ export default function ActivityLogPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {sortedLogs.map((log, i) => (
+                  {visibleLogs.map((log, i) => (
                     <tr
                       key={log.id}
                       style={{ borderBottom: "1px solid #f4f4f5", backgroundColor: hoveredRow === i ? "#f7f9fd" : "transparent", transition: "background 0.075s" }}
@@ -295,10 +302,13 @@ export default function ActivityLogPage() {
             </div>
           )}
 
-          {sortedLogs.length > 0 && (
+          {sortedLogs.length > PREVIEW_COUNT && (
             <div style={{ marginTop: "16px", display: "flex", justifyContent: "center" }}>
-              <button style={{ padding: "8px 24px", border: "1px solid #e4e4e7", backgroundColor: "transparent", fontSize: "12px", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", cursor: "pointer", color: "#18181b" }}>
-                View Full History
+              <button
+                onClick={() => setShowAllLogs((v) => !v)}
+                style={{ padding: "8px 24px", border: "1px solid #e4e4e7", backgroundColor: "transparent", fontSize: "12px", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", cursor: "pointer", color: "#18181b" }}
+              >
+                {showAllLogs ? "Show Less" : `View All ${sortedLogs.length} Logs`}
               </button>
             </div>
           )}

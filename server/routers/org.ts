@@ -85,7 +85,7 @@ export const orgRouter = router({
 
       // Pull all teams with basic data (no activity logs for performance)
       const teams = await ctx.db.team.findMany({
-        where: { orgId: org.id },
+        where: { orgId: org.id, archivedAt: null },
         include: {
           members: {
             include: {
@@ -169,7 +169,7 @@ export const orgRouter = router({
 
       // Pull teams with activity logs only (limited for performance)
       const teams = await ctx.db.team.findMany({
-        where: { orgId: org.id },
+        where: { orgId: org.id, archivedAt: null },
         select: {
           id: true,
           name: true,
@@ -484,7 +484,7 @@ export const orgRouter = router({
       }
 
       const teams = await ctx.db.team.findMany({
-        where: { orgId: org.id },
+        where: { orgId: org.id, archivedAt: null },
         include: {
           _count: {
             select: { members: true },
