@@ -8,6 +8,19 @@ services:
     preDeployCommand: pnpm prisma migrate deploy
     startCommand: pnpm exec next start -p $PORT
     autoDeploy: true
+    envVars:
+      - key: RESEND_API_KEY
+        sync: false
+      - key: EMAIL_FROM
+        sync: false
+      - key: CRON_SECRET
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+      - key: NEXTAUTH_SECRET
+        sync: false
+      - key: NEXTAUTH_URL
+        sync: false
 
   - type: web
     name: 4dx-platform-frontend
