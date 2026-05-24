@@ -41,9 +41,12 @@ export default function ActivityLogPage() {
     (wigs as any[]).flatMap((wig) =>
       (wig.leadMeasures || [])
         .filter((lm: LeadMeasure) => !user?.id || (lm.owners || []).some((owner) => owner.userId === user.id))
-        .map((lm: LeadMeasure) => ({ id: lm.id, name: lm.name, wigTitle: wig.title })),
+        .map((lm: LeadMeasure) => ({ id: lm.id, name: lm.name, wigTitle: wig.title, unit: (lm as any).unit || "" })),
     ), [wigs, user?.id]
   );
+
+  const selectedLM = allLeadMeasures.find((lm) => lm.id === selectedLeadMeasureId);
+  const selectedUnit = selectedLM?.unit && selectedLM.unit.toLowerCase() !== "none" ? selectedLM.unit : "";
 
   const hasLeadMeasures = allLeadMeasures.length > 0;
 
@@ -85,12 +88,15 @@ export default function ActivityLogPage() {
           // Activity logs might not be included in the response depending on backend query
           const logs = lm.activityLogs;
           if (logs && Array.isArray(logs)) {
-            const aggregatedLogs = logs.map((log: ActivityLogEntry) => ({
-              ...log,
-              leadMeasureId: lm.id,
-              leadMeasureName: lm.name,
-              wigTitle: wig.title,
-            }));
+            const aggregatedLogs = logs
+              .filter((log: ActivityLogEntry) => (log as any).userId === user?.id)
+              .map((log: ActivityLogEntry) => ({
+                ...log,
+                leadMeasureId: lm.id,
+                leadMeasureName: lm.name,
+                wigTitle: wig.title,
+                unit: lm.unit,
+              }));
             loadedLogs.push(...aggregatedLogs);
           }
         }
@@ -187,7 +193,7 @@ export default function ActivityLogPage() {
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
             <div>
               <label style={{ fontSize: "12px", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", color: "#18181b", display: "block", marginBottom: "8px" }}>
-                Numeric Value
+                Value{selectedUnit ? ` (${selectedUnit})` : ""}
               </label>
               <input
                 type="number"
