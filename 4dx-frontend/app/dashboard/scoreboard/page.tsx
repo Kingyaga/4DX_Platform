@@ -125,7 +125,8 @@ export default function ScoreboardPage() {
         {selected.leadMeasures.map((lm: LeadMeasure, i: number) => {
           const recentLogs = (lm.activityLogs || []).slice(0, 6).reverse();
           const trend = recentLogs.map((log: ActivityLogEntry) => log.value);
-          const current = (lm.activityLogs || []).length > 0 ? (lm.activityLogs || [])[0].value : 0;
+          // Cumulative total of all approved activity (correct 4DX lead measure tracking)
+          const current = (lm.activityLogs || []).reduce((sum: number, log: ActivityLogEntry) => sum + log.value, 0);
           const onTrack = current >= lm.targetValue;
           const pct = Math.min(100, Math.round((current / lm.targetValue) * 100));
 

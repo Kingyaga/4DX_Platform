@@ -105,7 +105,7 @@ export default function TeamLeadPage() {
   const activeWIGs = wigs.filter((w: any) => w.status === "ACTIVE").length;
 
   const allLeadMeasures = wigs.flatMap((w: any) => w.leadMeasures || []);
-  const onTrackCount = allLeadMeasures.filter((lm: any) => (lm.activityLogs?.[0]?.value || 0) >= lm.targetValue).length;
+  const onTrackCount = allLeadMeasures.filter((lm: any) => (lm.activityLogs || []).reduce((s: number, l: any) => s + l.value, 0) >= lm.targetValue).length;
   const executionScore = allLeadMeasures.length > 0 ? Math.round((onTrackCount / allLeadMeasures.length) * 100) : 0;
 
   return (

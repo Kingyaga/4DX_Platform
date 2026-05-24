@@ -72,13 +72,13 @@ export default function TeamLeadReportsPage() {
   const executionScore = allLeadMeasures.length > 0
     ? Math.round(
         allLeadMeasures.reduce((sum: number, lm: any) => {
-          const current = lm.activityLogs?.[0]?.value || 0;
+          const current = (lm.activityLogs || []).reduce((s: number, l: any) => s + l.value, 0);
           return sum + Math.min((current / (lm.targetValue || 1)) * 100, 100);
         }, 0) / allLeadMeasures.length
       )
     : 0;
 
-  const onTrackCount = allLeadMeasures.filter((lm: any) => (lm.activityLogs?.[0]?.value || 0) >= lm.targetValue).length;
+  const onTrackCount = allLeadMeasures.filter((lm: any) => (lm.activityLogs || []).reduce((s: number, l: any) => s + l.value, 0) >= lm.targetValue).length;
   const lagMeasures = wigs.map((w: any) => ({
     title: w.title,
     current: w.currentValue || 0,
@@ -310,7 +310,7 @@ export default function TeamLeadReportsPage() {
             </p>
             <div style={{ marginTop: "24px", display: "flex", flexDirection: "column", gap: "12px" }}>
               {allLeadMeasures.slice(0, 10).map((lm: any, i: number) => {
-                const current = lm.activityLogs?.[0]?.value || 0;
+                const current = (lm.activityLogs || []).reduce((s: number, l: any) => s + l.value, 0);
                 const isOnTrack = current >= lm.targetValue;
                 return (
                   <div key={i} style={{ padding: "12px", backgroundColor: "#f9fafb", borderRadius: "6px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>

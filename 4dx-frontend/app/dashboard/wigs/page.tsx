@@ -104,6 +104,10 @@ export default function WIGsPage() {
   }
 
   if (selectedWIG) {
+    const isClosed = ["ACHIEVED", "MISSED", "ABANDONED"].includes(selectedWIG.status);
+    if (isClosed) {
+      return <WIGHistoryDetail wig={selectedWIG} onBack={() => setSelectedWIG(null)} />;
+    }
     return <WIGDetail wig={selectedWIG} onBack={() => setSelectedWIG(null)} />;
   }
 
@@ -694,6 +698,162 @@ function WIGDetail({ wig, onBack }: { wig: WIG; onBack: () => void }) {
           </div>
         )}
       </div>
+    </main>
+  );
+}
+
+function WIGHistoryDetail({ wig, onBack }: { wig: WIG; onBack: () => void }) {
+  const outcomeColor = wig.status === "ACHIEVED" ? "#16A34A" : wig.status === "MISSED" ? "#ef4444" : "#71717a";
+  const outcomeIcon = wig.status === "ACHIEVED" ? "emoji_events" : wig.status === "MISSED" ? "cancel" : "archive";
+  const finalProgress = Math.min(100, Math.round(((wig.currentValue - wig.fromValue) / (wig.toValue - wig.fromValue)) * 100));
+
+  // Duration: from createdAt to closedAt
+  const startDate = new Date(wig.createdAt);
+  const endDate = wig.closedAt ? new Date(wig.closedAt) : new Date(wig.deadline);
+  const durationDays = Math.round((endDate.getTime() - startDate.getTime()) / 86_400_000);
+
+  return (
+    <main style={{ flex: 1, padding: "32px", fontFamily: "'Inter', sans-serif" }}>
+      {/* Back */}
+      <button
+        onClick={onBack}
+        style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "12px", fontWeight: 600, color: "#71717a", background: "none", border: "none", cursor: "pointer", marginBottom: "24px", textTransform: "uppercase", letterSpacing: "0.05em" }}
+      >
+        <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>arrow_back</span>
+        Back to History
+      </button>
+
+      {/* Outcome banner */}
+      <div style={{ backgroundColor: outcomeColor, color: "#ffffff", padding: "20px 24px", marginBottom: "24px", display: "flex", alignItems: "center", gap: "16px" }}>
+        <span className="material-symbols-outlined" style={{ fontSize: "36px" }}>{outcomeIcon}</span>
+        <div>
+          <div style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", opacity: 0.8, marginBottom: "4px" }}>
+            {wig.status === "ACHIEVED" ? "Goal Achieved" : wig.status === "MISSED" ? "Goal Missed" : "Goal Abandoned"}
+          </div>
+          <div style={{ fontSize: "22px", fontWeight: 700, letterSpacing: "-0.02em" }}>{wig.title}</div>
+        </div>
+        <div style={{ marginLeft: "auto", textAlign: "right" }}>
+          <div style={{ fontSize: "11px", opacity: 0.8, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "2px" }}>Closed</div>
+          <div style={{ fontSize: "14px", fontWeight: 600 }}>
+            {wig.closedAt ? new Date(wig.closedAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "—"}
+          </div>
+        </div>
+      </div>
+
+      {/* Lag measure summary */}
+      <div style={{ backgroundColor: "#ffffff", border: "1px solid #e4e4e7", padding: "24px", marginBottom: "24px" }}>
+        <div style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#71717a", marginBottom: "16px" }}>Lag Measure — Final Result</div>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "16px", flexWrap: "wrap", gap: "12px" }}>
+          <div>
+            <div style={{ fontSize: "40px", fontWeight: 700, letterSpacing: "-0.03em", color: "#18181b" }}>
+              {wig.currentValue} <span style={{ fontSize: "18px", fontWeight: 500, color: "#71717a" }}>{wig.unit}</span>
+            </div>
+            <div style={{ fontSize: "13px", color: "#71717a", marginTop: "4px" }}>
+              Baseline: {wig.fromValue} {wig.unit} → Target: {wig.toValue} {wig.unit}
+            </div>
+          </div>
+          <div style={{ textAlign: "right" }}>
+            <div style={{ fontSize: "32px", fontWeight: 700, color: outcomeColor }}>{finalProgress}%</div>
+            <div style={{ fontSize: "12px", color: "#71717a" }}>of target reached</div>
+          </div>
+        </div>
+        {/* Progress bar */}
+        <div style={{ width: "100%", height: "8px", backgroundColor: "#e4e4e7", marginBottom: "8px" }}>
+          <div style={{ height: "100%", backgroundColor: outcomeColor, width: `${finalProgress}%`, transition: "width 0.3s" }}></div>
+        </div>
+        {/* Timeline */}
+        <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", color: "#71717a", marginTop: "8px", flexWrap: "wrap", gap: "8px" }}>
+          <span>Started: {startDate.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</span>
+          <span>Deadline: {new Date(wig.deadline).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</span>
+          <span>Duration: {durationDays} day{durationDays !== 1 ? "s" : ""}</span>
+        </div>
+      </div>
+
+      {/* Lead measures breakdown */}
+      <div style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#71717a", marginBottom: "16px" }}>
+        Lead Measure Breakdown
+      </div>
+      {wig.leadMeasures.length === 0 ? (
+        <div style={{ color: "#71717a", fontSize: "14px", padding: "16px", border: "1px solid #e4e4e7", textAlign: "center" }}>No lead measures were tracked for this WIG.</div>
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+          {wig.leadMeasures.map((lm, i) => {
+            // Cumulative approved total
+            const totalApproved = (lm.activityLogs || []).reduce((sum, log) => sum + log.value, 0);
+            const lmPct = lm.targetValue > 0 ? Math.min(100, Math.round((totalApproved / lm.targetValue) * 100)) : 0;
+            const lmOnTrack = totalApproved >= lm.targetValue;
+
+            // Per-owner contribution
+            const ownerMap: Record<string, { name: string; total: number }> = {};
+            for (const log of (lm.activityLogs || []) as any[]) {
+              if (!log.userId) continue;
+              const name = log.user?.name || log.user?.email || log.userId;
+              if (!ownerMap[log.userId]) ownerMap[log.userId] = { name, total: 0 };
+              ownerMap[log.userId].total += log.value;
+            }
+            const owners = Object.values(ownerMap).sort((a, b) => b.total - a.total);
+
+            return (
+              <div key={lm.id} style={{ backgroundColor: "#ffffff", border: "1px solid #e4e4e7", padding: "20px" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "12px", flexWrap: "wrap", gap: "8px" }}>
+                  <div>
+                    <div style={{ fontSize: "11px", fontWeight: 600, color: "#71717a", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "4px" }}>Lead Measure {i + 1}</div>
+                    <div style={{ fontSize: "16px", fontWeight: 600, color: "#18181b" }}>{lm.name}</div>
+                    {lm.cadence && <div style={{ fontSize: "12px", color: "#71717a", marginTop: "2px" }}>{lm.cadence}</div>}
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "6px", padding: "4px 10px", border: `1px solid ${lmOnTrack ? "#16A34A" : "#e4e4e7"}`, backgroundColor: lmOnTrack ? "#f0fdf4" : "#f4f4f5" }}>
+                    <span style={{ fontSize: "12px", fontWeight: 700, color: lmOnTrack ? "#16A34A" : "#71717a", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                      {lmOnTrack ? "Target Met" : `${lmPct}% of target`}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Total vs target */}
+                <div style={{ display: "flex", alignItems: "flex-end", gap: "8px", marginBottom: "10px" }}>
+                  <span style={{ fontSize: "28px", fontWeight: 700, color: "#18181b", letterSpacing: "-0.02em" }}>{totalApproved.toFixed(1)}</span>
+                  <span style={{ fontSize: "14px", color: "#71717a", marginBottom: "4px" }}>/ {lm.targetValue.toFixed(1)} {lm.unit}</span>
+                </div>
+
+                {/* Progress bar */}
+                <div style={{ width: "100%", height: "4px", backgroundColor: "#e4e4e7", marginBottom: "16px" }}>
+                  <div style={{ height: "100%", backgroundColor: lmOnTrack ? "#16A34A" : "#18181b", width: `${lmPct}%` }}></div>
+                </div>
+
+                {/* Per-owner breakdown */}
+                {owners.length > 0 && (
+                  <div style={{ borderTop: "1px solid #f4f4f5", paddingTop: "12px" }}>
+                    <div style={{ fontSize: "11px", fontWeight: 600, color: "#71717a", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "10px" }}>Member Contribution</div>
+                    <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                      {owners.map((owner) => {
+                        const share = totalApproved > 0 ? Math.round((owner.total / totalApproved) * 100) : 0;
+                        return (
+                          <div key={owner.name}>
+                            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "4px" }}>
+                              <span style={{ fontSize: "13px", color: "#18181b" }}>{owner.name}</span>
+                              <span style={{ fontSize: "13px", fontWeight: 600, color: "#18181b" }}>
+                                {owner.total.toFixed(1)} {lm.unit}
+                                <span style={{ fontWeight: 400, color: "#71717a", marginLeft: "6px" }}>({share}%)</span>
+                              </span>
+                            </div>
+                            <div style={{ width: "100%", height: "3px", backgroundColor: "#f4f4f5" }}>
+                              <div style={{ height: "100%", backgroundColor: "#18181b", width: `${share}%` }}></div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* No logs */}
+                {owners.length === 0 && (
+                  <div style={{ fontSize: "12px", color: "#71717a", fontStyle: "italic" }}>No approved activity logs for this lead measure.</div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
     </main>
   );
 }
