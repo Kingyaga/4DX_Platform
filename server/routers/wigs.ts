@@ -88,7 +88,6 @@ export const wigsRouter = router({
   getByTeam: protectedProcedure
     .input(z.object({ teamSlug: z.string() }))
     .query(async ({ ctx, input }) => {
-      const currentUserId = (ctx.session.user as any).id;
       const team = await ctx.db.team.findUnique({
         where: { slug: input.teamSlug },
         select: { leadUserId: true },
@@ -109,9 +108,7 @@ export const wigsRouter = router({
                 },
               },
               activityLogs: {
-                where: team.leadUserId === currentUserId
-                  ? { status: "APPROVED" }
-                  : { status: "APPROVED", userId: currentUserId },
+                where: { status: "APPROVED" },
                 include: {
                   user: { select: { id: true, name: true, email: true } },
                 },
@@ -310,17 +307,6 @@ export const wigsRouter = router({
       });
 
       if (!wigWithDetails) throw new TRPCError({ code: "NOT_FOUND" });
-
-      // Filter activity logs to current user's logs unless they are the team lead
-      if (wigWithDetails.team.leadUserId !== currentUserId) {
-        return {
-          ...wigWithDetails,
-          leadMeasures: wigWithDetails.leadMeasures.map((lm) => ({
-            ...lm,
-            activityLogs: lm.activityLogs.filter((al) => al.userId === currentUserId),
-          })),
-        };
-      }
 
       return wigWithDetails;
     }),

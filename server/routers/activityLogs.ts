@@ -298,8 +298,9 @@ export const activityLogsRouter = router({
             select: {
               id: true,
               name: true,
+              unit: true,
               wig: {
-                select: { title: true },
+                select: { title: true, unit: true },
               },
             },
           },
