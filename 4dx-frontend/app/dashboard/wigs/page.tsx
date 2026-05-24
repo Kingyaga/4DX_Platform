@@ -204,6 +204,7 @@ export default function WIGsPage() {
               {displayedWigs.map((wig: WIG, i: number) => {
                 const statusColor = wig.status === "ACTIVE" ? "#16A34A" : wig.status === "DRAFT" ? "#71717a" : "#EAB308";
                 const progress = ((wig.currentValue - wig.fromValue) / (wig.toValue - wig.fromValue)) * 100;
+                const targetReached = wig.status === "ACTIVE" && wig.currentValue >= wig.toValue;
 
                 return (
                   <div
@@ -212,8 +213,8 @@ export default function WIGsPage() {
                     onMouseEnter={() => setHoveredRow(i)}
                     onMouseLeave={() => setHoveredRow(null)}
                     style={{
-                      backgroundColor: hoveredRow === i ? "#f7f9fd" : "#ffffff",
-                      border: "1px solid #e4e4e7",
+                      backgroundColor: targetReached ? "#fffbeb" : hoveredRow === i ? "#f7f9fd" : "#ffffff",
+                      border: targetReached ? "1px solid #f59e0b" : "1px solid #e4e4e7",
                       padding: "20px",
                       cursor: "pointer",
                       transition: "background 0.075s",
@@ -221,11 +222,17 @@ export default function WIGsPage() {
                   >
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "16px" }}>
                       <div style={{ flex: 1 }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px", flexWrap: "wrap" }}>
                           <span style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "2px 8px", border: "1px solid #e4e4e7", backgroundColor: "#f4f4f5", fontSize: "12px", fontWeight: 600 }}>
                             <span style={{ width: "8px", height: "8px", borderRadius: "50%", backgroundColor: statusColor, display: "inline-block" }}></span>
                             {wig.status}
                           </span>
+                          {targetReached && (
+                            <span style={{ display: "inline-flex", alignItems: "center", gap: "4px", padding: "2px 8px", backgroundColor: "#f59e0b", color: "#ffffff", fontSize: "12px", fontWeight: 700, letterSpacing: "0.04em", textTransform: "uppercase" }}>
+                              <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>emoji_events</span>
+                              Target Reached
+                            </span>
+                          )}
                           <span style={{ fontSize: "12px", color: "#71717a", textTransform: "uppercase", letterSpacing: "0.05em" }}>Wildly Important Goal</span>
                         </div>
                         <h2 style={{ fontSize: "20px", fontWeight: 600, color: "#18181b", letterSpacing: "-0.01em" }}>{wig.title}</h2>
@@ -235,7 +242,7 @@ export default function WIGsPage() {
                     <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                       <span style={{ fontSize: "12px", color: "#71717a" }}>Deadline: {new Date(wig.deadline).toLocaleDateString()}</span>
                       <div style={{ flex: 1, height: "4px", backgroundColor: "#e4e4e7" }}>
-                        <div style={{ height: "100%", backgroundColor: "#18181b", width: `${Math.min(progress, 100)}%` }}></div>
+                        <div style={{ height: "100%", backgroundColor: targetReached ? "#f59e0b" : "#18181b", width: `${Math.min(progress, 100)}%` }}></div>
                       </div>
                       <span style={{ fontSize: "12px", fontWeight: 600, color: "#18181b" }}>{wig.leadMeasures.length} Lead Measures</span>
                     </div>
@@ -424,8 +431,29 @@ function WIGDetail({ wig, onBack }: { wig: WIG; onBack: () => void }) {
         </div>
       )}
 
+      {activeWig.status === "ACTIVE" && activeWig.currentValue >= activeWig.toValue && (
+        <div style={{ marginBottom: "20px", padding: "16px 20px", backgroundColor: "#fffbeb", border: "1px solid #f59e0b", display: "flex", alignItems: "center", gap: "12px" }}>
+          <span className="material-symbols-outlined" style={{ fontSize: "28px", color: "#f59e0b" }}>emoji_events</span>
+          <div>
+            <div style={{ fontSize: "14px", fontWeight: 700, color: "#92400e" }}>Target Reached!</div>
+            <div style={{ fontSize: "13px", color: "#92400e", marginTop: "2px" }}>
+              This WIG has hit its goal. Close it as <strong>ACHIEVED</strong> to record the win and notify the team.
+            </div>
+          </div>
+          {canArchiveWIG && (
+            <button
+              onClick={() => setShowCloseModal(true)}
+              style={{ marginLeft: "auto", flexShrink: 0, backgroundColor: "#f59e0b", color: "#ffffff", fontSize: "12px", fontWeight: 700, letterSpacing: "0.05em", textTransform: "uppercase", padding: "8px 16px", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: "6px" }}
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>lock</span>
+              Close as Achieved
+            </button>
+          )}
+        </div>
+      )}
+
       <div style={{ width: "100%", height: "4px", backgroundColor: "#e4e4e7", marginBottom: "8px", position: "relative" }}>
-        <div style={{ height: "100%", backgroundColor: "#18181b", width: `${Math.min(progress, 100)}%` }}></div>
+        <div style={{ height: "100%", backgroundColor: activeWig.currentValue >= activeWig.toValue ? "#f59e0b" : "#18181b", width: `${Math.min(progress, 100)}%` }}></div>
       </div>
       <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", color: "#71717a" }}>
         <span>Baseline: {activeWig.fromValue}</span>

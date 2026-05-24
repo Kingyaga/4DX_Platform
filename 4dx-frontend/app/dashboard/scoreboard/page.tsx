@@ -82,6 +82,19 @@ export default function ScoreboardPage() {
         })}
       </div>
 
+      {/* Target reached banner */}
+      {selected.currentValue >= selected.toValue && (
+        <div style={{ marginBottom: "20px", padding: "16px 20px", backgroundColor: "#fffbeb", border: "1px solid #f59e0b", display: "flex", alignItems: "center", gap: "12px" }}>
+          <span className="material-symbols-outlined" style={{ fontSize: "28px", color: "#f59e0b" }}>emoji_events</span>
+          <div>
+            <div style={{ fontSize: "14px", fontWeight: 700, color: "#92400e" }}>Target Reached!</div>
+            <div style={{ fontSize: "13px", color: "#92400e", marginTop: "2px" }}>
+              This WIG has hit its goal. The team lead can now close it as <strong>ACHIEVED</strong> from the WIGs page.
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Lag Measure */}
       <div style={{ backgroundColor: "#ffffff", border: "1px solid #e4e4e7", padding: "24px", marginBottom: "24px" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "16px" }}>
