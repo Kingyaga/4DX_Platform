@@ -229,14 +229,14 @@ export function useCurrentSessions(teamSlug: string | null) {
 /**
  * Fetch all sessions for a team (Team Lead only)
  */
-export function useTeamSessions(teamSlug: string | null) {
-  const query = trpc.sessions.getTeamSessions.useQuery(
-    { teamSlug: teamSlug || "" },
-    { enabled: !!teamSlug },
+export function useTeamSessions(teamSlug: string | null, weekStarting?: string) {
+  const query = (trpc as any).sessions.getTeamSessions.useQuery(
+    { teamSlug: teamSlug!, ...(weekStarting ? { weekStarting } : {}) },
+    { enabled: Boolean(teamSlug) },
   );
 
   return {
-    sessions: query.data || [],
+    sessions: (query.data ?? []) as any[],
     isLoading: query.isLoading,
     error: query.error ? parseTRPCError(query.error) : null,
     refetch: query.refetch,
@@ -748,5 +748,58 @@ export function useFindUserByEmail() {
     isLoading: mutation.isPending,
     error: mutation.error ? parseTRPCError(mutation.error) : null,
     reset: mutation.reset,
+  };
+}
+
+/**
+ * Create an invite link (Admin only)
+ */
+export function useCreateInvite() {
+  const mutation = (trpc as any).invites.create.useMutation();
+  return {
+    createInvite: mutation.mutateAsync as (input: {
+      orgSlug: string;
+      email?: string;
+      teamSlug?: string;
+      expiresInDays?: number;
+    }) => Promise<{ token: string; inviteUrl: string; expiresAt: Date; email?: string }>,
+    isLoading: mutation.isPending,
+    error: mutation.error ? parseTRPCError(mutation.error) : null,
+  };
+}
+
+/**
+ * Fetch all invites for an organization (Admin only)
+ */
+export function useOrgInvites(orgSlug: string | null) {
+  const query = (trpc as any).invites.getByOrg.useQuery(
+    { orgSlug: orgSlug! },
+    { enabled: Boolean(orgSlug) }
+  );
+  return {
+    invites: (query.data ?? []) as Array<{
+      token: string;
+      email: string | null;
+      inviteUrl?: string;
+      expiresAt: Date;
+      usedAt: Date | null;
+      createdAt: Date;
+      createdBy: { id: string; name: string; email: string };
+    }>,
+    isLoading: query.isLoading,
+    error: query.error ? parseTRPCError(query.error) : null,
+    refetch: query.refetch,
+  };
+}
+
+/**
+ * Revoke an invite (Admin only)
+ */
+export function useRevokeInvite() {
+  const mutation = (trpc as any).invites.revoke.useMutation();
+  return {
+    revokeInvite: mutation.mutateAsync as (input: { token: string }) => Promise<unknown>,
+    isLoading: mutation.isPending,
+    error: mutation.error ? parseTRPCError(mutation.error) : null,
   };
 }

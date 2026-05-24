@@ -21,6 +21,8 @@ services:
         sync: false
       - key: NEXTAUTH_URL
         sync: false
+      - key: BACKEND_URL
+        sync: false
 
   - type: web
     name: 4dx-platform-frontend
@@ -41,7 +43,10 @@ services:
     rootDir: .
     schedule: "0 0 * * 1"
     buildCommand: pnpm prisma generate
-    startCommand: pnpm cron:generate-sessions
+    startCommand: >
+      curl -s -X POST
+      -H "Authorization: Bearer $CRON_SECRET"
+      "${BACKEND_URL}/api/cron/generate-sessions"
 
   - type: cron
     name: 4dx-mark-overdue-sessions
@@ -50,7 +55,10 @@ services:
     rootDir: .
     schedule: "0 9 * * 2"
     buildCommand: pnpm prisma generate
-    startCommand: pnpm cron:mark-overdue
+    startCommand: >
+      curl -s -X POST
+      -H "Authorization: Bearer $CRON_SECRET"
+      "${BACKEND_URL}/api/cron/mark-overdue"
 
   - type: cron
     name: 4dx-wigs-at-risk-notifications
@@ -59,4 +67,7 @@ services:
     rootDir: .
     schedule: "0 8 * * *"
     buildCommand: pnpm prisma generate
-    startCommand: pnpm notify:wigs-at-risk
+    startCommand: >
+      curl -s -X POST
+      -H "Authorization: Bearer $CRON_SECRET"
+      "${BACKEND_URL}/api/cron/wigs-at-risk"

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useEffect } from "react";
 import { useTeamStore } from "@/lib/stores/team-store";
 import { useUserStore } from "@/lib/stores/user-store";
 import { useWIGs, useTeamSessions, useMyTeams } from "@/lib/hooks";
@@ -23,14 +23,6 @@ export default function TeamLeadPage() {
 
   const isLoading = wigsLoading || sessionsLoading;
   const error = wigsError || sessionsError;
-
-  const weekBars = useMemo(() =>
-    Array.from({ length: 6 }).map((_, i) => ({
-      label: `W${i + 1}`,
-      value: 40 + ((i * 15 + Math.sin(i) * 25) % 60),
-    })),
-    []
-  );
 
   if (error) return <ErrorState error={error} />;
   if (isLoading) {
@@ -181,8 +173,41 @@ export default function TeamLeadPage() {
           </div>
         </div>
 
-        {/* Trend Chart Placeholder */}
-        {/* Removed 6-week trend chart as requested */}
+        {/* Session completion this week */}
+        <div style={{ border: "1px solid #e4e4e7", padding: "20px", backgroundColor: "#ffffff" }}>
+          <div style={{ fontSize: "12px", fontWeight: 600, color: "#71717a", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "12px" }}>
+            This Week's Sessions
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
+            <span style={{ fontSize: "32px", fontWeight: 700, color: "#18181b" }}>
+              {sessions.filter((s: any) => s.status === "COMPLETE").length}
+            </span>
+            <span style={{ fontSize: "14px", color: "#71717a" }}>
+              / {sessions.length} complete
+            </span>
+          </div>
+          <div style={{ width: "100%", height: "8px", backgroundColor: "#e4e4e7" }}>
+            <div style={{
+              height: "100%",
+              backgroundColor: "#18181b",
+              width: sessions.length > 0 ? `${Math.round((sessions.filter((s: any) => s.status === "COMPLETE").length / sessions.length) * 100)}%` : "0%",
+              transition: "width 0.3s ease",
+            }} />
+          </div>
+          <div style={{ display: "flex", gap: "16px", marginTop: "12px" }}>
+            {(["COMPLETE", "IN_PROGRESS", "PENDING", "OVERDUE"] as const).map((status) => {
+              const count = sessions.filter((s: any) => s.status === status).length;
+              if (count === 0) return null;
+              const colors: Record<string, string> = { COMPLETE: "#16A34A", IN_PROGRESS: "#EAB308", PENDING: "#71717a", OVERDUE: "#dc2626" };
+              return (
+                <div key={status} style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                  <span style={{ width: "8px", height: "8px", borderRadius: "50%", backgroundColor: colors[status], display: "inline-block" }} />
+                  <span style={{ fontSize: "12px", color: "#71717a" }}>{count} {status.replace("_", " ").toLowerCase()}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
 
         {/* Active WIGs List */}
         <div style={{ border: "1px solid #e4e4e7", borderRadius: "8px", padding: "20px", backgroundColor: "white" }}>

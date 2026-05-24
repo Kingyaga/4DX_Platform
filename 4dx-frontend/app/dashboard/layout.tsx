@@ -41,6 +41,7 @@ const allNavItems: NavItem[] = [
   { icon: "groups", label: "Teams", href: "/dashboard/admin/teams", roles: ["ADMIN"] },
   { icon: "people", label: "Users", href: "/dashboard/admin/users", roles: ["ADMIN"] },
   { icon: "person_add", label: "Create User", href: "/dashboard/admin/users/new", roles: ["ADMIN"] },
+  { icon: "mail", label: "Invites", href: "/dashboard/admin/invites", roles: ["ADMIN"] },
   { icon: "insights", label: "Org Activity", href: "/dashboard/admin/activity", roles: ["ADMIN"] },
 ];
 

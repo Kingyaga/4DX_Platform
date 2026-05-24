@@ -103,9 +103,9 @@ if (azureProvider) providers.push(azureProvider as any);
 
 export const authOptions: NextAuthOptions = {
   providers,
-  session: { 
+  session: {
     strategy: "jwt",
-    maxAge: 10 * 60, // 10 minutes
+    maxAge: 8 * 60 * 60, // 8 hours
   },
   callbacks: {
     async signIn({ user, account }) {

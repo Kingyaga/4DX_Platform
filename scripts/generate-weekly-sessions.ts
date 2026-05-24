@@ -43,6 +43,13 @@ async function main() {
     },
   });
 
+  // Pre-fetch all existing sessions for this Monday across all teams (one query total)
+  const existingSessions = await db.weeklySession.findMany({
+    where: { weekStarting: monday },
+    select: { userId: true, wigId: true },
+  });
+  const existingSet = new Set(existingSessions.map((s) => `${s.userId}:${s.wigId}`));
+
   for (const team of teams) {
     if (team.wigs.length === 0) continue;
 
@@ -55,10 +62,7 @@ async function main() {
 
     for (const member of team.members) {
       for (const wig of team.wigs) {
-        const exists = await db.weeklySession.findFirst({
-          where: { userId: member.userId, wigId: wig.id, weekStarting: monday },
-        });
-        if (exists) continue;
+        if (existingSet.has(`${member.userId}:${wig.id}`)) continue;
         sessionsToCreate.push({ userId: member.userId, wigId: wig.id, weekStarting: monday, status: "PENDING" });
       }
     }
