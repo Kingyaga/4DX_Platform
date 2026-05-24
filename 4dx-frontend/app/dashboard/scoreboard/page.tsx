@@ -45,8 +45,9 @@ export default function ScoreboardPage() {
   };
 
   const formatValue = (value: number, unit: string): string => {
+    if (!unit || unit.toLowerCase() === "none") return `${value}`;
     if (unit === "$") return `$${value.toLocaleString()}`;
-    return `${value}${unit}`;
+    return `${value} ${unit}`;
   };
 
   // Render the core scoreboard content (reused in both normal and display modes)
