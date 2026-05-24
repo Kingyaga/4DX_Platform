@@ -20,6 +20,34 @@ import { LoadingSpinner } from "@/lib/components/loading-spinner";
 import { getDefaultRouteForRole, getTeamRole, isRouteAllowedForRole } from "@/lib/team-routing";
 import type { MyTeamsResponse } from "@/lib/types";
 
+function getNotificationMessage(notif: any): string {
+  const p = notif.payloadJson as any;
+  if (p?.message) return p.message;
+
+  switch (notif.type) {
+    case "SESSION_READY":
+      return `Your weekly session for ${p?.wigTitle || "your WIG"} is ready.`;
+    case "SESSION_OVERDUE":
+      return `Session overdue: ${p?.wigTitle || "your WIG"}. Complete it now.`;
+    case "WIG_CLOSED":
+      return `WIG ${p?.wigTitle || ""} was closed as ${p?.status || "unknown"}.`;
+    case "ACTIVITY_APPROVED":
+      return `Activity approved: ${p?.value ?? ""} ${p?.unit ?? ""} on ${p?.leadMeasureName || "a lead measure"}.`.replace(/\s{2,}/g, " ").trim();
+    case "ACTIVITY_DECLINED":
+      return `Activity declined on ${p?.leadMeasureName || "a lead measure"}. Check the activity log.`;
+    case "WIG_DEADLINE_PASSED":
+      return `WIG deadline passed: ${p?.wigTitle || "your WIG"}. Close it with an outcome.`;
+    case "LEAD_MEASURE_OWNER_ADDED":
+      return `You were added as owner of: ${p?.leadMeasureName || "a lead measure"}.`;
+    case "LEAD_MEASURE_OWNER_REMOVED":
+      return `You were removed from: ${p?.leadMeasureName || "a lead measure"}.`;
+    case "WIG_AT_RISK":
+      return `WIG at risk: ${p?.wigTitle || "your WIG"} is behind schedule.`;
+    default:
+      return notif.type;
+  }
+}
+
 interface NavItem {
   icon: string;
   label: string;
@@ -40,7 +68,6 @@ const allNavItems: NavItem[] = [
   { icon: "admin_panel_settings", label: "Dashboard", href: "/dashboard/admin", roles: ["ADMIN"] },
   { icon: "groups", label: "Teams", href: "/dashboard/admin/teams", roles: ["ADMIN"] },
   { icon: "people", label: "Users", href: "/dashboard/admin/users", roles: ["ADMIN"] },
-  { icon: "person_add", label: "Create User", href: "/dashboard/admin/users/new", roles: ["ADMIN"] },
   { icon: "mail", label: "Invites", href: "/dashboard/admin/invites", roles: ["ADMIN"] },
   { icon: "insights", label: "Org Activity", href: "/dashboard/admin/activity", roles: ["ADMIN"] },
 ];
@@ -345,11 +372,7 @@ export default function DashboardLayout({
                         >
                           <div style={{ flex: 1 }}>
                             <p style={{ margin: 0, fontSize: "13px", color: "#18181b", lineHeight: "1.4" }}>
-                              {(notif.payloadJson as any)?.message ||
-                                (notif.type === "SESSION_READY" ? "Your weekly session is ready." :
-                                 notif.type === "SESSION_OVERDUE" ? "You have an overdue session." :
-                                 notif.type === "WIG_CLOSED" ? `WIG closed: ${(notif.payloadJson as any)?.wigTitle || ""}` :
-                                 notif.type)}
+                              {getNotificationMessage(notif)}
                             </p>
                             <p style={{ margin: "4px 0 0 0", fontSize: "11px", color: "#71717a" }}>
                               {new Date(notif.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
@@ -550,6 +573,33 @@ export default function DashboardLayout({
             </span>
             <span style={{ display: "flex", alignItems: "center", gap: "4px", opacity: 0.7, fontSize: "12px" }}>
               Start session
+              <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>arrow_forward</span>
+            </span>
+          </Link>
+        )}
+        {userRole === "TEAM_LEAD" && pendingRequestCount > 0 && pathname !== "/dashboard/team-lead/requests" && (
+          <Link
+            href="/dashboard/team-lead/requests"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              padding: "10px 24px",
+              backgroundColor: "#f59e0b",
+              color: "#ffffff",
+              textDecoration: "none",
+              fontSize: "13px",
+              fontWeight: 600,
+              letterSpacing: "0.02em",
+              flexShrink: 0,
+            }}
+          >
+            <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>pending_actions</span>
+              {pendingRequestCount} activity log{pendingRequestCount !== 1 ? "s" : ""} waiting for approval
+            </span>
+            <span style={{ display: "flex", alignItems: "center", gap: "4px", opacity: 0.85, fontSize: "12px" }}>
+              Review now
               <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>arrow_forward</span>
             </span>
           </Link>

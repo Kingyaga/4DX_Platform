@@ -346,7 +346,7 @@ export default function TeamLeadPage() {
             Manage WIGs
           </Link>
           <Link
-            href="/dashboard/activity"
+            href="/dashboard/team-lead/requests"
             style={{
               padding: "12px 16px",
               backgroundColor: "white",
@@ -359,10 +359,10 @@ export default function TeamLeadPage() {
               fontSize: "14px",
             }}
           >
-            Activity Log
+            Approve Activity
           </Link>
           <Link
-            href="/dashboard/session"
+            href="/dashboard/team-lead/reports"
             style={{
               padding: "12px 16px",
               backgroundColor: "white",
@@ -375,7 +375,7 @@ export default function TeamLeadPage() {
               fontSize: "14px",
             }}
           >
-            Team Sessions
+            Session Reports
           </Link>
         </div>
       </div>

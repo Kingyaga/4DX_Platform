@@ -366,24 +366,30 @@ function StepReview({ session }: { session: WeeklySession }) {
                     </div>
                     <div style={{ padding: "24px", flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center" }}>
                       <div style={{ fontSize: "14px", fontWeight: 500, color: "#18181b", marginBottom: "16px" }}>{lm.name}</div>
-                      <div style={{ fontSize: "32px", fontWeight: 700, color: "#18181b", marginBottom: "8px" }}>
-                        {(lm.activityLogs || []).length > 0 ? (lm.activityLogs || [])[0].value : 0} / {lm.targetValue}
-                      </div>
-                      <div style={{ width: "100%", height: "4px", backgroundColor: "#e4e4e7", marginBottom: "8px" }}>
-                        <div
-                          style={{
-                            height: "100%",
-                            backgroundColor: "#18181b",
-                            width: `${Math.min(100, Math.round((((lm.activityLogs || []).length > 0 ? (lm.activityLogs || [])[0].value : 0) / lm.targetValue) * 100))}%`,
-                          }}
-                        ></div>
-                      </div>
-                      <span style={{ fontSize: "12px", fontWeight: 500, color: (lm.activityLogs || []).length > 0 && (lm.activityLogs || [])[0].value >= lm.targetValue ? "#16A34A" : "#ba1a1a" }}>
-                        {(lm.activityLogs || []).length > 0 && (lm.activityLogs || [])[0].value >= lm.targetValue ? "On Track" : "Behind"}
-                      </span>
+                      {(() => {
+                        const cumulativeTotal = (lm.activityLogs || []).reduce((s, l) => s + l.value, 0);
+                        const progressPct = Math.min(100, Math.round((cumulativeTotal / lm.targetValue) * 100));
+                        const onTrack = cumulativeTotal >= lm.targetValue;
+                        return (
+                          <>
+                            <div style={{ fontSize: "32px", fontWeight: 700, color: "#18181b", marginBottom: "8px" }}>
+                              {cumulativeTotal} / {lm.targetValue}
+                            </div>
+                            <div style={{ width: "100%", height: "4px", backgroundColor: "#e4e4e7", marginBottom: "8px" }}>
+                              <div style={{ height: "100%", backgroundColor: "#18181b", width: `${progressPct}%` }}></div>
+                            </div>
+                            <span style={{ fontSize: "12px", fontWeight: 500, color: onTrack ? "#16A34A" : "#ba1a1a" }}>
+                              {onTrack ? "On Track" : "Behind"}
+                            </span>
+                          </>
+                        );
+                      })()}
                     </div>
                   </div>
                 ))}
+              </div>
+              <div style={{ marginTop: "12px", fontSize: "12px", color: "#71717a", textAlign: "center" }}>
+                Progress shows your cumulative approved activity toward the target.
               </div>
             </>
           ) : (
@@ -409,7 +415,11 @@ function StepCommit({
   return (
     <div style={{ maxWidth: "600px", margin: "0 auto" }}>
       <h1 style={{ fontSize: "24px", fontWeight: 600, color: "#18181b", marginBottom: "8px" }}>Make Commitments</h1>
-      <p style={{ fontSize: "16px", color: "#71717a", marginBottom: "32px" }}>What are the 1-2 most important things you can do this week to impact the lead measures?</p>
+      <p style={{ fontSize: "16px", color: "#71717a", marginBottom: "16px" }}>Make 1-3 specific commitments — each tied to a lead measure and completable this week.</p>
+      <div style={{ padding: "12px 16px", backgroundColor: "#f0fdf4", border: "1px solid #bbf7d0", marginBottom: "24px", fontSize: "13px", color: "#166534" }}>
+        <strong>Good commitment:</strong> "I will make 15 discovery calls by Friday to hit the weekly outreach target." &nbsp;
+        <strong>Weak:</strong> "Work on lead generation."
+      </div>
       <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
         {commitments.map((commitment, index) => (
           <div key={index} style={{ backgroundColor: "#ffffff", border: "1px solid #e4e4e7", padding: "20px", display: "flex", flexDirection: "column", gap: "16px" }}>
@@ -436,7 +446,7 @@ function StepCommit({
                     ),
                   );
                 }}
-                placeholder="e.g., Complete 10 customer calls and document feedback"
+                placeholder="e.g., I will [specific action] by [day] to impact [lead measure name]"
                 style={{ border: "1px solid #e4e4e7", backgroundColor: "#ffffff", padding: "8px 12px", fontSize: "14px", color: "#18181b", outline: "none", borderRadius: "0", width: "100%", minHeight: "60px", fontFamily: "'Inter', sans-serif" }}
               />
             </div>
