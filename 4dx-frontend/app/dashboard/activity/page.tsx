@@ -42,7 +42,17 @@ export default function ActivityLogPage() {
   const allLeadMeasures = useMemo(() =>
     (wigs as any[]).flatMap((wig) =>
       (wig.leadMeasures || [])
-        .filter((lm: LeadMeasure) => !userId || (lm.owners || []).some((owner) => owner.userId === userId))
+        .filter((lm: LeadMeasure) => {
+          const approvedTotal = (lm.activityLogs || [])
+            .filter((log) => log.status === "APPROVED")
+            .reduce((sum, log) => sum + log.value, 0);
+
+          return (
+            wig.status === "ACTIVE" &&
+            approvedTotal < lm.targetValue &&
+            (!userId || (lm.owners || []).some((owner) => owner.userId === userId))
+          );
+        })
         .map((lm: LeadMeasure) => ({ id: lm.id, name: lm.name, wigTitle: wig.title, unit: (lm as any).unit || "" })),
     ), [wigs, userId]
   );
@@ -54,7 +64,9 @@ export default function ActivityLogPage() {
 
   // Set default selected lead measure when data loads
   useEffect(() => {
-    if (hasLeadMeasures && !selectedLeadMeasureId) {
+    const selectionStillAvailable = allLeadMeasures.some((lm) => lm.id === selectedLeadMeasureId);
+
+    if (hasLeadMeasures && (!selectedLeadMeasureId || !selectionStillAvailable)) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setSelectedLeadMeasureId(allLeadMeasures[0].id);
     }
