@@ -189,7 +189,9 @@ export default function TeamLeadRequestsPage() {
                     </div>
                     <div style={{ textAlign: "right" }}>
                       <p style={{ margin: 0, fontSize: "12px", color: "#71717a" }}>{new Date(request.loggedForDate).toLocaleDateString()}</p>
-                      <p style={{ margin: "4px 0 0 0", fontSize: "14px", fontWeight: 700, color: "#18181b" }}>{request.value}</p>
+                      <p style={{ margin: "4px 0 0 0", fontSize: "14px", fontWeight: 700, color: "#18181b" }}>
+                        {request.value} {request.leadMeasure.wig.unit}
+                      </p>
                     </div>
                   </div>
 

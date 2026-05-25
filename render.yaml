@@ -1,19 +1,73 @@
 services:
   - type: web
     name: 4dx-platform-backend
-    env: node
+    runtime: node
     branch: main
     rootDir: .
     buildCommand: pnpm prisma generate && pnpm build
-    releaseCommand: pnpm prisma migrate deploy
-    startCommand: pnpm start
+    preDeployCommand: pnpm prisma migrate deploy
+    startCommand: pnpm exec next start -p $PORT
     autoDeploy: true
+    envVars:
+      - key: RESEND_API_KEY
+        sync: false
+      - key: EMAIL_FROM
+        sync: false
+      - key: CRON_SECRET
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+      - key: NEXTAUTH_SECRET
+        sync: false
+      - key: NEXTAUTH_URL
+        sync: false
+      - key: BACKEND_URL
+        sync: false
+
+  - type: web
+    name: 4dx-platform-frontend
+    runtime: node
+    branch: main
+    rootDir: .
+    buildCommand: npm ci && npm --prefix 4dx-frontend ci && npm --prefix 4dx-frontend run build
+    startCommand: npm --prefix 4dx-frontend run start -- -p $PORT
+    autoDeploy: true
+    envVars:
+      - key: NEXT_PUBLIC_BACKEND_URL
+        sync: false
+
+  - type: cron
+    name: 4dx-generate-weekly-sessions
+    runtime: node
+    branch: main
+    rootDir: .
+    schedule: "0 0 * * 1"
+    buildCommand: pnpm prisma generate
+    startCommand: >
+      curl -s -X POST
+      -H "Authorization: Bearer $CRON_SECRET"
+      "${BACKEND_URL}/api/cron/generate-sessions"
+
+  - type: cron
+    name: 4dx-mark-overdue-sessions
+    runtime: node
+    branch: main
+    rootDir: .
+    schedule: "0 9 * * 2"
+    buildCommand: pnpm prisma generate
+    startCommand: >
+      curl -s -X POST
+      -H "Authorization: Bearer $CRON_SECRET"
+      "${BACKEND_URL}/api/cron/mark-overdue"
 
   - type: cron
     name: 4dx-wigs-at-risk-notifications
-    env: node
+    runtime: node
     branch: main
     rootDir: .
     schedule: "0 8 * * *"
     buildCommand: pnpm prisma generate
-    startCommand: pnpm notify:wigs-at-risk
+    startCommand: >
+      curl -s -X POST
+      -H "Authorization: Bearer $CRON_SECRET"
+      "${BACKEND_URL}/api/cron/wigs-at-risk"

@@ -37,7 +37,7 @@ export default function ExecutionDetailsPage() {
   const executionScore = allLeadMeasures.length > 0
     ? Math.round(
         allLeadMeasures.reduce((sum: number, lm: any) => {
-          const currentValue = lm.activityLogs?.[0]?.value || 0;
+          const currentValue = (lm.activityLogs || []).reduce((s: number, l: any) => s + l.value, 0);
           const onTrack = currentValue >= (lm.targetValue || 0) ? 100 : (currentValue / (lm.targetValue || 1)) * 100;
           return sum + Math.min(onTrack, 100);
         }, 0) / allLeadMeasures.length
@@ -53,13 +53,13 @@ export default function ExecutionDetailsPage() {
       teamLMs.length > 0
         ? Math.round(
             teamLMs.reduce((sum: number, lm: any) => {
-              const current = lm.activityLogs?.[0]?.value || 0;
+              const current = (lm.activityLogs || []).reduce((s: number, l: any) => s + l.value, 0);
               return sum + Math.min((current / (lm.targetValue || 1)) * 100, 100);
             }, 0) / teamLMs.length
           )
         : 50;
 
-    const onTrackCount = teamLMs.filter((lm: any) => (lm.activityLogs?.[0]?.value || 0) >= lm.targetValue).length;
+    const onTrackCount = teamLMs.filter((lm: any) => (lm.activityLogs || []).reduce((s: number, l: any) => s + l.value, 0) >= lm.targetValue).length;
 
     return {
       teamName: team.name,
@@ -168,7 +168,7 @@ export default function ExecutionDetailsPage() {
           <div style={{ padding: "20px" }}>
             <div style={{ display: "grid", gap: "16px" }}>
               {allLeadMeasures.map((lm: any) => {
-                const currentValue = lm.activityLogs?.[0]?.value || 0;
+                const currentValue = (lm.activityLogs || []).reduce((s: number, l: any) => s + l.value, 0);
                 const targetValue = lm.targetValue || 0;
                 const progressPercent = targetValue > 0 ? Math.min((currentValue / targetValue) * 100, 100) : 0;
                 const isOnTrack = currentValue >= targetValue;

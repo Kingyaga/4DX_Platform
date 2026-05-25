@@ -50,18 +50,18 @@ export default function AdminTeamsPage() {
   const [successBannerMessage, setSuccessBannerMessage] = useTimedMessage<string | null>(null);
 
   const handleDeleteTeam = async (team: Team) => {
-    const confirmed = window.confirm(`Are you sure you want to delete the team "${team.name}"? This action cannot be undone and will remove all associated data including WIGs, lead measures, sessions, and memberships.`);
+    const confirmed = window.confirm(`Archive the team "${team.name}"? Teams with active WIGs must close those WIGs first.`);
     if (!confirmed) return;
 
     try {
       setTeamActionError(null);
       setTeamActionMessage(null);
       await deleteTeam({ teamSlug: team.slug });
-      setTeamActionMessage(`Team "${team.name}" has been successfully deleted.`);
+      setTeamActionMessage(`Team "${team.name}" has been archived.`);
       refetch();
     } catch (error) {
-      setTeamActionError(`Failed to delete team "${team.name}". Please try again.`);
-      console.error("Failed to delete team", error);
+      setTeamActionError(error instanceof Error ? error.message : `Failed to archive team "${team.name}". Please try again.`);
+      console.error("Failed to archive team", error);
     }
   };
 
@@ -281,7 +281,7 @@ export default function AdminTeamsPage() {
                       fontWeight: "500",
                     }}
                   >
-                    Delete
+                    Archive
                   </button>
                 </div>
 

@@ -179,6 +179,12 @@ export interface ActivityLogEntry {
   note: string | null;
   status: "PENDING" | "APPROVED" | "REJECTED";
   createdAt: Date;
+  userId?: string;
+  user?: {
+    id: string;
+    name: string | null;
+    email: string;
+  };
 }
 
 export interface LeadMeasure {
@@ -201,6 +207,7 @@ export interface CreateLeadMeasureInput {
   cadence: Cadence;
   targetValue: number;
   unit: string;
+  ownerUserIds: string[];
   description?: string;
 }
 

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useUserStore } from "@/lib/stores/user-store";
 import { useTeamStore } from "@/lib/stores/team-store";
-import { useWIGs, useMyTeams } from "@/lib/hooks";
+import { useWIGs, useMyTeams, useTeamSessions } from "@/lib/hooks";
 import { ErrorState, EmptyState } from "@/lib/components/states";
 import Link from "next/link";
 
@@ -14,6 +14,16 @@ export default function TeamLeadReportsPage() {
   const { teams, isLoading: teamsLoading, error: teamsError } = useMyTeams(orgSlug);
   const [selectedReport, setSelectedReport] = useState<"execution" | "lag" | "lead" | null>(null);
   const [reportActionMessage, setReportActionMessage] = useState<string | null>(null);
+  const [selectedWeek, setSelectedWeek] = useState<string>(() => {
+    const now = new Date();
+    const day = now.getUTCDay();
+    const diff = day === 0 ? -6 : 1 - day;
+    const monday = new Date(now);
+    monday.setUTCDate(now.getUTCDate() + diff);
+    monday.setUTCHours(0, 0, 0, 0);
+    return monday.toISOString().split("T")[0];
+  });
+  const { sessions, isLoading: sessionsLoading } = useTeamSessions(currentTeamSlug, selectedWeek);
 
   useEffect(() => {
     if (!teamsLoading && teams.length > 0 && (!currentTeamSlug || !teams.some((team: any) => team.slug === currentTeamSlug))) {
@@ -63,7 +73,7 @@ export default function TeamLeadReportsPage() {
   const executionScore = allLeadMeasures.length > 0
     ? Math.round(
         allLeadMeasures.reduce((sum: number, lm: any) => {
-          const current = lm.activityLogs?.[0]?.value || 0;
+          const current = (lm.activityLogs || []).reduce((s: number, l: any) => s + l.value, 0);
           return sum + Math.min((current / (lm.targetValue || 1)) * 100, 100);
         }, 0) / allLeadMeasures.length
       )
@@ -93,6 +103,106 @@ export default function TeamLeadReportsPage() {
         <div>
           <h1 style={{ fontSize: "28px", fontWeight: "700", margin: "0 0 8px 0" }}>Team Reports</h1>
           <p style={{ margin: 0, color: "#71717a", fontSize: "14px" }}>Performance analysis and insights</p>
+        </div>
+
+        {/* Week selector */}
+        <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "24px" }}>
+          <button
+            onClick={() => {
+              const d = new Date(selectedWeek);
+              d.setUTCDate(d.getUTCDate() - 7);
+              setSelectedWeek(d.toISOString().split("T")[0]);
+            }}
+            style={{ padding: "8px 16px", border: "1px solid #e4e4e7", backgroundColor: "#ffffff", cursor: "pointer", fontSize: "13px", fontWeight: 600 }}
+          >
+            ← Prev week
+          </button>
+          <span style={{ fontSize: "14px", fontWeight: 600, color: "#18181b" }}>
+            Week of {new Date(selectedWeek).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+          </span>
+          <button
+            onClick={() => {
+              const now = new Date();
+              const day = now.getUTCDay();
+              const diff = day === 0 ? -6 : 1 - day;
+              const thisMonday = new Date(now);
+              thisMonday.setUTCDate(now.getUTCDate() + diff);
+              thisMonday.setUTCHours(0, 0, 0, 0);
+              const currentMondayStr = thisMonday.toISOString().split("T")[0];
+              if (selectedWeek >= currentMondayStr) return;
+              const d = new Date(selectedWeek);
+              d.setUTCDate(d.getUTCDate() + 7);
+              setSelectedWeek(d.toISOString().split("T")[0]);
+            }}
+            disabled={(() => {
+              const now = new Date();
+              const day = now.getUTCDay();
+              const diff = day === 0 ? -6 : 1 - day;
+              const thisMonday = new Date(now);
+              thisMonday.setUTCDate(now.getUTCDate() + diff);
+              thisMonday.setUTCHours(0, 0, 0, 0);
+              return selectedWeek >= thisMonday.toISOString().split("T")[0];
+            })()}
+            style={{ padding: "8px 16px", border: "1px solid #e4e4e7", backgroundColor: "#ffffff", cursor: "pointer", fontSize: "13px", fontWeight: 600, opacity: selectedWeek >= new Date().toISOString().split("T")[0] ? 0.4 : 1 }}
+          >
+            Next week →
+          </button>
+        </div>
+
+        {/* Session completion for selected week */}
+        <div style={{ border: "1px solid #e4e4e7", padding: "20px", marginBottom: "24px", backgroundColor: "#ffffff" }}>
+          <h3 style={{ fontSize: "13px", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em", color: "#71717a", marginBottom: "16px" }}>
+            Session Status — Week of {new Date(selectedWeek).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+          </h3>
+          {sessionsLoading ? (
+            <p style={{ color: "#71717a", fontSize: "14px" }}>Loading...</p>
+          ) : sessions.length === 0 ? (
+            <p style={{ color: "#71717a", fontSize: "14px" }}>No sessions generated for this week.</p>
+          ) : (
+            <div>
+              <div style={{ display: "flex", gap: "24px", marginBottom: "16px" }}>
+                {(["COMPLETE", "IN_PROGRESS", "PENDING", "OVERDUE"] as const).map((status) => {
+                  const count = sessions.filter((s: any) => s.status === status).length;
+                  const colors: Record<string, string> = { COMPLETE: "#16A34A", IN_PROGRESS: "#EAB308", PENDING: "#71717a", OVERDUE: "#dc2626" };
+                  return (
+                    <div key={status} style={{ textAlign: "center" }}>
+                      <div style={{ fontSize: "28px", fontWeight: 700, color: colors[status] }}>{count}</div>
+                      <div style={{ fontSize: "11px", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em", color: "#71717a" }}>{status.replace("_", " ")}</div>
+                    </div>
+                  );
+                })}
+              </div>
+              <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                <thead>
+                  <tr style={{ borderBottom: "1px solid #e4e4e7" }}>
+                    <th style={{ padding: "8px 12px", textAlign: "left", fontSize: "11px", fontWeight: 600, color: "#71717a", textTransform: "uppercase" }}>Member</th>
+                    <th style={{ padding: "8px 12px", textAlign: "left", fontSize: "11px", fontWeight: 600, color: "#71717a", textTransform: "uppercase" }}>WIG</th>
+                    <th style={{ padding: "8px 12px", textAlign: "left", fontSize: "11px", fontWeight: 600, color: "#71717a", textTransform: "uppercase" }}>Status</th>
+                    <th style={{ padding: "8px 12px", textAlign: "left", fontSize: "11px", fontWeight: 600, color: "#71717a", textTransform: "uppercase" }}>Commitments</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {sessions.map((s: any, i: number) => {
+                    const statusColors: Record<string, string> = { COMPLETE: "#16A34A", IN_PROGRESS: "#EAB308", PENDING: "#71717a", OVERDUE: "#dc2626" };
+                    return (
+                      <tr key={s.id} style={{ borderBottom: i < sessions.length - 1 ? "1px solid #f4f4f5" : "none" }}>
+                        <td style={{ padding: "10px 12px", fontSize: "14px", color: "#18181b" }}>{s.user?.name || s.user?.email || "—"}</td>
+                        <td style={{ padding: "10px 12px", fontSize: "13px", color: "#71717a" }}>{s.wig?.title || "—"}</td>
+                        <td style={{ padding: "10px 12px" }}>
+                          <span style={{ fontSize: "11px", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em", color: statusColors[s.status] || "#71717a" }}>
+                            {s.status?.replace("_", " ")}
+                          </span>
+                        </td>
+                        <td style={{ padding: "10px 12px", fontSize: "13px", color: "#71717a" }}>
+                          {s.commitments?.length ?? 0}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
 
         {/* Report Type Selection */}
@@ -210,7 +320,7 @@ export default function TeamLeadReportsPage() {
             </p>
             <div style={{ marginTop: "24px", display: "flex", flexDirection: "column", gap: "12px" }}>
               {allLeadMeasures.slice(0, 10).map((lm: any, i: number) => {
-                const current = lm.activityLogs?.[0]?.value || 0;
+                const current = (lm.activityLogs || []).reduce((s: number, l: any) => s + l.value, 0);
                 const isOnTrack = current >= lm.targetValue;
                 return (
                   <div key={i} style={{ padding: "12px", backgroundColor: "#f9fafb", borderRadius: "6px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>

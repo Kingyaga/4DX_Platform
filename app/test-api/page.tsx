@@ -71,6 +71,7 @@ export default function TestApi() {
               cadence: "WEEKLY",
               targetValue: 10,
               unit: "calls",
+              ownerUserIds: ["replace-with-team-member-user-id"],
             })
           }
         >

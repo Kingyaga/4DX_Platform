@@ -1,3 +1,52 @@
+CREATE TABLE IF NOT EXISTS "Invite" (
+  "id" TEXT NOT NULL,
+  "token" TEXT NOT NULL,
+  "email" TEXT,
+  "expiresAt" TIMESTAMP(3) NOT NULL,
+  "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "usedAt" TIMESTAMP(3),
+  "orgId" TEXT NOT NULL,
+  "teamId" TEXT,
+  "invitedByUserId" TEXT NOT NULL,
+  CONSTRAINT "Invite_pkey" PRIMARY KEY ("id")
+);
+
+CREATE TABLE IF NOT EXISTS "InviteToken" (
+  "id" TEXT NOT NULL,
+  "token" TEXT NOT NULL,
+  "email" TEXT,
+  "orgId" TEXT NOT NULL,
+  "teamId" TEXT,
+  "role" "OrgRole" NOT NULL DEFAULT 'MEMBER',
+  "usedAt" TIMESTAMP(3),
+  "expiresAt" TIMESTAMP(3) NOT NULL,
+  "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "createdByUserId" TEXT NOT NULL,
+  CONSTRAINT "InviteToken_pkey" PRIMARY KEY ("id")
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS "Invite_token_key" ON "Invite"("token");
+CREATE UNIQUE INDEX IF NOT EXISTS "InviteToken_token_key" ON "InviteToken"("token");
+
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'Invite_orgId_fkey') THEN
+    ALTER TABLE "Invite" ADD CONSTRAINT "Invite_orgId_fkey" FOREIGN KEY ("orgId") REFERENCES "Organization"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'Invite_teamId_fkey') THEN
+    ALTER TABLE "Invite" ADD CONSTRAINT "Invite_teamId_fkey" FOREIGN KEY ("teamId") REFERENCES "Team"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'Invite_invitedByUserId_fkey') THEN
+    ALTER TABLE "Invite" ADD CONSTRAINT "Invite_invitedByUserId_fkey" FOREIGN KEY ("invitedByUserId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'InviteToken_orgId_fkey') THEN
+    ALTER TABLE "InviteToken" ADD CONSTRAINT "InviteToken_orgId_fkey" FOREIGN KEY ("orgId") REFERENCES "Organization"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'InviteToken_createdByUserId_fkey') THEN
+    ALTER TABLE "InviteToken" ADD CONSTRAINT "InviteToken_createdByUserId_fkey" FOREIGN KEY ("createdByUserId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+  END IF;
+END $$;
+
 CREATE INDEX IF NOT EXISTS "OrgMembership_orgId_idx" ON "OrgMembership"("orgId");
 
 CREATE INDEX IF NOT EXISTS "Invite_orgId_idx" ON "Invite"("orgId");

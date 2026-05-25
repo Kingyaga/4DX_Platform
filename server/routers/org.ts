@@ -85,7 +85,7 @@ export const orgRouter = router({
 
       // Pull all teams with basic data (no activity logs for performance)
       const teams = await ctx.db.team.findMany({
-        where: { orgId: org.id },
+        where: { orgId: org.id, archivedAt: null },
         include: {
           members: {
             include: {
@@ -169,7 +169,7 @@ export const orgRouter = router({
 
       // Pull teams with activity logs only (limited for performance)
       const teams = await ctx.db.team.findMany({
-        where: { orgId: org.id },
+        where: { orgId: org.id, archivedAt: null },
         select: {
           id: true,
           name: true,
@@ -450,13 +450,19 @@ export const orgRouter = router({
         throw new TRPCError({ code: "FORBIDDEN" });
       }
 
+      // Scope audit logs to this org's members only to prevent cross-org data leak
+      const orgMemberships = await ctx.db.orgMembership.findMany({
+        where: { orgId: org.id },
+        select: { userId: true },
+      });
+      const orgMemberIds = orgMemberships.map((m) => m.userId);
+
       return ctx.db.auditLog.findMany({
+        where: { actorUserId: { in: orgMemberIds } },
+        take: input.limit ?? 50,
         orderBy: { createdAt: "desc" },
-        take: input.limit,
         include: {
-          actor: {
-            select: { id: true, name: true, email: true },
-          },
+          actor: { select: { id: true, name: true, email: true } },
         },
       });
     }),
@@ -484,7 +490,7 @@ export const orgRouter = router({
       }
 
       const teams = await ctx.db.team.findMany({
-        where: { orgId: org.id },
+        where: { orgId: org.id, archivedAt: null },
         include: {
           _count: {
             select: { members: true },

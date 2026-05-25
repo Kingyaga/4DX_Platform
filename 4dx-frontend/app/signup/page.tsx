@@ -40,7 +40,7 @@ export default function SignupPage() {
     onSuccess: () => {
       router.push("/login?registered=true");
     },
-    onError: (err) => {
+    onError: (err: { message?: string }) => {
       setError(err.message || "Unable to create account. Please try again.");
       setLoading(false);
     },

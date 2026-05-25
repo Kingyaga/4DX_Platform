@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState, useMemo, type FormEvent } from "react";
-import { useWIGs, useLogActivity } from "@/lib/hooks";
+import { useWIGs, useLogActivity, useActivityLogsByUser, useEditActivity } from "@/lib/hooks";
 import { useTeamStore } from "@/lib/stores/team-store";
+import { useUserStore } from "@/lib/stores/user-store";
 import { ErrorState, EmptyState } from "@/lib/components/states";
 import { LoadingSpinner } from "@/lib/components/loading-spinner";
 import type { WIG, LeadMeasure, ActivityLogEntry } from "@/lib/types";
@@ -15,9 +16,15 @@ type AggregatedActivityLog = ActivityLogEntry & {
 
 export default function ActivityLogPage() {
   const { currentTeamSlug } = useTeamStore();
+  const { user } = useUserStore();
   const { wigs, isLoading, error } = useWIGs(currentTeamSlug);
   const { logActivity, isLoading: isSubmitting, error: submitError } = useLogActivity();
+  const { activityLogs: myAllLogs } = useActivityLogsByUser(user?.id ?? null);
+  const { editActivity } = useEditActivity();
 
+  const [editingLogId, setEditingLogId] = useState<string | null>(null);
+  const [editValue, setEditValue] = useState<string>("");
+  const [editNote, setEditNote] = useState<string>("");
   const [hoveredRow, setHoveredRow] = useState<number | null>(null);
   const [selectedLeadMeasureId, setSelectedLeadMeasureId] = useState<string>("");
   const [value, setValue] = useState<string>("");
@@ -27,12 +34,19 @@ export default function ActivityLogPage() {
   const [logsError, setLogsError] = useState<string | null>(null);
   const [logsRefreshIndex, setLogsRefreshIndex] = useState(0);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [showAllLogs, setShowAllLogs] = useState(false);
+  const PREVIEW_COUNT = 10;
 
   const allLeadMeasures = useMemo(() =>
     (wigs as any[]).flatMap((wig) =>
-      (wig.leadMeasures || []).map((lm: LeadMeasure) => ({ id: lm.id, name: lm.name, wigTitle: wig.title })),
-    ), [wigs]
+      (wig.leadMeasures || [])
+        .filter((lm: LeadMeasure) => !user?.id || (lm.owners || []).some((owner) => owner.userId === user.id))
+        .map((lm: LeadMeasure) => ({ id: lm.id, name: lm.name, wigTitle: wig.title, unit: (lm as any).unit || "" })),
+    ), [wigs, user?.id]
   );
+
+  const selectedLM = allLeadMeasures.find((lm) => lm.id === selectedLeadMeasureId);
+  const selectedUnit = selectedLM?.unit && selectedLM.unit.toLowerCase() !== "none" ? selectedLM.unit : "";
 
   const hasLeadMeasures = allLeadMeasures.length > 0;
 
@@ -74,12 +88,15 @@ export default function ActivityLogPage() {
           // Activity logs might not be included in the response depending on backend query
           const logs = lm.activityLogs;
           if (logs && Array.isArray(logs)) {
-            const aggregatedLogs = logs.map((log: ActivityLogEntry) => ({
-              ...log,
-              leadMeasureId: lm.id,
-              leadMeasureName: lm.name,
-              wigTitle: wig.title,
-            }));
+            const aggregatedLogs = logs
+              .filter((log: ActivityLogEntry) => (log as any).userId === user?.id)
+              .map((log: ActivityLogEntry) => ({
+                ...log,
+                leadMeasureId: lm.id,
+                leadMeasureName: lm.name,
+                wigTitle: wig.title,
+                unit: lm.unit,
+              }));
             loadedLogs.push(...aggregatedLogs);
           }
         }
@@ -93,9 +110,12 @@ export default function ActivityLogPage() {
     }
   }, [wigs, logsRefreshIndex]);
 
+  const pendingLogs = (myAllLogs as any[]).filter((log: any) => log.status === "PENDING");
+
   const sortedLogs = [...activityLogs].sort((a: AggregatedActivityLog, b: AggregatedActivityLog) =>
     new Date(b.loggedForDate).getTime() - new Date(a.loggedForDate).getTime(),
   );
+  const visibleLogs = showAllLogs ? sortedLogs : sortedLogs.slice(0, PREVIEW_COUNT);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -173,7 +193,7 @@ export default function ActivityLogPage() {
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
             <div>
               <label style={{ fontSize: "12px", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", color: "#18181b", display: "block", marginBottom: "8px" }}>
-                Numeric Value
+                Value{selectedUnit ? ` (${selectedUnit})` : ""}
               </label>
               <input
                 type="number"
@@ -220,7 +240,7 @@ export default function ActivityLogPage() {
 
           {!hasLeadMeasures && (
             <div style={{ padding: "12px", backgroundColor: "#f8fafc", border: "1px solid #e2e8f0", color: "#475569", fontSize: "14px", borderRadius: "4px" }}>
-              Your team does not have any lead measures yet. Ask your team lead to create one before submitting activity.
+              You do not own any lead measures on this team yet. Ask your team lead to assign you before submitting activity.
             </div>
           )}
 
@@ -239,6 +259,70 @@ export default function ActivityLogPage() {
 
       <div style={{ display: "flex", justifyContent: "center" }}>
         <div style={{ width: "100%", maxWidth: "900px", marginTop: "48px", marginBottom: "48px" }}>
+          {pendingLogs.length > 0 && (
+            <div style={{ marginBottom: "24px" }}>
+              <h3 style={{ fontSize: "14px", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em", color: "#71717a", marginBottom: "12px" }}>
+                Awaiting Approval ({pendingLogs.length})
+              </h3>
+              {pendingLogs.map((log: any) => {
+                const isEditable = Date.now() - new Date(log.createdAt).getTime() < 24 * 60 * 60 * 1000;
+                return (
+                  <div key={log.id} style={{ marginBottom: "8px" }}>
+                    <div style={{ padding: "12px 16px", border: "1px solid #e4e4e7", backgroundColor: "#fffbeb", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <div>
+                        <span style={{ fontSize: "13px", fontWeight: 600, color: "#18181b" }}>{log.leadMeasure?.name ?? "Lead Measure"}</span>
+                        <span style={{ fontSize: "12px", color: "#71717a", marginLeft: "8px" }}>{new Date(log.loggedForDate).toLocaleDateString()}</span>
+                      </div>
+                      <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                        <span style={{ fontSize: "14px", fontWeight: 700, color: "#18181b" }}>{log.value} {log.leadMeasure?.unit ?? ""}</span>
+                        <span style={{ fontSize: "11px", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em", color: "#B45309", backgroundColor: "#FEF3C7", padding: "2px 8px", borderRadius: "4px" }}>Pending</span>
+                        {isEditable && (
+                          <button
+                            onClick={() => { setEditingLogId(log.id); setEditValue(String(log.value)); setEditNote(log.note ?? ""); }}
+                            style={{ fontSize: "12px", color: "#71717a", background: "none", border: "none", cursor: "pointer", textDecoration: "underline" }}
+                          >
+                            Edit
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                    {editingLogId === log.id && (
+                      <div style={{ marginTop: "8px", display: "flex", gap: "8px", alignItems: "center", padding: "8px 16px", border: "1px solid #e4e4e7", backgroundColor: "#f8fafc" }}>
+                        <input
+                          type="number"
+                          value={editValue}
+                          onChange={(e) => setEditValue(e.target.value)}
+                          style={{ width: "80px", padding: "4px 8px", border: "1px solid #e4e4e7", fontSize: "13px" }}
+                        />
+                        <input
+                          type="text"
+                          value={editNote}
+                          onChange={(e) => setEditNote(e.target.value)}
+                          placeholder="Note (optional)"
+                          style={{ flex: 1, padding: "4px 8px", border: "1px solid #e4e4e7", fontSize: "13px" }}
+                        />
+                        <button
+                          onClick={async () => {
+                            try {
+                              await editActivity({ logId: log.id, value: parseFloat(editValue), note: editNote || undefined });
+                              setEditingLogId(null);
+                            } catch {}
+                          }}
+                          style={{ padding: "4px 12px", backgroundColor: "#18181b", color: "#fff", border: "none", fontSize: "12px", cursor: "pointer" }}
+                        >
+                          Save
+                        </button>
+                        <button onClick={() => setEditingLogId(null)} style={{ padding: "4px 12px", border: "1px solid #e4e4e7", background: "none", fontSize: "12px", cursor: "pointer" }}>
+                          Cancel
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
           <h2 style={{ fontSize: "20px", fontWeight: 600, color: "#18181b", marginBottom: "24px", paddingBottom: "8px", borderBottom: "1px solid #e4e4e7" }}>
             Recent Logs
           </h2>
@@ -269,7 +353,7 @@ export default function ActivityLogPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {sortedLogs.map((log, i) => (
+                  {visibleLogs.map((log, i) => (
                     <tr
                       key={log.id}
                       style={{ borderBottom: "1px solid #f4f4f5", backgroundColor: hoveredRow === i ? "#f7f9fd" : "transparent", transition: "background 0.075s" }}
@@ -295,10 +379,13 @@ export default function ActivityLogPage() {
             </div>
           )}
 
-          {sortedLogs.length > 0 && (
+          {sortedLogs.length > PREVIEW_COUNT && (
             <div style={{ marginTop: "16px", display: "flex", justifyContent: "center" }}>
-              <button style={{ padding: "8px 24px", border: "1px solid #e4e4e7", backgroundColor: "transparent", fontSize: "12px", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", cursor: "pointer", color: "#18181b" }}>
-                View Full History
+              <button
+                onClick={() => setShowAllLogs((v) => !v)}
+                style={{ padding: "8px 24px", border: "1px solid #e4e4e7", backgroundColor: "transparent", fontSize: "12px", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", cursor: "pointer", color: "#18181b" }}
+              >
+                {showAllLogs ? "Show Less" : `View All ${sortedLogs.length} Logs`}
               </button>
             </div>
           )}

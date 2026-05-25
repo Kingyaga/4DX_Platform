@@ -3,7 +3,8 @@ import { Prisma } from "@/generated/prisma/client";
 import { router, protectedProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
 import { auditLog } from "../audit";
-import { notifyMany } from "../notify";
+import { sendWigClosedEmail, sendWigDeadlinePassedEmail } from "../email";
+import { notify, notifyMany } from "../notify";
 
 const wigValueSchema = z
   .number()
@@ -48,13 +49,7 @@ export const wigsRouter = router({
         });
       }
 
-      if (team.wigs.length >= 2) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message:
-            "Teams cannot have more than 2 active WIGs. Close an existing WIG first.",
-        });
-      }
+      // Draft WIGs do not count against the active cap; activation enforces the hard limit.
       // Org admins cannot create WIGs — management only
       const isOrgAdmin = await ctx.db.orgMembership.findFirst({
         where: {
@@ -80,7 +75,7 @@ export const wigsRouter = router({
           unit: input.unit,
           deadline: input.deadline,
           description: input.description,
-          status: "ACTIVE",
+          status: "DRAFT",
           teamId: team.id,
           createdByUserId: (ctx.session.user as any).id,
         },
@@ -125,7 +120,6 @@ export const wigsRouter = router({
   getByTeam: protectedProcedure
     .input(z.object({ teamSlug: z.string() }))
     .query(async ({ ctx, input }) => {
-      const currentUserId = (ctx.session.user as any).id;
       const team = await ctx.db.team.findUnique({
         where: { slug: input.teamSlug },
         select: { leadUserId: true },
@@ -140,12 +134,17 @@ export const wigsRouter = router({
         include: {
           leadMeasures: {
             include: {
+              owners: {
+                include: {
+                  user: { select: { id: true, name: true, email: true } },
+                },
+              },
               activityLogs: {
-                where: team.leadUserId === currentUserId
-                  ? { status: "APPROVED" }
-                  : { status: "APPROVED", userId: currentUserId },
+                where: { status: "APPROVED" },
+                include: {
+                  user: { select: { id: true, name: true, email: true } },
+                },
                 orderBy: { loggedForDate: "desc" },
-                take: 10,
               },
             },
           },
@@ -165,7 +164,17 @@ export const wigsRouter = router({
     .mutation(async ({ ctx, input }) => {
       const wig = await ctx.db.wIG.findUnique({
         where: { id: input.wigId },
-        include: { team: true },
+        include: {
+          team: {
+            include: {
+              members: {
+                include: {
+                  user: { select: { id: true, name: true, email: true } },
+                },
+              },
+            },
+          },
+        },
       });
 
       if (!wig) throw new TRPCError({ code: "NOT_FOUND" });
@@ -198,6 +207,107 @@ export const wigsRouter = router({
         } as Prisma.InputJsonValue,
       });
 
+      // Notify all team members about WIG closure
+      const memberUserIds = wig.team.members.map((m) => m.userId);
+      if (memberUserIds.length > 0) {
+        await notifyMany({
+          db: ctx.db,
+          userIds: memberUserIds,
+          type: "WIG_CLOSED",
+          payload: { wigTitle: wig.title, status: input.status },
+        });
+
+        // Send email to each member
+        for (const member of wig.team.members) {
+          sendWigClosedEmail({
+            to: member.user.email,
+            name: member.user.name || member.user.email,
+            wigTitle: wig.title,
+            status: input.status,
+          }).catch(() => {
+            // Don't block on email errors
+          });
+        }
+      }
+
+      return updatedWIG;
+    }),
+
+  activate: protectedProcedure
+    .input(z.object({ wigId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const wig = await ctx.db.wIG.findUnique({
+        where: { id: input.wigId },
+        include: {
+          team: {
+            include: {
+              wigs: { where: { status: "ACTIVE" } },
+            },
+          },
+          leadMeasures: {
+            where: { archivedAt: null },
+            include: { owners: true },
+          },
+        },
+      });
+
+      if (!wig) throw new TRPCError({ code: "NOT_FOUND" });
+
+      if (wig.status !== "DRAFT") {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Only draft WIGs can be activated.",
+        });
+      }
+
+      if (wig.team.leadUserId !== (ctx.session.user as any).id) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Only the team lead can activate WIGs.",
+        });
+      }
+
+      if (wig.team.wigs.length >= 2) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message:
+            "Teams cannot have more than 2 active WIGs. Close an existing WIG first.",
+        });
+      }
+
+      if (wig.leadMeasures.length < 1 || wig.leadMeasures.length > 3) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "A WIG must have 1 to 3 lead measures before activation.",
+        });
+      }
+
+      const leadMeasureWithoutOwner = wig.leadMeasures.find(
+        (leadMeasure) => leadMeasure.owners.length === 0,
+      );
+
+      if (leadMeasureWithoutOwner) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Every lead measure must have at least one owner before activation.",
+        });
+      }
+
+      const updatedWIG = await ctx.db.wIG.update({
+        where: { id: input.wigId },
+        data: { status: "ACTIVE" },
+      });
+
+      await auditLog({
+        db: ctx.db,
+        actorUserId: (ctx.session.user as any).id,
+        entityType: "WIG",
+        entityId: input.wigId,
+        action: "WIG_ACTIVATED",
+        before: { status: wig.status } as Prisma.InputJsonValue,
+        after: { status: updatedWIG.status } as Prisma.InputJsonValue,
+      });
+
       return updatedWIG;
     }),
   // Get a single WIG by ID with full details
@@ -205,16 +315,6 @@ export const wigsRouter = router({
     .input(z.object({ wigId: z.string() }))
     .query(async ({ ctx, input }) => {
       const currentUserId = (ctx.session.user as any).id;
-      const wig = await ctx.db.wIG.findUnique({
-        where: { id: input.wigId },
-        include: {
-          team: {
-            select: { id: true, name: true, slug: true, leadUserId: true },
-          },
-        },
-      });
-
-      if (!wig) throw new TRPCError({ code: "NOT_FOUND" });
 
       const wigWithDetails = await ctx.db.wIG.findUnique({
         where: { id: input.wigId },
@@ -231,11 +331,7 @@ export const wigsRouter = router({
                 },
               },
               activityLogs: {
-                where: wig.team.leadUserId === currentUserId
-                  ? undefined
-                  : { userId: currentUserId },
                 orderBy: { loggedForDate: "desc" },
-                take: 10,
               },
             },
           },
@@ -243,6 +339,7 @@ export const wigsRouter = router({
       });
 
       if (!wigWithDetails) throw new TRPCError({ code: "NOT_FOUND" });
+
       return wigWithDetails;
     }),
 
@@ -276,5 +373,43 @@ export const wigsRouter = router({
         where: { id: input.wigId },
         data: input.data,
       });
+    }),
+
+  checkAndNotifyExpired: protectedProcedure
+    .mutation(async ({ ctx }) => {
+      // Only org admins or system (called from cron) can trigger this
+      const isAdmin = await ctx.db.orgMembership.findFirst({
+        where: { userId: (ctx.session.user as any).id, role: "ADMIN" },
+      });
+      if (!isAdmin) throw new TRPCError({ code: "FORBIDDEN" });
+
+      const expiredWigs = await ctx.db.wIG.findMany({
+        where: { status: "ACTIVE", deadline: { lt: new Date() } },
+        include: {
+          team: {
+            include: {
+              members: { include: { user: { select: { id: true, name: true, email: true } } } },
+            },
+          },
+        },
+      });
+
+      for (const wig of expiredWigs) {
+        await notify({
+          db: ctx.db,
+          userId: wig.team.leadUserId,
+          type: "WIG_DEADLINE_PASSED",
+          payload: { wigTitle: wig.title, wigId: wig.id, deadline: wig.deadline.toISOString() },
+        });
+
+        sendWigDeadlinePassedEmail({
+          to: wig.team.members.find((m) => m.userId === wig.team.leadUserId)?.user.email ?? "",
+          name: wig.team.members.find((m) => m.userId === wig.team.leadUserId)?.user.name ?? "Team Lead",
+          wigTitle: wig.title,
+          teamName: wig.team.name ?? "",
+        }).catch(() => {});
+      }
+
+      return { notified: expiredWigs.length };
     }),
 });

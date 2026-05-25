@@ -39,7 +39,7 @@ export default function CreateUserPage() {
       setNewUserTeam("");
       refetchUsers();
     },
-    onError: (err) => {
+    onError: (err: { message?: string }) => {
       setAdminError(err.message || "Unable to create user.");
       setAdminSuccess("");
     },

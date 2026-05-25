@@ -3,7 +3,7 @@
 import { useState, useEffect, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { useTimedMessage } from "@/lib/useTimedMessage";
-import { useAddTeamMember, useRemoveTeamMember, useRoleCheck, useTeam } from "@/lib/hooks";
+import { useAddTeamMember, useRemoveTeamMember, useRoleCheck, useTeam, useFindUserByEmail } from "@/lib/hooks";
 import { useTeamStore } from "@/lib/stores/team-store";
 import { ErrorState, EmptyState } from "@/lib/components/states";
 
@@ -13,11 +13,12 @@ export default function MembersPage() {
   const { team, isLoading, error, refetch } = useTeam(currentTeamSlug);
   const { addMember, isLoading: isAdding, error: addError } = useAddTeamMember();
   const { removeMember, isLoading: isRemoving, error: removeError } = useRemoveTeamMember();
+  const { findUserByEmail, user: foundUser, isLoading: isLookingUp, error: lookupError, reset: resetLookup } = useFindUserByEmail();
   const { canAddMembers } = useRoleCheck();
 
   const [hoveredRow, setHoveredRow] = useState<number | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
-  const [newMemberId, setNewMemberId] = useState("");
+  const [emailInput, setEmailInput] = useState("");
   const [newMemberRole, setNewMemberRole] = useState<"LEAD" | "MEMBER">("MEMBER");
   const [successMessage, setSuccessMessage] = useTimedMessage<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
@@ -28,29 +29,36 @@ export default function MembersPage() {
     setIsHydrated(true);
   }, []);
 
-  const handleAddMember = async (e: FormEvent) => {
+  const handleLookup = async (e: FormEvent) => {
     e.preventDefault();
-
-    if (!currentTeamSlug || !newMemberId.trim()) {
-      setFormError("Enter an existing user ID to add them to the team.");
-      return;
+    if (!emailInput.trim()) return;
+    setFormError(null);
+    try {
+      await findUserByEmail({ email: emailInput.trim() });
+    } catch {
+      // error surfaced via lookupError
     }
+  };
+
+  const handleAddMember = async () => {
+    if (!currentTeamSlug || !foundUser) return;
 
     try {
       await addMember({
         teamSlug: currentTeamSlug,
-        userId: newMemberId.trim(),
+        userId: foundUser.id,
         role: newMemberRole,
       });
 
       setSuccessMessage("Member added successfully.");
       setFormError(null);
-      setNewMemberId("");
+      setEmailInput("");
       setShowAddForm(false);
+      resetLookup();
       refetch();
-    } catch (error) {
+    } catch (err) {
       setSuccessMessage(null);
-      setFormError(error instanceof Error ? error.message : "Unable to add member. Confirm the user exists in your organization and try again.");
+      setFormError(err instanceof Error ? err.message : "Unable to add member. Confirm the user exists in your organization and try again.");
     }
   };
 
@@ -68,8 +76,8 @@ export default function MembersPage() {
       setSuccessMessage("Member removed successfully.");
       setFormError(null);
       refetch();
-    } catch (error) {
-      setFormError(error instanceof Error ? error.message : "Unable to remove member. Please try again.");
+    } catch (err) {
+      setFormError(err instanceof Error ? err.message : "Unable to remove member. Please try again.");
       setSuccessMessage(null);
     } finally {
       setRemovingMemberId(null);
@@ -78,7 +86,6 @@ export default function MembersPage() {
 
   const members = team?.members || [];
 
-  // Show loading state during SSR and initial hydration
   if (!isHydrated || isLoading) {
     return (
       <main style={{ flex: 1, padding: "32px", fontFamily: "'Inter', sans-serif" }}>
@@ -112,11 +119,11 @@ export default function MembersPage() {
         <div>
           <h1 style={{ fontSize: "24px", fontWeight: 600, color: "#18181b", letterSpacing: "-0.02em", textTransform: "uppercase" }}>Team Members</h1>
           <p style={{ fontSize: "14px", color: "#71717a", marginTop: "4px" }}>
-            Manage access for your current team. You can add an existing organization member by their user ID.
+            Manage access for your current team. Look up an existing organization member by email to add them.
           </p>
           {canAddMembers && (
             <p style={{ fontSize: "13px", color: "#52525b", marginTop: "8px" }}>
-              Click any member row to view that member's activity log history.
+              Click any member row to view that member&apos;s activity log history.
             </p>
           )}
           {!canAddMembers && (
@@ -131,6 +138,8 @@ export default function MembersPage() {
               setShowAddForm((current) => !current);
               setFormError(null);
               setSuccessMessage(null);
+              resetLookup();
+              setEmailInput("");
             }}
             style={{ backgroundColor: "#000000", color: "#ffffff", fontSize: "12px", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", padding: "10px 16px", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: "8px" }}
           >
@@ -140,59 +149,98 @@ export default function MembersPage() {
         )}
       </div>
 
+      {/* Success / error messages outside the form */}
+      {successMessage && (
+        <div style={{ marginBottom: "16px", padding: "12px 16px", backgroundColor: "#ddf7e6", border: "1px solid #a7f3d0", color: "#0f5132", fontSize: "14px" }}>
+          {successMessage}
+        </div>
+      )}
+      {(removeError) && (
+        <div style={{ marginBottom: "16px", padding: "12px 16px", backgroundColor: "#fee2e2", border: "1px solid #fecaca", color: "#991b1b", fontSize: "14px" }}>
+          {removeError?.message}
+        </div>
+      )}
+
       {showAddForm && (
         <div style={{ marginBottom: "24px", backgroundColor: "#ffffff", border: "1px solid #e4e4e7", padding: "20px" }}>
-          <h2 style={{ fontSize: "18px", fontWeight: 600, margin: 0, marginBottom: "12px" }}>Add a team member</h2>
-          <p style={{ margin: 0, fontSize: "14px", color: "#71717a", marginBottom: "16px" }}>
-            Use an existing user ID to add a member to this team. We currently do not have an email lookup endpoint in the backend.
+          <h2 style={{ fontSize: "18px", fontWeight: 600, margin: 0, marginBottom: "4px" }}>Add a team member</h2>
+          <p style={{ margin: "0 0 16px 0", fontSize: "14px", color: "#71717a" }}>
+            Search by email address to find a user in your organization, then confirm to add them.
           </p>
-          <form onSubmit={handleAddMember} style={{ display: "grid", gap: "16px" }}>
-            <div style={{ display: "grid", gap: "8px" }}>
-              <label style={{ fontSize: "12px", fontWeight: 500, color: "#18181b" }}>User ID *</label>
+
+          {/* Step 1: Email lookup */}
+          <form onSubmit={handleLookup} style={{ display: "flex", gap: "12px", marginBottom: "16px", alignItems: "flex-end" }}>
+            <div style={{ flex: 1, display: "grid", gap: "6px" }}>
+              <label style={{ fontSize: "12px", fontWeight: 600, color: "#18181b" }}>Email address *</label>
               <input
-                type="text"
-                value={newMemberId}
-                onChange={(event) => setNewMemberId(event.target.value)}
-                placeholder="Enter existing user ID"
-                style={{ width: "100%", border: "1px solid #e4e4e7", backgroundColor: "#ffffff", padding: "10px", fontSize: "16px", color: "#18181b", outline: "none" }}
+                type="email"
+                value={emailInput}
+                onChange={(e) => { setEmailInput(e.target.value); resetLookup(); }}
+                placeholder="user@yourorg.com"
+                required
+                style={{ border: "1px solid #e4e4e7", backgroundColor: "#ffffff", padding: "10px", fontSize: "14px", color: "#18181b", outline: "none" }}
               />
             </div>
-
-            <div style={{ display: "grid", gap: "8px" }}>
-              <label style={{ fontSize: "12px", fontWeight: 500, color: "#18181b" }}>Role *</label>
-              <select
-                value={newMemberRole}
-                onChange={(event) => setNewMemberRole(event.target.value as "LEAD" | "MEMBER")}
-                style={{ width: "100%", border: "1px solid #e4e4e7", backgroundColor: "#ffffff", padding: "10px", fontSize: "16px", color: "#18181b", outline: "none" }}
-              >
-                <option value="MEMBER">Member</option>
-                <option value="LEAD">Lead</option>
-              </select>
-            </div>
-
-            {(formError || addError || successMessage) && (
-              <div style={{ padding: "12px", borderRadius: "8px", backgroundColor: formError || addError ? "#fee2e2" : "#ddf7e6", border: `1px solid ${formError || addError ? "#fecaca" : "#a7f3d0"}`, color: formError || addError ? "#991b1b" : "#0f5132" }}>
-                {formError || addError?.message || successMessage}
-              </div>
-            )}
-
-            <div style={{ display: "flex", gap: "12px", justifyContent: "flex-end" }}>
-              <button
-                type="button"
-                onClick={() => setShowAddForm(false)}
-                style={{ padding: "10px 16px", backgroundColor: "#f4f4f5", color: "#18181b", border: "1px solid #e4e4e7", cursor: "pointer", fontWeight: 600 }}
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                disabled={isAdding}
-                style={{ padding: "10px 16px", backgroundColor: isAdding ? "#a1a1a1" : "#000000", color: "#ffffff", border: "none", cursor: isAdding ? "not-allowed" : "pointer", fontWeight: 600 }}
-              >
-                {isAdding ? "Adding…" : "Add Member"}
-              </button>
-            </div>
+            <button
+              type="submit"
+              disabled={isLookingUp || !emailInput.trim()}
+              style={{ padding: "10px 16px", backgroundColor: isLookingUp ? "#a1a1a1" : "#000000", color: "#ffffff", border: "none", cursor: isLookingUp ? "not-allowed" : "pointer", fontWeight: 600, fontSize: "12px", textTransform: "uppercase", letterSpacing: "0.05em", whiteSpace: "nowrap" }}
+            >
+              {isLookingUp ? "Searching..." : "Look up"}
+            </button>
           </form>
+
+          {lookupError && (
+            <div style={{ marginBottom: "16px", padding: "12px", backgroundColor: "#fee2e2", border: "1px solid #fecaca", color: "#991b1b", fontSize: "14px" }}>
+              {lookupError.message}
+            </div>
+          )}
+
+          {/* Step 2: Confirm found user */}
+          {foundUser && (
+            <div style={{ border: "1px solid #e4e4e7", padding: "16px", backgroundColor: "#f9fafb" }}>
+              <p style={{ margin: "0 0 4px 0", fontSize: "14px", fontWeight: 600, color: "#18181b" }}>
+                {foundUser.name || foundUser.email}
+              </p>
+              <p style={{ margin: "0 0 16px 0", fontSize: "13px", color: "#71717a" }}>{foundUser.email}</p>
+
+              <div style={{ display: "grid", gap: "8px", marginBottom: "16px" }}>
+                <label style={{ fontSize: "12px", fontWeight: 600, color: "#18181b" }}>Role *</label>
+                <select
+                  value={newMemberRole}
+                  onChange={(e) => setNewMemberRole(e.target.value as "LEAD" | "MEMBER")}
+                  style={{ border: "1px solid #e4e4e7", backgroundColor: "#ffffff", padding: "10px", fontSize: "14px", color: "#18181b", outline: "none" }}
+                >
+                  <option value="MEMBER">Member</option>
+                  <option value="LEAD">Lead</option>
+                </select>
+              </div>
+
+              {(formError || addError) && (
+                <div style={{ marginBottom: "12px", padding: "12px", backgroundColor: "#fee2e2", border: "1px solid #fecaca", color: "#991b1b", fontSize: "14px" }}>
+                  {formError || addError?.message}
+                </div>
+              )}
+
+              <div style={{ display: "flex", gap: "12px", justifyContent: "flex-end" }}>
+                <button
+                  type="button"
+                  onClick={() => { resetLookup(); setEmailInput(""); }}
+                  style={{ padding: "10px 16px", backgroundColor: "#f4f4f5", color: "#18181b", border: "1px solid #e4e4e7", cursor: "pointer", fontWeight: 600, fontSize: "12px" }}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleAddMember}
+                  disabled={isAdding}
+                  style={{ padding: "10px 16px", backgroundColor: isAdding ? "#a1a1a1" : "#000000", color: "#ffffff", border: "none", cursor: isAdding ? "not-allowed" : "pointer", fontWeight: 600, fontSize: "12px", textTransform: "uppercase", letterSpacing: "0.05em" }}
+                >
+                  {isAdding ? "Adding…" : `Add ${foundUser.name || foundUser.email}`}
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 

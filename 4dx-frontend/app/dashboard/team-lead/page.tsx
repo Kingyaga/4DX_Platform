@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useEffect } from "react";
 import { useTeamStore } from "@/lib/stores/team-store";
 import { useUserStore } from "@/lib/stores/user-store";
 import { useWIGs, useTeamSessions, useMyTeams } from "@/lib/hooks";
@@ -23,14 +23,6 @@ export default function TeamLeadPage() {
 
   const isLoading = wigsLoading || sessionsLoading;
   const error = wigsError || sessionsError;
-
-  const weekBars = useMemo(() =>
-    Array.from({ length: 6 }).map((_, i) => ({
-      label: `W${i + 1}`,
-      value: 40 + ((i * 15 + Math.sin(i) * 25) % 60),
-    })),
-    []
-  );
 
   if (error) return <ErrorState error={error} />;
   if (isLoading) {
@@ -113,7 +105,7 @@ export default function TeamLeadPage() {
   const activeWIGs = wigs.filter((w: any) => w.status === "ACTIVE").length;
 
   const allLeadMeasures = wigs.flatMap((w: any) => w.leadMeasures || []);
-  const onTrackCount = allLeadMeasures.filter((lm: any) => (lm.activityLogs?.[0]?.value || 0) >= lm.targetValue).length;
+  const onTrackCount = allLeadMeasures.filter((lm: any) => (lm.activityLogs || []).reduce((s: number, l: any) => s + l.value, 0) >= lm.targetValue).length;
   const executionScore = allLeadMeasures.length > 0 ? Math.round((onTrackCount / allLeadMeasures.length) * 100) : 0;
 
   return (
@@ -181,8 +173,41 @@ export default function TeamLeadPage() {
           </div>
         </div>
 
-        {/* Trend Chart Placeholder */}
-        {/* Removed 6-week trend chart as requested */}
+        {/* Session completion this week */}
+        <div style={{ border: "1px solid #e4e4e7", padding: "20px", backgroundColor: "#ffffff" }}>
+          <div style={{ fontSize: "12px", fontWeight: 600, color: "#71717a", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "12px" }}>
+            This Week's Sessions
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
+            <span style={{ fontSize: "32px", fontWeight: 700, color: "#18181b" }}>
+              {sessions.filter((s: any) => s.status === "COMPLETE").length}
+            </span>
+            <span style={{ fontSize: "14px", color: "#71717a" }}>
+              / {sessions.length} complete
+            </span>
+          </div>
+          <div style={{ width: "100%", height: "8px", backgroundColor: "#e4e4e7" }}>
+            <div style={{
+              height: "100%",
+              backgroundColor: "#18181b",
+              width: sessions.length > 0 ? `${Math.round((sessions.filter((s: any) => s.status === "COMPLETE").length / sessions.length) * 100)}%` : "0%",
+              transition: "width 0.3s ease",
+            }} />
+          </div>
+          <div style={{ display: "flex", gap: "16px", marginTop: "12px" }}>
+            {(["COMPLETE", "IN_PROGRESS", "PENDING", "OVERDUE"] as const).map((status) => {
+              const count = sessions.filter((s: any) => s.status === status).length;
+              if (count === 0) return null;
+              const colors: Record<string, string> = { COMPLETE: "#16A34A", IN_PROGRESS: "#EAB308", PENDING: "#71717a", OVERDUE: "#dc2626" };
+              return (
+                <div key={status} style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                  <span style={{ width: "8px", height: "8px", borderRadius: "50%", backgroundColor: colors[status], display: "inline-block" }} />
+                  <span style={{ fontSize: "12px", color: "#71717a" }}>{count} {status.replace("_", " ").toLowerCase()}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
 
         {/* Active WIGs List */}
         <div style={{ border: "1px solid #e4e4e7", borderRadius: "8px", padding: "20px", backgroundColor: "white" }}>
@@ -237,6 +262,72 @@ export default function TeamLeadPage() {
           )}
         </div>
 
+        {/* Session Roster — who completed vs pending this week */}
+        <div style={{ border: "1px solid #e4e4e7", borderRadius: "8px", padding: "20px", backgroundColor: "white" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+            <h2 style={{ margin: 0, fontSize: "16px", fontWeight: "600" }}>Weekly Session Roster</h2>
+            <span style={{ fontSize: "12px", color: "#71717a" }}>
+              {sessions.filter((s: any) => s.status === "COMPLETE").length} / {sessions.length} complete
+            </span>
+          </div>
+
+          {sessions.length === 0 ? (
+            <p style={{ margin: 0, color: "#a1a1aa", fontSize: "14px" }}>No sessions generated for this week yet.</p>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+              {sessions.map((session: any) => {
+                const statusColor =
+                  session.status === "COMPLETE" ? "#16A34A" :
+                  session.status === "OVERDUE"  ? "#ef4444" :
+                  session.status === "IN_PROGRESS" ? "#EAB308" : "#71717a";
+                const statusLabel =
+                  session.status === "COMPLETE" ? "Complete" :
+                  session.status === "OVERDUE"  ? "Overdue" :
+                  session.status === "IN_PROGRESS" ? "In Progress" : "Pending";
+
+                return (
+                  <div
+                    key={session.id}
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      padding: "10px 14px",
+                      border: "1px solid #e4e4e7",
+                      borderRadius: "6px",
+                      backgroundColor: "#fafafa",
+                    }}
+                  >
+                    <div>
+                      <p style={{ margin: 0, fontWeight: "500", fontSize: "14px" }}>
+                        {session.user?.name || session.user?.email || "Unknown"}
+                      </p>
+                      {session.wig?.title && (
+                        <p style={{ margin: "2px 0 0 0", fontSize: "11px", color: "#71717a" }}>{session.wig.title}</p>
+                      )}
+                    </div>
+                    <span
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: "5px",
+                        fontSize: "12px",
+                        fontWeight: 600,
+                        color: statusColor,
+                        textTransform: "uppercase",
+                        letterSpacing: "0.04em",
+                      }}
+                    >
+                      <span style={{ width: "7px", height: "7px", borderRadius: "50%", backgroundColor: statusColor, display: "inline-block" }} />
+                      {statusLabel}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
         {/* Quick Actions */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "12px" }}>
           <Link
@@ -255,7 +346,7 @@ export default function TeamLeadPage() {
             Manage WIGs
           </Link>
           <Link
-            href="/dashboard/activity"
+            href="/dashboard/team-lead/requests"
             style={{
               padding: "12px 16px",
               backgroundColor: "white",
@@ -268,10 +359,10 @@ export default function TeamLeadPage() {
               fontSize: "14px",
             }}
           >
-            Activity Log
+            Approve Activity
           </Link>
           <Link
-            href="/dashboard/session"
+            href="/dashboard/team-lead/reports"
             style={{
               padding: "12px 16px",
               backgroundColor: "white",
@@ -284,7 +375,7 @@ export default function TeamLeadPage() {
               fontSize: "14px",
             }}
           >
-            Team Sessions
+            Session Reports
           </Link>
         </div>
       </div>

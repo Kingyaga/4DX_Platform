@@ -583,4 +583,23 @@ export const authRouter = router({
 
       return { success: true };
     }),
+
+  // Find a user by email — for team leads to look up users before adding them
+  findByEmail: protectedProcedure
+    .input(z.object({ email: emailSchema }))
+    .mutation(async ({ ctx, input }) => {
+      const user = await ctx.db.user.findUnique({
+        where: { email: input.email },
+        select: { id: true, name: true, email: true },
+      });
+
+      if (!user) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "No user found with that email address.",
+        });
+      }
+
+      return user;
+    }),
 });
