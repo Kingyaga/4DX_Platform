@@ -92,7 +92,8 @@ export default function LoginPage() {
     setShowPassword(!showPassword);
   };
 
-  const handleSignIn = async () => {
+  const handleSignIn = async (event) => {
+    event?.preventDefault();
     setError("");
 
     const normalizedEmail = email.trim().toLowerCase();
@@ -200,6 +201,7 @@ export default function LoginPage() {
             </p>
           )}
 
+          <form onSubmit={handleSignIn}>
           <div className="fields">
             <div className="input-wrapper">
               <input
@@ -264,8 +266,7 @@ export default function LoginPage() {
 
           <button
             className="btn-signin"
-            type="button"
-            onClick={handleSignIn}
+            type="submit"
             disabled={loading}
             style={{ opacity: loading ? 0.7 : 1 }}
           >
@@ -278,6 +279,7 @@ export default function LoginPage() {
               "Sign In"
             )}
           </button>
+          </form>
 
           <button
             className="btn-signin"

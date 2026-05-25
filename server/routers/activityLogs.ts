@@ -4,38 +4,91 @@ import { router, protectedProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
 import { auditLog } from "../audit";
 import { notify, notifyMany } from "../notify";
-import { sendActivityApprovedEmail, sendActivityDeclinedEmail } from "../email";
+import { sendActivityApprovedEmail, sendActivityDeclinedEmail, sendWigClosedEmail } from "../email";
+import { getNextWigCompletionState } from "../wigCompletion";
 
 const CLOSED_WIG_STATUSES = ["ACHIEVED", "MISSED", "ABANDONED"] as const;
 
-function getNextWigProgress(wig: {
-  currentValue: number;
-  fromValue: number;
-  toValue: number;
-  status: string;
-  closedAt: Date | null;
-}, approvedValue: number) {
-  const direction = wig.toValue >= wig.fromValue ? 1 : -1;
-  const nextValue = wig.currentValue + approvedValue * direction;
-  const reachedTarget = direction === 1
-    ? nextValue >= wig.toValue
-    : nextValue <= wig.toValue;
+async function getLeadMeasureTotal(
+  db: Pick<Prisma.TransactionClient, "activityLog">,
+  leadMeasureId: string,
+) {
+  const aggregate = await db.activityLog.aggregate({
+    where: { leadMeasureId, status: "APPROVED" },
+    _sum: { value: true },
+  });
 
-  if (!reachedTarget) {
-    return {
-      currentValue: nextValue,
-      status: wig.status,
-      closedAt: wig.closedAt,
-      achieved: false,
-    };
+  return aggregate._sum.value ?? 0;
+}
+
+async function getNextWigState(
+  db: Pick<Prisma.TransactionClient, "wIG" | "activityLog">,
+  wigId: string,
+) {
+  const wig = await db.wIG.findUnique({
+    where: { id: wigId },
+    include: {
+      leadMeasures: {
+        where: { archivedAt: null },
+        include: {
+          activityLogs: {
+            where: { status: "APPROVED" },
+            select: { value: true },
+          },
+        },
+      },
+    },
+  });
+
+  if (!wig) throw new TRPCError({ code: "NOT_FOUND", message: "WIG not found." });
+
+  return getNextWigCompletionState(wig);
+}
+
+async function notifyWigAutoClosed(
+  db: Pick<Prisma.TransactionClient, "wIG" | "notification">,
+  wigId: string,
+) {
+  const wig = await db.wIG.findUnique({
+    where: { id: wigId },
+    include: {
+      team: {
+        include: {
+          members: {
+            include: {
+              user: { select: { id: true, name: true, email: true } },
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (!wig) return;
+
+  const memberUserIds = wig.team.members.map((member) => member.userId);
+  if (memberUserIds.length === 0) return;
+
+  await db.notification.createMany({
+    data: memberUserIds.map((userId) => ({
+      userId,
+      type: "WIG_CLOSED",
+      payloadJson: {
+        wigTitle: wig.title,
+        status: "ACHIEVED",
+        reason: "All lead measures were completed.",
+      },
+    })),
+  });
+
+  for (const member of wig.team.members) {
+    sendWigClosedEmail({
+      to: member.user.email,
+      name: member.user.name || member.user.email,
+      wigTitle: wig.title,
+      status: "ACHIEVED",
+    }).catch(() => {});
   }
-
-  return {
-    currentValue: wig.toValue,
-    status: "ACHIEVED",
-    closedAt: wig.closedAt ?? new Date(),
-    achieved: wig.status !== "ACHIEVED",
-  };
 }
 
 export const activityLogsRouter = router({
@@ -65,6 +118,14 @@ export const activityLogsRouter = router({
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: "This WIG is closed. Create or select an active WIG before logging activity.",
+        });
+      }
+
+      const currentTotal = await getLeadMeasureTotal(ctx.db, leadMeasure.id);
+      if (currentTotal >= leadMeasure.targetValue) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "This lead measure is already complete and no longer accepts activity logs.",
         });
       }
 
@@ -165,22 +226,24 @@ export const activityLogsRouter = router({
         });
       }
 
-      const nextWig = getNextWigProgress(wig, log.value);
-
-      const [updatedLog, updatedWIG] = await ctx.db.$transaction([
-        ctx.db.activityLog.update({
+      const { updatedLog, updatedWIG } = await ctx.db.$transaction(async (tx) => {
+        const updatedLog = await tx.activityLog.update({
           where: { id: input.logId },
           data: { status: "APPROVED" },
-        }),
-        ctx.db.wIG.update({
+        });
+
+        const nextWig = await getNextWigState(tx, wig.id);
+        const updatedWIG = await tx.wIG.update({
           where: { id: wig.id },
           data: {
             currentValue: nextWig.currentValue,
             status: nextWig.status as any,
             closedAt: nextWig.closedAt,
           },
-        }),
-      ]);
+        });
+
+        return { updatedLog, updatedWIG };
+      });
 
       await auditLog({
         db: ctx.db,
@@ -221,6 +284,10 @@ export const activityLogsRouter = router({
         unit: log.leadMeasure.wig.unit ?? "",
       }).catch(() => {});
 
+      if (updatedWIG.status === "ACHIEVED" && wig.status !== "ACHIEVED") {
+        await notifyWigAutoClosed(ctx.db, wig.id);
+      }
+
       return updatedLog;
     }),
 
@@ -258,33 +325,35 @@ export const activityLogsRouter = router({
 
       const affectedUserIds = Array.from(new Set(pendingLogs.map((log) => log.userId)));
       let approvedCount = 0;
-      const achievedWigIds = new Set<string>();
+      const autoClosedWigIds = new Set<string>();
 
       await ctx.db.$transaction(async (tx) => {
-        const progressByWig = new Map<string, {
-          currentValue: number;
-          fromValue: number;
-          toValue: number;
-          status: string;
-          closedAt: Date | null;
-        }>();
+        const affectedWigIds = new Set<string>();
 
         for (const log of pendingLogs) {
-          const wigSnapshot = progressByWig.get(log.leadMeasure.wig.id) ?? log.leadMeasure.wig;
+          const wig = await tx.wIG.findUnique({
+            where: { id: log.leadMeasure.wig.id },
+            select: { id: true, status: true },
+          });
 
-          if (CLOSED_WIG_STATUSES.includes(wigSnapshot.status as any)) {
+          if (!wig || CLOSED_WIG_STATUSES.includes(wig.status as any)) {
             continue;
           }
-
-          const nextWig = getNextWigProgress(wigSnapshot, log.value);
 
           await tx.activityLog.update({
             where: { id: log.id },
             data: { status: "APPROVED" },
           });
 
+          affectedWigIds.add(wig.id);
+          approvedCount += 1;
+        }
+
+        for (const wigId of affectedWigIds) {
+          const nextWig = await getNextWigState(tx, wigId);
+
           await tx.wIG.update({
-            where: { id: log.leadMeasure.wig.id },
+            where: { id: wigId },
             data: {
               currentValue: nextWig.currentValue,
               status: nextWig.status as any,
@@ -292,17 +361,8 @@ export const activityLogsRouter = router({
             },
           });
 
-          progressByWig.set(log.leadMeasure.wig.id, {
-            currentValue: nextWig.currentValue,
-            fromValue: wigSnapshot.fromValue,
-            toValue: wigSnapshot.toValue,
-            status: nextWig.status,
-            closedAt: nextWig.closedAt,
-          });
-
-          approvedCount += 1;
           if (nextWig.achieved) {
-            achievedWigIds.add(log.leadMeasure.wig.id);
+            autoClosedWigIds.add(wigId);
           }
         }
       });
@@ -316,7 +376,7 @@ export const activityLogsRouter = router({
         after: {
           teamSlug: input.teamSlug,
           approvedCount,
-          achievedWigIds: Array.from(achievedWigIds),
+          autoClosedWigIds: Array.from(autoClosedWigIds),
         },
       });
 
@@ -327,6 +387,10 @@ export const activityLogsRouter = router({
           type: "ACTIVITY_APPROVED",
           payload: { message: "Your pending activity logs have been approved." },
         });
+      }
+
+      for (const wigId of autoClosedWigIds) {
+        await notifyWigAutoClosed(ctx.db, wigId);
       }
 
       return { count: approvedCount };

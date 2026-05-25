@@ -6,7 +6,7 @@ import { useTeamStore } from "@/lib/stores/team-store";
 import { useUserStore } from "@/lib/stores/user-store";
 import { ErrorState, EmptyState } from "@/lib/components/states";
 import { LoadingSpinner } from "@/lib/components/loading-spinner";
-import type { WIG, LeadMeasure, ActivityLogEntry } from "@/lib/types";
+import type { LeadMeasure, ActivityLogEntry } from "@/lib/types";
 
 type AggregatedActivityLog = ActivityLogEntry & {
   leadMeasureId: string;
@@ -35,14 +35,26 @@ export default function ActivityLogPage() {
   const [logsRefreshIndex, setLogsRefreshIndex] = useState(0);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [showAllLogs, setShowAllLogs] = useState(false);
+  const [currentTimeMs, setCurrentTimeMs] = useState(0);
   const PREVIEW_COUNT = 10;
+  const userId = user?.id;
 
   const allLeadMeasures = useMemo(() =>
     (wigs as any[]).flatMap((wig) =>
       (wig.leadMeasures || [])
-        .filter((lm: LeadMeasure) => !user?.id || (lm.owners || []).some((owner) => owner.userId === user.id))
+        .filter((lm: LeadMeasure) => {
+          const approvedTotal = (lm.activityLogs || [])
+            .filter((log) => log.status === "APPROVED")
+            .reduce((sum, log) => sum + log.value, 0);
+
+          return (
+            wig.status === "ACTIVE" &&
+            approvedTotal < lm.targetValue &&
+            (!userId || (lm.owners || []).some((owner) => owner.userId === userId))
+          );
+        })
         .map((lm: LeadMeasure) => ({ id: lm.id, name: lm.name, wigTitle: wig.title, unit: (lm as any).unit || "" })),
-    ), [wigs, user?.id]
+    ), [wigs, userId]
   );
 
   const selectedLM = allLeadMeasures.find((lm) => lm.id === selectedLeadMeasureId);
@@ -52,7 +64,9 @@ export default function ActivityLogPage() {
 
   // Set default selected lead measure when data loads
   useEffect(() => {
-    if (hasLeadMeasures && !selectedLeadMeasureId) {
+    const selectionStillAvailable = allLeadMeasures.some((lm) => lm.id === selectedLeadMeasureId);
+
+    if (hasLeadMeasures && (!selectedLeadMeasureId || !selectionStillAvailable)) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setSelectedLeadMeasureId(allLeadMeasures[0].id);
     }
@@ -72,6 +86,15 @@ export default function ActivityLogPage() {
     return () => window.clearTimeout(timeoutId);
   }, [successMessage]);
 
+  useEffect(() => {
+    const updateCurrentTime = () => setCurrentTimeMs(Date.now());
+
+    updateCurrentTime();
+    const intervalId = window.setInterval(updateCurrentTime, 60 * 1000);
+
+    return () => window.clearInterval(intervalId);
+  }, []);
+
   // Extract activity logs from WIGs data
   useEffect(() => {
     if (!wigs.length) {
@@ -89,7 +112,7 @@ export default function ActivityLogPage() {
           const logs = lm.activityLogs;
           if (logs && Array.isArray(logs)) {
             const aggregatedLogs = logs
-              .filter((log: ActivityLogEntry) => (log as any).userId === user?.id)
+              .filter((log: ActivityLogEntry) => (log as any).userId === userId)
               .map((log: ActivityLogEntry) => ({
                 ...log,
                 leadMeasureId: lm.id,
@@ -108,7 +131,7 @@ export default function ActivityLogPage() {
       const errorMessage = err instanceof Error ? err.message : "Unable to load activity logs.";
       setLogsError(errorMessage);
     }
-  }, [wigs, logsRefreshIndex]);
+  }, [wigs, logsRefreshIndex, userId]);
 
   const pendingLogs = (myAllLogs as any[]).filter((log: any) => log.status === "PENDING");
 
@@ -265,7 +288,7 @@ export default function ActivityLogPage() {
                 Awaiting Approval ({pendingLogs.length})
               </h3>
               {pendingLogs.map((log: any) => {
-                const isEditable = Date.now() - new Date(log.createdAt).getTime() < 24 * 60 * 60 * 1000;
+                const isEditable = currentTimeMs > 0 && currentTimeMs - new Date(log.createdAt).getTime() < 24 * 60 * 60 * 1000;
                 return (
                   <div key={log.id} style={{ marginBottom: "8px" }}>
                     <div style={{ padding: "12px 16px", border: "1px solid #e4e4e7", backgroundColor: "#fffbeb", display: "flex", justifyContent: "space-between", alignItems: "center" }}>

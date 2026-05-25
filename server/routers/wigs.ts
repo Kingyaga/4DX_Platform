@@ -179,8 +179,21 @@ export const wigsRouter = router({
 
       if (!wig) throw new TRPCError({ code: "NOT_FOUND" });
 
-      if (wig.team.leadUserId !== (ctx.session.user as any).id) {
-        throw new TRPCError({ code: "FORBIDDEN" });
+      const actorUserId = (ctx.session.user as any).id;
+      const isOrgAdmin = await ctx.db.orgMembership.findFirst({
+        where: {
+          userId: actorUserId,
+          orgId: wig.team.orgId,
+          role: "ADMIN",
+        },
+        select: { userId: true },
+      });
+
+      if (wig.team.leadUserId !== actorUserId && !isOrgAdmin) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Only the team lead or an org admin can close WIGs.",
+        });
       }
 
       const updatedWIG = await ctx.db.wIG.update({
@@ -193,7 +206,7 @@ export const wigsRouter = router({
 
       await auditLog({
         db: ctx.db,
-        actorUserId: (ctx.session.user as any).id,
+        actorUserId,
         entityType: "WIG",
         entityId: input.wigId,
         action: "WIG_CLOSED",

@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start -p 3001",
     "lint": "eslint",
+    "test:backend": "tsx --test server/**/*.test.ts",
     "notify:wigs-at-risk": "ts-node --compiler-options {\"module\":\"CommonJS\"} -r tsconfig-paths/register scripts/check-wigs-at-risk.ts",
     "cron:generate-sessions": "ts-node --compiler-options {\"module\":\"CommonJS\"} -r tsconfig-paths/register scripts/generate-weekly-sessions.ts",
     "cron:mark-overdue": "ts-node --compiler-options {\"module\":\"CommonJS\"} -r tsconfig-paths/register scripts/mark-overdue-sessions.ts"

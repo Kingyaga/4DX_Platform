@@ -642,10 +642,19 @@ function WIGDetail({ wig, onBack }: { wig: WIG; onBack: () => void }) {
           <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
             {activeWig.leadMeasures.map((lm) => {
               const totalLogged = (lm.activityLogs || []).reduce((sum, log) => sum + log.value, 0);
+              const leadMeasureCompleted = totalLogged >= lm.targetValue;
 
               return (
                 <div key={lm.id} style={{ backgroundColor: "#ffffff", border: "1px solid #e4e4e7", padding: "20px" }}>
-                  <h3 style={{ fontSize: "18px", fontWeight: 600, color: "#18181b", marginBottom: "8px" }}>{lm.name}</h3>
+                  <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "12px", marginBottom: "8px" }}>
+                    <h3 style={{ fontSize: "18px", fontWeight: 600, color: "#18181b", margin: 0 }}>{lm.name}</h3>
+                    {leadMeasureCompleted && (
+                      <span style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "4px 10px", border: "1px solid #16A34A", backgroundColor: "#f0fdf4", color: "#16A34A", fontSize: "11px", fontWeight: 700, letterSpacing: "0.05em", textTransform: "uppercase", whiteSpace: "nowrap" }}>
+                        <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>check_circle</span>
+                        Completed
+                      </span>
+                    )}
+                  </div>
                   {(lm.owners?.length || 0) > 0 && (
                     <p style={{ fontSize: "12px", color: "#52525b", marginBottom: "8px" }}>
                       Owners: {lm.owners?.map((owner) => owner.user.name).join(", ")}
@@ -733,7 +742,37 @@ function WIGDetail({ wig, onBack }: { wig: WIG; onBack: () => void }) {
 function WIGHistoryDetail({ wig, onBack }: { wig: WIG; onBack: () => void }) {
   const outcomeColor = wig.status === "ACHIEVED" ? "#16A34A" : wig.status === "MISSED" ? "#ef4444" : "#71717a";
   const outcomeIcon = wig.status === "ACHIEVED" ? "emoji_events" : wig.status === "MISSED" ? "cancel" : "archive";
-  const finalProgress = Math.min(100, Math.round(((wig.currentValue - wig.fromValue) / (wig.toValue - wig.fromValue)) * 100));
+  const finalProgress = wig.leadMeasures.length > 0
+    ? Math.round(
+        wig.leadMeasures.reduce((sum, lm) => {
+          const totalApproved = (lm.activityLogs || []).reduce((logSum, log) => logSum + log.value, 0);
+          return sum + Math.min(100, lm.targetValue > 0 ? (totalApproved / lm.targetValue) * 100 : 0);
+        }, 0) / wig.leadMeasures.length,
+      )
+    : Math.min(100, Math.round(((wig.currentValue - wig.fromValue) / (wig.toValue - wig.fromValue)) * 100));
+  const leadMeasureCompletionEvents = wig.leadMeasures
+    .map((lm) => {
+      let runningTotal = 0;
+      const completionLog = [...(lm.activityLogs || [])]
+        .sort((a, b) => new Date(a.loggedForDate).getTime() - new Date(b.loggedForDate).getTime())
+        .find((log) => {
+          runningTotal += log.value;
+          return lm.targetValue > 0 && runningTotal >= lm.targetValue;
+        });
+
+      return completionLog
+        ? {
+            leadMeasureName: lm.name,
+            completedAt: new Date(completionLog.loggedForDate),
+            value: runningTotal,
+            targetValue: lm.targetValue,
+            unit: lm.unit,
+          }
+        : null;
+    })
+    .filter((event): event is { leadMeasureName: string; completedAt: Date; value: number; targetValue: number; unit: string } => Boolean(event))
+    .sort((a, b) => b.completedAt.getTime() - a.completedAt.getTime());
+  const finalCompletionEvent = leadMeasureCompletionEvents[0] || null;
 
   // Duration: from createdAt to closedAt
   const startDate = new Date(wig.createdAt);
@@ -782,7 +821,7 @@ function WIGHistoryDetail({ wig, onBack }: { wig: WIG; onBack: () => void }) {
           </div>
           <div style={{ textAlign: "right" }}>
             <div style={{ fontSize: "32px", fontWeight: 700, color: outcomeColor }}>{finalProgress}%</div>
-            <div style={{ fontSize: "12px", color: "#71717a" }}>of target reached</div>
+            <div style={{ fontSize: "12px", color: "#71717a" }}>lead measure completion</div>
           </div>
         </div>
         {/* Progress bar */}
@@ -795,6 +834,32 @@ function WIGHistoryDetail({ wig, onBack }: { wig: WIG; onBack: () => void }) {
           <span>Deadline: {new Date(wig.deadline).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</span>
           <span>Duration: {durationDays} day{durationDays !== 1 ? "s" : ""}</span>
         </div>
+      </div>
+
+      <div style={{ backgroundColor: "#ffffff", border: "1px solid #e4e4e7", padding: "20px", marginBottom: "24px" }}>
+        <div style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#71717a", marginBottom: "12px" }}>Auto-Close Audit</div>
+        {finalCompletionEvent ? (
+          <div style={{ display: "flex", justifyContent: "space-between", gap: "16px", flexWrap: "wrap" }}>
+            <div>
+              <div style={{ fontSize: "16px", fontWeight: 700, color: "#18181b" }}>{finalCompletionEvent.leadMeasureName}</div>
+              <div style={{ fontSize: "13px", color: "#71717a", marginTop: "4px" }}>
+                Final lead measure to cross target.
+              </div>
+            </div>
+            <div style={{ textAlign: "right" }}>
+              <div style={{ fontSize: "14px", fontWeight: 700, color: "#18181b" }}>
+                {finalCompletionEvent.completedAt.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+              </div>
+              <div style={{ fontSize: "12px", color: "#71717a", marginTop: "4px" }}>
+                {finalCompletionEvent.value.toFixed(1)} / {finalCompletionEvent.targetValue.toFixed(1)} {finalCompletionEvent.unit}
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div style={{ fontSize: "13px", color: "#71717a" }}>
+            This WIG was closed manually before every lead measure crossed its target.
+          </div>
+        )}
       </div>
 
       {/* Lead measures breakdown */}

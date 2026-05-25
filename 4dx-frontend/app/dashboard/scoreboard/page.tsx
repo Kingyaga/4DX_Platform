@@ -5,18 +5,28 @@ import { useWIGs } from "@/lib/hooks";
 import { useTeamStore } from "@/lib/stores/team-store";
 import { ErrorState, EmptyState } from "@/lib/components/states";
 import { LoadingSpinner } from "@/lib/components/loading-spinner";
-import type { WIG, LeadMeasure, ActivityLogEntry } from "@/lib/types";
+import type { LeadMeasure, ActivityLogEntry } from "@/lib/types";
 
 export default function ScoreboardPage() {
   const { currentTeamSlug } = useTeamStore();
   const { wigs, isLoading, error, refetch } = useWIGs(currentTeamSlug);
   const [selectedWigId, setSelectedWigId] = useState<string>("");
   const [displayMode, setDisplayMode] = useState(false);
+  const [currentTimeMs, setCurrentTimeMs] = useState(0);
 
   useEffect(() => {
     const interval = setInterval(() => { refetch(); }, 60_000);
     return () => clearInterval(interval);
   }, [refetch]);
+
+  useEffect(() => {
+    const updateCurrentTime = () => setCurrentTimeMs(Date.now());
+
+    updateCurrentTime();
+    const interval = setInterval(updateCurrentTime, 60_000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   // Enter/exit display mode with Escape key
   useEffect(() => {
@@ -31,8 +41,8 @@ export default function ScoreboardPage() {
   const selected = selectedWigId ? activeWigs.find((w) => w.id === selectedWigId) : activeWigs[0];
 
   // Days remaining to deadline
-  const daysRemaining = selected
-    ? Math.max(0, Math.ceil((new Date(selected.deadline).getTime() - Date.now()) / 86_400_000))
+  const daysRemaining = selected && currentTimeMs > 0
+    ? Math.max(0, Math.ceil((new Date(selected.deadline).getTime() - currentTimeMs) / 86_400_000))
     : 0;
 
   // Helper: compute status color based on progress
@@ -57,6 +67,14 @@ export default function ScoreboardPage() {
     const headingColor = isDark ? "#ffffff" : "#18181b";
     const secondaryColor = isDark ? "#a1a1aa" : "#71717a";
     const bodyTextColor = isDark ? "#d4d4d8" : "#52525b";
+    const completionScore = selected.leadMeasures.length > 0
+      ? Math.round(
+          selected.leadMeasures.reduce((sum: number, lm: LeadMeasure) => {
+            const current = (lm.activityLogs || []).reduce((logSum: number, log: ActivityLogEntry) => logSum + log.value, 0);
+            return sum + Math.min(100, lm.targetValue > 0 ? (current / lm.targetValue) * 100 : 0);
+          }, 0) / selected.leadMeasures.length,
+        )
+      : 0;
 
     return (
       <>
@@ -109,13 +127,16 @@ export default function ScoreboardPage() {
             <div>
               <span style={{ fontSize: "12px", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", color: secondaryColor, display: "block", marginBottom: "8px" }}>Lag Measure Progress</span>
               <span style={{ fontSize: isDark ? "48px" : "32px", fontWeight: 700, letterSpacing: "-0.03em", color: headingColor }}>
-                {formatValue(selected.currentValue, selected.unit)}
+                {completionScore}%
+              </span>
+              <span style={{ fontSize: "12px", color: secondaryColor, display: "block", marginTop: "4px" }}>
+                lead measure completion score
               </span>
             </div>
             <div style={{ textAlign: "right" }}>
-              <span style={{ fontSize: "12px", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", color: secondaryColor, display: "block", marginBottom: "8px" }}>Target</span>
+              <span style={{ fontSize: "12px", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", color: secondaryColor, display: "block", marginBottom: "8px" }}>Lag Value</span>
               <span style={{ fontSize: "20px", fontWeight: 600, color: headingColor }}>
-                {formatValue(selected.toValue, selected.unit)}
+                {formatValue(selected.currentValue, selected.unit)}
               </span>
               <span style={{ fontSize: "12px", color: secondaryColor, display: "block", marginTop: "4px" }}>
                 {daysRemaining} day{daysRemaining !== 1 ? "s" : ""} remaining
@@ -127,7 +148,7 @@ export default function ScoreboardPage() {
               style={{
                 height: "100%",
                 backgroundColor: getStatusColor(selected.currentValue, selected.toValue, selected.fromValue),
-                width: `${Math.min(100, ((selected.currentValue - selected.fromValue) / (selected.toValue - selected.fromValue)) * 100)}%`,
+                width: `${completionScore}%`,
               }}
             ></div>
           </div>
@@ -171,7 +192,7 @@ export default function ScoreboardPage() {
                     <span style={{ fontSize: "16px", fontWeight: 500, color: headingColor }}>{lm.name}</span>
                   </div>
                   <span style={{ fontSize: "12px", fontWeight: 600, color: onTrack ? "#16A34A" : "#ba1a1a", textTransform: "uppercase", letterSpacing: "0.05em" }}>
-                    {onTrack ? "On Track" : "Behind"}
+                    {onTrack ? "Completed" : "Behind"}
                   </span>
                 </div>
 
@@ -183,6 +204,13 @@ export default function ScoreboardPage() {
                 <div style={{ width: "100%", height: "4px", backgroundColor: isDark ? "#3f3f46" : "#e4e4e7", marginBottom: "16px" }}>
                   <div style={{ height: "100%", backgroundColor: isDark ? "#a1a1aa" : "#18181b", width: `${pct}%` }}></div>
                 </div>
+
+                {onTrack && (
+                  <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "4px 10px", marginBottom: "16px", border: "1px solid #16A34A", backgroundColor: isDark ? "#052e16" : "#f0fdf4", color: "#16A34A", fontSize: "11px", fontWeight: 700, letterSpacing: "0.05em", textTransform: "uppercase" }}>
+                    <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>check_circle</span>
+                    Completed
+                  </div>
+                )}
 
                 {/* Per-owner contribution breakdown */}
                 {ownerList.length > 0 && (
