@@ -3,6 +3,12 @@ import { Prisma } from "@/generated/prisma/client";
 import { router, protectedProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
 import { auditLog } from "../audit";
+import { notifyMany } from "../notify";
+
+const wigValueSchema = z
+  .number()
+  .finite()
+  .nonnegative("WIG current and target values cannot be negative.");
 
 export const wigsRouter = router({
   create: protectedProcedure
@@ -10,8 +16,8 @@ export const wigsRouter = router({
       z.object({
         teamSlug: z.string(),
         title: z.string().min(3).max(200),
-        fromValue: z.number(),
-        toValue: z.number(),
+        fromValue: wigValueSchema,
+        toValue: wigValueSchema,
         unit: z.string().min(1),
         deadline: z.coerce.date(),
         description: z.string().optional(),
@@ -19,6 +25,13 @@ export const wigsRouter = router({
     )
 
     .mutation(async ({ ctx, input }) => {
+      if (input.toValue <= input.fromValue) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Target value must be greater than the current value.",
+        });
+      }
+
       const team = await ctx.db.team.findUnique({
         where: { slug: input.teamSlug },
         include: {
@@ -85,6 +98,26 @@ export const wigsRouter = router({
           teamId: createdWIG.teamId,
         },
       });
+
+      const orgAdmins = await ctx.db.orgMembership.findMany({
+        where: { orgId: team.orgId, role: "ADMIN" },
+        select: { userId: true },
+      });
+
+      if (orgAdmins.length > 0) {
+        await notifyMany({
+          db: ctx.db,
+          userIds: orgAdmins.map((admin) => admin.userId),
+          type: "WIG_CREATED",
+          payload: {
+            wigId: createdWIG.id,
+            title: createdWIG.title,
+            teamId: team.id,
+            teamName: team.name,
+            createdByUserId: (ctx.session.user as any).id,
+          },
+        });
+      }
 
       return createdWIG;
     }),

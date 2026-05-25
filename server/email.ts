@@ -154,6 +154,40 @@ export async function sendPasswordResetEmail({
   }
 }
 
+export async function sendNewUserDetailsEmail({
+  to,
+  name,
+  email,
+  temporaryPassword,
+  orgName,
+  teamName,
+}: {
+  to: string;
+  name: string;
+  email: string;
+  temporaryPassword: string;
+  orgName: string;
+  teamName?: string;
+}): Promise<boolean> {
+  try {
+    return await sendEmail({
+      to,
+      subject: `Welcome to ${orgName} on 4DX Platform`,
+      html: `
+        <h2>Hi ${escapeHtml(name)},</h2>
+        <p>Your 4DX Platform account has been created for <strong>${escapeHtml(orgName)}</strong>.</p>
+        ${teamName ? `<p>Team: <strong>${escapeHtml(teamName)}</strong></p>` : ""}
+        <p><strong>Email:</strong> ${escapeHtml(email)}</p>
+        <p><strong>Temporary password:</strong> ${escapeHtml(temporaryPassword)}</p>
+        <p>Please sign in and change your password from Settings.</p>
+      `,
+    });
+  } catch (error) {
+    console.error("New user details email failed:", error);
+    return false;
+  }
+}
+
 export async function sendTeamMembershipEmail({
   to,
   name,

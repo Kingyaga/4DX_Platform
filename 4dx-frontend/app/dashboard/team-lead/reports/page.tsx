@@ -13,6 +13,7 @@ export default function TeamLeadReportsPage() {
   const { wigs, isLoading, error } = useWIGs(currentTeamSlug);
   const { teams, isLoading: teamsLoading, error: teamsError } = useMyTeams(orgSlug);
   const [selectedReport, setSelectedReport] = useState<"execution" | "lag" | "lead" | null>(null);
+  const [reportActionMessage, setReportActionMessage] = useState<string | null>(null);
 
   useEffect(() => {
     if (!teamsLoading && teams.length > 0 && (!currentTeamSlug || !teams.some((team: any) => team.slug === currentTeamSlug))) {
@@ -69,12 +70,21 @@ export default function TeamLeadReportsPage() {
     : 0;
 
   const onTrackCount = allLeadMeasures.filter((lm: any) => (lm.activityLogs?.[0]?.value || 0) >= lm.targetValue).length;
-  const lagMeasures = wigs.map((w: any) => ({
-    title: w.title,
-    current: w.currentValue || 0,
-    target: w.toValue,
-    progress: Math.round(((w.currentValue || 0) / w.toValue) * 100),
-  }));
+  const lagMeasures = wigs.map((w: any) => {
+    const fromValue = w.fromValue || 0;
+    const toValue = w.toValue || 0;
+    const currentValue = w.currentValue ?? fromValue;
+    const denominator = toValue - fromValue;
+    const rawProgress = denominator > 0 ? ((currentValue - fromValue) / denominator) * 100 : 0;
+
+    return {
+      title: w.title,
+      baseline: fromValue,
+      current: currentValue,
+      target: toValue,
+      progress: Math.max(0, Math.min(100, Math.round(rawProgress))),
+    };
+  });
 
   return (
     <main style={{ flex: 1, overflowY: "auto", padding: "32px" }}>
@@ -184,7 +194,7 @@ export default function TeamLeadReportsPage() {
                     />
                   </div>
                   <p style={{ margin: 0, fontSize: "12px", color: "#71717a" }}>
-                    {measure.current} of {measure.target} target
+                    Baseline {measure.baseline} · Current {measure.current} · Target {measure.target}
                   </p>
                 </div>
               ))}
@@ -231,33 +241,44 @@ export default function TeamLeadReportsPage() {
 
         {/* Generate Report Button */}
         {selectedReport && (
-          <div style={{ display: "flex", gap: "12px" }}>
-            <button
-              style={{
-                padding: "12px 24px",
-                backgroundColor: "#3b82f6",
-                color: "white",
-                border: "none",
-                borderRadius: "6px",
-                fontWeight: "500",
-                cursor: "pointer",
-              }}
-            >
-              Download Report
-            </button>
-            <button
-              style={{
-                padding: "12px 24px",
-                backgroundColor: "white",
-                color: "#18181b",
-                border: "1px solid #e4e4e7",
-                borderRadius: "6px",
-                fontWeight: "500",
-                cursor: "pointer",
-              }}
-            >
-              Share Report
-            </button>
+          <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+            {reportActionMessage && (
+              <div style={{ padding: "12px", border: "1px solid #fde68a", backgroundColor: "#fffbeb", color: "#92400e", borderRadius: "6px", fontSize: "14px", fontWeight: 600 }}>
+                {reportActionMessage}
+              </div>
+            )}
+            <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
+              <button
+                type="button"
+                onClick={() => setReportActionMessage("Report downloads need a backend export endpoint before this can be enabled. Added to the backend-dependent list.")}
+                style={{
+                  padding: "12px 24px",
+                  backgroundColor: "#f4f4f5",
+                  color: "#71717a",
+                  border: "1px solid #e4e4e7",
+                  borderRadius: "6px",
+                  fontWeight: "500",
+                  cursor: "not-allowed",
+                }}
+              >
+                Download Report (Coming Soon)
+              </button>
+              <button
+                type="button"
+                onClick={() => setReportActionMessage("Report sharing needs a backend share-link or email endpoint before this can be enabled. Added to the backend-dependent list.")}
+                style={{
+                  padding: "12px 24px",
+                  backgroundColor: "#f4f4f5",
+                  color: "#71717a",
+                  border: "1px solid #e4e4e7",
+                  borderRadius: "6px",
+                  fontWeight: "500",
+                  cursor: "not-allowed",
+                }}
+              >
+                Share Report (Coming Soon)
+              </button>
+            </div>
           </div>
         )}
 

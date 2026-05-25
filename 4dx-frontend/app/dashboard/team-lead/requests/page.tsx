@@ -77,7 +77,9 @@ export default function TeamLeadRequestsPage() {
     setRequestStatusMessage(null);
 
     try {
+      const requestedCount = pendingRequests.length;
       const result = await approveAllRequests({ teamSlug: currentTeamSlug });
+      const approvedCount = typeof result?.count === "number" ? result.count : requestedCount;
       await Promise.all([
         refetch(),
         trpcCtx.activityLogs.getPendingForTeam.invalidate({ teamSlug: currentTeamSlug }),
@@ -85,7 +87,7 @@ export default function TeamLeadRequestsPage() {
         trpcCtx.activityLogs.getByUser.invalidate(),
         trpcCtx.sessions.getCurrentSession.invalidate({ teamSlug: currentTeamSlug }),
       ]);
-      setRequestStatusMessage(`${result.count} request${result.count === 1 ? "" : "s"} approved.`);
+      setRequestStatusMessage(`${approvedCount} request${approvedCount === 1 ? "" : "s"} approved.`);
     } finally {
       setProcessingRequestId(null);
       setProcessingRequestAction(null);

@@ -507,6 +507,7 @@ function WIGCreateForm({ onCancel, onSuccess }: { onCancel: () => void; onSucces
   const [unit, setUnit] = useState("USD");
   const [deadline, setDeadline] = useState("");
   const [description, setDescription] = useState("");
+  const [validationError, setValidationError] = useState<string | null>(null);
 
   const currentTeamSlug = useTeamStore((state) => state.currentTeamSlug);
   const { createWIG, isLoading, error } = useCreateWIG();
@@ -514,16 +515,39 @@ function WIGCreateForm({ onCancel, onSuccess }: { onCancel: () => void; onSucces
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    setValidationError(null);
+
     if (!currentTeamSlug || !title || !from || !to || !deadline) {
       return;
     }
+
+    const fromValue = parseFloat(from);
+    const toValue = parseFloat(to);
+
+    if (Number.isNaN(fromValue) || Number.isNaN(toValue)) {
+      setValidationError("Enter valid numeric values for current and target.");
+      return;
+    }
+
+    if (fromValue < 0 || toValue < 0) {
+      setValidationError("Current and target values cannot be negative.");
+      return;
+    }
+
+    if (toValue <= fromValue) {
+      setValidationError("Target value must be greater than current value.");
+      return;
+    }
+
+    const confirmed = window.confirm(`Create this WIG?\n\nIncrease ${title} from ${fromValue} to ${toValue} by ${new Date(deadline).toLocaleDateString()}.`);
+    if (!confirmed) return;
 
     try {
       await createWIG({
         teamSlug: currentTeamSlug,
         title,
-        fromValue: parseFloat(from),
-        toValue: parseFloat(to),
+        fromValue,
+        toValue,
         unit,
         deadline: new Date(deadline),
         description: description || undefined,
@@ -545,6 +569,11 @@ function WIGCreateForm({ onCancel, onSuccess }: { onCancel: () => void; onSucces
 
         {/* Error */}
         {error && <ErrorState error={error} title="Failed to create WIG" />}
+        {validationError && (
+          <div style={{ padding: "12px", backgroundColor: "#fee2e2", border: "1px solid #fecaca", color: "#991b1b", fontSize: "14px", borderRadius: "4px" }}>
+            {validationError}
+          </div>
+        )}
 
         {/* Live Preview */}
         <div style={{ backgroundColor: "#f4f4f5", border: "1px solid #e4e4e7", padding: "20px" }}>
@@ -578,6 +607,8 @@ function WIGCreateForm({ onCancel, onSuccess }: { onCancel: () => void; onSucces
               <label style={{ fontSize: "12px", fontWeight: 500, color: "#18181b" }}>From (Current Value) *</label>
               <input
                 type="number"
+                min="0"
+                step="any"
                 placeholder="0"
                 value={from}
                 onChange={(e) => setFrom(e.target.value)}
@@ -589,6 +620,8 @@ function WIGCreateForm({ onCancel, onSuccess }: { onCancel: () => void; onSucces
               <label style={{ fontSize: "12px", fontWeight: 500, color: "#18181b" }}>To (Target Value) *</label>
               <input
                 type="number"
+                min="0"
+                step="any"
                 placeholder="1000000"
                 value={to}
                 onChange={(e) => setTo(e.target.value)}

@@ -3,6 +3,7 @@ import { Prisma, type PrismaClient } from "@/generated/prisma/client";
 type NotificationType =
   | "SESSION_READY"
   | "SESSION_OVERDUE"
+  | "WIG_CREATED"
   | "WIG_CLOSED"
   | "TEAM_INVITE"
   | "TEAM_MEMBER_ADDED"
