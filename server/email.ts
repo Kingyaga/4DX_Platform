@@ -154,6 +154,40 @@ export async function sendPasswordResetEmail({
   }
 }
 
+export async function sendNewUserDetailsEmail({
+  to,
+  name,
+  email,
+  temporaryPassword,
+  orgName,
+  teamName,
+}: {
+  to: string;
+  name: string;
+  email: string;
+  temporaryPassword: string;
+  orgName: string;
+  teamName?: string;
+}): Promise<boolean> {
+  try {
+    return await sendEmail({
+      to,
+      subject: `Welcome to ${orgName} on 4DX Platform`,
+      html: `
+        <h2>Hi ${escapeHtml(name)},</h2>
+        <p>Your 4DX Platform account has been created for <strong>${escapeHtml(orgName)}</strong>.</p>
+        ${teamName ? `<p>Team: <strong>${escapeHtml(teamName)}</strong></p>` : ""}
+        <p><strong>Email:</strong> ${escapeHtml(email)}</p>
+        <p><strong>Temporary password:</strong> ${escapeHtml(temporaryPassword)}</p>
+        <p>Please sign in and change your password from Settings.</p>
+      `,
+    });
+  } catch (error) {
+    console.error("New user details email failed:", error);
+    return false;
+  }
+}
+
 export async function sendTeamMembershipEmail({
   to,
   name,
@@ -203,5 +237,114 @@ export async function sendWigAtRiskEmail({
     });
   } catch (error) {
     console.error("WIG at-risk email failed:", error);
+  }
+}
+
+export async function sendActivityApprovedEmail({
+  to,
+  name,
+  leadMeasureName,
+  value,
+  unit,
+}: {
+  to: string;
+  name: string;
+  leadMeasureName: string;
+  value: number;
+  unit: string;
+}) {
+  try {
+    await sendEmail({
+      to,
+      subject: `Activity approved: ${leadMeasureName}`,
+      html: `
+        <h2>Hi ${escapeHtml(name)},</h2>
+        <p>Your activity log for <strong>${escapeHtml(leadMeasureName)}</strong> has been approved.</p>
+        <p>Value recorded: <strong>${value} ${escapeHtml(unit)}</strong></p>
+        <p>This contribution is now reflected on your team's scoreboard.</p>
+      `,
+    });
+  } catch (error) {
+    console.error("Activity approved email failed:", error);
+  }
+}
+
+export async function sendActivityDeclinedEmail({
+  to,
+  name,
+  leadMeasureName,
+  value,
+}: {
+  to: string;
+  name: string;
+  leadMeasureName: string;
+  value: number;
+}) {
+  try {
+    await sendEmail({
+      to,
+      subject: `Activity log declined: ${leadMeasureName}`,
+      html: `
+        <h2>Hi ${escapeHtml(name)},</h2>
+        <p>Your activity log of <strong>${value}</strong> for <strong>${escapeHtml(leadMeasureName)}</strong> was declined by your team lead.</p>
+        <p>If you believe this is an error, please speak with your team lead directly.</p>
+      `,
+    });
+  } catch (error) {
+    console.error("Activity declined email failed:", error);
+  }
+}
+
+export async function sendWigDeadlinePassedEmail({
+  to,
+  name,
+  wigTitle,
+  teamName,
+}: {
+  to: string;
+  name: string;
+  wigTitle: string;
+  teamName: string;
+}) {
+  try {
+    await sendEmail({
+      to,
+      subject: `WIG deadline passed: ${wigTitle}`,
+      html: `
+        <h2>Hi ${escapeHtml(name)},</h2>
+        <p>The WIG <strong>${escapeHtml(wigTitle)}</strong> for <strong>${escapeHtml(teamName)}</strong> has passed its deadline and has not been closed.</p>
+        <p>Please review the WIG and close it as ACHIEVED, MISSED, or ABANDONED in 4DX Platform.</p>
+      `,
+    });
+  } catch (error) {
+    console.error("WIG deadline passed email failed:", error);
+  }
+}
+
+export async function sendLeadMeasureOwnersChangedEmail({
+  to,
+  name,
+  leadMeasureName,
+  wigTitle,
+  action,
+}: {
+  to: string;
+  name: string;
+  leadMeasureName: string;
+  wigTitle: string;
+  action: "added" | "removed";
+}) {
+  try {
+    await sendEmail({
+      to,
+      subject: `Lead measure ownership ${action}: ${leadMeasureName}`,
+      html: `
+        <h2>Hi ${escapeHtml(name)},</h2>
+        <p>You have been ${action} as an owner of <strong>${escapeHtml(leadMeasureName)}</strong> under WIG <strong>${escapeHtml(wigTitle)}</strong>.</p>
+        <p>Sign in to 4DX Platform to view your updated responsibilities.</p>
+      `,
+    });
+  } catch (error) {
+    console.error("Lead measure owners changed email failed:", error);
   }
 }

@@ -1,15 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useCurrentUser, useTimedMessage } from "@/lib/hooks";
+import { useEffect } from "react";
+import { useCurrentUser } from "@/lib/hooks";
+import { useTimedMessage } from "@/lib/useTimedMessage";
 
 /**
  * Initialize user store from NextAuth session and fetch profile from backend
  */
 export function UserInitializer({ children }: { children: React.ReactNode }) {
-  const [showWelcome, setShowWelcome] = useState(false);
-  const [userName, setUserName] = useState<string>("");
-  const { message: welcomeMessage, showMessage: showWelcomeMessage, clearMessage: clearWelcomeMessage } = useTimedMessage(3000);
+  const [welcomeMessage, setWelcomeMessage] = useTimedMessage<string | null>(null, 3000);
 
   // This hook fetches the current user's profile with role from the backend
   const { data: me, isLoading } = useCurrentUser();
@@ -19,18 +18,16 @@ export function UserInitializer({ children }: { children: React.ReactNode }) {
     if (me && me.name && !isLoading) {
       const hasSeenWelcome = sessionStorage.getItem('hasSeenWelcome');
       if (!hasSeenWelcome) {
-        setUserName(me.name);
-        setShowWelcome(true);
-        showWelcomeMessage(`Welcome back, ${me.name}!`);
+        setWelcomeMessage(`Welcome back, ${me.name}!`);
         sessionStorage.setItem('hasSeenWelcome', 'true');
       }
     }
-  }, [me, isLoading, showWelcomeMessage]);
+  }, [me, isLoading, setWelcomeMessage]);
 
   return (
     <>
       {children}
-      {showWelcome && welcomeMessage && (
+      {welcomeMessage && (
         <div
           style={{
             position: "fixed",

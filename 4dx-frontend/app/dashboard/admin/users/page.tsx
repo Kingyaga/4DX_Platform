@@ -65,22 +65,41 @@ export default function AdminUsersPage() {
               View all users in the organization and delete users as needed. Deletions are permanent.
             </p>
           </div>
-          <Link
-            href="/dashboard/admin/users/new"
-            style={{
-              padding: "10px 16px",
-              backgroundColor: "#3b82f6",
-              color: "white",
-              border: "none",
-              borderRadius: "6px",
-              fontWeight: "500",
-              fontSize: "14px",
-              cursor: "pointer",
-              textDecoration: "none",
-            }}
-          >
-            + Create User
-          </Link>
+          <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+            <Link
+              href="/dashboard/admin/invites"
+              style={{
+                padding: "10px 20px",
+                border: "1px solid #18181b",
+                backgroundColor: "transparent",
+                color: "#18181b",
+                fontSize: "12px",
+                fontWeight: 600,
+                textTransform: "uppercase",
+                letterSpacing: "0.05em",
+                textDecoration: "none",
+                display: "inline-block",
+              }}
+            >
+              Invite Members
+            </Link>
+            <Link
+              href="/dashboard/admin/users/new"
+              style={{
+                padding: "10px 16px",
+                backgroundColor: "#3b82f6",
+                color: "white",
+                border: "none",
+                borderRadius: "6px",
+                fontWeight: "500",
+                fontSize: "14px",
+                cursor: "pointer",
+                textDecoration: "none",
+              }}
+            >
+              + Create User
+            </Link>
+          </div>
         </div>
 
         <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap", justifyContent: "space-between" }}>

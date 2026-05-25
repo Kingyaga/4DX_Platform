@@ -267,43 +267,31 @@ export const teamsRouter = router({
         });
       }
 
-      await ctx.db.$transaction([
-        ctx.db.activityLog.deleteMany({
-          where: { leadMeasure: { wig: { teamId: team.id } } },
-        }),
-        ctx.db.commitment.deleteMany({
-          where: { linkedLeadMeasure: { wig: { teamId: team.id } } },
-        }),
-        ctx.db.leadMeasureOwner.deleteMany({
-          where: { leadMeasure: { wig: { teamId: team.id } } },
-        }),
-        ctx.db.leadMeasure.deleteMany({
-          where: { wig: { teamId: team.id } },
-        }),
-        ctx.db.weeklySession.deleteMany({
-          where: { wig: { teamId: team.id } },
-        }),
-        ctx.db.wIG.deleteMany({
-          where: { teamId: team.id },
-        }),
-        ctx.db.teamMembership.deleteMany({
-          where: { teamId: team.id },
-        }),
-        ctx.db.team.delete({
-          where: { id: team.id },
-        }),
-      ]);
+      const activeWigCount = await ctx.db.wIG.count({
+        where: { teamId: team.id, status: "ACTIVE" },
+      });
 
-      // Handle invite deletion separately with error handling
-      // (table might not exist or be incomplete in some environments)
-      try {
-        await ctx.db.invite.deleteMany({
-          where: { teamId: team.id },
+      if (activeWigCount > 0) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Teams with active WIGs cannot be archived. Close active WIGs first.",
         });
-      } catch (error) {
-        console.warn("Could not delete team invites - table may not exist", error);
-        // Don't fail the deletion if invites can't be cleaned up
       }
+
+      await ctx.db.team.update({
+        where: { id: team.id },
+        data: { archivedAt: new Date() },
+      });
+
+      await auditLog({
+        db: ctx.db,
+        actorUserId: (ctx.session.user as any).id,
+        entityType: "TEAM",
+        entityId: team.id,
+        action: "TEAM_ARCHIVED",
+        before: { archivedAt: team.archivedAt } as Prisma.InputJsonValue,
+        after: { archivedAt: new Date().toISOString() } as Prisma.InputJsonValue,
+      });
 
       return { success: true };
     }),
@@ -333,7 +321,7 @@ export const teamsRouter = router({
         },
       });
 
-      if (!team) throw new TRPCError({ code: "NOT_FOUND" });
+      if (!team || team.archivedAt) throw new TRPCError({ code: "NOT_FOUND" });
       return team;
     }),
 
@@ -350,6 +338,7 @@ export const teamsRouter = router({
       return ctx.db.team.findMany({
         where: {
           orgId: org.id,
+          archivedAt: null,
           OR: [
             { members: { some: { userId } } },
             { leadUserId: userId },
@@ -399,7 +388,7 @@ export const teamsRouter = router({
       }
 
       return ctx.db.team.findMany({
-        where: { orgId: org.id },
+        where: { orgId: org.id, archivedAt: null },
         include: {
           members: {
             include: {

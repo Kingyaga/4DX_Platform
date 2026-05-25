@@ -28,18 +28,17 @@ export const sessionsRouter = router({
       const sessionsToCreate = [];
 
       for (const member of team.members) {
-        // Check if this member already has an active session this week
-        const existingSession = await ctx.db.weeklySession.findFirst({
-          where: {
-            userId: member.userId,
-            weekStarting: monday,
-            status: { in: ["PENDING", "IN_PROGRESS"] },
-          },
-        });
-
-        if (existingSession) continue;
-
         for (const wig of team.wigs) {
+          const existingSession = await ctx.db.weeklySession.findFirst({
+            where: {
+              userId: member.userId,
+              wigId: wig.id,
+              weekStarting: monday,
+            },
+          });
+
+          if (existingSession) continue;
+
           sessionsToCreate.push({
             userId: member.userId,
             wigId: wig.id,
@@ -160,6 +159,37 @@ export const sessionsRouter = router({
       }
 
       // Update each commitment's outcome
+      const invalidNotDoneUpdate = input.commitmentUpdates.find(
+        (update) => update.status === "NOT_DONE" && !update.notDoneReason,
+      );
+
+      if (invalidNotDoneUpdate) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "A not-done commitment requires a reason.",
+        });
+      }
+
+      if (input.commitmentUpdates.length > 0) {
+        const validCommitmentCount = await ctx.db.commitment.count({
+          where: {
+            id: { in: input.commitmentUpdates.map((update) => update.commitmentId) },
+            weeklySession: {
+              userId: session.userId,
+              wigId: session.wigId,
+              weekStarting: { lt: session.weekStarting },
+            },
+          },
+        });
+
+        if (validCommitmentCount !== input.commitmentUpdates.length) {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "You can only account for your own prior commitments on this WIG.",
+          });
+        }
+      }
+
       await Promise.all(
         input.commitmentUpdates.map((update) =>
           ctx.db.commitment.update({
@@ -326,11 +356,39 @@ export const sessionsRouter = router({
         });
       }
 
+      // Validate that any linked lead measures belong to this session's WIG
+      const linkedIds = input.commitments
+        .map((c) => c.linkedLeadMeasureId)
+        .filter((id): id is string => Boolean(id));
+
+      if (linkedIds.length > 0) {
+        const validCount = await ctx.db.leadMeasure.count({
+          where: { id: { in: linkedIds }, wigId: session.wigId },
+        });
+        if (validCount !== linkedIds.length) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Linked lead measures must belong to this session's WIG.",
+          });
+        }
+      }
+
       if (session.commitDoneAt)
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: "Commit step already completed.",
         });
+
+      const vagueCommitment = input.commitments.find(
+        (commitment) => commitment.text.trim().split(/\s+/).filter(Boolean).length < 5,
+      );
+
+      if (vagueCommitment) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Commitments must be specific. Use at least 5 words.",
+        });
+      }
 
       await ctx.db.commitment.createMany({
         data: input.commitments.map((c) => ({
@@ -399,7 +457,7 @@ export const sessionsRouter = router({
 
       const monday = getThisMonday();
 
-      return ctx.db.weeklySession.findMany({
+      const sessions = await ctx.db.weeklySession.findMany({
         where: {
           userId: (ctx.session.user as any).id,
           wig: { teamId: team.id },
@@ -411,11 +469,40 @@ export const sessionsRouter = router({
             include: {
               leadMeasures: {
                 where: { archivedAt: null },
+                include: {
+                  activityLogs: {
+                    where: { status: "APPROVED" },
+                    orderBy: { loggedForDate: "desc" },
+                    take: 6,
+                  },
+                },
               },
             },
           },
         },
       });
+
+      const sessionsWithPriorCommitments = await Promise.all(
+        sessions.map(async (session) => {
+          const previousSession = await ctx.db.weeklySession.findFirst({
+            where: {
+              userId: session.userId,
+              wigId: session.wigId,
+              weekStarting: { lt: monday },
+              commitDoneAt: { not: null },
+            },
+            orderBy: { weekStarting: "desc" },
+            include: { commitments: true },
+          });
+
+          return {
+            ...session,
+            commitments: previousSession?.commitments ?? [],
+          };
+        }),
+      );
+
+      return sessionsWithPriorCommitments;
     }),
 
   // Get a single session for the logged in user

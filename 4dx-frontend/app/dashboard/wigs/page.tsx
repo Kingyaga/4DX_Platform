@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useWIGs, useCreateWIG, useUpdateWIG, useCreateLeadMeasure, useCloseWIG, useRoleCheck, useMyTeams } from "@/lib/hooks";
+import { useWIGs, useCreateWIG, useUpdateWIG, useCreateLeadMeasure, useRoleCheck, useMyTeams, useActivateWIG, useTeam, useCloseWIG, useUpdateLeadMeasureOwners } from "@/lib/hooks";
 import { useTeamStore } from "@/lib/stores/team-store";
 import { useUserStore } from "@/lib/stores/user-store";
 import { WIGListSkeleton } from "@/lib/components/skeletons";
 import { ErrorState, EmptyState } from "@/lib/components/states";
-import type { WIG, LeadMeasure } from "@/lib/types";
+import type { WIG, LeadMeasure, TeamMember } from "@/lib/types";
 
 export default function WIGsPage() {
   const [selectedWIG, setSelectedWIG] = useState<WIG | null>(null);
@@ -104,7 +104,11 @@ export default function WIGsPage() {
   }
 
   if (selectedWIG) {
-    return <WIGDetail wig={selectedWIG} onBack={() => { setSelectedWIG(null); refetch(); }} />;
+    const isClosed = ["ACHIEVED", "MISSED", "ABANDONED"].includes(selectedWIG.status);
+    if (isClosed) {
+      return <WIGHistoryDetail wig={selectedWIG} onBack={() => setSelectedWIG(null)} />;
+    }
+    return <WIGDetail wig={selectedWIG} onBack={() => setSelectedWIG(null)} />;
   }
 
   return (
@@ -200,6 +204,7 @@ export default function WIGsPage() {
               {displayedWigs.map((wig: WIG, i: number) => {
                 const statusColor = wig.status === "ACTIVE" ? "#16A34A" : wig.status === "DRAFT" ? "#71717a" : "#EAB308";
                 const progress = ((wig.currentValue - wig.fromValue) / (wig.toValue - wig.fromValue)) * 100;
+                const targetReached = wig.status === "ACTIVE" && wig.currentValue >= wig.toValue;
 
                 return (
                   <div
@@ -208,8 +213,8 @@ export default function WIGsPage() {
                     onMouseEnter={() => setHoveredRow(i)}
                     onMouseLeave={() => setHoveredRow(null)}
                     style={{
-                      backgroundColor: hoveredRow === i ? "#f7f9fd" : "#ffffff",
-                      border: "1px solid #e4e4e7",
+                      backgroundColor: targetReached ? "#fffbeb" : hoveredRow === i ? "#f7f9fd" : "#ffffff",
+                      border: targetReached ? "1px solid #f59e0b" : "1px solid #e4e4e7",
                       padding: "20px",
                       cursor: "pointer",
                       transition: "background 0.075s",
@@ -217,11 +222,17 @@ export default function WIGsPage() {
                   >
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "16px" }}>
                       <div style={{ flex: 1 }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px", flexWrap: "wrap" }}>
                           <span style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "2px 8px", border: "1px solid #e4e4e7", backgroundColor: "#f4f4f5", fontSize: "12px", fontWeight: 600 }}>
                             <span style={{ width: "8px", height: "8px", borderRadius: "50%", backgroundColor: statusColor, display: "inline-block" }}></span>
                             {wig.status}
                           </span>
+                          {targetReached && (
+                            <span style={{ display: "inline-flex", alignItems: "center", gap: "4px", padding: "2px 8px", backgroundColor: "#f59e0b", color: "#ffffff", fontSize: "12px", fontWeight: 700, letterSpacing: "0.04em", textTransform: "uppercase" }}>
+                              <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>emoji_events</span>
+                              Target Reached
+                            </span>
+                          )}
                           <span style={{ fontSize: "12px", color: "#71717a", textTransform: "uppercase", letterSpacing: "0.05em" }}>Wildly Important Goal</span>
                         </div>
                         <h2 style={{ fontSize: "20px", fontWeight: 600, color: "#18181b", letterSpacing: "-0.01em" }}>{wig.title}</h2>
@@ -231,7 +242,7 @@ export default function WIGsPage() {
                     <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                       <span style={{ fontSize: "12px", color: "#71717a" }}>Deadline: {new Date(wig.deadline).toLocaleDateString()}</span>
                       <div style={{ flex: 1, height: "4px", backgroundColor: "#e4e4e7" }}>
-                        <div style={{ height: "100%", backgroundColor: "#18181b", width: `${Math.min(progress, 100)}%` }}></div>
+                        <div style={{ height: "100%", backgroundColor: targetReached ? "#f59e0b" : "#18181b", width: `${Math.min(progress, 100)}%` }}></div>
                       </div>
                       <span style={{ fontSize: "12px", fontWeight: 600, color: "#18181b" }}>{wig.leadMeasures.length} Lead Measures</span>
                     </div>
@@ -254,35 +265,40 @@ function WIGDetail({ wig, onBack }: { wig: WIG; onBack: () => void }) {
   const [cadence, setCadence] = useState<"WEEKLY" | "BIWEEKLY">("WEEKLY");
   const [targetValue, setTargetValue] = useState("");
   const [leadMeasureUnit, setLeadMeasureUnit] = useState(wig.unit || "");
+  const [ownerUserIds, setOwnerUserIds] = useState<string[]>([]);
   const [activeWig, setActiveWig] = useState<WIG>(wig);
+  const [showCloseModal, setShowCloseModal] = useState(false);
+  const [closeStatus, setCloseStatus] = useState<"ACHIEVED" | "MISSED" | "ABANDONED">("ACHIEVED");
+  const [editingOwnersForLm, setEditingOwnersForLm] = useState<string | null>(null);
+  const [newOwnerIds, setNewOwnerIds] = useState<string[]>([]);
 
   const { createLeadMeasure, isLoading: isCreatingLeadMeasure, error: createLeadMeasureError } = useCreateLeadMeasure();
+  const { updateOwners, isLoading: isUpdatingOwners } = useUpdateLeadMeasureOwners();
+  const { activateWIG, isLoading: isActivatingWIG, error: activateWIGError } = useActivateWIG();
   const { closeWIG, isLoading: isClosingWIG, error: closeWIGError } = useCloseWIG();
   const { canArchiveWIG, canCreateWIG } = useRoleCheck();
+  const currentTeamSlug = useTeamStore((state) => state.currentTeamSlug);
+  const { team } = useTeam(currentTeamSlug);
   const progress = ((activeWig.currentValue - activeWig.fromValue) / (activeWig.toValue - activeWig.fromValue)) * 100;
   const statusColor = activeWig.status === "ACTIVE" ? "#16A34A" : activeWig.status === "DRAFT" ? "#71717a" : "#EAB308";
-  const isClosed = ["ACHIEVED", "MISSED", "ABANDONED"].includes(activeWig.status);
 
   useEffect(() => {
     setActiveWig(wig);
     setLeadMeasureUnit(wig.unit || "");
   }, [wig]);
 
-  const canAddLeadMeasure = canCreateWIG && !isClosed && activeWig.leadMeasures.length < 3;
-
-  const handleCloseWIG = async (status: "ACHIEVED" | "MISSED" | "ABANDONED") => {
-    try {
-      const closed = await closeWIG({ wigId: activeWig.id, status });
-      setActiveWig((prev) => ({ ...prev, ...closed }));
-    } catch {
-      // Error is surfaced by hook state
-    }
-  };
+  const canAddLeadMeasure = canCreateWIG && activeWig.leadMeasures.length < 3;
+  const canActivateWIG =
+    canCreateWIG &&
+    activeWig.status === "DRAFT" &&
+    activeWig.leadMeasures.length >= 1 &&
+    activeWig.leadMeasures.length <= 3 &&
+    activeWig.leadMeasures.every((leadMeasure) => (leadMeasure.owners?.length || 0) > 0);
 
   const handleCreateLeadMeasure = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!leadMeasureName || !cadence || !targetValue || !leadMeasureUnit) {
+    if (!leadMeasureName || !cadence || !targetValue || !leadMeasureUnit || ownerUserIds.length === 0) {
       return;
     }
 
@@ -294,6 +310,7 @@ function WIGDetail({ wig, onBack }: { wig: WIG; onBack: () => void }) {
         cadence,
         targetValue: parseFloat(targetValue),
         unit: leadMeasureUnit,
+        ownerUserIds,
       });
 
       setActiveWig((prev) => ({
@@ -306,6 +323,26 @@ function WIGDetail({ wig, onBack }: { wig: WIG; onBack: () => void }) {
       setCadence("WEEKLY");
       setTargetValue("");
       setLeadMeasureUnit(wig.unit || "");
+      setOwnerUserIds([]);
+    } catch {
+      // Error is surfaced by hook state
+    }
+  };
+
+  const handleActivateWIG = async () => {
+    try {
+      const activated = await activateWIG({ wigId: activeWig.id });
+      setActiveWig((current) => ({ ...current, status: activated.status }));
+    } catch {
+      // Error is surfaced by hook state
+    }
+  };
+
+  const handleCloseWIG = async () => {
+    try {
+      await closeWIG({ wigId: activeWig.id, status: closeStatus });
+      setShowCloseModal(false);
+      onBack();
     } catch {
       // Error is surfaced by hook state
     }
@@ -336,60 +373,87 @@ function WIGDetail({ wig, onBack }: { wig: WIG; onBack: () => void }) {
             </span>
             <span style={{ fontSize: "12px", color: "#71717a", textTransform: "uppercase", letterSpacing: "0.05em" }}>Wildly Important Goal</span>
           </div>
-          <h1 style={{ fontSize: "24px", fontWeight: 600, color: "#18181b", letterSpacing: "-0.02em" }}>{activeWig.title}</h1>
+          <h1 style={{ fontSize: "24px", fontWeight: 600, color: "#18181b", letterSpacing: "-0.02em" }}>{wig.title}</h1>
         </div>
-        {canArchiveWIG && !isClosed && (
-          <button
-            onClick={() => setIsEditing(true)}
-            style={{ backgroundColor: "#000000", color: "#ffffff", fontSize: "12px", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", padding: "10px 16px", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: "8px" }}
-          >
-            <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>edit</span>
-            Edit WIG
-          </button>
+        {canArchiveWIG && (
+          <div style={{ display: "flex", gap: "8px" }}>
+            {activeWig.status === "ACTIVE" && (
+              <button
+                onClick={() => setShowCloseModal(true)}
+                style={{ backgroundColor: "#ef4444", color: "#ffffff", fontSize: "12px", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", padding: "10px 16px", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: "8px" }}
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>lock</span>
+                Close WIG
+              </button>
+            )}
+            <button
+              onClick={() => setIsEditing(true)}
+              style={{ backgroundColor: "#000000", color: "#ffffff", fontSize: "12px", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", padding: "10px 16px", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: "8px" }}
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>edit</span>
+              Edit WIG
+            </button>
+          </div>
         )}
       </div>
 
-      {closeWIGError && <ErrorState error={closeWIGError} title="Unable to close WIG" />}
+      {activateWIGError && <ErrorState error={activateWIGError} title="Unable to activate WIG" />}
 
       <div style={{ marginBottom: "24px", padding: "16px", borderRadius: "16px", backgroundColor: canArchiveWIG ? "#ecfdf5" : "#f8fafc", border: `1px solid ${canArchiveWIG ? "#10b981" : "#e4e4e7"}`, color: canArchiveWIG ? "#166534" : "#52525b" }}>
-        {isClosed
-          ? `This WIG is closed as ${activeWig.status}${activeWig.closedAt ? ` on ${new Date(activeWig.closedAt).toLocaleDateString()}` : ""}. Its lead measures and activity remain available as history.`
-          : canArchiveWIG
-          ? "You are the current team lead for this team, so WIG actions are available to you."
+        {canArchiveWIG
+          ? activeWig.status === "DRAFT"
+            ? "This WIG is a draft. Add 1-3 owned lead measures, then activate it to put it on the scoreboard."
+            : "You are the current team lead for this team, so WIG actions are available to you."
           : "This WIG is read-only unless you are the current team lead for the selected team."}
       </div>
 
-      {canArchiveWIG && !isClosed && (
-        <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", marginBottom: "24px" }}>
+      {canCreateWIG && activeWig.status === "DRAFT" && (
+        <div style={{ marginBottom: "24px", display: "flex", justifyContent: "flex-end" }}>
           <button
             type="button"
-            disabled={isClosingWIG}
-            onClick={() => handleCloseWIG("ACHIEVED")}
-            style={{ backgroundColor: "#166534", color: "#ffffff", fontSize: "12px", fontWeight: 600, padding: "10px 14px", border: "none", cursor: isClosingWIG ? "not-allowed" : "pointer", textTransform: "uppercase", letterSpacing: "0.05em" }}
+            onClick={handleActivateWIG}
+            disabled={!canActivateWIG || isActivatingWIG}
+            title={!canActivateWIG ? "Add 1-3 lead measures and assign at least one owner to each." : undefined}
+            style={{
+              backgroundColor: canActivateWIG && !isActivatingWIG ? "#16A34A" : "#d4d4d8",
+              color: canActivateWIG && !isActivatingWIG ? "#ffffff" : "#71717a",
+              fontSize: "12px",
+              fontWeight: 600,
+              letterSpacing: "0.05em",
+              textTransform: "uppercase",
+              padding: "10px 16px",
+              border: "none",
+              cursor: canActivateWIG && !isActivatingWIG ? "pointer" : "not-allowed",
+            }}
           >
-            Mark Achieved
-          </button>
-          <button
-            type="button"
-            disabled={isClosingWIG}
-            onClick={() => handleCloseWIG("MISSED")}
-            style={{ backgroundColor: "#f4f4f5", color: "#18181b", fontSize: "12px", fontWeight: 600, padding: "10px 14px", border: "1px solid #e4e4e7", cursor: isClosingWIG ? "not-allowed" : "pointer", textTransform: "uppercase", letterSpacing: "0.05em" }}
-          >
-            Mark Missed
-          </button>
-          <button
-            type="button"
-            disabled={isClosingWIG}
-            onClick={() => handleCloseWIG("ABANDONED")}
-            style={{ backgroundColor: "#f4f4f5", color: "#18181b", fontSize: "12px", fontWeight: 600, padding: "10px 14px", border: "1px solid #e4e4e7", cursor: isClosingWIG ? "not-allowed" : "pointer", textTransform: "uppercase", letterSpacing: "0.05em" }}
-          >
-            Abandon
+            {isActivatingWIG ? "Activating..." : "Activate WIG"}
           </button>
         </div>
       )}
 
+      {activeWig.status === "ACTIVE" && activeWig.currentValue >= activeWig.toValue && (
+        <div style={{ marginBottom: "20px", padding: "16px 20px", backgroundColor: "#fffbeb", border: "1px solid #f59e0b", display: "flex", alignItems: "center", gap: "12px" }}>
+          <span className="material-symbols-outlined" style={{ fontSize: "28px", color: "#f59e0b" }}>emoji_events</span>
+          <div>
+            <div style={{ fontSize: "14px", fontWeight: 700, color: "#92400e" }}>Target Reached!</div>
+            <div style={{ fontSize: "13px", color: "#92400e", marginTop: "2px" }}>
+              This WIG has hit its goal. Close it as <strong>ACHIEVED</strong> to record the win and notify the team.
+            </div>
+          </div>
+          {canArchiveWIG && (
+            <button
+              onClick={() => setShowCloseModal(true)}
+              style={{ marginLeft: "auto", flexShrink: 0, backgroundColor: "#f59e0b", color: "#ffffff", fontSize: "12px", fontWeight: 700, letterSpacing: "0.05em", textTransform: "uppercase", padding: "8px 16px", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: "6px" }}
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>lock</span>
+              Close as Achieved
+            </button>
+          )}
+        </div>
+      )}
+
       <div style={{ width: "100%", height: "4px", backgroundColor: "#e4e4e7", marginBottom: "8px", position: "relative" }}>
-        <div style={{ height: "100%", backgroundColor: "#18181b", width: `${Math.min(progress, 100)}%` }}></div>
+        <div style={{ height: "100%", backgroundColor: activeWig.currentValue >= activeWig.toValue ? "#f59e0b" : "#18181b", width: `${Math.min(progress, 100)}%` }}></div>
       </div>
       <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", color: "#71717a" }}>
         <span>Baseline: {activeWig.fromValue}</span>
@@ -400,7 +464,7 @@ function WIGDetail({ wig, onBack }: { wig: WIG; onBack: () => void }) {
       <div>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "16px", paddingBottom: "8px", borderBottom: "1px solid #e4e4e7" }}>
           <h2 style={{ fontSize: "20px", fontWeight: 600, color: "#18181b" }}>Lead Measures ({activeWig.leadMeasures.length})</h2>
-          {canCreateWIG && !isClosed && (
+          {canCreateWIG && (
             <button
               onClick={() => setShowAddLeadMeasure((current) => !current)}
               disabled={!canAddLeadMeasure}
@@ -489,6 +553,28 @@ function WIGDetail({ wig, onBack }: { wig: WIG; onBack: () => void }) {
               />
             </div>
 
+            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+              <label style={{ fontSize: "12px", fontWeight: 600, color: "#18181b" }}>Owner(s) *</label>
+              <div style={{ display: "grid", gap: "8px" }}>
+                {(team?.members || []).map((member: TeamMember) => (
+                  <label key={member.userId} style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "14px", color: "#18181b" }}>
+                    <input
+                      type="checkbox"
+                      checked={ownerUserIds.includes(member.userId)}
+                      onChange={(event) => {
+                        setOwnerUserIds((current) =>
+                          event.target.checked
+                            ? [...current, member.userId]
+                            : current.filter((userId) => userId !== member.userId),
+                        );
+                      }}
+                    />
+                    {member.user.name} <span style={{ color: "#71717a" }}>({member.role})</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
             <div style={{ display: "flex", justifyContent: "flex-end", gap: "12px" }}>
               <button
                 type="button"
@@ -508,6 +594,45 @@ function WIGDetail({ wig, onBack }: { wig: WIG; onBack: () => void }) {
           </form>
         )}
 
+        {closeWIGError && <ErrorState error={closeWIGError} title="Unable to close WIG" />}
+
+        {/* Close WIG Modal */}
+        {showCloseModal && (
+          <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100 }}>
+            <div style={{ backgroundColor: "#ffffff", border: "1px solid #e4e4e7", padding: "32px", maxWidth: "480px", width: "100%", margin: "16px" }}>
+              <h2 style={{ fontSize: "20px", fontWeight: 600, color: "#18181b", marginBottom: "8px" }}>Close WIG</h2>
+              <p style={{ fontSize: "14px", color: "#71717a", marginBottom: "24px" }}>
+                This is irreversible. Once closed, this WIG becomes read-only and will appear in Closed History.
+              </p>
+              <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginBottom: "24px" }}>
+                <label style={{ fontSize: "12px", fontWeight: 600, color: "#18181b", textTransform: "uppercase", letterSpacing: "0.05em" }}>Outcome *</label>
+                {(["ACHIEVED", "MISSED", "ABANDONED"] as const).map((s) => (
+                  <label key={s} style={{ display: "flex", alignItems: "center", gap: "10px", padding: "10px 14px", border: `1px solid ${closeStatus === s ? "#18181b" : "#e4e4e7"}`, backgroundColor: closeStatus === s ? "#f4f4f5" : "#ffffff", cursor: "pointer", fontSize: "14px", fontWeight: 500 }}>
+                    <input type="radio" name="closeStatus" value={s} checked={closeStatus === s} onChange={() => setCloseStatus(s)} />
+                    <span style={{ color: s === "ACHIEVED" ? "#16A34A" : s === "MISSED" ? "#ef4444" : "#71717a" }}>{s}</span>
+                  </label>
+                ))}
+              </div>
+              <div style={{ display: "flex", gap: "12px", justifyContent: "flex-end" }}>
+                <button
+                  onClick={() => setShowCloseModal(false)}
+                  disabled={isClosingWIG}
+                  style={{ padding: "10px 16px", border: "1px solid #e4e4e7", backgroundColor: "#ffffff", fontSize: "12px", fontWeight: 600, cursor: "pointer", textTransform: "uppercase", letterSpacing: "0.05em", color: "#18181b" }}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleCloseWIG}
+                  disabled={isClosingWIG}
+                  style={{ padding: "10px 16px", border: "none", backgroundColor: "#ef4444", color: "#ffffff", fontSize: "12px", fontWeight: 600, cursor: isClosingWIG ? "not-allowed" : "pointer", textTransform: "uppercase", letterSpacing: "0.05em" }}
+                >
+                  {isClosingWIG ? "Closing..." : `Close as ${closeStatus}`}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {activeWig.leadMeasures.length === 0 ? (
           <EmptyState
             title="No lead measures yet"
@@ -521,6 +646,67 @@ function WIGDetail({ wig, onBack }: { wig: WIG; onBack: () => void }) {
               return (
                 <div key={lm.id} style={{ backgroundColor: "#ffffff", border: "1px solid #e4e4e7", padding: "20px" }}>
                   <h3 style={{ fontSize: "18px", fontWeight: 600, color: "#18181b", marginBottom: "8px" }}>{lm.name}</h3>
+                  {(lm.owners?.length || 0) > 0 && (
+                    <p style={{ fontSize: "12px", color: "#52525b", marginBottom: "8px" }}>
+                      Owners: {lm.owners?.map((owner) => owner.user.name).join(", ")}
+                    </p>
+                  )}
+                  {canCreateWIG && (
+                    <button
+                      onClick={() => {
+                        setEditingOwnersForLm(lm.id);
+                        setNewOwnerIds(lm.owners?.map((o: any) => o.userId) ?? []);
+                      }}
+                      style={{ fontSize: "12px", color: "#71717a", background: "none", border: "none", cursor: "pointer", textDecoration: "underline", padding: 0, marginBottom: "8px", display: "block" }}
+                    >
+                      Edit owners
+                    </button>
+                  )}
+                  {editingOwnersForLm === lm.id && (
+                    <div style={{ marginTop: "8px", marginBottom: "12px", padding: "12px", border: "1px solid #e4e4e7", backgroundColor: "#f8fafc" }}>
+                      <p style={{ fontSize: "12px", fontWeight: 600, color: "#71717a", marginBottom: "8px", textTransform: "uppercase" }}>Select owners</p>
+                      {(team?.members || []).map((member: any) => {
+                        const userId = member.userId || member.id;
+                        const name = member.user?.name || member.user?.email || userId;
+                        const isChecked = newOwnerIds.includes(userId);
+                        return (
+                          <label key={userId} style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "6px", cursor: "pointer" }}>
+                            <input
+                              type="checkbox"
+                              checked={isChecked}
+                              onChange={() => setNewOwnerIds((prev) => isChecked ? prev.filter((id) => id !== userId) : [...prev, userId])}
+                            />
+                            <span style={{ fontSize: "13px", color: "#18181b" }}>{name}</span>
+                          </label>
+                        );
+                      })}
+                      <div style={{ display: "flex", gap: "8px", marginTop: "12px" }}>
+                        <button
+                          onClick={async () => {
+                            if (newOwnerIds.length === 0) return;
+                            try {
+                              const updated = await updateOwners({ leadMeasureId: lm.id, ownerUserIds: newOwnerIds });
+                              setActiveWig((prev) => ({
+                                ...prev,
+                                leadMeasures: prev.leadMeasures.map((m) => m.id === lm.id ? { ...m, owners: (updated as any).owners } : m),
+                              }));
+                              setEditingOwnersForLm(null);
+                            } catch {}
+                          }}
+                          disabled={isUpdatingOwners || newOwnerIds.length === 0}
+                          style={{ padding: "6px 16px", backgroundColor: "#18181b", color: "#ffffff", border: "none", fontSize: "12px", fontWeight: 600, cursor: isUpdatingOwners || newOwnerIds.length === 0 ? "not-allowed" : "pointer" }}
+                        >
+                          {isUpdatingOwners ? "Saving…" : "Save owners"}
+                        </button>
+                        <button
+                          onClick={() => setEditingOwnersForLm(null)}
+                          style={{ padding: "6px 16px", backgroundColor: "transparent", border: "1px solid #e4e4e7", fontSize: "12px", cursor: "pointer" }}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  )}
                   {lm.description && (
                     <p style={{ fontSize: "14px", color: "#71717a", marginBottom: "12px" }}>{lm.description}</p>
                   )}
@@ -544,6 +730,162 @@ function WIGDetail({ wig, onBack }: { wig: WIG; onBack: () => void }) {
   );
 }
 
+function WIGHistoryDetail({ wig, onBack }: { wig: WIG; onBack: () => void }) {
+  const outcomeColor = wig.status === "ACHIEVED" ? "#16A34A" : wig.status === "MISSED" ? "#ef4444" : "#71717a";
+  const outcomeIcon = wig.status === "ACHIEVED" ? "emoji_events" : wig.status === "MISSED" ? "cancel" : "archive";
+  const finalProgress = Math.min(100, Math.round(((wig.currentValue - wig.fromValue) / (wig.toValue - wig.fromValue)) * 100));
+
+  // Duration: from createdAt to closedAt
+  const startDate = new Date(wig.createdAt);
+  const endDate = wig.closedAt ? new Date(wig.closedAt) : new Date(wig.deadline);
+  const durationDays = Math.round((endDate.getTime() - startDate.getTime()) / 86_400_000);
+
+  return (
+    <main style={{ flex: 1, padding: "32px", fontFamily: "'Inter', sans-serif" }}>
+      {/* Back */}
+      <button
+        onClick={onBack}
+        style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "12px", fontWeight: 600, color: "#71717a", background: "none", border: "none", cursor: "pointer", marginBottom: "24px", textTransform: "uppercase", letterSpacing: "0.05em" }}
+      >
+        <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>arrow_back</span>
+        Back to History
+      </button>
+
+      {/* Outcome banner */}
+      <div style={{ backgroundColor: outcomeColor, color: "#ffffff", padding: "20px 24px", marginBottom: "24px", display: "flex", alignItems: "center", gap: "16px" }}>
+        <span className="material-symbols-outlined" style={{ fontSize: "36px" }}>{outcomeIcon}</span>
+        <div>
+          <div style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", opacity: 0.8, marginBottom: "4px" }}>
+            {wig.status === "ACHIEVED" ? "Goal Achieved" : wig.status === "MISSED" ? "Goal Missed" : "Goal Abandoned"}
+          </div>
+          <div style={{ fontSize: "22px", fontWeight: 700, letterSpacing: "-0.02em" }}>{wig.title}</div>
+        </div>
+        <div style={{ marginLeft: "auto", textAlign: "right" }}>
+          <div style={{ fontSize: "11px", opacity: 0.8, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "2px" }}>Closed</div>
+          <div style={{ fontSize: "14px", fontWeight: 600 }}>
+            {wig.closedAt ? new Date(wig.closedAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "—"}
+          </div>
+        </div>
+      </div>
+
+      {/* Lag measure summary */}
+      <div style={{ backgroundColor: "#ffffff", border: "1px solid #e4e4e7", padding: "24px", marginBottom: "24px" }}>
+        <div style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#71717a", marginBottom: "16px" }}>Lag Measure — Final Result</div>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "16px", flexWrap: "wrap", gap: "12px" }}>
+          <div>
+            <div style={{ fontSize: "40px", fontWeight: 700, letterSpacing: "-0.03em", color: "#18181b" }}>
+              {wig.currentValue} <span style={{ fontSize: "18px", fontWeight: 500, color: "#71717a" }}>{wig.unit}</span>
+            </div>
+            <div style={{ fontSize: "13px", color: "#71717a", marginTop: "4px" }}>
+              Baseline: {wig.fromValue} {wig.unit} → Target: {wig.toValue} {wig.unit}
+            </div>
+          </div>
+          <div style={{ textAlign: "right" }}>
+            <div style={{ fontSize: "32px", fontWeight: 700, color: outcomeColor }}>{finalProgress}%</div>
+            <div style={{ fontSize: "12px", color: "#71717a" }}>of target reached</div>
+          </div>
+        </div>
+        {/* Progress bar */}
+        <div style={{ width: "100%", height: "8px", backgroundColor: "#e4e4e7", marginBottom: "8px" }}>
+          <div style={{ height: "100%", backgroundColor: outcomeColor, width: `${finalProgress}%`, transition: "width 0.3s" }}></div>
+        </div>
+        {/* Timeline */}
+        <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", color: "#71717a", marginTop: "8px", flexWrap: "wrap", gap: "8px" }}>
+          <span>Started: {startDate.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</span>
+          <span>Deadline: {new Date(wig.deadline).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</span>
+          <span>Duration: {durationDays} day{durationDays !== 1 ? "s" : ""}</span>
+        </div>
+      </div>
+
+      {/* Lead measures breakdown */}
+      <div style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#71717a", marginBottom: "16px" }}>
+        Lead Measure Breakdown
+      </div>
+      {wig.leadMeasures.length === 0 ? (
+        <div style={{ color: "#71717a", fontSize: "14px", padding: "16px", border: "1px solid #e4e4e7", textAlign: "center" }}>No lead measures were tracked for this WIG.</div>
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+          {wig.leadMeasures.map((lm, i) => {
+            // Cumulative approved total
+            const totalApproved = (lm.activityLogs || []).reduce((sum, log) => sum + log.value, 0);
+            const lmPct = lm.targetValue > 0 ? Math.min(100, Math.round((totalApproved / lm.targetValue) * 100)) : 0;
+            const lmOnTrack = totalApproved >= lm.targetValue;
+
+            // Per-owner contribution
+            const ownerMap: Record<string, { name: string; total: number }> = {};
+            for (const log of (lm.activityLogs || []) as any[]) {
+              if (!log.userId) continue;
+              const name = log.user?.name || log.user?.email || log.userId;
+              if (!ownerMap[log.userId]) ownerMap[log.userId] = { name, total: 0 };
+              ownerMap[log.userId].total += log.value;
+            }
+            const owners = Object.values(ownerMap).sort((a, b) => b.total - a.total);
+
+            return (
+              <div key={lm.id} style={{ backgroundColor: "#ffffff", border: "1px solid #e4e4e7", padding: "20px" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "12px", flexWrap: "wrap", gap: "8px" }}>
+                  <div>
+                    <div style={{ fontSize: "11px", fontWeight: 600, color: "#71717a", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "4px" }}>Lead Measure {i + 1}</div>
+                    <div style={{ fontSize: "16px", fontWeight: 600, color: "#18181b" }}>{lm.name}</div>
+                    {lm.cadence && <div style={{ fontSize: "12px", color: "#71717a", marginTop: "2px" }}>{lm.cadence}</div>}
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "6px", padding: "4px 10px", border: `1px solid ${lmOnTrack ? "#16A34A" : "#e4e4e7"}`, backgroundColor: lmOnTrack ? "#f0fdf4" : "#f4f4f5" }}>
+                    <span style={{ fontSize: "12px", fontWeight: 700, color: lmOnTrack ? "#16A34A" : "#71717a", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                      {lmOnTrack ? "Target Met" : `${lmPct}% of target`}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Total vs target */}
+                <div style={{ display: "flex", alignItems: "flex-end", gap: "8px", marginBottom: "10px" }}>
+                  <span style={{ fontSize: "28px", fontWeight: 700, color: "#18181b", letterSpacing: "-0.02em" }}>{totalApproved.toFixed(1)}</span>
+                  <span style={{ fontSize: "14px", color: "#71717a", marginBottom: "4px" }}>/ {lm.targetValue.toFixed(1)} {lm.unit}</span>
+                </div>
+
+                {/* Progress bar */}
+                <div style={{ width: "100%", height: "4px", backgroundColor: "#e4e4e7", marginBottom: "16px" }}>
+                  <div style={{ height: "100%", backgroundColor: lmOnTrack ? "#16A34A" : "#18181b", width: `${lmPct}%` }}></div>
+                </div>
+
+                {/* Per-owner breakdown */}
+                {owners.length > 0 && (
+                  <div style={{ borderTop: "1px solid #f4f4f5", paddingTop: "12px" }}>
+                    <div style={{ fontSize: "11px", fontWeight: 600, color: "#71717a", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "10px" }}>Member Contribution</div>
+                    <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                      {owners.map((owner) => {
+                        const share = totalApproved > 0 ? Math.round((owner.total / totalApproved) * 100) : 0;
+                        return (
+                          <div key={owner.name}>
+                            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "4px" }}>
+                              <span style={{ fontSize: "13px", color: "#18181b" }}>{owner.name}</span>
+                              <span style={{ fontSize: "13px", fontWeight: 600, color: "#18181b" }}>
+                                {owner.total.toFixed(1)} {lm.unit}
+                                <span style={{ fontWeight: 400, color: "#71717a", marginLeft: "6px" }}>({share}%)</span>
+                              </span>
+                            </div>
+                            <div style={{ width: "100%", height: "3px", backgroundColor: "#f4f4f5" }}>
+                              <div style={{ height: "100%", backgroundColor: "#18181b", width: `${share}%` }}></div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* No logs */}
+                {owners.length === 0 && (
+                  <div style={{ fontSize: "12px", color: "#71717a", fontStyle: "italic" }}>No approved activity logs for this lead measure.</div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </main>
+  );
+}
+
 function WIGCreateForm({ onCancel, onSuccess }: { onCancel: () => void; onSuccess: () => void }) {
   const [title, setTitle] = useState("");
   const [from, setFrom] = useState("");
@@ -551,6 +893,7 @@ function WIGCreateForm({ onCancel, onSuccess }: { onCancel: () => void; onSucces
   const [unit, setUnit] = useState("USD");
   const [deadline, setDeadline] = useState("");
   const [description, setDescription] = useState("");
+  const [validationError, setValidationError] = useState<string | null>(null);
 
   const currentTeamSlug = useTeamStore((state) => state.currentTeamSlug);
   const { createWIG, isLoading, error } = useCreateWIG();
@@ -558,16 +901,39 @@ function WIGCreateForm({ onCancel, onSuccess }: { onCancel: () => void; onSucces
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    setValidationError(null);
+
     if (!currentTeamSlug || !title || !from || !to || !deadline) {
       return;
     }
+
+    const fromValue = parseFloat(from);
+    const toValue = parseFloat(to);
+
+    if (Number.isNaN(fromValue) || Number.isNaN(toValue)) {
+      setValidationError("Enter valid numeric values for current and target.");
+      return;
+    }
+
+    if (fromValue < 0 || toValue < 0) {
+      setValidationError("Current and target values cannot be negative.");
+      return;
+    }
+
+    if (toValue <= fromValue) {
+      setValidationError("Target value must be greater than current value.");
+      return;
+    }
+
+    const confirmed = window.confirm(`Create this WIG?\n\nIncrease ${title} from ${fromValue} to ${toValue} by ${new Date(deadline).toLocaleDateString()}.`);
+    if (!confirmed) return;
 
     try {
       await createWIG({
         teamSlug: currentTeamSlug,
         title,
-        fromValue: parseFloat(from),
-        toValue: parseFloat(to),
+        fromValue,
+        toValue,
         unit,
         deadline: new Date(deadline),
         description: description || undefined,
@@ -589,6 +955,11 @@ function WIGCreateForm({ onCancel, onSuccess }: { onCancel: () => void; onSucces
 
         {/* Error */}
         {error && <ErrorState error={error} title="Failed to create WIG" />}
+        {validationError && (
+          <div style={{ padding: "12px", backgroundColor: "#fee2e2", border: "1px solid #fecaca", color: "#991b1b", fontSize: "14px", borderRadius: "4px" }}>
+            {validationError}
+          </div>
+        )}
 
         {/* Live Preview */}
         <div style={{ backgroundColor: "#f4f4f5", border: "1px solid #e4e4e7", padding: "20px" }}>
@@ -622,6 +993,8 @@ function WIGCreateForm({ onCancel, onSuccess }: { onCancel: () => void; onSucces
               <label style={{ fontSize: "12px", fontWeight: 500, color: "#18181b" }}>From (Current Value) *</label>
               <input
                 type="number"
+                min="0"
+                step="any"
                 placeholder="0"
                 value={from}
                 onChange={(e) => setFrom(e.target.value)}
@@ -633,6 +1006,8 @@ function WIGCreateForm({ onCancel, onSuccess }: { onCancel: () => void; onSucces
               <label style={{ fontSize: "12px", fontWeight: 500, color: "#18181b" }}>To (Target Value) *</label>
               <input
                 type="number"
+                min="0"
+                step="any"
                 placeholder="1000000"
                 value={to}
                 onChange={(e) => setTo(e.target.value)}

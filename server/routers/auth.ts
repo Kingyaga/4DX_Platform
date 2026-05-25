@@ -3,7 +3,7 @@ import { router, publicProcedure, protectedProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
-import { sendPasswordResetEmail } from "../email";
+import { sendNewUserDetailsEmail, sendPasswordResetEmail } from "../email";
 import { checkRateLimit, getRequestIp } from "../rateLimit";
 
 const emailSchema = z.string().trim().toLowerCase().email();
@@ -404,6 +404,8 @@ export const authRouter = router({
         },
       });
 
+      let assignedTeamName: string | undefined;
+
       if (input.teamSlug) {
         const team = await ctx.db.team.findFirst({
           where: {
@@ -426,9 +428,20 @@ export const authRouter = router({
             role: "MEMBER",
           },
         });
+
+        assignedTeamName = team.name;
       }
 
-      return { id: user.id, email: user.email };
+      const emailSent = await sendNewUserDetailsEmail({
+        to: user.email,
+        name: user.name,
+        email: user.email,
+        temporaryPassword: input.password,
+        orgName: org.name,
+        teamName: assignedTeamName,
+      });
+
+      return { id: user.id, email: user.email, emailSent };
     }),
 
   getAllUsers: protectedProcedure
@@ -570,5 +583,24 @@ export const authRouter = router({
       ]);
 
       return { success: true };
+    }),
+
+  // Find a user by email — for team leads to look up users before adding them
+  findByEmail: protectedProcedure
+    .input(z.object({ email: emailSchema }))
+    .mutation(async ({ ctx, input }) => {
+      const user = await ctx.db.user.findUnique({
+        where: { email: input.email },
+        select: { id: true, name: true, email: true },
+      });
+
+      if (!user) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "No user found with that email address.",
+        });
+      }
+
+      return user;
     }),
 });

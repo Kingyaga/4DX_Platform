@@ -3,6 +3,8 @@ import { Prisma } from "@/generated/prisma/client";
 import { router, protectedProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
 import { auditLog } from "../audit";
+import { notify, notifyMany } from "../notify";
+import { sendActivityApprovedEmail, sendActivityDeclinedEmail } from "../email";
 
 const CLOSED_WIG_STATUSES = ["ACHIEVED", "MISSED", "ABANDONED"] as const;
 
@@ -51,7 +53,10 @@ export const activityLogsRouter = router({
       // Verify the lead measure exists and get team info
       const leadMeasure = await ctx.db.leadMeasure.findUnique({
         where: { id: input.leadMeasureId },
-        include: { wig: { include: { team: true } } },
+        include: {
+          owners: true,
+          wig: { include: { team: true } },
+        },
       });
 
       if (!leadMeasure) throw new TRPCError({ code: "NOT_FOUND" });
@@ -77,6 +82,17 @@ export const activityLogsRouter = router({
         throw new TRPCError({
           code: "FORBIDDEN",
           message: "You must be a team member to log activity.",
+        });
+      }
+
+      const isOwner = leadMeasure.owners.some(
+        (owner) => owner.userId === (ctx.session.user as any).id,
+      );
+
+      if (!isOwner) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "You can only log activity against lead measures you own.",
         });
       }
 
@@ -114,12 +130,11 @@ export const activityLogsRouter = router({
       const log = await ctx.db.activityLog.findUnique({
         where: { id: input.logId },
         include: {
+          user: { select: { id: true, name: true, email: true } },
           leadMeasure: {
             include: {
               wig: {
-                include: {
-                  team: true,
-                },
+                include: { team: true },
               },
             },
           },
@@ -187,6 +202,25 @@ export const activityLogsRouter = router({
         } as Prisma.InputJsonValue,
       });
 
+      await notify({
+        db: ctx.db,
+        userId: log.userId,
+        type: "ACTIVITY_APPROVED",
+        payload: {
+          leadMeasureName: log.leadMeasure.name,
+          value: log.value,
+          wigTitle: log.leadMeasure.wig.title,
+        },
+      });
+
+      sendActivityApprovedEmail({
+        to: log.user.email,
+        name: log.user.name || log.user.email,
+        leadMeasureName: log.leadMeasure.name,
+        value: log.value,
+        unit: log.leadMeasure.wig.unit ?? "",
+      }).catch(() => {});
+
       return updatedLog;
     }),
 
@@ -222,6 +256,7 @@ export const activityLogsRouter = router({
         orderBy: { createdAt: "asc" },
       });
 
+      const affectedUserIds = Array.from(new Set(pendingLogs.map((log) => log.userId)));
       let approvedCount = 0;
       const achievedWigIds = new Set<string>();
 
@@ -285,6 +320,15 @@ export const activityLogsRouter = router({
         },
       });
 
+      if (affectedUserIds.length > 0) {
+        await notifyMany({
+          db: ctx.db,
+          userIds: affectedUserIds,
+          type: "ACTIVITY_APPROVED",
+          payload: { message: "Your pending activity logs have been approved." },
+        });
+      }
+
       return { count: approvedCount };
     }),
 
@@ -294,12 +338,11 @@ export const activityLogsRouter = router({
       const log = await ctx.db.activityLog.findUnique({
         where: { id: input.logId },
         include: {
+          user: { select: { id: true, name: true, email: true } },
           leadMeasure: {
             include: {
               wig: {
-                include: {
-                  team: true,
-                },
+                include: { team: true },
               },
             },
           },
@@ -315,10 +358,33 @@ export const activityLogsRouter = router({
         });
       }
 
-      return ctx.db.activityLog.update({
+      // Note: this system only declines PENDING logs, so currentValue does not need
+      // to be re-aggregated here. If a previously APPROVED log could be declined in
+      // future, re-aggregation would be required (same pattern as approve).
+      const declined = await ctx.db.activityLog.update({
         where: { id: input.logId },
         data: { status: "REJECTED" },
       });
+
+      await notify({
+        db: ctx.db,
+        userId: log.userId,
+        type: "ACTIVITY_DECLINED",
+        payload: {
+          leadMeasureName: log.leadMeasure.name,
+          value: log.value,
+          wigTitle: log.leadMeasure.wig.title,
+        },
+      });
+
+      sendActivityDeclinedEmail({
+        to: log.user.email,
+        name: log.user.name || log.user.email,
+        leadMeasureName: log.leadMeasure.name,
+        value: log.value,
+      }).catch(() => {});
+
+      return declined;
     }),
 
   getPendingForTeam: protectedProcedure
@@ -342,8 +408,9 @@ export const activityLogsRouter = router({
             select: {
               id: true,
               name: true,
+              unit: true,
               wig: {
-                select: { title: true },
+                select: { title: true, unit: true },
               },
             },
           },

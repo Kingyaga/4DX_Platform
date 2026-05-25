@@ -8,6 +8,19 @@ import { RoleBadge } from "@/lib/components/role-badge";
 import { LoadingSpinner } from "@/lib/components/loading-spinner";
 import Link from "next/link";
 
+function PermissionRow({ granted, label, highlight }: { granted: boolean; label: string; highlight?: "blue" | "yellow" }) {
+  const bg = !granted ? "#f4f4f5" : highlight === "yellow" ? "#fef08a" : highlight === "blue" ? "#dbeafe" : "#dcfce7";
+  const color = !granted ? "#a1a1aa" : highlight === "yellow" ? "#854d0e" : highlight === "blue" ? "#0c4a6e" : "#166534";
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: "12px", padding: "12px", backgroundColor: "#f9fafb", borderRadius: "6px" }}>
+      <div style={{ width: "20px", height: "20px", borderRadius: "4px", backgroundColor: bg, display: "flex", alignItems: "center", justifyContent: "center", color, fontSize: "12px", fontWeight: 700, flexShrink: 0 }}>
+        {granted ? "✓" : "–"}
+      </div>
+      <span style={{ fontSize: "14px", color: granted ? "#18181b" : "#a1a1aa" }}>{label}</span>
+    </div>
+  );
+}
+
 export default function SettingsPage() {
   const { data: session } = useSession();
   const { user, clearUser } = useUserStore();
@@ -188,85 +201,19 @@ export default function SettingsPage() {
           <h2 style={{ margin: "0 0 20px 0", fontSize: "18px", fontWeight: "600" }}>Your Permissions</h2>
 
           <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "12px", padding: "12px", backgroundColor: "#f9fafb", borderRadius: "6px" }}>
-              <div
-                style={{
-                  width: "20px",
-                  height: "20px",
-                  borderRadius: "4px",
-                  backgroundColor: "#dcfce7",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  color: "#166534",
-                  fontSize: "12px",
-                }}
-              >
-                ✓
-              </div>
-              <span style={{ fontSize: "14px", color: "#18181b" }}>Create WIGs</span>
-            </div>
+            {/* All users: log activity */}
+            <PermissionRow granted label="Log Activity" />
 
-            <div style={{ display: "flex", alignItems: "center", gap: "12px", padding: "12px", backgroundColor: "#f9fafb", borderRadius: "6px" }}>
-              <div
-                style={{
-                  width: "20px",
-                  height: "20px",
-                  borderRadius: "4px",
-                  backgroundColor: "#dcfce7",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  color: "#166534",
-                  fontSize: "12px",
-                }}
-              >
-                ✓
-              </div>
-              <span style={{ fontSize: "14px", color: "#18181b" }}>Generate Reports</span>
-            </div>
+            {/* Team lead + admin: create WIGs, generate reports, manage team */}
+            <PermissionRow granted={isTeamLead || isAdmin} label="Create WIGs" />
+            <PermissionRow granted={isTeamLead || isAdmin} label="Generate Reports" />
+            <PermissionRow granted={isTeamLead || isAdmin} label="Approve Activity Logs" />
 
-            {isAdmin && (
-              <div style={{ display: "flex", alignItems: "center", gap: "12px", padding: "12px", backgroundColor: "#f9fafb", borderRadius: "6px" }}>
-                <div
-                  style={{
-                    width: "20px",
-                    height: "20px",
-                    borderRadius: "4px",
-                    backgroundColor: "#fef08a",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    color: "#854d0e",
-                    fontSize: "12px",
-                  }}
-                >
-                  ⚙
-                </div>
-                <span style={{ fontSize: "14px", color: "#18181b", fontWeight: "500" }}>Manage Organization</span>
-              </div>
-            )}
+            {/* Team lead only */}
+            {isTeamLead && <PermissionRow granted label="Manage Team Members" highlight="blue" />}
 
-            {isTeamLead && (
-              <div style={{ display: "flex", alignItems: "center", gap: "12px", padding: "12px", backgroundColor: "#f9fafb", borderRadius: "6px" }}>
-                <div
-                  style={{
-                    width: "20px",
-                    height: "20px",
-                    borderRadius: "4px",
-                    backgroundColor: "#dbeafe",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    color: "#0c4a6e",
-                    fontSize: "12px",
-                  }}
-                >
-                  <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>groups</span>
-                </div>
-                <span style={{ fontSize: "14px", color: "#18181b", fontWeight: "500" }}>Manage Team</span>
-              </div>
-            )}
+            {/* Admin only */}
+            {isAdmin && <PermissionRow granted label="Manage Organization" highlight="yellow" />}
           </div>
 
           <p style={{ margin: "16px 0 0 0", fontSize: "12px", color: "#71717a" }}>

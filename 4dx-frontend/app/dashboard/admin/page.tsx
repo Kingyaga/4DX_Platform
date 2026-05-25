@@ -146,7 +146,7 @@ export default function AdminPage() {
   const executionScore = allLeadMeasures.length > 0
     ? Math.round(
         allLeadMeasures.reduce((sum: number, lm: LeadMeasure) => {
-          const currentValue = lm.activityLogs?.[0]?.value || 0;
+          const currentValue = (lm.activityLogs || []).reduce((s, l) => s + l.value, 0);
           const onTrack = currentValue >= (lm.targetValue || 0) ? 100 : (currentValue / (lm.targetValue || 1)) * 100;
           return sum + Math.min(onTrack, 100);
         }, 0) / allLeadMeasures.length
@@ -164,7 +164,7 @@ export default function AdminPage() {
 
   // Completion stats
   const onTrackCount = allLeadMeasures.filter(
-    (lm: LeadMeasure) => (lm.activityLogs?.[0]?.value || 0) >= lm.targetValue
+    (lm: LeadMeasure) => (lm.activityLogs || []).reduce((s, l) => s + l.value, 0) >= lm.targetValue
   ).length;
   const completionRate = allLeadMeasures.length > 0 ? Math.round((onTrackCount / allLeadMeasures.length) * 100) : 0;
 
@@ -179,7 +179,7 @@ export default function AdminPage() {
       teamLMs.length > 0
         ? Math.round(
             teamLMs.reduce((sum: number, lm: LeadMeasure) => {
-              const current = lm.activityLogs?.[0]?.value || 0;
+              const current = (lm.activityLogs || []).reduce((s, l) => s + l.value, 0);
               return sum + Math.min((current / (lm.targetValue || 1)) * 100, 100);
             }, 0) / teamLMs.length
           )
@@ -194,7 +194,7 @@ export default function AdminPage() {
     const avgScore = teamLMs.length > 0
       ? Math.round(
           teamLMs.reduce((sum: number, lm: LeadMeasure) => {
-            const current = lm.activityLogs?.[0]?.value || 0;
+            const current = (lm.activityLogs || []).reduce((s, l) => s + l.value, 0);
             return sum + Math.min((current / (lm.targetValue || 1)) * 100, 100);
           }, 0) / teamLMs.length
         )
@@ -205,7 +205,7 @@ export default function AdminPage() {
       tagVariant: "error",
       timestamp: "Just now",
       team: worstTeam.name,
-      description: `Execution score is ${avgScore}%. ${teamLMs.filter((lm: LeadMeasure) => (lm.activityLogs?.[0]?.value || 0) < lm.targetValue).length} lead measures need attention.`,
+      description: `Execution score is ${avgScore}%. ${teamLMs.filter((lm: LeadMeasure) => (lm.activityLogs || []).reduce((s, l) => s + l.value, 0) < lm.targetValue).length} lead measures need attention.`,
       href: "/dashboard/admin/execution-details",
     });
   }
@@ -271,13 +271,13 @@ export default function AdminPage() {
       teamLMs.length > 0
         ? Math.round(
             teamLMs.reduce((sum: number, lm: LeadMeasure) => {
-              const current = lm.activityLogs?.[0]?.value || 0;
+              const current = (lm.activityLogs || []).reduce((s, l) => s + l.value, 0);
               return sum + Math.min((current / (lm.targetValue || 1)) * 100, 100);
             }, 0) / teamLMs.length
           )
         : 50;
 
-    const onTrackLMs = teamLMs.filter((lm: LeadMeasure) => (lm.activityLogs?.[0]?.value || 0) >= lm.targetValue).length;
+    const onTrackLMs = teamLMs.filter((lm: LeadMeasure) => (lm.activityLogs || []).reduce((s, l) => s + l.value, 0) >= lm.targetValue).length;
     const leadMeasureHealth = teamLMs.length > 0 ? Math.round((onTrackLMs / teamLMs.length) * 100) : 50;
 
     let status: "on-track" | "warning" | "critical" = "on-track";
@@ -485,10 +485,7 @@ export default function AdminPage() {
               <div>
                 <div style={dataDisplayStyle}>{executionScore}%</div>
                 <div style={{ display: "flex", alignItems: "center", gap: "4px", marginTop: "8px", fontSize: "14px", color: "#71717a" }}>
-                  <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>
-                    {executionScore >= 80 ? "arrow_upward" : "arrow_downward"}
-                  </span>
-                  <span>{executionScore >= 80 ? "+" : ""}3% vs last week</span>
+                  <span>{org?.sessionStats?.completionRate ?? 0}% session completion rate</span>
                 </div>
               </div>
             </div>
