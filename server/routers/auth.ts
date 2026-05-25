@@ -16,6 +16,7 @@ function hashToken(token: string) {
 function getFrontendUrl() {
   return (
     process.env.PASSWORD_RESET_BASE_URL ||
+    process.env.FRONTEND_URL ||
     process.env.NEXT_PUBLIC_APP_URL ||
     process.env.NEXT_PUBLIC_NEXTAUTH_URL ||
     process.env.NEXTAUTH_URL ||

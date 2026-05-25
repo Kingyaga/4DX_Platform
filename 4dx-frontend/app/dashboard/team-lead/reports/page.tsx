@@ -13,6 +13,7 @@ export default function TeamLeadReportsPage() {
   const { wigs, isLoading, error } = useWIGs(currentTeamSlug);
   const { teams, isLoading: teamsLoading, error: teamsError } = useMyTeams(orgSlug);
   const [selectedReport, setSelectedReport] = useState<"execution" | "lag" | "lead" | null>(null);
+  const [downloadMessage, setDownloadMessage] = useState("");
 
   useEffect(() => {
     if (!teamsLoading && teams.length > 0 && (!currentTeamSlug || !teams.some((team: any) => team.slug === currentTeamSlug))) {
@@ -75,6 +76,75 @@ export default function TeamLeadReportsPage() {
     target: w.toValue,
     progress: Math.round(((w.currentValue || 0) / w.toValue) * 100),
   }));
+
+  const getReportRows = (): string[][] => {
+    if (selectedReport === "execution") {
+      return [
+        ["Metric", "Value"],
+        ["Overall Score", `${executionScore}%`],
+        ["Lead Measures On Track", String(onTrackCount)],
+        ["Lead Measures Behind Pace", String(allLeadMeasures.length - onTrackCount)],
+        ["Total Lead Measures", String(allLeadMeasures.length)],
+      ];
+    }
+
+    if (selectedReport === "lag") {
+      return [
+        ["WIG", "Current", "Target", "Progress"],
+        ...lagMeasures.map((measure: any) => [
+          measure.title,
+          String(measure.current),
+          String(measure.target),
+          `${measure.progress}%`,
+        ]),
+      ];
+    }
+
+    if (selectedReport === "lead") {
+      return [
+        ["Lead Measure", "Cadence", "Current", "Target", "Unit", "Status"],
+        ...allLeadMeasures.map((lm: any) => {
+          const current = lm.activityLogs?.[0]?.value || 0;
+          return [
+            lm.name || "Lead Measure",
+            lm.cadence || "Weekly",
+            String(current),
+            String(lm.targetValue || 0),
+            lm.unit || "",
+            current >= lm.targetValue ? "ON TRACK" : "BEHIND",
+          ];
+        }),
+      ];
+    }
+
+    return [];
+  };
+
+  const handleDownloadReport = () => {
+    if (!selectedReport) return;
+
+    const rows = getReportRows();
+    const csv = rows
+      .map((row) =>
+        row
+          .map((cell) => `"${String(cell).replace(/"/g, '""')}"`)
+          .join(","),
+      )
+      .join("\n");
+
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    const date = new Date().toISOString().slice(0, 10);
+    link.href = url;
+    link.download = `${currentTeamSlug}-${selectedReport}-report-${date}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+    setDownloadMessage("Report downloaded.");
+    window.setTimeout(() => setDownloadMessage(""), 2500);
+  };
 
   return (
     <main style={{ flex: 1, overflowY: "auto", padding: "32px" }}>
@@ -233,6 +303,7 @@ export default function TeamLeadReportsPage() {
         {selectedReport && (
           <div style={{ display: "flex", gap: "12px" }}>
             <button
+              onClick={handleDownloadReport}
               style={{
                 padding: "12px 24px",
                 backgroundColor: "#3b82f6",
@@ -258,6 +329,11 @@ export default function TeamLeadReportsPage() {
             >
               Share Report
             </button>
+            {downloadMessage && (
+              <span style={{ alignSelf: "center", fontSize: "13px", color: "#166534", fontWeight: 600 }}>
+                {downloadMessage}
+              </span>
+            )}
           </div>
         )}
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useWIGs, useCreateWIG, useUpdateWIG, useCreateLeadMeasure, useRoleCheck, useMyTeams } from "@/lib/hooks";
+import { useWIGs, useCreateWIG, useUpdateWIG, useCreateLeadMeasure, useCloseWIG, useRoleCheck, useMyTeams } from "@/lib/hooks";
 import { useTeamStore } from "@/lib/stores/team-store";
 import { useUserStore } from "@/lib/stores/user-store";
 import { WIGListSkeleton } from "@/lib/components/skeletons";
@@ -104,7 +104,7 @@ export default function WIGsPage() {
   }
 
   if (selectedWIG) {
-    return <WIGDetail wig={selectedWIG} onBack={() => setSelectedWIG(null)} />;
+    return <WIGDetail wig={selectedWIG} onBack={() => { setSelectedWIG(null); refetch(); }} />;
   }
 
   return (
@@ -257,16 +257,27 @@ function WIGDetail({ wig, onBack }: { wig: WIG; onBack: () => void }) {
   const [activeWig, setActiveWig] = useState<WIG>(wig);
 
   const { createLeadMeasure, isLoading: isCreatingLeadMeasure, error: createLeadMeasureError } = useCreateLeadMeasure();
+  const { closeWIG, isLoading: isClosingWIG, error: closeWIGError } = useCloseWIG();
   const { canArchiveWIG, canCreateWIG } = useRoleCheck();
-  const progress = ((wig.currentValue - wig.fromValue) / (wig.toValue - wig.fromValue)) * 100;
-  const statusColor = wig.status === "ACTIVE" ? "#16A34A" : wig.status === "DRAFT" ? "#71717a" : "#EAB308";
+  const progress = ((activeWig.currentValue - activeWig.fromValue) / (activeWig.toValue - activeWig.fromValue)) * 100;
+  const statusColor = activeWig.status === "ACTIVE" ? "#16A34A" : activeWig.status === "DRAFT" ? "#71717a" : "#EAB308";
+  const isClosed = ["ACHIEVED", "MISSED", "ABANDONED"].includes(activeWig.status);
 
   useEffect(() => {
     setActiveWig(wig);
     setLeadMeasureUnit(wig.unit || "");
   }, [wig]);
 
-  const canAddLeadMeasure = canCreateWIG && activeWig.leadMeasures.length < 3;
+  const canAddLeadMeasure = canCreateWIG && !isClosed && activeWig.leadMeasures.length < 3;
+
+  const handleCloseWIG = async (status: "ACHIEVED" | "MISSED" | "ABANDONED") => {
+    try {
+      const closed = await closeWIG({ wigId: activeWig.id, status });
+      setActiveWig((prev) => ({ ...prev, ...closed }));
+    } catch {
+      // Error is surfaced by hook state
+    }
+  };
 
   const handleCreateLeadMeasure = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -321,13 +332,13 @@ function WIGDetail({ wig, onBack }: { wig: WIG; onBack: () => void }) {
           <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
             <span style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "2px 8px", border: "1px solid #e4e4e7", backgroundColor: "#f4f4f5", fontSize: "12px", fontWeight: 600 }}>
               <span style={{ width: "8px", height: "8px", borderRadius: "50%", backgroundColor: statusColor, display: "inline-block" }}></span>
-              {wig.status}
+              {activeWig.status}
             </span>
             <span style={{ fontSize: "12px", color: "#71717a", textTransform: "uppercase", letterSpacing: "0.05em" }}>Wildly Important Goal</span>
           </div>
-          <h1 style={{ fontSize: "24px", fontWeight: 600, color: "#18181b", letterSpacing: "-0.02em" }}>{wig.title}</h1>
+          <h1 style={{ fontSize: "24px", fontWeight: 600, color: "#18181b", letterSpacing: "-0.02em" }}>{activeWig.title}</h1>
         </div>
-        {canArchiveWIG && (
+        {canArchiveWIG && !isClosed && (
           <button
             onClick={() => setIsEditing(true)}
             style={{ backgroundColor: "#000000", color: "#ffffff", fontSize: "12px", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", padding: "10px 16px", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: "8px" }}
@@ -338,25 +349,58 @@ function WIGDetail({ wig, onBack }: { wig: WIG; onBack: () => void }) {
         )}
       </div>
 
+      {closeWIGError && <ErrorState error={closeWIGError} title="Unable to close WIG" />}
+
       <div style={{ marginBottom: "24px", padding: "16px", borderRadius: "16px", backgroundColor: canArchiveWIG ? "#ecfdf5" : "#f8fafc", border: `1px solid ${canArchiveWIG ? "#10b981" : "#e4e4e7"}`, color: canArchiveWIG ? "#166534" : "#52525b" }}>
-        {canArchiveWIG
+        {isClosed
+          ? `This WIG is closed as ${activeWig.status}${activeWig.closedAt ? ` on ${new Date(activeWig.closedAt).toLocaleDateString()}` : ""}. Its lead measures and activity remain available as history.`
+          : canArchiveWIG
           ? "You are the current team lead for this team, so WIG actions are available to you."
           : "This WIG is read-only unless you are the current team lead for the selected team."}
       </div>
+
+      {canArchiveWIG && !isClosed && (
+        <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", marginBottom: "24px" }}>
+          <button
+            type="button"
+            disabled={isClosingWIG}
+            onClick={() => handleCloseWIG("ACHIEVED")}
+            style={{ backgroundColor: "#166534", color: "#ffffff", fontSize: "12px", fontWeight: 600, padding: "10px 14px", border: "none", cursor: isClosingWIG ? "not-allowed" : "pointer", textTransform: "uppercase", letterSpacing: "0.05em" }}
+          >
+            Mark Achieved
+          </button>
+          <button
+            type="button"
+            disabled={isClosingWIG}
+            onClick={() => handleCloseWIG("MISSED")}
+            style={{ backgroundColor: "#f4f4f5", color: "#18181b", fontSize: "12px", fontWeight: 600, padding: "10px 14px", border: "1px solid #e4e4e7", cursor: isClosingWIG ? "not-allowed" : "pointer", textTransform: "uppercase", letterSpacing: "0.05em" }}
+          >
+            Mark Missed
+          </button>
+          <button
+            type="button"
+            disabled={isClosingWIG}
+            onClick={() => handleCloseWIG("ABANDONED")}
+            style={{ backgroundColor: "#f4f4f5", color: "#18181b", fontSize: "12px", fontWeight: 600, padding: "10px 14px", border: "1px solid #e4e4e7", cursor: isClosingWIG ? "not-allowed" : "pointer", textTransform: "uppercase", letterSpacing: "0.05em" }}
+          >
+            Abandon
+          </button>
+        </div>
+      )}
 
       <div style={{ width: "100%", height: "4px", backgroundColor: "#e4e4e7", marginBottom: "8px", position: "relative" }}>
         <div style={{ height: "100%", backgroundColor: "#18181b", width: `${Math.min(progress, 100)}%` }}></div>
       </div>
       <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", color: "#71717a" }}>
-        <span>Baseline: {wig.fromValue}</span>
-        <span>Deadline: {new Date(wig.deadline).toLocaleDateString()}</span>
+        <span>Baseline: {activeWig.fromValue}</span>
+        <span>Deadline: {new Date(activeWig.deadline).toLocaleDateString()}</span>
       </div>
 
       {/* Lead Measures */}
       <div>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "16px", paddingBottom: "8px", borderBottom: "1px solid #e4e4e7" }}>
           <h2 style={{ fontSize: "20px", fontWeight: 600, color: "#18181b" }}>Lead Measures ({activeWig.leadMeasures.length})</h2>
-          {canCreateWIG && (
+          {canCreateWIG && !isClosed && (
             <button
               onClick={() => setShowAddLeadMeasure((current) => !current)}
               disabled={!canAddLeadMeasure}
