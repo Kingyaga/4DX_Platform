@@ -348,3 +348,41 @@ export async function sendLeadMeasureOwnersChangedEmail({
     console.error("Lead measure owners changed email failed:", error);
   }
 }
+
+export async function sendReportSharedEmail({
+  to,
+  name,
+  teamName,
+  reportTitle,
+  sharedByName,
+  csv,
+}: {
+  to: string;
+  name: string;
+  teamName: string;
+  reportTitle: string;
+  sharedByName: string;
+  csv: string;
+}): Promise<boolean> {
+  try {
+    const rows = csv
+      .split("\n")
+      .slice(0, 8)
+      .map((row) => `<tr>${row.split(",").map((cell) => `<td style="padding:6px 8px;border:1px solid #e5e7eb;">${escapeHtml(cell.replace(/^"|"$/g, "").replace(/""/g, '"'))}</td>`).join("")}</tr>`)
+      .join("");
+
+    return await sendEmail({
+      to,
+      subject: `${reportTitle} for ${teamName}`,
+      html: `
+        <h2>Hi ${escapeHtml(name)},</h2>
+        <p>${escapeHtml(sharedByName)} shared the <strong>${escapeHtml(reportTitle)}</strong> for <strong>${escapeHtml(teamName)}</strong>.</p>
+        <table style="border-collapse:collapse;font-size:14px;">${rows}</table>
+        <p>Sign in to 4DX Platform to review the full report.</p>
+      `,
+    });
+  } catch (error) {
+    console.error("Report shared email failed:", error);
+    return false;
+  }
+}

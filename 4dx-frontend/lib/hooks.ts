@@ -580,6 +580,27 @@ export function useUpdateWIG() {
   };
 }
 
+export function useExportReport() {
+  const utils = trpc.useUtils();
+
+  return {
+    exportReport: (input: { teamSlug: string; reportType: "execution" | "lag" | "lead" }) =>
+      utils.client.reports.exportCsv.query(input),
+  };
+}
+
+export function useShareReport() {
+  const mutation = trpc.reports.share.useMutation();
+
+  return {
+    shareReport: mutation.mutateAsync,
+    isLoading: mutation.isPending,
+    error: mutation.error ? parseTRPCError(mutation.error) : null,
+    isSuccess: mutation.isSuccess,
+    reset: mutation.reset,
+  };
+}
+
 /**
  * Add member to team (Team lead or organization admin)
  */

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useUserStore } from "@/lib/stores/user-store";
 import { useTeamStore } from "@/lib/stores/team-store";
-import { useWIGs, useMyTeams, useTeamSessions } from "@/lib/hooks";
+import { useWIGs, useMyTeams, useTeamSessions, useExportReport, useShareReport } from "@/lib/hooks";
 import { ErrorState, EmptyState } from "@/lib/components/states";
 import Link from "next/link";
 
@@ -25,6 +25,8 @@ export default function TeamLeadReportsPage() {
     return monday.toISOString().split("T")[0];
   });
   const { sessions, isLoading: sessionsLoading } = useTeamSessions(currentTeamSlug, selectedWeek);
+  const { exportReport } = useExportReport();
+  const { shareReport, isLoading: isSharingReport } = useShareReport();
 
   useEffect(() => {
     if (!teamsLoading && teams.length > 0 && (!currentTeamSlug || !teams.some((team: any) => team.slug === currentTeamSlug))) {
@@ -97,73 +99,33 @@ export default function TeamLeadReportsPage() {
     };
   });
 
-  const getReportRows = (): string[][] => {
-    if (selectedReport === "execution") {
-      return [
-        ["Metric", "Value"],
-        ["Overall Score", `${executionScore}%`],
-        ["Lead Measures On Track", String(onTrackCount)],
-        ["Lead Measures Behind Pace", String(allLeadMeasures.length - onTrackCount)],
-        ["Total Lead Measures", String(allLeadMeasures.length)],
-      ];
-    }
+  const handleDownloadReport = async () => {
+    if (!selectedReport || !currentTeamSlug) return;
 
-    if (selectedReport === "lag") {
-      return [
-        ["WIG", "Current", "Target", "Progress"],
-        ...lagMeasures.map((measure: any) => [
-          measure.title,
-          String(measure.current),
-          String(measure.target),
-          `${measure.progress}%`,
-        ]),
-      ];
-    }
-
-    if (selectedReport === "lead") {
-      return [
-        ["Lead Measure", "Cadence", "Current", "Target", "Unit", "Status"],
-        ...allLeadMeasures.map((lm: any) => {
-          const current = lm.activityLogs?.[0]?.value || 0;
-          return [
-            lm.name || "Lead Measure",
-            lm.cadence || "Weekly",
-            String(current),
-            String(lm.targetValue || 0),
-            lm.unit || "",
-            current >= lm.targetValue ? "ON TRACK" : "BEHIND",
-          ];
-        }),
-      ];
-    }
-
-    return [];
-  };
-
-  const handleDownloadReport = () => {
-    if (!selectedReport) return;
-
-    const rows = getReportRows();
-    const csv = rows
-      .map((row) =>
-        row
-          .map((cell) => `"${String(cell).replace(/"/g, '""')}"`)
-          .join(","),
-      )
-      .join("\n");
-
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    setReportActionMessage(null);
+    const report = await exportReport({ teamSlug: currentTeamSlug, reportType: selectedReport });
+    const blob = new Blob([report.csv], { type: report.contentType });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
-    const date = new Date().toISOString().slice(0, 10);
     link.href = url;
-    link.download = `${currentTeamSlug}-${selectedReport}-report-${date}.csv`;
+    link.download = report.filename;
     document.body.appendChild(link);
     link.click();
     link.remove();
     URL.revokeObjectURL(url);
     setDownloadMessage("Report downloaded.");
     window.setTimeout(() => setDownloadMessage(""), 2500);
+  };
+
+  const handleShareReport = async () => {
+    if (!selectedReport || !currentTeamSlug) return;
+
+    const result = await shareReport({ teamSlug: currentTeamSlug, reportType: selectedReport });
+    if (!result.emailConfigured) {
+      setReportActionMessage("Report share is wired up, but no email was sent because RESEND_API_KEY / EMAIL_FROM is not configured.");
+      return;
+    }
+    setReportActionMessage(`Report shared with ${result.sent} of ${result.recipients} team members.`);
   };
 
   return (
@@ -445,18 +407,19 @@ export default function TeamLeadReportsPage() {
               </button>
               <button
                 type="button"
-                onClick={() => setReportActionMessage("Report sharing needs a backend share-link or email endpoint before this can be enabled. Added to the backend-dependent list.")}
+                onClick={handleShareReport}
+                disabled={isSharingReport}
                 style={{
                   padding: "12px 24px",
-                  backgroundColor: "#f4f4f5",
-                  color: "#71717a",
+                  backgroundColor: isSharingReport ? "#f4f4f5" : "white",
+                  color: isSharingReport ? "#71717a" : "#18181b",
                   border: "1px solid #e4e4e7",
                   borderRadius: "6px",
                   fontWeight: "500",
-                  cursor: "not-allowed",
+                  cursor: isSharingReport ? "not-allowed" : "pointer",
                 }}
               >
-                Share Report (Coming Soon)
+                {isSharingReport ? "Sharing..." : "Share Report"}
               </button>
               {downloadMessage && (
                 <span style={{ alignSelf: "center", fontSize: "13px", color: "#166534", fontWeight: 600 }}>
