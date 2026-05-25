@@ -12,9 +12,13 @@ export default function ScoreboardPage() {
   const { wigs, isLoading, error, refetch } = useWIGs(currentTeamSlug);
   const [selectedWigId, setSelectedWigId] = useState<string>("");
   const [displayMode, setDisplayMode] = useState(false);
+  const [currentTime, setCurrentTime] = useState(() => Date.now());
 
   useEffect(() => {
-    const interval = setInterval(() => { refetch(); }, 60_000);
+    const interval = setInterval(() => {
+      setCurrentTime(Date.now());
+      refetch();
+    }, 60_000);
     return () => clearInterval(interval);
   }, [refetch]);
 
@@ -32,7 +36,7 @@ export default function ScoreboardPage() {
 
   // Days remaining to deadline
   const daysRemaining = selected
-    ? Math.max(0, Math.ceil((new Date(selected.deadline).getTime() - Date.now()) / 86_400_000))
+    ? Math.max(0, Math.ceil((new Date(selected.deadline).getTime() - currentTime) / 86_400_000))
     : 0;
 
   // Helper: compute status color based on progress
