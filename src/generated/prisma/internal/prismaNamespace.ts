@@ -395,8 +395,6 @@ export const ModelName = {
   LeadMeasureOwner: 'LeadMeasureOwner',
   ActivityLog: 'ActivityLog',
   WeeklySession: 'WeeklySession',
-  SessionBlocker: 'SessionBlocker',
-  SessionTimelineEvent: 'SessionTimelineEvent',
   Commitment: 'Commitment',
   Notification: 'Notification',
   AuditLog: 'AuditLog',
@@ -418,7 +416,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "organization" | "user" | "orgMembership" | "invite" | "team" | "teamMembership" | "wIG" | "leadMeasure" | "leadMeasureOwner" | "activityLog" | "weeklySession" | "sessionBlocker" | "sessionTimelineEvent" | "commitment" | "notification" | "auditLog" | "apiKey" | "inviteToken" | "passwordResetToken"
+    modelProps: "organization" | "user" | "orgMembership" | "invite" | "team" | "teamMembership" | "wIG" | "leadMeasure" | "leadMeasureOwner" | "activityLog" | "weeklySession" | "commitment" | "notification" | "auditLog" | "apiKey" | "inviteToken" | "passwordResetToken"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1236,154 +1234,6 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
-    SessionBlocker: {
-      payload: Prisma.$SessionBlockerPayload<ExtArgs>
-      fields: Prisma.SessionBlockerFieldRefs
-      operations: {
-        findUnique: {
-          args: Prisma.SessionBlockerFindUniqueArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$SessionBlockerPayload> | null
-        }
-        findUniqueOrThrow: {
-          args: Prisma.SessionBlockerFindUniqueOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$SessionBlockerPayload>
-        }
-        findFirst: {
-          args: Prisma.SessionBlockerFindFirstArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$SessionBlockerPayload> | null
-        }
-        findFirstOrThrow: {
-          args: Prisma.SessionBlockerFindFirstOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$SessionBlockerPayload>
-        }
-        findMany: {
-          args: Prisma.SessionBlockerFindManyArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$SessionBlockerPayload>[]
-        }
-        create: {
-          args: Prisma.SessionBlockerCreateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$SessionBlockerPayload>
-        }
-        createMany: {
-          args: Prisma.SessionBlockerCreateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        createManyAndReturn: {
-          args: Prisma.SessionBlockerCreateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$SessionBlockerPayload>[]
-        }
-        delete: {
-          args: Prisma.SessionBlockerDeleteArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$SessionBlockerPayload>
-        }
-        update: {
-          args: Prisma.SessionBlockerUpdateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$SessionBlockerPayload>
-        }
-        deleteMany: {
-          args: Prisma.SessionBlockerDeleteManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateMany: {
-          args: Prisma.SessionBlockerUpdateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateManyAndReturn: {
-          args: Prisma.SessionBlockerUpdateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$SessionBlockerPayload>[]
-        }
-        upsert: {
-          args: Prisma.SessionBlockerUpsertArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$SessionBlockerPayload>
-        }
-        aggregate: {
-          args: Prisma.SessionBlockerAggregateArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AggregateSessionBlocker>
-        }
-        groupBy: {
-          args: Prisma.SessionBlockerGroupByArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.SessionBlockerGroupByOutputType>[]
-        }
-        count: {
-          args: Prisma.SessionBlockerCountArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.SessionBlockerCountAggregateOutputType> | number
-        }
-      }
-    }
-    SessionTimelineEvent: {
-      payload: Prisma.$SessionTimelineEventPayload<ExtArgs>
-      fields: Prisma.SessionTimelineEventFieldRefs
-      operations: {
-        findUnique: {
-          args: Prisma.SessionTimelineEventFindUniqueArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$SessionTimelineEventPayload> | null
-        }
-        findUniqueOrThrow: {
-          args: Prisma.SessionTimelineEventFindUniqueOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$SessionTimelineEventPayload>
-        }
-        findFirst: {
-          args: Prisma.SessionTimelineEventFindFirstArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$SessionTimelineEventPayload> | null
-        }
-        findFirstOrThrow: {
-          args: Prisma.SessionTimelineEventFindFirstOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$SessionTimelineEventPayload>
-        }
-        findMany: {
-          args: Prisma.SessionTimelineEventFindManyArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$SessionTimelineEventPayload>[]
-        }
-        create: {
-          args: Prisma.SessionTimelineEventCreateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$SessionTimelineEventPayload>
-        }
-        createMany: {
-          args: Prisma.SessionTimelineEventCreateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        createManyAndReturn: {
-          args: Prisma.SessionTimelineEventCreateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$SessionTimelineEventPayload>[]
-        }
-        delete: {
-          args: Prisma.SessionTimelineEventDeleteArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$SessionTimelineEventPayload>
-        }
-        update: {
-          args: Prisma.SessionTimelineEventUpdateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$SessionTimelineEventPayload>
-        }
-        deleteMany: {
-          args: Prisma.SessionTimelineEventDeleteManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateMany: {
-          args: Prisma.SessionTimelineEventUpdateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateManyAndReturn: {
-          args: Prisma.SessionTimelineEventUpdateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$SessionTimelineEventPayload>[]
-        }
-        upsert: {
-          args: Prisma.SessionTimelineEventUpsertArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$SessionTimelineEventPayload>
-        }
-        aggregate: {
-          args: Prisma.SessionTimelineEventAggregateArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AggregateSessionTimelineEvent>
-        }
-        groupBy: {
-          args: Prisma.SessionTimelineEventGroupByArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.SessionTimelineEventGroupByOutputType>[]
-        }
-        count: {
-          args: Prisma.SessionTimelineEventCountArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.SessionTimelineEventCountAggregateOutputType> | number
-        }
-      }
-    }
     Commitment: {
       payload: Prisma.$CommitmentPayload<ExtArgs>
       fields: Prisma.CommitmentFieldRefs
@@ -1987,10 +1837,9 @@ export type LeadMeasureOwnerScalarFieldEnum = (typeof LeadMeasureOwnerScalarFiel
 
 export const ActivityLogScalarFieldEnum = {
   id: 'id',
-  trackingType: 'trackingType',
   value: 'value',
-  valueJson: 'valueJson',
   progressStatus: 'progressStatus',
+  payloadJson: 'payloadJson',
   loggedForDate: 'loggedForDate',
   note: 'note',
   status: 'status',
@@ -2005,52 +1854,18 @@ export type ActivityLogScalarFieldEnum = (typeof ActivityLogScalarFieldEnum)[key
 
 export const WeeklySessionScalarFieldEnum = {
   id: 'id',
-  title: 'title',
   weekStarting: 'weekStarting',
-  weekEnding: 'weekEnding',
   status: 'status',
-  snapshotJson: 'snapshotJson',
-  notes: 'notes',
-  confidenceScore: 'confidenceScore',
   accountDoneAt: 'accountDoneAt',
   reviewDoneAt: 'reviewDoneAt',
   commitDoneAt: 'commitDoneAt',
-  startedAt: 'startedAt',
-  completedAt: 'completedAt',
+  snapshotJson: 'snapshotJson',
   createdAt: 'createdAt',
   wigId: 'wigId',
-  userId: 'userId',
-  teamId: 'teamId',
-  facilitatorUserId: 'facilitatorUserId'
+  userId: 'userId'
 } as const
 
 export type WeeklySessionScalarFieldEnum = (typeof WeeklySessionScalarFieldEnum)[keyof typeof WeeklySessionScalarFieldEnum]
-
-
-export const SessionBlockerScalarFieldEnum = {
-  id: 'id',
-  title: 'title',
-  details: 'details',
-  status: 'status',
-  createdAt: 'createdAt',
-  resolvedAt: 'resolvedAt',
-  weeklySessionId: 'weeklySessionId',
-  createdByUserId: 'createdByUserId'
-} as const
-
-export type SessionBlockerScalarFieldEnum = (typeof SessionBlockerScalarFieldEnum)[keyof typeof SessionBlockerScalarFieldEnum]
-
-
-export const SessionTimelineEventScalarFieldEnum = {
-  id: 'id',
-  type: 'type',
-  payloadJson: 'payloadJson',
-  createdAt: 'createdAt',
-  weeklySessionId: 'weeklySessionId',
-  actorUserId: 'actorUserId'
-} as const
-
-export type SessionTimelineEventScalarFieldEnum = (typeof SessionTimelineEventScalarFieldEnum)[keyof typeof SessionTimelineEventScalarFieldEnum]
 
 
 export const CommitmentScalarFieldEnum = {
@@ -2060,7 +1875,6 @@ export const CommitmentScalarFieldEnum = {
   notDoneReason: 'notDoneReason',
   reflection: 'reflection',
   resolvedAt: 'resolvedAt',
-  createdAt: 'createdAt',
   weeklySessionId: 'weeklySessionId',
   linkedLeadMeasureId: 'linkedLeadMeasureId'
 } as const
@@ -2222,119 +2036,119 @@ export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaM
  * Reference to a field of type 'Boolean'
  */
 export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
-    
+
 
 
 /**
  * Reference to a field of type 'OrgRole'
  */
 export type EnumOrgRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'OrgRole'>
-    
+
 
 
 /**
  * Reference to a field of type 'OrgRole[]'
  */
 export type ListEnumOrgRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'OrgRole[]'>
-    
+
 
 
 /**
  * Reference to a field of type 'TeamRole'
  */
 export type EnumTeamRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TeamRole'>
-    
+
 
 
 /**
  * Reference to a field of type 'TeamRole[]'
  */
 export type ListEnumTeamRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TeamRole[]'>
-    
+
 
 
 /**
  * Reference to a field of type 'TrackingType'
  */
 export type EnumTrackingTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TrackingType'>
-    
+
 
 
 /**
  * Reference to a field of type 'TrackingType[]'
  */
 export type ListEnumTrackingTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TrackingType[]'>
-    
+
 
 
 /**
  * Reference to a field of type 'Float'
  */
 export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
-    
+
 
 
 /**
  * Reference to a field of type 'Float[]'
  */
 export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
-    
+
 
 
 /**
  * Reference to a field of type 'WIGStatus'
  */
 export type EnumWIGStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'WIGStatus'>
-    
+
 
 
 /**
  * Reference to a field of type 'WIGStatus[]'
  */
 export type ListEnumWIGStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'WIGStatus[]'>
-    
+
 
 
 /**
  * Reference to a field of type 'Cadence'
  */
 export type EnumCadenceFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Cadence'>
-    
+
 
 
 /**
  * Reference to a field of type 'Cadence[]'
  */
 export type ListEnumCadenceFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Cadence[]'>
-    
 
-
-/**
- * Reference to a field of type 'Json'
- */
-export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
-    
-
-
-/**
- * Reference to a field of type 'QueryMode'
- */
-export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
-    
 
 
 /**
  * Reference to a field of type 'ActivityProgressStatus'
  */
 export type EnumActivityProgressStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ActivityProgressStatus'>
-    
+
 
 
 /**
  * Reference to a field of type 'ActivityProgressStatus[]'
  */
 export type ListEnumActivityProgressStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ActivityProgressStatus[]'>
-    
+
+
+
+/**
+ * Reference to a field of type 'Json'
+ */
+export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
+
+
+
+/**
+ * Reference to a field of type 'QueryMode'
+ */
+export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
+
 
 
 /**
@@ -2366,34 +2180,6 @@ export type ListEnumSessionStatusFieldRefInput<$PrismaModel> = FieldRefInputType
 
 
 /**
- * Reference to a field of type 'Int'
- */
-export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
-    
-
-
-/**
- * Reference to a field of type 'Int[]'
- */
-export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
-    
-
-
-/**
- * Reference to a field of type 'BlockerStatus'
- */
-export type EnumBlockerStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BlockerStatus'>
-    
-
-
-/**
- * Reference to a field of type 'BlockerStatus[]'
- */
-export type ListEnumBlockerStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BlockerStatus[]'>
-    
-
-
-/**
  * Reference to a field of type 'CommitmentStatus'
  */
 export type EnumCommitmentStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CommitmentStatus'>
@@ -2418,6 +2204,20 @@ export type EnumNotDoneReasonFieldRefInput<$PrismaModel> = FieldRefInputType<$Pr
  * Reference to a field of type 'NotDoneReason[]'
  */
 export type ListEnumNotDoneReasonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'NotDoneReason[]'>
+    
+
+
+/**
+ * Reference to a field of type 'Int'
+ */
+export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
+    
+
+
+/**
+ * Reference to a field of type 'Int[]'
+ */
+export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
     
 
 /**
@@ -2541,8 +2341,6 @@ export type GlobalOmitConfig = {
   leadMeasureOwner?: Prisma.LeadMeasureOwnerOmit
   activityLog?: Prisma.ActivityLogOmit
   weeklySession?: Prisma.WeeklySessionOmit
-  sessionBlocker?: Prisma.SessionBlockerOmit
-  sessionTimelineEvent?: Prisma.SessionTimelineEventOmit
   commitment?: Prisma.CommitmentOmit
   notification?: Prisma.NotificationOmit
   auditLog?: Prisma.AuditLogOmit
@@ -2611,4 +2409,3 @@ export type PrismaAction =
  * `PrismaClient` proxy available in interactive transactions.
  */
 export type TransactionClient = Omit<DefaultPrismaClient, runtime.ITXClientDenyList>
-

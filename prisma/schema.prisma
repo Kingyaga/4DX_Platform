@@ -29,7 +29,7 @@ model User {
   id                  String   @id @default(cuid())
   email               String   @unique
   name                String
-  passwordHash        String
+  passwordHash        String?
   createdAt           DateTime @default(now())
   defaultTeamId       String?
   mustChangePassword  Boolean  @default(false)
@@ -38,9 +38,6 @@ model User {
   teamMemberships     TeamMembership[]
   activityLogs        ActivityLog[]
   weeklySessions      WeeklySession[]
-  facilitatedSessions WeeklySession[] @relation("WeeklySessionFacilitator")
-  sessionBlockers     SessionBlocker[]
-  sessionTimeline     SessionTimelineEvent[]
   notifications       Notification[]
   auditLogs           AuditLog[]
   leadMeasures        LeadMeasureOwner[]
@@ -108,7 +105,6 @@ model Team {
   leadUserId String
   members    TeamMembership[]
   wigs       WIG[]
-  weeklySessions WeeklySession[]
   invites    Invite[]
   inviteTokens InviteToken[]
 
@@ -219,10 +215,9 @@ model LeadMeasureOwner {
 
 model ActivityLog {
   id            String            @id @default(cuid())
-  trackingType  TrackingType      @default(NUMERIC)
   value         Float?
-  valueJson     Json?
   progressStatus ActivityProgressStatus?
+  payloadJson   Json?
   loggedForDate DateTime
   note          String?
   status        ActivityLogStatus @default(PENDING)
@@ -238,6 +233,7 @@ model ActivityLog {
   @@index([leadMeasureId])
   @@index([userId])
   @@index([loggedForDate])
+  @@index([payloadJson], type: Gin)
 }
 
 enum ActivityLogStatus {
@@ -249,15 +245,6 @@ enum ActivityLogStatus {
 enum TrackingType {
   NUMERIC
   MILESTONE
-  BOOLEAN
-  TIME
-  TEXT
-  PERCENTAGE
-  DURATION
-  CHECKLIST
-  COMPLETION
-  HYBRID
-  CUSTOM
 }
 
 enum ActivityProgressStatus {
@@ -271,42 +258,26 @@ enum ActivityProgressStatus {
 
 model WeeklySession {
   id            String        @id @default(cuid())
-  title         String?
   weekStarting  DateTime
-  weekEnding    DateTime?
   status        SessionStatus @default(PENDING)
-  snapshotJson  Json?
-  notes         String?
-  confidenceScore Int?
   accountDoneAt DateTime?
   reviewDoneAt  DateTime?
   commitDoneAt  DateTime?
-  startedAt     DateTime?
-  completedAt   DateTime?
+  snapshotJson  Json?
   createdAt     DateTime      @default(now())
 
-  wigId String?
-  wig   WIG?   @relation(fields: [wigId], references: [id])
+  wigId String
+  wig   WIG    @relation(fields: [wigId], references: [id])
 
-  userId String?
-  user   User?  @relation(fields: [userId], references: [id])
-
-  teamId String?
-  team   Team?  @relation(fields: [teamId], references: [id])
-
-  facilitatorUserId String?
-  facilitator       User? @relation("WeeklySessionFacilitator", fields: [facilitatorUserId], references: [id])
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
 
   commitments Commitment[]
-  blockers    SessionBlocker[]
-  timeline    SessionTimelineEvent[]
 
   @@index([wigId])
   @@index([userId])
-  @@index([teamId])
-  @@index([facilitatorUserId])
   @@index([wigId, userId, weekStarting])
-  @@index([teamId, weekStarting])
+  @@index([snapshotJson], type: Gin)
 }
 
 enum SessionStatus {
@@ -314,45 +285,6 @@ enum SessionStatus {
   IN_PROGRESS
   COMPLETE
   OVERDUE
-}
-
-model SessionBlocker {
-  id        String   @id @default(cuid())
-  title     String
-  details   String?
-  status    BlockerStatus @default(OPEN)
-  createdAt DateTime @default(now())
-  resolvedAt DateTime?
-
-  weeklySessionId String
-  weeklySession   WeeklySession @relation(fields: [weeklySessionId], references: [id])
-
-  createdByUserId String
-  createdBy       User @relation(fields: [createdByUserId], references: [id])
-
-  @@index([weeklySessionId])
-  @@index([createdByUserId])
-}
-
-enum BlockerStatus {
-  OPEN
-  RESOLVED
-}
-
-model SessionTimelineEvent {
-  id          String   @id @default(cuid())
-  type        String
-  payloadJson Json?
-  createdAt   DateTime @default(now())
-
-  weeklySessionId String
-  weeklySession   WeeklySession @relation(fields: [weeklySessionId], references: [id])
-
-  actorUserId String
-  actor       User @relation(fields: [actorUserId], references: [id])
-
-  @@index([weeklySessionId])
-  @@index([actorUserId])
 }
 
 // ─── COMMITMENT ──────────────────────────────────────────────────────────────
@@ -364,7 +296,6 @@ model Commitment {
   notDoneReason NotDoneReason?
   reflection    String?
   resolvedAt    DateTime?
-  createdAt     DateTime         @default(now())
 
   weeklySessionId String
   weeklySession   WeeklySession @relation(fields: [weeklySessionId], references: [id])

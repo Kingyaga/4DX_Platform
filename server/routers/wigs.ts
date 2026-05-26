@@ -337,8 +337,6 @@ export const wigsRouter = router({
   getById: protectedProcedure
     .input(z.object({ wigId: z.string() }))
     .query(async ({ ctx, input }) => {
-      const currentUserId = (ctx.session.user as any).id;
-
       const wigWithDetails = await ctx.db.wIG.findUnique({
         where: { id: input.wigId },
         include: {

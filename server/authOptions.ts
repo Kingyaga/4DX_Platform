@@ -4,63 +4,24 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { type JWT } from "next-auth/jwt";
 import { type Session } from "next-auth";
 import bcrypt from "bcryptjs";
-import crypto from "crypto";
 import { db } from "./db";
 import { checkBooleanRateLimit, getRequestIp } from "./rateLimit";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-function getAllowedMicrosoftDomain() {
-  return (process.env.MICROSOFT_ALLOWED_DOMAIN || process.env.COMPANY_EMAIL_DOMAIN || "").trim().toLowerCase().replace(/^@/, "");
+function normalizeEmail(email: string) {
+  return email.toLowerCase().trim();
 }
 
-function isAllowedMicrosoftEmail(email: string) {
-  const allowedDomain = getAllowedMicrosoftDomain();
-  return !allowedDomain || email.toLowerCase().endsWith(`@${allowedDomain}`);
+function getEmailDomain(email: string) {
+  return email.split("@")[1]?.toLowerCase() ?? "";
 }
 
-async function provisionMicrosoftUser(user: { email?: string | null; name?: string | null }) {
-  const email = user.email?.toLowerCase().trim();
-  if (!email || !isAllowedMicrosoftEmail(email)) return false;
-
-  const existingUser = await db.user.findUnique({ where: { email } });
-  if (existingUser) return true;
-
-  const invite = await db.inviteToken.findFirst({
-    where: { email, usedAt: null, expiresAt: { gt: new Date() } },
-  });
-  const defaultOrgSlug = process.env.MICROSOFT_DEFAULT_ORG_SLUG || process.env.DEFAULT_ORG_SLUG;
-  const defaultOrg = !invite && defaultOrgSlug
-    ? await db.organization.findUnique({ where: { slug: defaultOrgSlug } })
-    : null;
-
-  if (!invite && !defaultOrg) return false;
-
-  await db.user.create({
-    data: {
-      email,
-      name: user.name || email.split("@")[0],
-      passwordHash: await bcrypt.hash(crypto.randomUUID(), 12),
-      orgMemberships: {
-        create: {
-          orgId: invite?.orgId || defaultOrg!.id,
-          role: invite?.role || "MEMBER",
-        },
-      },
-      ...(invite?.teamId
-        ? {
-            teamMemberships: { create: { teamId: invite.teamId, role: "MEMBER" } },
-            defaultTeamId: invite.teamId,
-          }
-        : {}),
-    },
-  });
-
-  if (invite) {
-    await db.inviteToken.update({ where: { id: invite.id }, data: { usedAt: new Date() } });
-  }
-
-  return true;
+function getAllowedMicrosoftDomains() {
+  return (process.env.MICROSOFT_ALLOWED_DOMAIN ?? "")
+    .split(",")
+    .map((domain) => domain.trim().toLowerCase())
+    .filter(Boolean);
 }
 
 function microsoftProvider() {
@@ -121,6 +82,10 @@ const providers: NextAuthOptions["providers"] = [
         return null;
       }
 
+      if (!user.passwordHash) {
+        return null;
+      }
+
       const passwordMatch = await bcrypt.compare(
         credentials.password,
         user.passwordHash,
@@ -148,12 +113,83 @@ export const authOptions: NextAuthOptions = {
   providers,
   session: {
     strategy: "jwt",
-    maxAge: 10 * 60,
+    maxAge: 8 * 60 * 60,
   },
   callbacks: {
     async signIn({ user, account }) {
       if (account?.provider !== "azure-ad") return true;
-      return provisionMicrosoftUser(user);
+
+      const email = user.email ? normalizeEmail(user.email) : null;
+      if (!email) return false;
+
+      const allowedDomains = getAllowedMicrosoftDomains();
+      if (allowedDomains.length > 0 && !allowedDomains.includes(getEmailDomain(email))) {
+        return false;
+      }
+
+      const existingUser = await db.user.findUnique({ where: { email } });
+      if (existingUser) return true;
+
+      const invite = await db.inviteToken.findFirst({
+        where: {
+          email,
+          usedAt: null,
+          expiresAt: { gt: new Date() },
+        },
+        orderBy: { createdAt: "desc" },
+      });
+
+      const defaultOrgSlug = process.env.MICROSOFT_DEFAULT_ORG_SLUG;
+      const defaultOrg = !invite && defaultOrgSlug
+        ? await db.organization.findUnique({ where: { slug: defaultOrgSlug } })
+        : null;
+
+      if (!invite && !defaultOrg) {
+        return false;
+      }
+
+      await db.$transaction(async (tx) => {
+        const createdUser = await tx.user.create({
+          data: {
+            email,
+            name: user.name || email,
+            passwordHash: null,
+            defaultTeamId: invite?.teamId ?? null,
+          },
+        });
+
+        await tx.orgMembership.create({
+          data: {
+            userId: createdUser.id,
+            orgId: invite?.orgId ?? defaultOrg!.id,
+            role: invite?.role ?? "MEMBER",
+          },
+        });
+
+        if (invite?.teamId) {
+          await tx.teamMembership.create({
+            data: {
+              userId: createdUser.id,
+              teamId: invite.teamId,
+              role: "MEMBER",
+            },
+          });
+
+          await tx.user.update({
+            where: { id: createdUser.id },
+            data: { defaultTeamId: invite.teamId },
+          });
+        }
+
+        if (invite) {
+          await tx.inviteToken.update({
+            where: { token: invite.token },
+            data: { usedAt: new Date() },
+          });
+        }
+      });
+
+      return true;
     },
     async jwt({ token, user }) {
       if (user?.id) token.id = user.id;

@@ -20,7 +20,7 @@ async function testAuthorize() {
     });
 
     console.log("User found:", user ? "YES" : "NO");
-    if (user) {
+    if (user?.passwordHash) {
       console.log("User ID:", user.id);
       console.log("User email:", user.email);
       console.log("Password hash exists:", !!user.passwordHash);
@@ -41,6 +41,11 @@ async function testAuthorize() {
       } else {
         console.log("❌ Password mismatch!");
       }
+    } else if (user) {
+      console.log("User ID:", user.id);
+      console.log("User email:", user.email);
+      console.log("Password hash exists: false");
+      console.log("Authorization should fail for passwordless users.");
     } else {
       console.log("❌ User not found!");
     }

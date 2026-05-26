@@ -4,6 +4,7 @@ import { TRPCError } from "@trpc/server";
 import { notify, notifyMany } from "../notify";
 import { sendSessionReadyEmail } from "../email";
 import { auditLog } from "../audit";
+import { buildWeeklySessionSnapshot } from "../sessionSnapshot";
 
 function getWeekEnding(weekStarting: Date) {
   const weekEnding = new Date(weekStarting);
@@ -323,7 +324,10 @@ export const sessionsRouter = router({
         where: { slug: input.teamSlug },
         include: {
           members: true,
-          wigs: { where: { status: "ACTIVE" } },
+          wigs: {
+            where: { status: "ACTIVE" },
+            include: { leadMeasures: { where: { archivedAt: null } } },
+          },
         },
       });
 
@@ -353,6 +357,7 @@ export const sessionsRouter = router({
             wigId: wig.id,
             weekStarting: monday,
             status: "PENDING" as const,
+            snapshotJson: buildWeeklySessionSnapshot({ team, wig }),
           });
         }
       }

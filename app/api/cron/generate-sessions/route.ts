@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { db } from "@/server/db";
-import { notify, notifyMany } from "@/server/notify";
+import { notifyMany } from "@/server/notify";
 import { sendSessionReadyEmail } from "@/server/email";
+import { buildWeeklySessionSnapshot } from "@/server/sessionSnapshot";
 
 // Called by Vercel Cron every Monday at 00:00 UTC (see vercel.json)
 // Authorization: CRON_SECRET header must match env var
@@ -19,7 +20,10 @@ export async function POST(req: Request) {
     where: { archivedAt: null },
     include: {
       members: true,
-      wigs: { where: { status: "ACTIVE" } },
+      wigs: {
+        where: { status: "ACTIVE" },
+        include: { leadMeasures: { where: { archivedAt: null } } },
+      },
     },
   });
 
@@ -38,6 +42,7 @@ export async function POST(req: Request) {
       wigId: string;
       weekStarting: Date;
       status: "PENDING";
+      snapshotJson: ReturnType<typeof buildWeeklySessionSnapshot>;
     }> = [];
 
     for (const member of team.members) {
@@ -48,6 +53,7 @@ export async function POST(req: Request) {
           wigId: wig.id,
           weekStarting: monday,
           status: "PENDING",
+          snapshotJson: buildWeeklySessionSnapshot({ team, wig }),
         });
       }
     }

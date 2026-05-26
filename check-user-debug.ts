@@ -10,11 +10,13 @@ async function main() {
 
   console.log("User:", JSON.stringify(user, null, 2));
   
-  if (user) {
+  if (user?.passwordHash) {
     // Test bcrypt comparison
     const bcrypt = await import("bcryptjs");
     const isValid = await bcrypt.compare("password123", user.passwordHash);
     console.log("Password valid:", isValid);
+  } else if (user) {
+    console.log("Password valid: no password hash set");
   }
 }
 

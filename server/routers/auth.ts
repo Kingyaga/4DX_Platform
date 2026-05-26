@@ -215,6 +215,13 @@ export const authRouter = router({
         throw new TRPCError({ code: "NOT_FOUND", message: "User not found." });
       }
 
+      if (!user.passwordHash) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "This account uses Microsoft sign-in. Password changes are not available.",
+        });
+      }
+
       const passwordMatch = await bcrypt.compare(input.currentPassword, user.passwordHash);
       if (!passwordMatch) {
         throw new TRPCError({
