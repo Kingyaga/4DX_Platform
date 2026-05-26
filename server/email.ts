@@ -161,6 +161,7 @@ export async function sendNewUserDetailsEmail({
   temporaryPassword,
   orgName,
   teamName,
+  loginUrl,
 }: {
   to: string;
   name: string;
@@ -168,18 +169,58 @@ export async function sendNewUserDetailsEmail({
   temporaryPassword: string;
   orgName: string;
   teamName?: string;
+  loginUrl?: string;
 }): Promise<boolean> {
+  const safeLoginUrl = loginUrl ? escapeHtml(loginUrl) : null;
   try {
     return await sendEmail({
       to,
-      subject: `Welcome to ${orgName} on 4DX Platform`,
+      subject: `You've been added to ${orgName} — your login details`,
       html: `
-        <h2>Hi ${escapeHtml(name)},</h2>
-        <p>Your 4DX Platform account has been created for <strong>${escapeHtml(orgName)}</strong>.</p>
-        ${teamName ? `<p>Team: <strong>${escapeHtml(teamName)}</strong></p>` : ""}
-        <p><strong>Email:</strong> ${escapeHtml(email)}</p>
-        <p><strong>Temporary password:</strong> ${escapeHtml(temporaryPassword)}</p>
-        <p>Please sign in and change your password from Settings.</p>
+        <div style="font-family:'Inter',Arial,sans-serif;max-width:560px;margin:0 auto;background:#ffffff;border:1px solid #e4e4e7;border-radius:8px;overflow:hidden;">
+          <div style="background:#18181b;padding:28px 32px;">
+            <h1 style="color:#ffffff;font-size:20px;font-weight:700;margin:0;letter-spacing:-0.01em;text-transform:uppercase;">STRATEGY</h1>
+            <p style="color:#a1a1aa;font-size:12px;margin:4px 0 0 0;text-transform:uppercase;letter-spacing:0.05em;">Operational Discipline</p>
+          </div>
+          <div style="padding:32px;">
+            <h2 style="font-size:22px;font-weight:700;color:#18181b;margin:0 0 8px 0;">Welcome, ${escapeHtml(name)}!</h2>
+            <p style="color:#71717a;font-size:15px;margin:0 0 24px 0;">
+              Your account has been created for <strong style="color:#18181b;">${escapeHtml(orgName)}</strong>.
+              ${teamName ? `You've been assigned to the <strong style="color:#18181b;">${escapeHtml(teamName)}</strong> team.` : ""}
+            </p>
+
+            <div style="background:#f4f4f5;border-radius:8px;padding:20px 24px;margin-bottom:24px;">
+              <p style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#71717a;margin:0 0 12px 0;">Your Login Details</p>
+              <table style="width:100%;border-collapse:collapse;">
+                <tr>
+                  <td style="font-size:13px;font-weight:600;color:#71717a;padding:4px 0;width:120px;">Email</td>
+                  <td style="font-size:14px;color:#18181b;font-weight:600;padding:4px 0;">${escapeHtml(email)}</td>
+                </tr>
+                <tr>
+                  <td style="font-size:13px;font-weight:600;color:#71717a;padding:4px 0;">Password</td>
+                  <td style="font-size:14px;color:#18181b;font-weight:600;padding:4px 0;font-family:monospace;">${escapeHtml(temporaryPassword)}</td>
+                </tr>
+              </table>
+            </div>
+
+            <div style="background:#fef9c3;border:1px solid #fde047;border-radius:6px;padding:12px 16px;margin-bottom:24px;">
+              <p style="font-size:13px;color:#713f12;margin:0;">
+                <strong>⚠ You will be prompted to change your password after your first login.</strong>
+                Choose a strong password you haven't used elsewhere.
+              </p>
+            </div>
+
+            ${safeLoginUrl ? `
+            <a href="${safeLoginUrl}" style="display:inline-block;background:#18181b;color:#ffffff;text-decoration:none;padding:12px 28px;border-radius:6px;font-size:14px;font-weight:700;letter-spacing:0.02em;margin-bottom:24px;">
+              Sign In to 4DX Platform →
+            </a>
+            ` : ""}
+
+            <p style="font-size:13px;color:#a1a1aa;margin:0;border-top:1px solid #e4e4e7;padding-top:16px;">
+              If you weren't expecting this email, please contact your organization administrator.
+            </p>
+          </div>
+        </div>
       `,
     });
   } catch (error) {

@@ -14,13 +14,7 @@ import { useTeamStore } from "@/lib/stores/team-store";
 import { useUserStore } from "@/lib/stores/user-store";
 import { ErrorState, EmptyState } from "@/lib/components/states";
 import { LoadingSpinner } from "@/lib/components/loading-spinner";
-import type { WIG, LeadMeasure, ActivityLogEntry } from "@/lib/types";
-
-type AggregatedActivityLog = ActivityLogEntry & {
-  leadMeasureId: string;
-  leadMeasureName: string;
-  wigTitle: string;
-};
+import type { LeadMeasure } from "@/lib/types";
 
 export default function ActivityLogPage() {
   const { currentTeamSlug } = useTeamStore();
@@ -45,9 +39,6 @@ export default function ActivityLogPage() {
     new Date().toISOString().split("T")[0],
   );
   const [note, setNote] = useState<string>("");
-  const [activityLogs, setActivityLogs] = useState<AggregatedActivityLog[]>([]);
-  const [logsError, setLogsError] = useState<string | null>(null);
-  const [logsRefreshIndex, setLogsRefreshIndex] = useState(0);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [showAllLogs, setShowAllLogs] = useState(false);
   const PREVIEW_COUNT = 10;
@@ -103,53 +94,13 @@ export default function ActivityLogPage() {
     return () => window.clearTimeout(timeoutId);
   }, [successMessage]);
 
-  // Extract activity logs from WIGs data
-  useEffect(() => {
-    if (!wigs.length) {
-      setActivityLogs([]);
-      setLogsError(null);
-      return;
-    }
-
-    try {
-      const loadedLogs: AggregatedActivityLog[] = [];
-
-      for (const wig of wigs as any[]) {
-        for (const lm of (wig.leadMeasures || []) as any[]) {
-          // Activity logs might not be included in the response depending on backend query
-          const logs = lm.activityLogs;
-          if (logs && Array.isArray(logs)) {
-            const aggregatedLogs = logs
-              .filter(
-                (log: ActivityLogEntry) => (log as any).userId === user?.id,
-              )
-              .map((log: ActivityLogEntry) => ({
-                ...log,
-                leadMeasureId: lm.id,
-                leadMeasureName: lm.name,
-                wigTitle: wig.title,
-                unit: lm.unit,
-              }));
-            loadedLogs.push(...aggregatedLogs);
-          }
-        }
-      }
-
-      setActivityLogs(loadedLogs);
-      setLogsError(null);
-    } catch (err: unknown) {
-      const errorMessage =
-        err instanceof Error ? err.message : "Unable to load activity logs.";
-      setLogsError(errorMessage);
-    }
-  }, [wigs, logsRefreshIndex]);
-
   const pendingLogs = (myAllLogs as any[]).filter(
     (log: any) => log.status === "PENDING",
   );
 
-  const sortedLogs = [...activityLogs].sort(
-    (a: AggregatedActivityLog, b: AggregatedActivityLog) =>
+  // Use myAllLogs (all statuses) for Recent Logs so users can see APPROVED/REJECTED entries too
+  const sortedLogs = [...(myAllLogs as any[])].sort(
+    (a: any, b: any) =>
       new Date(b.loggedForDate).getTime() - new Date(a.loggedForDate).getTime(),
   );
   const visibleLogs = showAllLogs
@@ -174,7 +125,6 @@ export default function ActivityLogPage() {
       setValue("");
       setLogDate(new Date().toISOString().split("T")[0]);
       setNote("");
-      setLogsRefreshIndex((current) => current + 1);
     } catch {
       // error handled inside hook
     }
@@ -436,7 +386,7 @@ export default function ActivityLogPage() {
             />
           </div>
 
-          {(submitError || logsError) && (
+          {submitError && (
             <div
               style={{
                 padding: "12px",
@@ -447,7 +397,7 @@ export default function ActivityLogPage() {
                 borderRadius: "4px",
               }}
             >
-              {submitError?.message || logsError}
+              {submitError?.message}
             </div>
           )}
 
@@ -792,6 +742,22 @@ export default function ActivityLogPage() {
                         backgroundColor: "#f4f4f5",
                         borderBottom: "1px solid #e4e4e7",
                         textAlign: "left",
+                        width: "100px",
+                      }}
+                    >
+                      Status
+                    </th>
+                    <th
+                      style={{
+                        padding: "12px 16px",
+                        fontSize: "12px",
+                        fontWeight: 600,
+                        letterSpacing: "0.05em",
+                        textTransform: "uppercase",
+                        color: "#71717a",
+                        backgroundColor: "#f4f4f5",
+                        borderBottom: "1px solid #e4e4e7",
+                        textAlign: "left",
                       }}
                     >
                       Note
@@ -799,7 +765,20 @@ export default function ActivityLogPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {visibleLogs.map((log, i) => (
+                  {visibleLogs.map((log: any, i: number) => {
+                    const statusColor =
+                      log.status === "APPROVED"
+                        ? "#16a34a"
+                        : log.status === "REJECTED"
+                          ? "#dc2626"
+                          : "#d97706";
+                    const statusBg =
+                      log.status === "APPROVED"
+                        ? "#dcfce7"
+                        : log.status === "REJECTED"
+                          ? "#fee2e2"
+                          : "#fef3c7";
+                    return (
                     <tr
                       key={log.id}
                       style={{
@@ -837,7 +816,7 @@ export default function ActivityLogPage() {
                           fontWeight: 500,
                         }}
                       >
-                        {log.leadMeasureName}
+                        {log.leadMeasure?.name ?? log.leadMeasureName ?? "—"}
                       </td>
                       <td
                         style={{
@@ -849,6 +828,23 @@ export default function ActivityLogPage() {
                         }}
                       >
                         {log.value}
+                      </td>
+                      <td style={{ padding: "16px" }}>
+                        <span
+                          style={{
+                            display: "inline-block",
+                            fontSize: "11px",
+                            fontWeight: 600,
+                            textTransform: "uppercase",
+                            letterSpacing: "0.05em",
+                            color: statusColor,
+                            backgroundColor: statusBg,
+                            padding: "2px 8px",
+                            borderRadius: "4px",
+                          }}
+                        >
+                          {log.status === "REJECTED" ? "Declined" : log.status.charAt(0) + log.status.slice(1).toLowerCase()}
+                        </span>
                       </td>
                       <td
                         style={{
@@ -864,7 +860,8 @@ export default function ActivityLogPage() {
                         {log.note || "-"}
                       </td>
                     </tr>
-                  ))}
+                    );
+                  })}
                 </tbody>
               </table>
             </div>

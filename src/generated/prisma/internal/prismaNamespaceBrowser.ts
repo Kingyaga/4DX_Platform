@@ -103,7 +103,8 @@ export const UserScalarFieldEnum = {
   name: 'name',
   passwordHash: 'passwordHash',
   createdAt: 'createdAt',
-  defaultTeamId: 'defaultTeamId'
+  defaultTeamId: 'defaultTeamId',
+  mustChangePassword: 'mustChangePassword'
 } as const
 
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
