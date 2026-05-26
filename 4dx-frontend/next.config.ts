@@ -10,6 +10,10 @@ const nextConfig: NextConfig = {
     }
 
     const destination = backendUrl.replace(/\/$/, "");
+    // Prevent accidental self-proxy loops (frontend dev server also runs on :3000).
+    if (/^https?:\/\/(localhost|127\.0\.0\.1):3000$/i.test(destination)) {
+      return [];
+    }
 
     return [
       {

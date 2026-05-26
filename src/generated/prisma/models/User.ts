@@ -31,6 +31,7 @@ export type UserMinAggregateOutputType = {
   passwordHash: string | null
   createdAt: Date | null
   defaultTeamId: string | null
+  mustChangePassword: boolean | null
 }
 
 export type UserMaxAggregateOutputType = {
@@ -40,6 +41,7 @@ export type UserMaxAggregateOutputType = {
   passwordHash: string | null
   createdAt: Date | null
   defaultTeamId: string | null
+  mustChangePassword: boolean | null
 }
 
 export type UserCountAggregateOutputType = {
@@ -49,6 +51,7 @@ export type UserCountAggregateOutputType = {
   passwordHash: number
   createdAt: number
   defaultTeamId: number
+  mustChangePassword: number
   _all: number
 }
 
@@ -60,6 +63,7 @@ export type UserMinAggregateInputType = {
   passwordHash?: true
   createdAt?: true
   defaultTeamId?: true
+  mustChangePassword?: true
 }
 
 export type UserMaxAggregateInputType = {
@@ -69,6 +73,7 @@ export type UserMaxAggregateInputType = {
   passwordHash?: true
   createdAt?: true
   defaultTeamId?: true
+  mustChangePassword?: true
 }
 
 export type UserCountAggregateInputType = {
@@ -78,6 +83,7 @@ export type UserCountAggregateInputType = {
   passwordHash?: true
   createdAt?: true
   defaultTeamId?: true
+  mustChangePassword?: true
   _all?: true
 }
 
@@ -160,6 +166,7 @@ export type UserGroupByOutputType = {
   passwordHash: string
   createdAt: Date
   defaultTeamId: string | null
+  mustChangePassword: boolean
   _count: UserCountAggregateOutputType | null
   _min: UserMinAggregateOutputType | null
   _max: UserMaxAggregateOutputType | null
@@ -190,6 +197,7 @@ export type UserWhereInput = {
   passwordHash?: Prisma.StringFilter<"User"> | string
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   defaultTeamId?: Prisma.StringNullableFilter<"User"> | string | null
+  mustChangePassword?: Prisma.BoolFilter<"User"> | boolean
   orgMemberships?: Prisma.OrgMembershipListRelationFilter
   teamMemberships?: Prisma.TeamMembershipListRelationFilter
   activityLogs?: Prisma.ActivityLogListRelationFilter
@@ -209,6 +217,7 @@ export type UserOrderByWithRelationInput = {
   passwordHash?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   defaultTeamId?: Prisma.SortOrderInput | Prisma.SortOrder
+  mustChangePassword?: Prisma.SortOrder
   orgMemberships?: Prisma.OrgMembershipOrderByRelationAggregateInput
   teamMemberships?: Prisma.TeamMembershipOrderByRelationAggregateInput
   activityLogs?: Prisma.ActivityLogOrderByRelationAggregateInput
@@ -231,6 +240,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   passwordHash?: Prisma.StringFilter<"User"> | string
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   defaultTeamId?: Prisma.StringNullableFilter<"User"> | string | null
+  mustChangePassword?: Prisma.BoolFilter<"User"> | boolean
   orgMemberships?: Prisma.OrgMembershipListRelationFilter
   teamMemberships?: Prisma.TeamMembershipListRelationFilter
   activityLogs?: Prisma.ActivityLogListRelationFilter
@@ -250,6 +260,7 @@ export type UserOrderByWithAggregationInput = {
   passwordHash?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   defaultTeamId?: Prisma.SortOrderInput | Prisma.SortOrder
+  mustChangePassword?: Prisma.SortOrder
   _count?: Prisma.UserCountOrderByAggregateInput
   _max?: Prisma.UserMaxOrderByAggregateInput
   _min?: Prisma.UserMinOrderByAggregateInput
@@ -265,6 +276,7 @@ export type UserScalarWhereWithAggregatesInput = {
   passwordHash?: Prisma.StringWithAggregatesFilter<"User"> | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
   defaultTeamId?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
+  mustChangePassword?: Prisma.BoolWithAggregatesFilter<"User"> | boolean
 }
 
 export type UserCreateInput = {
@@ -274,6 +286,7 @@ export type UserCreateInput = {
   passwordHash: string
   createdAt?: Date | string
   defaultTeamId?: string | null
+  mustChangePassword?: boolean
   orgMemberships?: Prisma.OrgMembershipCreateNestedManyWithoutUserInput
   teamMemberships?: Prisma.TeamMembershipCreateNestedManyWithoutUserInput
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutUserInput
@@ -293,6 +306,7 @@ export type UserUncheckedCreateInput = {
   passwordHash: string
   createdAt?: Date | string
   defaultTeamId?: string | null
+  mustChangePassword?: boolean
   orgMemberships?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutUserInput
   teamMemberships?: Prisma.TeamMembershipUncheckedCreateNestedManyWithoutUserInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutUserInput
@@ -312,6 +326,7 @@ export type UserUpdateInput = {
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   defaultTeamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   orgMemberships?: Prisma.OrgMembershipUpdateManyWithoutUserNestedInput
   teamMemberships?: Prisma.TeamMembershipUpdateManyWithoutUserNestedInput
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutUserNestedInput
@@ -331,6 +346,7 @@ export type UserUncheckedUpdateInput = {
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   defaultTeamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   orgMemberships?: Prisma.OrgMembershipUncheckedUpdateManyWithoutUserNestedInput
   teamMemberships?: Prisma.TeamMembershipUncheckedUpdateManyWithoutUserNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutUserNestedInput
@@ -350,6 +366,7 @@ export type UserCreateManyInput = {
   passwordHash: string
   createdAt?: Date | string
   defaultTeamId?: string | null
+  mustChangePassword?: boolean
 }
 
 export type UserUpdateManyMutationInput = {
@@ -359,6 +376,7 @@ export type UserUpdateManyMutationInput = {
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   defaultTeamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type UserUncheckedUpdateManyInput = {
@@ -368,6 +386,7 @@ export type UserUncheckedUpdateManyInput = {
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   defaultTeamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type UserCountOrderByAggregateInput = {
@@ -377,6 +396,7 @@ export type UserCountOrderByAggregateInput = {
   passwordHash?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   defaultTeamId?: Prisma.SortOrder
+  mustChangePassword?: Prisma.SortOrder
 }
 
 export type UserMaxOrderByAggregateInput = {
@@ -386,6 +406,7 @@ export type UserMaxOrderByAggregateInput = {
   passwordHash?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   defaultTeamId?: Prisma.SortOrder
+  mustChangePassword?: Prisma.SortOrder
 }
 
 export type UserMinOrderByAggregateInput = {
@@ -395,6 +416,7 @@ export type UserMinOrderByAggregateInput = {
   passwordHash?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   defaultTeamId?: Prisma.SortOrder
+  mustChangePassword?: Prisma.SortOrder
 }
 
 export type UserScalarRelationFilter = {
@@ -404,6 +426,10 @@ export type UserScalarRelationFilter = {
 
 export type NullableStringFieldUpdateOperationsInput = {
   set?: string | null
+}
+
+export type BoolFieldUpdateOperationsInput = {
+  set?: boolean
 }
 
 export type UserCreateNestedOneWithoutOrgMembershipsInput = {
@@ -553,6 +579,7 @@ export type UserCreateWithoutOrgMembershipsInput = {
   passwordHash: string
   createdAt?: Date | string
   defaultTeamId?: string | null
+  mustChangePassword?: boolean
   teamMemberships?: Prisma.TeamMembershipCreateNestedManyWithoutUserInput
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutUserInput
   weeklySessions?: Prisma.WeeklySessionCreateNestedManyWithoutUserInput
@@ -571,6 +598,7 @@ export type UserUncheckedCreateWithoutOrgMembershipsInput = {
   passwordHash: string
   createdAt?: Date | string
   defaultTeamId?: string | null
+  mustChangePassword?: boolean
   teamMemberships?: Prisma.TeamMembershipUncheckedCreateNestedManyWithoutUserInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutUserInput
   weeklySessions?: Prisma.WeeklySessionUncheckedCreateNestedManyWithoutUserInput
@@ -605,6 +633,7 @@ export type UserUpdateWithoutOrgMembershipsInput = {
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   defaultTeamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   teamMemberships?: Prisma.TeamMembershipUpdateManyWithoutUserNestedInput
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutUserNestedInput
   weeklySessions?: Prisma.WeeklySessionUpdateManyWithoutUserNestedInput
@@ -623,6 +652,7 @@ export type UserUncheckedUpdateWithoutOrgMembershipsInput = {
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   defaultTeamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   teamMemberships?: Prisma.TeamMembershipUncheckedUpdateManyWithoutUserNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutUserNestedInput
   weeklySessions?: Prisma.WeeklySessionUncheckedUpdateManyWithoutUserNestedInput
@@ -641,6 +671,7 @@ export type UserCreateWithoutInvitesInput = {
   passwordHash: string
   createdAt?: Date | string
   defaultTeamId?: string | null
+  mustChangePassword?: boolean
   orgMemberships?: Prisma.OrgMembershipCreateNestedManyWithoutUserInput
   teamMemberships?: Prisma.TeamMembershipCreateNestedManyWithoutUserInput
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutUserInput
@@ -659,6 +690,7 @@ export type UserUncheckedCreateWithoutInvitesInput = {
   passwordHash: string
   createdAt?: Date | string
   defaultTeamId?: string | null
+  mustChangePassword?: boolean
   orgMemberships?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutUserInput
   teamMemberships?: Prisma.TeamMembershipUncheckedCreateNestedManyWithoutUserInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutUserInput
@@ -693,6 +725,7 @@ export type UserUpdateWithoutInvitesInput = {
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   defaultTeamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   orgMemberships?: Prisma.OrgMembershipUpdateManyWithoutUserNestedInput
   teamMemberships?: Prisma.TeamMembershipUpdateManyWithoutUserNestedInput
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutUserNestedInput
@@ -711,6 +744,7 @@ export type UserUncheckedUpdateWithoutInvitesInput = {
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   defaultTeamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   orgMemberships?: Prisma.OrgMembershipUncheckedUpdateManyWithoutUserNestedInput
   teamMemberships?: Prisma.TeamMembershipUncheckedUpdateManyWithoutUserNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutUserNestedInput
@@ -729,6 +763,7 @@ export type UserCreateWithoutTeamMembershipsInput = {
   passwordHash: string
   createdAt?: Date | string
   defaultTeamId?: string | null
+  mustChangePassword?: boolean
   orgMemberships?: Prisma.OrgMembershipCreateNestedManyWithoutUserInput
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutUserInput
   weeklySessions?: Prisma.WeeklySessionCreateNestedManyWithoutUserInput
@@ -747,6 +782,7 @@ export type UserUncheckedCreateWithoutTeamMembershipsInput = {
   passwordHash: string
   createdAt?: Date | string
   defaultTeamId?: string | null
+  mustChangePassword?: boolean
   orgMemberships?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutUserInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutUserInput
   weeklySessions?: Prisma.WeeklySessionUncheckedCreateNestedManyWithoutUserInput
@@ -781,6 +817,7 @@ export type UserUpdateWithoutTeamMembershipsInput = {
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   defaultTeamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   orgMemberships?: Prisma.OrgMembershipUpdateManyWithoutUserNestedInput
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutUserNestedInput
   weeklySessions?: Prisma.WeeklySessionUpdateManyWithoutUserNestedInput
@@ -799,6 +836,7 @@ export type UserUncheckedUpdateWithoutTeamMembershipsInput = {
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   defaultTeamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   orgMemberships?: Prisma.OrgMembershipUncheckedUpdateManyWithoutUserNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutUserNestedInput
   weeklySessions?: Prisma.WeeklySessionUncheckedUpdateManyWithoutUserNestedInput
@@ -817,6 +855,7 @@ export type UserCreateWithoutLeadMeasuresInput = {
   passwordHash: string
   createdAt?: Date | string
   defaultTeamId?: string | null
+  mustChangePassword?: boolean
   orgMemberships?: Prisma.OrgMembershipCreateNestedManyWithoutUserInput
   teamMemberships?: Prisma.TeamMembershipCreateNestedManyWithoutUserInput
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutUserInput
@@ -835,6 +874,7 @@ export type UserUncheckedCreateWithoutLeadMeasuresInput = {
   passwordHash: string
   createdAt?: Date | string
   defaultTeamId?: string | null
+  mustChangePassword?: boolean
   orgMemberships?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutUserInput
   teamMemberships?: Prisma.TeamMembershipUncheckedCreateNestedManyWithoutUserInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutUserInput
@@ -869,6 +909,7 @@ export type UserUpdateWithoutLeadMeasuresInput = {
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   defaultTeamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   orgMemberships?: Prisma.OrgMembershipUpdateManyWithoutUserNestedInput
   teamMemberships?: Prisma.TeamMembershipUpdateManyWithoutUserNestedInput
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutUserNestedInput
@@ -887,6 +928,7 @@ export type UserUncheckedUpdateWithoutLeadMeasuresInput = {
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   defaultTeamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   orgMemberships?: Prisma.OrgMembershipUncheckedUpdateManyWithoutUserNestedInput
   teamMemberships?: Prisma.TeamMembershipUncheckedUpdateManyWithoutUserNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutUserNestedInput
@@ -905,6 +947,7 @@ export type UserCreateWithoutActivityLogsInput = {
   passwordHash: string
   createdAt?: Date | string
   defaultTeamId?: string | null
+  mustChangePassword?: boolean
   orgMemberships?: Prisma.OrgMembershipCreateNestedManyWithoutUserInput
   teamMemberships?: Prisma.TeamMembershipCreateNestedManyWithoutUserInput
   weeklySessions?: Prisma.WeeklySessionCreateNestedManyWithoutUserInput
@@ -923,6 +966,7 @@ export type UserUncheckedCreateWithoutActivityLogsInput = {
   passwordHash: string
   createdAt?: Date | string
   defaultTeamId?: string | null
+  mustChangePassword?: boolean
   orgMemberships?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutUserInput
   teamMemberships?: Prisma.TeamMembershipUncheckedCreateNestedManyWithoutUserInput
   weeklySessions?: Prisma.WeeklySessionUncheckedCreateNestedManyWithoutUserInput
@@ -957,6 +1001,7 @@ export type UserUpdateWithoutActivityLogsInput = {
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   defaultTeamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   orgMemberships?: Prisma.OrgMembershipUpdateManyWithoutUserNestedInput
   teamMemberships?: Prisma.TeamMembershipUpdateManyWithoutUserNestedInput
   weeklySessions?: Prisma.WeeklySessionUpdateManyWithoutUserNestedInput
@@ -975,6 +1020,7 @@ export type UserUncheckedUpdateWithoutActivityLogsInput = {
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   defaultTeamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   orgMemberships?: Prisma.OrgMembershipUncheckedUpdateManyWithoutUserNestedInput
   teamMemberships?: Prisma.TeamMembershipUncheckedUpdateManyWithoutUserNestedInput
   weeklySessions?: Prisma.WeeklySessionUncheckedUpdateManyWithoutUserNestedInput
@@ -993,6 +1039,7 @@ export type UserCreateWithoutWeeklySessionsInput = {
   passwordHash: string
   createdAt?: Date | string
   defaultTeamId?: string | null
+  mustChangePassword?: boolean
   orgMemberships?: Prisma.OrgMembershipCreateNestedManyWithoutUserInput
   teamMemberships?: Prisma.TeamMembershipCreateNestedManyWithoutUserInput
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutUserInput
@@ -1011,6 +1058,7 @@ export type UserUncheckedCreateWithoutWeeklySessionsInput = {
   passwordHash: string
   createdAt?: Date | string
   defaultTeamId?: string | null
+  mustChangePassword?: boolean
   orgMemberships?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutUserInput
   teamMemberships?: Prisma.TeamMembershipUncheckedCreateNestedManyWithoutUserInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutUserInput
@@ -1045,6 +1093,7 @@ export type UserUpdateWithoutWeeklySessionsInput = {
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   defaultTeamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   orgMemberships?: Prisma.OrgMembershipUpdateManyWithoutUserNestedInput
   teamMemberships?: Prisma.TeamMembershipUpdateManyWithoutUserNestedInput
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutUserNestedInput
@@ -1063,6 +1112,7 @@ export type UserUncheckedUpdateWithoutWeeklySessionsInput = {
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   defaultTeamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   orgMemberships?: Prisma.OrgMembershipUncheckedUpdateManyWithoutUserNestedInput
   teamMemberships?: Prisma.TeamMembershipUncheckedUpdateManyWithoutUserNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutUserNestedInput
@@ -1081,6 +1131,7 @@ export type UserCreateWithoutNotificationsInput = {
   passwordHash: string
   createdAt?: Date | string
   defaultTeamId?: string | null
+  mustChangePassword?: boolean
   orgMemberships?: Prisma.OrgMembershipCreateNestedManyWithoutUserInput
   teamMemberships?: Prisma.TeamMembershipCreateNestedManyWithoutUserInput
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutUserInput
@@ -1099,6 +1150,7 @@ export type UserUncheckedCreateWithoutNotificationsInput = {
   passwordHash: string
   createdAt?: Date | string
   defaultTeamId?: string | null
+  mustChangePassword?: boolean
   orgMemberships?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutUserInput
   teamMemberships?: Prisma.TeamMembershipUncheckedCreateNestedManyWithoutUserInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutUserInput
@@ -1133,6 +1185,7 @@ export type UserUpdateWithoutNotificationsInput = {
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   defaultTeamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   orgMemberships?: Prisma.OrgMembershipUpdateManyWithoutUserNestedInput
   teamMemberships?: Prisma.TeamMembershipUpdateManyWithoutUserNestedInput
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutUserNestedInput
@@ -1151,6 +1204,7 @@ export type UserUncheckedUpdateWithoutNotificationsInput = {
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   defaultTeamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   orgMemberships?: Prisma.OrgMembershipUncheckedUpdateManyWithoutUserNestedInput
   teamMemberships?: Prisma.TeamMembershipUncheckedUpdateManyWithoutUserNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutUserNestedInput
@@ -1169,6 +1223,7 @@ export type UserCreateWithoutAuditLogsInput = {
   passwordHash: string
   createdAt?: Date | string
   defaultTeamId?: string | null
+  mustChangePassword?: boolean
   orgMemberships?: Prisma.OrgMembershipCreateNestedManyWithoutUserInput
   teamMemberships?: Prisma.TeamMembershipCreateNestedManyWithoutUserInput
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutUserInput
@@ -1187,6 +1242,7 @@ export type UserUncheckedCreateWithoutAuditLogsInput = {
   passwordHash: string
   createdAt?: Date | string
   defaultTeamId?: string | null
+  mustChangePassword?: boolean
   orgMemberships?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutUserInput
   teamMemberships?: Prisma.TeamMembershipUncheckedCreateNestedManyWithoutUserInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutUserInput
@@ -1221,6 +1277,7 @@ export type UserUpdateWithoutAuditLogsInput = {
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   defaultTeamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   orgMemberships?: Prisma.OrgMembershipUpdateManyWithoutUserNestedInput
   teamMemberships?: Prisma.TeamMembershipUpdateManyWithoutUserNestedInput
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutUserNestedInput
@@ -1239,6 +1296,7 @@ export type UserUncheckedUpdateWithoutAuditLogsInput = {
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   defaultTeamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   orgMemberships?: Prisma.OrgMembershipUncheckedUpdateManyWithoutUserNestedInput
   teamMemberships?: Prisma.TeamMembershipUncheckedUpdateManyWithoutUserNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutUserNestedInput
@@ -1257,6 +1315,7 @@ export type UserCreateWithoutCreatedInvitesInput = {
   passwordHash: string
   createdAt?: Date | string
   defaultTeamId?: string | null
+  mustChangePassword?: boolean
   orgMemberships?: Prisma.OrgMembershipCreateNestedManyWithoutUserInput
   teamMemberships?: Prisma.TeamMembershipCreateNestedManyWithoutUserInput
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutUserInput
@@ -1275,6 +1334,7 @@ export type UserUncheckedCreateWithoutCreatedInvitesInput = {
   passwordHash: string
   createdAt?: Date | string
   defaultTeamId?: string | null
+  mustChangePassword?: boolean
   orgMemberships?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutUserInput
   teamMemberships?: Prisma.TeamMembershipUncheckedCreateNestedManyWithoutUserInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutUserInput
@@ -1309,6 +1369,7 @@ export type UserUpdateWithoutCreatedInvitesInput = {
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   defaultTeamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   orgMemberships?: Prisma.OrgMembershipUpdateManyWithoutUserNestedInput
   teamMemberships?: Prisma.TeamMembershipUpdateManyWithoutUserNestedInput
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutUserNestedInput
@@ -1327,6 +1388,7 @@ export type UserUncheckedUpdateWithoutCreatedInvitesInput = {
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   defaultTeamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   orgMemberships?: Prisma.OrgMembershipUncheckedUpdateManyWithoutUserNestedInput
   teamMemberships?: Prisma.TeamMembershipUncheckedUpdateManyWithoutUserNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutUserNestedInput
@@ -1345,6 +1407,7 @@ export type UserCreateWithoutPasswordResetTokensInput = {
   passwordHash: string
   createdAt?: Date | string
   defaultTeamId?: string | null
+  mustChangePassword?: boolean
   orgMemberships?: Prisma.OrgMembershipCreateNestedManyWithoutUserInput
   teamMemberships?: Prisma.TeamMembershipCreateNestedManyWithoutUserInput
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutUserInput
@@ -1363,6 +1426,7 @@ export type UserUncheckedCreateWithoutPasswordResetTokensInput = {
   passwordHash: string
   createdAt?: Date | string
   defaultTeamId?: string | null
+  mustChangePassword?: boolean
   orgMemberships?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutUserInput
   teamMemberships?: Prisma.TeamMembershipUncheckedCreateNestedManyWithoutUserInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutUserInput
@@ -1397,6 +1461,7 @@ export type UserUpdateWithoutPasswordResetTokensInput = {
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   defaultTeamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   orgMemberships?: Prisma.OrgMembershipUpdateManyWithoutUserNestedInput
   teamMemberships?: Prisma.TeamMembershipUpdateManyWithoutUserNestedInput
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutUserNestedInput
@@ -1415,6 +1480,7 @@ export type UserUncheckedUpdateWithoutPasswordResetTokensInput = {
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   defaultTeamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   orgMemberships?: Prisma.OrgMembershipUncheckedUpdateManyWithoutUserNestedInput
   teamMemberships?: Prisma.TeamMembershipUncheckedUpdateManyWithoutUserNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutUserNestedInput
@@ -1545,6 +1611,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   passwordHash?: boolean
   createdAt?: boolean
   defaultTeamId?: boolean
+  mustChangePassword?: boolean
   orgMemberships?: boolean | Prisma.User$orgMembershipsArgs<ExtArgs>
   teamMemberships?: boolean | Prisma.User$teamMembershipsArgs<ExtArgs>
   activityLogs?: boolean | Prisma.User$activityLogsArgs<ExtArgs>
@@ -1565,6 +1632,7 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   passwordHash?: boolean
   createdAt?: boolean
   defaultTeamId?: boolean
+  mustChangePassword?: boolean
 }, ExtArgs["result"]["user"]>
 
 export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1574,6 +1642,7 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   passwordHash?: boolean
   createdAt?: boolean
   defaultTeamId?: boolean
+  mustChangePassword?: boolean
 }, ExtArgs["result"]["user"]>
 
 export type UserSelectScalar = {
@@ -1583,9 +1652,10 @@ export type UserSelectScalar = {
   passwordHash?: boolean
   createdAt?: boolean
   defaultTeamId?: boolean
+  mustChangePassword?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "name" | "passwordHash" | "createdAt" | "defaultTeamId", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "name" | "passwordHash" | "createdAt" | "defaultTeamId" | "mustChangePassword", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   orgMemberships?: boolean | Prisma.User$orgMembershipsArgs<ExtArgs>
   teamMemberships?: boolean | Prisma.User$teamMembershipsArgs<ExtArgs>
@@ -1623,6 +1693,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     passwordHash: string
     createdAt: Date
     defaultTeamId: string | null
+    mustChangePassword: boolean
   }, ExtArgs["result"]["user"]>
   composites: {}
 }
@@ -2062,6 +2133,7 @@ export interface UserFieldRefs {
   readonly passwordHash: Prisma.FieldRef<"User", 'String'>
   readonly createdAt: Prisma.FieldRef<"User", 'DateTime'>
   readonly defaultTeamId: Prisma.FieldRef<"User", 'String'>
+  readonly mustChangePassword: Prisma.FieldRef<"User", 'Boolean'>
 }
     
 

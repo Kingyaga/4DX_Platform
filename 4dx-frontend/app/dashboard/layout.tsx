@@ -13,6 +13,7 @@ import {
   useNotifications,
   useMarkNotificationRead,
   useMarkAllNotificationsRead,
+  useChangePassword,
 } from "@/lib/hooks";
 import { useUserStore } from "@/lib/stores/user-store";
 import { useTeamStore } from "@/lib/stores/team-store";
@@ -43,6 +44,8 @@ function getNotificationMessage(notif: any): string {
       return `You were removed from: ${p?.leadMeasureName || "a lead measure"}.`;
     case "WIG_AT_RISK":
       return `WIG at risk: ${p?.wigTitle || "your WIG"} is behind schedule.`;
+    case "WIG_CREATED":
+      return `New WIG created: "${p?.title || "a WIG"}" on team ${p?.teamName || ""}.`.trim();
     default:
       return notif.type;
   }
@@ -67,7 +70,6 @@ const allNavItems: NavItem[] = [
   { icon: "admin_panel_settings", label: "Dashboard", href: "/dashboard/admin", roles: ["ADMIN"] },
   { icon: "groups", label: "Teams", href: "/dashboard/admin/teams", roles: ["ADMIN"] },
   { icon: "people", label: "Users", href: "/dashboard/admin/users", roles: ["ADMIN"] },
-  { icon: "mail", label: "Invites", href: "/dashboard/admin/invites", roles: ["ADMIN"] },
   { icon: "insights", label: "Org Activity", href: "/dashboard/admin/activity", roles: ["ADMIN"] },
 ];
 
@@ -81,7 +83,7 @@ export default function DashboardLayout({
   const { status } = useSession();
 
   // Fetch current user profile with role from backend
-  const { isLoading: userLoading } = useCurrentUser();
+  const { data: meData, isLoading: userLoading, refetch: refetchMe } = useCurrentUser();
 
   const { user, userRole, clearUser, orgSlug } = useUserStore();
   const setUserRole = useUserStore((state) => state.setUserRole);
@@ -89,6 +91,36 @@ export default function DashboardLayout({
   const { teams, isLoading: teamsLoading } = useMyTeams(orgSlug);
   const { pendingRequests } = usePendingActivityRequests(currentTeamSlug);
   const pendingRequestCount = pendingRequests.length;
+
+  // Force password change modal
+  const mustChangePassword = (meData as any)?.mustChangePassword === true;
+  const [forceNewPassword, setForceNewPassword] = useState("");
+  const [forceConfirmPassword, setForceConfirmPassword] = useState("");
+  const [forcePasswordError, setForcePasswordError] = useState("");
+  const [forceCurrentPassword, setForceCurrentPassword] = useState("");
+  const { changePassword, isLoading: isChangingForcePassword } = useChangePassword();
+
+  const handleForcePasswordChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setForcePasswordError("");
+    if (forceNewPassword.length < 8) {
+      setForcePasswordError("Password must be at least 8 characters.");
+      return;
+    }
+    if (forceNewPassword !== forceConfirmPassword) {
+      setForcePasswordError("Passwords do not match.");
+      return;
+    }
+    try {
+      await changePassword({ currentPassword: forceCurrentPassword, newPassword: forceNewPassword });
+      await refetchMe();
+      setForceNewPassword("");
+      setForceConfirmPassword("");
+      setForceCurrentPassword("");
+    } catch (err: any) {
+      setForcePasswordError(err?.message || "Failed to update password.");
+    }
+  };
 
   // Notification bell
   const [notifOpen, setNotifOpen] = useState(false);
@@ -230,6 +262,73 @@ export default function DashboardLayout({
           cursor: pointer;
         }
       `}</style>
+
+      {/* Force password change modal */}
+      {mustChangePassword && (
+        <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.6)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: "24px" }}>
+          <div style={{ backgroundColor: "#ffffff", borderRadius: "12px", padding: "40px", maxWidth: "440px", width: "100%", boxShadow: "0 20px 60px rgba(0,0,0,0.3)" }}>
+            <div style={{ marginBottom: "24px" }}>
+              <h2 style={{ fontSize: "22px", fontWeight: 700, color: "#18181b", margin: "0 0 8px 0" }}>Set your password</h2>
+              <p style={{ fontSize: "14px", color: "#71717a", margin: 0, lineHeight: "1.5" }}>
+                Your account was created with a temporary password. Please set a new password before continuing.
+              </p>
+            </div>
+
+            <form onSubmit={handleForcePasswordChange} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+              <label style={{ display: "flex", flexDirection: "column", gap: "6px", fontSize: "13px", fontWeight: 600, color: "#71717a", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                Temporary Password
+                <input
+                  type="password"
+                  value={forceCurrentPassword}
+                  onChange={(e) => setForceCurrentPassword(e.target.value)}
+                  placeholder="Enter the password you received"
+                  required
+                  style={{ padding: "10px 12px", border: "1px solid #d4d4d8", borderRadius: "6px", fontSize: "14px", color: "#18181b", fontWeight: 400, textTransform: "none", letterSpacing: "normal" }}
+                />
+              </label>
+
+              <label style={{ display: "flex", flexDirection: "column", gap: "6px", fontSize: "13px", fontWeight: 600, color: "#71717a", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                New Password
+                <input
+                  type="password"
+                  value={forceNewPassword}
+                  onChange={(e) => setForceNewPassword(e.target.value)}
+                  placeholder="Minimum 8 characters"
+                  required
+                  style={{ padding: "10px 12px", border: "1px solid #d4d4d8", borderRadius: "6px", fontSize: "14px", color: "#18181b", fontWeight: 400, textTransform: "none", letterSpacing: "normal" }}
+                />
+              </label>
+
+              <label style={{ display: "flex", flexDirection: "column", gap: "6px", fontSize: "13px", fontWeight: 600, color: "#71717a", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                Confirm New Password
+                <input
+                  type="password"
+                  value={forceConfirmPassword}
+                  onChange={(e) => setForceConfirmPassword(e.target.value)}
+                  placeholder="Repeat your new password"
+                  required
+                  style={{ padding: "10px 12px", border: "1px solid #d4d4d8", borderRadius: "6px", fontSize: "14px", color: "#18181b", fontWeight: 400, textTransform: "none", letterSpacing: "normal" }}
+                />
+              </label>
+
+              {forcePasswordError && (
+                <div style={{ padding: "10px 14px", backgroundColor: "#fef2f2", border: "1px solid #fecaca", borderRadius: "6px", fontSize: "13px", color: "#dc2626" }}>
+                  {forcePasswordError}
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={isChangingForcePassword}
+                style={{ padding: "12px", backgroundColor: isChangingForcePassword ? "#a1a1aa" : "#18181b", color: "#ffffff", border: "none", borderRadius: "6px", fontSize: "14px", fontWeight: 700, cursor: isChangingForcePassword ? "not-allowed" : "pointer", marginTop: "8px" }}
+              >
+                {isChangingForcePassword ? "Updating…" : "Set New Password & Continue"}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
       {/* Sidebar */}
       <nav
         style={{

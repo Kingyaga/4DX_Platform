@@ -49,6 +49,7 @@ export default function TeamLeadRequestsPage() {
   };
 
   const handleDecline = async (requestId: string) => {
+    if (!window.confirm("Decline this activity request? The member will be notified.")) return;
     setProcessingRequestId(requestId);
     setProcessingRequestAction("decline");
     setRequestStatusMessage(null);
