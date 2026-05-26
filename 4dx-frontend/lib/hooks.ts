@@ -243,6 +243,60 @@ export function useTeamSessions(teamSlug: string | null, weekStarting?: string) 
   };
 }
 
+export function useTeamWeeklySession(teamSlug: string | null, weekStarting?: string) {
+  const query = (trpc as any).sessions.getTeamWeeklySession.useQuery(
+    { teamSlug: teamSlug || "", weekStarting },
+    { enabled: !!teamSlug },
+  );
+
+  return {
+    session: query.data || null,
+    isLoading: query.isLoading,
+    error: query.error ? parseTRPCError(query.error) : null,
+    refetch: query.refetch,
+  };
+}
+
+export function useCreateManualSession() {
+  const mutation = (trpc as any).sessions.createManual.useMutation();
+
+  return {
+    createSession: mutation.mutateAsync,
+    isLoading: mutation.isPending,
+    error: mutation.error ? parseTRPCError(mutation.error) : null,
+  };
+}
+
+export function useUpdateTeamSession() {
+  const mutation = (trpc as any).sessions.updateTeamSession.useMutation();
+
+  return {
+    updateSession: mutation.mutateAsync,
+    isLoading: mutation.isPending,
+    error: mutation.error ? parseTRPCError(mutation.error) : null,
+  };
+}
+
+export function useAddTeamCommitment() {
+  const mutation = (trpc as any).sessions.addTeamCommitment.useMutation();
+
+  return {
+    addCommitment: mutation.mutateAsync,
+    isLoading: mutation.isPending,
+    error: mutation.error ? parseTRPCError(mutation.error) : null,
+  };
+}
+
+export function useAddSessionBlocker() {
+  const mutation = (trpc as any).sessions.addBlocker.useMutation();
+
+  return {
+    addBlocker: mutation.mutateAsync,
+    isLoading: mutation.isPending,
+    error: mutation.error ? parseTRPCError(mutation.error) : null,
+  };
+}
+
 /**
  * Fetch a single session by ID
  */

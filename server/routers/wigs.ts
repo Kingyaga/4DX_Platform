@@ -10,6 +10,7 @@ const wigValueSchema = z
   .number()
   .finite()
   .nonnegative("WIG current and target values cannot be negative.");
+const wigTrackingTypeSchema = z.enum(["NUMERIC", "MILESTONE", "COMPLETION", "HYBRID", "CUSTOM"]);
 
 export const wigsRouter = router({
   create: protectedProcedure
@@ -17,7 +18,7 @@ export const wigsRouter = router({
       z.object({
         teamSlug: z.string(),
         title: z.string().min(3).max(200),
-        trackingType: z.enum(["NUMERIC", "MILESTONE"]).default("NUMERIC"),
+        trackingType: wigTrackingTypeSchema.default("NUMERIC"),
         fromValue: wigValueSchema.optional(),
         toValue: wigValueSchema.optional(),
         unit: z.string().optional(),

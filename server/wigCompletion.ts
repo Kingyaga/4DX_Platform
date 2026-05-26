@@ -5,6 +5,7 @@ export type LeadMeasureCompletionInput = {
   targetValue?: number | null;
   activityLogs?: Array<{
     value?: number | null;
+    valueJson?: unknown;
     progressStatus?: string | null;
     loggedForDate?: Date | string | null;
   }>;
@@ -31,7 +32,7 @@ function getLatestProgressStatus(leadMeasure: LeadMeasureCompletionInput) {
 }
 
 export function isLeadMeasureComplete(leadMeasure: LeadMeasureCompletionInput) {
-  if (leadMeasure.trackingType === "MILESTONE") {
+  if (leadMeasure.trackingType && leadMeasure.trackingType !== "NUMERIC" && leadMeasure.trackingType !== "PERCENTAGE" && leadMeasure.trackingType !== "DURATION") {
     return getLatestProgressStatus(leadMeasure) === "DONE";
   }
 
@@ -39,7 +40,7 @@ export function isLeadMeasureComplete(leadMeasure: LeadMeasureCompletionInput) {
 }
 
 export function getLeadMeasureCompletionPercent(leadMeasure: LeadMeasureCompletionInput) {
-  if (leadMeasure.trackingType === "MILESTONE") {
+  if (leadMeasure.trackingType && leadMeasure.trackingType !== "NUMERIC" && leadMeasure.trackingType !== "PERCENTAGE" && leadMeasure.trackingType !== "DURATION") {
     const status = getLatestProgressStatus(leadMeasure);
     if (status === "DONE") return 100;
     if (status === "IN_PROGRESS") return 50;
@@ -74,7 +75,7 @@ export function getLastCompletedLeadMeasure(leadMeasures: LeadMeasureCompletionI
         })
         .find((log) => {
           total += log.value ?? 0;
-          if (leadMeasure.trackingType === "MILESTONE") {
+          if (leadMeasure.trackingType && leadMeasure.trackingType !== "NUMERIC" && leadMeasure.trackingType !== "PERCENTAGE" && leadMeasure.trackingType !== "DURATION") {
             return log.progressStatus === "DONE";
           }
           return (leadMeasure.targetValue ?? 0) > 0 && total >= (leadMeasure.targetValue ?? 0);

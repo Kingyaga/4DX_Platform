@@ -17,6 +17,8 @@ export async function POST(req: Request) {
     where: {
       weekStarting: monday,
       status: { in: ["PENDING", "IN_PROGRESS"] },
+      userId: { not: null },
+      wigId: { not: null },
     },
     include: {
       user: { select: { id: true, name: true, email: true } },
@@ -41,6 +43,7 @@ export async function POST(req: Request) {
   const notificationRows: Array<{ userId: string; type: string; payloadJson: object }> = [];
 
   for (const session of overdueSessions) {
+    if (!session.userId || !session.user || !session.wig) continue;
     if (!notifiedUserIds.has(session.userId)) {
       notifiedUserIds.add(session.userId);
       notificationRows.push({
@@ -60,6 +63,7 @@ export async function POST(req: Request) {
 
   // Emails — fire-and-forget, don't block response
   overdueSessions.forEach((session) => {
+    if (!session.user || !session.wig) return;
     sendSessionOverdueEmail({
       to: session.user.email,
       name: session.user.name || session.user.email,

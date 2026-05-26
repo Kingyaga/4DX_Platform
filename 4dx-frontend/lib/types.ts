@@ -120,7 +120,18 @@ export interface MyTeamsResponse extends TeamWithoutWigs {
 // ─── WIG (WILDLY IMPORTANT GOAL) ───────────────────────────────────────────
 
 export type WIGStatus = "DRAFT" | "ACTIVE" | "ACHIEVED" | "MISSED" | "ABANDONED";
-export type TrackingType = "NUMERIC" | "MILESTONE";
+export type TrackingType =
+  | "NUMERIC"
+  | "MILESTONE"
+  | "BOOLEAN"
+  | "TIME"
+  | "TEXT"
+  | "PERCENTAGE"
+  | "DURATION"
+  | "CHECKLIST"
+  | "COMPLETION"
+  | "HYBRID"
+  | "CUSTOM";
 export type ActivityProgressStatus = "NOT_STARTED" | "IN_PROGRESS" | "BLOCKED" | "DONE";
 
 export interface WIG {
@@ -178,7 +189,9 @@ export interface LeadMeasureOwner {
 
 export interface ActivityLogEntry {
   id: string;
+  trackingType?: TrackingType;
   value: number | null;
+  valueJson?: unknown;
   progressStatus: ActivityProgressStatus | null;
   loggedForDate: Date;
   note: string | null;
@@ -234,7 +247,9 @@ export interface UpdateLeadMeasureInput {
 
 export interface ActivityLog {
   id: string;
+  trackingType?: TrackingType;
   value: number | null;
+  valueJson?: unknown;
   progressStatus: ActivityProgressStatus | null;
   loggedForDate: Date;
   note: string | null;
@@ -252,6 +267,7 @@ export interface ActivityLog {
 export interface LogActivityInput {
   leadMeasureId: string;
   value?: number;
+  valueJson?: unknown;
   progressStatus?: ActivityProgressStatus;
   loggedForDate: string; // ISO string
   note?: string;
@@ -260,6 +276,7 @@ export interface LogActivityInput {
 export interface EditActivityInput {
   logId: string;
   value?: number;
+  valueJson?: unknown;
   progressStatus?: ActivityProgressStatus;
   note?: string;
 }
@@ -283,16 +300,37 @@ export interface Commitment {
 
 export interface WeeklySession {
   id: string;
+  title?: string | null;
   weekStarting: Date;
+  weekEnding?: Date | null;
   status: SessionStatus;
+  snapshotJson?: any;
+  notes?: string | null;
+  confidenceScore?: number | null;
   accountDoneAt: Date | null;
   reviewDoneAt: Date | null;
   commitDoneAt: Date | null;
   createdAt: Date;
-  wigId: string;
-  userId: string;
+  wigId?: string | null;
+  userId?: string | null;
+  teamId?: string | null;
+  facilitatorUserId?: string | null;
   commitments: Commitment[];
-  wig: WIG;
+  wig?: WIG | null;
+  blockers?: Array<{
+    id: string;
+    title: string;
+    details: string | null;
+    status: "OPEN" | "RESOLVED";
+    createdAt: Date;
+  }>;
+  timeline?: Array<{
+    id: string;
+    type: string;
+    payloadJson?: any;
+    createdAt: Date;
+    actor?: { id: string; name: string | null; email: string };
+  }>;
 }
 
 export interface CompleteAccountInput {

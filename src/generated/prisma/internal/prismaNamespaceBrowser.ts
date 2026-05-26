@@ -62,6 +62,8 @@ export const ModelName = {
   LeadMeasureOwner: 'LeadMeasureOwner',
   ActivityLog: 'ActivityLog',
   WeeklySession: 'WeeklySession',
+  SessionBlocker: 'SessionBlocker',
+  SessionTimelineEvent: 'SessionTimelineEvent',
   Commitment: 'Commitment',
   Notification: 'Notification',
   AuditLog: 'AuditLog',
@@ -206,7 +208,9 @@ export type LeadMeasureOwnerScalarFieldEnum = (typeof LeadMeasureOwnerScalarFiel
 
 export const ActivityLogScalarFieldEnum = {
   id: 'id',
+  trackingType: 'trackingType',
   value: 'value',
+  valueJson: 'valueJson',
   progressStatus: 'progressStatus',
   loggedForDate: 'loggedForDate',
   note: 'note',
@@ -222,17 +226,52 @@ export type ActivityLogScalarFieldEnum = (typeof ActivityLogScalarFieldEnum)[key
 
 export const WeeklySessionScalarFieldEnum = {
   id: 'id',
+  title: 'title',
   weekStarting: 'weekStarting',
+  weekEnding: 'weekEnding',
   status: 'status',
+  snapshotJson: 'snapshotJson',
+  notes: 'notes',
+  confidenceScore: 'confidenceScore',
   accountDoneAt: 'accountDoneAt',
   reviewDoneAt: 'reviewDoneAt',
   commitDoneAt: 'commitDoneAt',
+  startedAt: 'startedAt',
+  completedAt: 'completedAt',
   createdAt: 'createdAt',
   wigId: 'wigId',
-  userId: 'userId'
+  userId: 'userId',
+  teamId: 'teamId',
+  facilitatorUserId: 'facilitatorUserId'
 } as const
 
 export type WeeklySessionScalarFieldEnum = (typeof WeeklySessionScalarFieldEnum)[keyof typeof WeeklySessionScalarFieldEnum]
+
+
+export const SessionBlockerScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  details: 'details',
+  status: 'status',
+  createdAt: 'createdAt',
+  resolvedAt: 'resolvedAt',
+  weeklySessionId: 'weeklySessionId',
+  createdByUserId: 'createdByUserId'
+} as const
+
+export type SessionBlockerScalarFieldEnum = (typeof SessionBlockerScalarFieldEnum)[keyof typeof SessionBlockerScalarFieldEnum]
+
+
+export const SessionTimelineEventScalarFieldEnum = {
+  id: 'id',
+  type: 'type',
+  payloadJson: 'payloadJson',
+  createdAt: 'createdAt',
+  weeklySessionId: 'weeklySessionId',
+  actorUserId: 'actorUserId'
+} as const
+
+export type SessionTimelineEventScalarFieldEnum = (typeof SessionTimelineEventScalarFieldEnum)[keyof typeof SessionTimelineEventScalarFieldEnum]
 
 
 export const CommitmentScalarFieldEnum = {
@@ -242,6 +281,7 @@ export const CommitmentScalarFieldEnum = {
   notDoneReason: 'notDoneReason',
   reflection: 'reflection',
   resolvedAt: 'resolvedAt',
+  createdAt: 'createdAt',
   weeklySessionId: 'weeklySessionId',
   linkedLeadMeasureId: 'linkedLeadMeasureId'
 } as const
@@ -325,19 +365,19 @@ export const SortOrder = {
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
 
 
-export const JsonNullValueInput = {
-  JsonNull: JsonNull
-} as const
-
-export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
-
-
 export const NullableJsonNullValueInput = {
   DbNull: DbNull,
   JsonNull: JsonNull
 } as const
 
 export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
+
+
+export const JsonNullValueInput = {
+  JsonNull: JsonNull
+} as const
+
+export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
 
 export const QueryMode = {

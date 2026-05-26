@@ -31,6 +31,7 @@ export type CommitmentMinAggregateOutputType = {
   notDoneReason: $Enums.NotDoneReason | null
   reflection: string | null
   resolvedAt: Date | null
+  createdAt: Date | null
   weeklySessionId: string | null
   linkedLeadMeasureId: string | null
 }
@@ -42,6 +43,7 @@ export type CommitmentMaxAggregateOutputType = {
   notDoneReason: $Enums.NotDoneReason | null
   reflection: string | null
   resolvedAt: Date | null
+  createdAt: Date | null
   weeklySessionId: string | null
   linkedLeadMeasureId: string | null
 }
@@ -53,6 +55,7 @@ export type CommitmentCountAggregateOutputType = {
   notDoneReason: number
   reflection: number
   resolvedAt: number
+  createdAt: number
   weeklySessionId: number
   linkedLeadMeasureId: number
   _all: number
@@ -66,6 +69,7 @@ export type CommitmentMinAggregateInputType = {
   notDoneReason?: true
   reflection?: true
   resolvedAt?: true
+  createdAt?: true
   weeklySessionId?: true
   linkedLeadMeasureId?: true
 }
@@ -77,6 +81,7 @@ export type CommitmentMaxAggregateInputType = {
   notDoneReason?: true
   reflection?: true
   resolvedAt?: true
+  createdAt?: true
   weeklySessionId?: true
   linkedLeadMeasureId?: true
 }
@@ -88,6 +93,7 @@ export type CommitmentCountAggregateInputType = {
   notDoneReason?: true
   reflection?: true
   resolvedAt?: true
+  createdAt?: true
   weeklySessionId?: true
   linkedLeadMeasureId?: true
   _all?: true
@@ -172,6 +178,7 @@ export type CommitmentGroupByOutputType = {
   notDoneReason: $Enums.NotDoneReason | null
   reflection: string | null
   resolvedAt: Date | null
+  createdAt: Date
   weeklySessionId: string
   linkedLeadMeasureId: string | null
   _count: CommitmentCountAggregateOutputType | null
@@ -204,6 +211,7 @@ export type CommitmentWhereInput = {
   notDoneReason?: Prisma.EnumNotDoneReasonNullableFilter<"Commitment"> | $Enums.NotDoneReason | null
   reflection?: Prisma.StringNullableFilter<"Commitment"> | string | null
   resolvedAt?: Prisma.DateTimeNullableFilter<"Commitment"> | Date | string | null
+  createdAt?: Prisma.DateTimeFilter<"Commitment"> | Date | string
   weeklySessionId?: Prisma.StringFilter<"Commitment"> | string
   linkedLeadMeasureId?: Prisma.StringNullableFilter<"Commitment"> | string | null
   weeklySession?: Prisma.XOR<Prisma.WeeklySessionScalarRelationFilter, Prisma.WeeklySessionWhereInput>
@@ -217,6 +225,7 @@ export type CommitmentOrderByWithRelationInput = {
   notDoneReason?: Prisma.SortOrderInput | Prisma.SortOrder
   reflection?: Prisma.SortOrderInput | Prisma.SortOrder
   resolvedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
   weeklySessionId?: Prisma.SortOrder
   linkedLeadMeasureId?: Prisma.SortOrderInput | Prisma.SortOrder
   weeklySession?: Prisma.WeeklySessionOrderByWithRelationInput
@@ -233,6 +242,7 @@ export type CommitmentWhereUniqueInput = Prisma.AtLeast<{
   notDoneReason?: Prisma.EnumNotDoneReasonNullableFilter<"Commitment"> | $Enums.NotDoneReason | null
   reflection?: Prisma.StringNullableFilter<"Commitment"> | string | null
   resolvedAt?: Prisma.DateTimeNullableFilter<"Commitment"> | Date | string | null
+  createdAt?: Prisma.DateTimeFilter<"Commitment"> | Date | string
   weeklySessionId?: Prisma.StringFilter<"Commitment"> | string
   linkedLeadMeasureId?: Prisma.StringNullableFilter<"Commitment"> | string | null
   weeklySession?: Prisma.XOR<Prisma.WeeklySessionScalarRelationFilter, Prisma.WeeklySessionWhereInput>
@@ -246,6 +256,7 @@ export type CommitmentOrderByWithAggregationInput = {
   notDoneReason?: Prisma.SortOrderInput | Prisma.SortOrder
   reflection?: Prisma.SortOrderInput | Prisma.SortOrder
   resolvedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
   weeklySessionId?: Prisma.SortOrder
   linkedLeadMeasureId?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.CommitmentCountOrderByAggregateInput
@@ -263,6 +274,7 @@ export type CommitmentScalarWhereWithAggregatesInput = {
   notDoneReason?: Prisma.EnumNotDoneReasonNullableWithAggregatesFilter<"Commitment"> | $Enums.NotDoneReason | null
   reflection?: Prisma.StringNullableWithAggregatesFilter<"Commitment"> | string | null
   resolvedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Commitment"> | Date | string | null
+  createdAt?: Prisma.DateTimeWithAggregatesFilter<"Commitment"> | Date | string
   weeklySessionId?: Prisma.StringWithAggregatesFilter<"Commitment"> | string
   linkedLeadMeasureId?: Prisma.StringNullableWithAggregatesFilter<"Commitment"> | string | null
 }
@@ -274,6 +286,7 @@ export type CommitmentCreateInput = {
   notDoneReason?: $Enums.NotDoneReason | null
   reflection?: string | null
   resolvedAt?: Date | string | null
+  createdAt?: Date | string
   weeklySession: Prisma.WeeklySessionCreateNestedOneWithoutCommitmentsInput
   linkedLeadMeasure?: Prisma.LeadMeasureCreateNestedOneWithoutCommitmentsInput
 }
@@ -285,6 +298,7 @@ export type CommitmentUncheckedCreateInput = {
   notDoneReason?: $Enums.NotDoneReason | null
   reflection?: string | null
   resolvedAt?: Date | string | null
+  createdAt?: Date | string
   weeklySessionId: string
   linkedLeadMeasureId?: string | null
 }
@@ -296,6 +310,7 @@ export type CommitmentUpdateInput = {
   notDoneReason?: Prisma.NullableEnumNotDoneReasonFieldUpdateOperationsInput | $Enums.NotDoneReason | null
   reflection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   weeklySession?: Prisma.WeeklySessionUpdateOneRequiredWithoutCommitmentsNestedInput
   linkedLeadMeasure?: Prisma.LeadMeasureUpdateOneWithoutCommitmentsNestedInput
 }
@@ -307,6 +322,7 @@ export type CommitmentUncheckedUpdateInput = {
   notDoneReason?: Prisma.NullableEnumNotDoneReasonFieldUpdateOperationsInput | $Enums.NotDoneReason | null
   reflection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   weeklySessionId?: Prisma.StringFieldUpdateOperationsInput | string
   linkedLeadMeasureId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
@@ -318,6 +334,7 @@ export type CommitmentCreateManyInput = {
   notDoneReason?: $Enums.NotDoneReason | null
   reflection?: string | null
   resolvedAt?: Date | string | null
+  createdAt?: Date | string
   weeklySessionId: string
   linkedLeadMeasureId?: string | null
 }
@@ -329,6 +346,7 @@ export type CommitmentUpdateManyMutationInput = {
   notDoneReason?: Prisma.NullableEnumNotDoneReasonFieldUpdateOperationsInput | $Enums.NotDoneReason | null
   reflection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type CommitmentUncheckedUpdateManyInput = {
@@ -338,6 +356,7 @@ export type CommitmentUncheckedUpdateManyInput = {
   notDoneReason?: Prisma.NullableEnumNotDoneReasonFieldUpdateOperationsInput | $Enums.NotDoneReason | null
   reflection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   weeklySessionId?: Prisma.StringFieldUpdateOperationsInput | string
   linkedLeadMeasureId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
@@ -359,6 +378,7 @@ export type CommitmentCountOrderByAggregateInput = {
   notDoneReason?: Prisma.SortOrder
   reflection?: Prisma.SortOrder
   resolvedAt?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
   weeklySessionId?: Prisma.SortOrder
   linkedLeadMeasureId?: Prisma.SortOrder
 }
@@ -370,6 +390,7 @@ export type CommitmentMaxOrderByAggregateInput = {
   notDoneReason?: Prisma.SortOrder
   reflection?: Prisma.SortOrder
   resolvedAt?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
   weeklySessionId?: Prisma.SortOrder
   linkedLeadMeasureId?: Prisma.SortOrder
 }
@@ -381,6 +402,7 @@ export type CommitmentMinOrderByAggregateInput = {
   notDoneReason?: Prisma.SortOrder
   reflection?: Prisma.SortOrder
   resolvedAt?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
   weeklySessionId?: Prisma.SortOrder
   linkedLeadMeasureId?: Prisma.SortOrder
 }
@@ -484,6 +506,7 @@ export type CommitmentCreateWithoutLinkedLeadMeasureInput = {
   notDoneReason?: $Enums.NotDoneReason | null
   reflection?: string | null
   resolvedAt?: Date | string | null
+  createdAt?: Date | string
   weeklySession: Prisma.WeeklySessionCreateNestedOneWithoutCommitmentsInput
 }
 
@@ -494,6 +517,7 @@ export type CommitmentUncheckedCreateWithoutLinkedLeadMeasureInput = {
   notDoneReason?: $Enums.NotDoneReason | null
   reflection?: string | null
   resolvedAt?: Date | string | null
+  createdAt?: Date | string
   weeklySessionId: string
 }
 
@@ -533,6 +557,7 @@ export type CommitmentScalarWhereInput = {
   notDoneReason?: Prisma.EnumNotDoneReasonNullableFilter<"Commitment"> | $Enums.NotDoneReason | null
   reflection?: Prisma.StringNullableFilter<"Commitment"> | string | null
   resolvedAt?: Prisma.DateTimeNullableFilter<"Commitment"> | Date | string | null
+  createdAt?: Prisma.DateTimeFilter<"Commitment"> | Date | string
   weeklySessionId?: Prisma.StringFilter<"Commitment"> | string
   linkedLeadMeasureId?: Prisma.StringNullableFilter<"Commitment"> | string | null
 }
@@ -544,6 +569,7 @@ export type CommitmentCreateWithoutWeeklySessionInput = {
   notDoneReason?: $Enums.NotDoneReason | null
   reflection?: string | null
   resolvedAt?: Date | string | null
+  createdAt?: Date | string
   linkedLeadMeasure?: Prisma.LeadMeasureCreateNestedOneWithoutCommitmentsInput
 }
 
@@ -554,6 +580,7 @@ export type CommitmentUncheckedCreateWithoutWeeklySessionInput = {
   notDoneReason?: $Enums.NotDoneReason | null
   reflection?: string | null
   resolvedAt?: Date | string | null
+  createdAt?: Date | string
   linkedLeadMeasureId?: string | null
 }
 
@@ -590,6 +617,7 @@ export type CommitmentCreateManyLinkedLeadMeasureInput = {
   notDoneReason?: $Enums.NotDoneReason | null
   reflection?: string | null
   resolvedAt?: Date | string | null
+  createdAt?: Date | string
   weeklySessionId: string
 }
 
@@ -600,6 +628,7 @@ export type CommitmentUpdateWithoutLinkedLeadMeasureInput = {
   notDoneReason?: Prisma.NullableEnumNotDoneReasonFieldUpdateOperationsInput | $Enums.NotDoneReason | null
   reflection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   weeklySession?: Prisma.WeeklySessionUpdateOneRequiredWithoutCommitmentsNestedInput
 }
 
@@ -610,6 +639,7 @@ export type CommitmentUncheckedUpdateWithoutLinkedLeadMeasureInput = {
   notDoneReason?: Prisma.NullableEnumNotDoneReasonFieldUpdateOperationsInput | $Enums.NotDoneReason | null
   reflection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   weeklySessionId?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
@@ -620,6 +650,7 @@ export type CommitmentUncheckedUpdateManyWithoutLinkedLeadMeasureInput = {
   notDoneReason?: Prisma.NullableEnumNotDoneReasonFieldUpdateOperationsInput | $Enums.NotDoneReason | null
   reflection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   weeklySessionId?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
@@ -630,6 +661,7 @@ export type CommitmentCreateManyWeeklySessionInput = {
   notDoneReason?: $Enums.NotDoneReason | null
   reflection?: string | null
   resolvedAt?: Date | string | null
+  createdAt?: Date | string
   linkedLeadMeasureId?: string | null
 }
 
@@ -640,6 +672,7 @@ export type CommitmentUpdateWithoutWeeklySessionInput = {
   notDoneReason?: Prisma.NullableEnumNotDoneReasonFieldUpdateOperationsInput | $Enums.NotDoneReason | null
   reflection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   linkedLeadMeasure?: Prisma.LeadMeasureUpdateOneWithoutCommitmentsNestedInput
 }
 
@@ -650,6 +683,7 @@ export type CommitmentUncheckedUpdateWithoutWeeklySessionInput = {
   notDoneReason?: Prisma.NullableEnumNotDoneReasonFieldUpdateOperationsInput | $Enums.NotDoneReason | null
   reflection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   linkedLeadMeasureId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
@@ -660,6 +694,7 @@ export type CommitmentUncheckedUpdateManyWithoutWeeklySessionInput = {
   notDoneReason?: Prisma.NullableEnumNotDoneReasonFieldUpdateOperationsInput | $Enums.NotDoneReason | null
   reflection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   linkedLeadMeasureId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
@@ -672,6 +707,7 @@ export type CommitmentSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   notDoneReason?: boolean
   reflection?: boolean
   resolvedAt?: boolean
+  createdAt?: boolean
   weeklySessionId?: boolean
   linkedLeadMeasureId?: boolean
   weeklySession?: boolean | Prisma.WeeklySessionDefaultArgs<ExtArgs>
@@ -685,6 +721,7 @@ export type CommitmentSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   notDoneReason?: boolean
   reflection?: boolean
   resolvedAt?: boolean
+  createdAt?: boolean
   weeklySessionId?: boolean
   linkedLeadMeasureId?: boolean
   weeklySession?: boolean | Prisma.WeeklySessionDefaultArgs<ExtArgs>
@@ -698,6 +735,7 @@ export type CommitmentSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   notDoneReason?: boolean
   reflection?: boolean
   resolvedAt?: boolean
+  createdAt?: boolean
   weeklySessionId?: boolean
   linkedLeadMeasureId?: boolean
   weeklySession?: boolean | Prisma.WeeklySessionDefaultArgs<ExtArgs>
@@ -711,11 +749,12 @@ export type CommitmentSelectScalar = {
   notDoneReason?: boolean
   reflection?: boolean
   resolvedAt?: boolean
+  createdAt?: boolean
   weeklySessionId?: boolean
   linkedLeadMeasureId?: boolean
 }
 
-export type CommitmentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "text" | "status" | "notDoneReason" | "reflection" | "resolvedAt" | "weeklySessionId" | "linkedLeadMeasureId", ExtArgs["result"]["commitment"]>
+export type CommitmentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "text" | "status" | "notDoneReason" | "reflection" | "resolvedAt" | "createdAt" | "weeklySessionId" | "linkedLeadMeasureId", ExtArgs["result"]["commitment"]>
 export type CommitmentInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   weeklySession?: boolean | Prisma.WeeklySessionDefaultArgs<ExtArgs>
   linkedLeadMeasure?: boolean | Prisma.Commitment$linkedLeadMeasureArgs<ExtArgs>
@@ -742,6 +781,7 @@ export type $CommitmentPayload<ExtArgs extends runtime.Types.Extensions.Internal
     notDoneReason: $Enums.NotDoneReason | null
     reflection: string | null
     resolvedAt: Date | null
+    createdAt: Date
     weeklySessionId: string
     linkedLeadMeasureId: string | null
   }, ExtArgs["result"]["commitment"]>
@@ -1175,6 +1215,7 @@ export interface CommitmentFieldRefs {
   readonly notDoneReason: Prisma.FieldRef<"Commitment", 'NotDoneReason'>
   readonly reflection: Prisma.FieldRef<"Commitment", 'String'>
   readonly resolvedAt: Prisma.FieldRef<"Commitment", 'DateTime'>
+  readonly createdAt: Prisma.FieldRef<"Commitment", 'DateTime'>
   readonly weeklySessionId: Prisma.FieldRef<"Commitment", 'String'>
   readonly linkedLeadMeasureId: Prisma.FieldRef<"Commitment", 'String'>
 }

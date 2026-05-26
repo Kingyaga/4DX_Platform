@@ -590,6 +590,11 @@ export type WIGScalarRelationFilter = {
   isNot?: Prisma.WIGWhereInput
 }
 
+export type WIGNullableScalarRelationFilter = {
+  is?: Prisma.WIGWhereInput | null
+  isNot?: Prisma.WIGWhereInput | null
+}
+
 export type WIGCreateNestedManyWithoutTeamInput = {
   create?: Prisma.XOR<Prisma.WIGCreateWithoutTeamInput, Prisma.WIGUncheckedCreateWithoutTeamInput> | Prisma.WIGCreateWithoutTeamInput[] | Prisma.WIGUncheckedCreateWithoutTeamInput[]
   connectOrCreate?: Prisma.WIGCreateOrConnectWithoutTeamInput | Prisma.WIGCreateOrConnectWithoutTeamInput[]
@@ -668,10 +673,12 @@ export type WIGCreateNestedOneWithoutWeeklySessionsInput = {
   connect?: Prisma.WIGWhereUniqueInput
 }
 
-export type WIGUpdateOneRequiredWithoutWeeklySessionsNestedInput = {
+export type WIGUpdateOneWithoutWeeklySessionsNestedInput = {
   create?: Prisma.XOR<Prisma.WIGCreateWithoutWeeklySessionsInput, Prisma.WIGUncheckedCreateWithoutWeeklySessionsInput>
   connectOrCreate?: Prisma.WIGCreateOrConnectWithoutWeeklySessionsInput
   upsert?: Prisma.WIGUpsertWithoutWeeklySessionsInput
+  disconnect?: Prisma.WIGWhereInput | boolean
+  delete?: Prisma.WIGWhereInput | boolean
   connect?: Prisma.WIGWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.WIGUpdateToOneWithWhereWithoutWeeklySessionsInput, Prisma.WIGUpdateWithoutWeeklySessionsInput>, Prisma.WIGUncheckedUpdateWithoutWeeklySessionsInput>
 }

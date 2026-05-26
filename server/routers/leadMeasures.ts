@@ -5,6 +5,20 @@ import { notifyMany } from "../notify";
 import { auditLog } from "../audit";
 import { sendLeadMeasureOwnersChangedEmail } from "../email";
 
+const trackingTypeSchema = z.enum([
+  "NUMERIC",
+  "MILESTONE",
+  "BOOLEAN",
+  "TIME",
+  "TEXT",
+  "PERCENTAGE",
+  "DURATION",
+  "CHECKLIST",
+  "COMPLETION",
+  "HYBRID",
+  "CUSTOM",
+]);
+
 export const leadMeasuresRouter = router({
   create: protectedProcedure
     .input(
@@ -12,7 +26,7 @@ export const leadMeasuresRouter = router({
         wigId: z.string(),
         name: z.string().min(3),
         description: z.string().optional(),
-        trackingType: z.enum(["NUMERIC", "MILESTONE"]).default("NUMERIC"),
+        trackingType: trackingTypeSchema.default("NUMERIC"),
         cadence: z.enum(["WEEKLY", "BIWEEKLY"]),
         targetValue: z.number().optional(),
         unit: z.string().optional(),
@@ -20,10 +34,10 @@ export const leadMeasuresRouter = router({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      if (input.trackingType === "NUMERIC" && ((input.targetValue ?? 0) <= 0 || !input.unit)) {
+      if (["NUMERIC", "PERCENTAGE", "DURATION"].includes(input.trackingType) && ((input.targetValue ?? 0) <= 0 || !input.unit)) {
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: "Numeric lead measures require a positive target value and unit.",
+          message: "Numeric, percentage, and duration lead measures require a positive target value and unit.",
         });
       }
 
@@ -120,7 +134,7 @@ export const leadMeasuresRouter = router({
         name: z.string().min(3).optional(),
         description: z.string().optional(),
         cadence: z.enum(["WEEKLY", "BIWEEKLY"]).optional(),
-        trackingType: z.enum(["NUMERIC", "MILESTONE"]).optional(),
+        trackingType: trackingTypeSchema.optional(),
         targetValue: z.number().optional(),
         unit: z.string().optional(),
       }),

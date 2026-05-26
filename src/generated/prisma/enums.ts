@@ -56,7 +56,16 @@ export type ActivityLogStatus = (typeof ActivityLogStatus)[keyof typeof Activity
 
 export const TrackingType = {
   NUMERIC: 'NUMERIC',
-  MILESTONE: 'MILESTONE'
+  MILESTONE: 'MILESTONE',
+  BOOLEAN: 'BOOLEAN',
+  TIME: 'TIME',
+  TEXT: 'TEXT',
+  PERCENTAGE: 'PERCENTAGE',
+  DURATION: 'DURATION',
+  CHECKLIST: 'CHECKLIST',
+  COMPLETION: 'COMPLETION',
+  HYBRID: 'HYBRID',
+  CUSTOM: 'CUSTOM'
 } as const
 
 export type TrackingType = (typeof TrackingType)[keyof typeof TrackingType]
@@ -80,6 +89,14 @@ export const SessionStatus = {
 } as const
 
 export type SessionStatus = (typeof SessionStatus)[keyof typeof SessionStatus]
+
+
+export const BlockerStatus = {
+  OPEN: 'OPEN',
+  RESOLVED: 'RESOLVED'
+} as const
+
+export type BlockerStatus = (typeof BlockerStatus)[keyof typeof BlockerStatus]
 
 
 export const CommitmentStatus = {

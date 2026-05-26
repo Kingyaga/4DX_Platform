@@ -8,8 +8,16 @@ import { WIGListSkeleton } from "@/lib/components/skeletons";
 import { ErrorState, EmptyState } from "@/lib/components/states";
 import type { WIG, LeadMeasure, TeamMember, TrackingType } from "@/lib/types";
 
+function isNonNumericWig(trackingType: TrackingType) {
+  return trackingType !== "NUMERIC";
+}
+
+function isNonNumericLeadMeasure(trackingType: TrackingType) {
+  return trackingType !== "NUMERIC" && trackingType !== "PERCENTAGE" && trackingType !== "DURATION";
+}
+
 function getWigProgress(wig: WIG) {
-  if (wig.trackingType === "MILESTONE") {
+  if (isNonNumericWig(wig.trackingType)) {
     if (!wig.leadMeasures.length) return 0;
     const total = wig.leadMeasures.reduce((sum, leadMeasure) => sum + getLeadMeasureProgress(leadMeasure), 0);
     return Math.round(total / wig.leadMeasures.length);
@@ -23,7 +31,7 @@ function getWigProgress(wig: WIG) {
 }
 
 function getLeadMeasureProgress(leadMeasure: LeadMeasure) {
-  if (leadMeasure.trackingType === "MILESTONE") {
+  if (isNonNumericLeadMeasure(leadMeasure.trackingType)) {
     const latest = [...(leadMeasure.activityLogs || [])].sort((a, b) => new Date(b.loggedForDate).getTime() - new Date(a.loggedForDate).getTime())[0];
     if (latest?.progressStatus === "DONE") return 100;
     if (latest?.progressStatus === "IN_PROGRESS") return 50;
@@ -267,7 +275,7 @@ export default function WIGsPage() {
                             </span>
                           )}
                           <span style={{ fontSize: "12px", color: "#71717a", textTransform: "uppercase", letterSpacing: "0.05em" }}>Wildly Important Goal</span>
-                          {wig.trackingType === "MILESTONE" && (
+                          {wig.trackingType !== "NUMERIC" && (
                             <span style={{ fontSize: "12px", color: "#52525b", backgroundColor: "#e4e4e7", padding: "2px 8px", fontWeight: 700 }}>Milestone</span>
                           )}
                         </div>
@@ -331,7 +339,7 @@ function WIGDetail({ wig, onBack }: { wig: WIG; onBack: () => void }) {
   useEffect(() => {
     setActiveWig(wig);
     setLeadMeasureUnit(wig.unit || "");
-    setLeadMeasureTrackingType(wig.trackingType === "MILESTONE" ? "MILESTONE" : "NUMERIC");
+    setLeadMeasureTrackingType(wig.trackingType !== "NUMERIC" ? "MILESTONE" : "NUMERIC");
   }, [wig]);
 
   const canAddLeadMeasure = canCreateWIG && activeWig.leadMeasures.length < 3;
@@ -349,7 +357,7 @@ function WIGDetail({ wig, onBack }: { wig: WIG; onBack: () => void }) {
       return;
     }
 
-    if (leadMeasureTrackingType === "NUMERIC" && (!targetValue || !leadMeasureUnit)) {
+    if ((leadMeasureTrackingType === "NUMERIC" || leadMeasureTrackingType === "PERCENTAGE" || leadMeasureTrackingType === "DURATION") && (!targetValue || !leadMeasureUnit)) {
       return;
     }
 
@@ -360,8 +368,8 @@ function WIGDetail({ wig, onBack }: { wig: WIG; onBack: () => void }) {
         description: leadMeasureDescription || undefined,
         trackingType: leadMeasureTrackingType,
         cadence,
-        targetValue: leadMeasureTrackingType === "NUMERIC" ? parseFloat(targetValue) : undefined,
-        unit: leadMeasureTrackingType === "NUMERIC" ? leadMeasureUnit : undefined,
+        targetValue: leadMeasureTrackingType === "NUMERIC" || leadMeasureTrackingType === "PERCENTAGE" || leadMeasureTrackingType === "DURATION" ? parseFloat(targetValue) : undefined,
+        unit: leadMeasureTrackingType === "NUMERIC" || leadMeasureTrackingType === "PERCENTAGE" || leadMeasureTrackingType === "DURATION" ? leadMeasureUnit : undefined,
         ownerUserIds,
       });
 
@@ -373,7 +381,7 @@ function WIGDetail({ wig, onBack }: { wig: WIG; onBack: () => void }) {
       setLeadMeasureName("");
       setLeadMeasureDescription("");
       setCadence("WEEKLY");
-      setLeadMeasureTrackingType(wig.trackingType === "MILESTONE" ? "MILESTONE" : "NUMERIC");
+      setLeadMeasureTrackingType(wig.trackingType !== "NUMERIC" ? "MILESTONE" : "NUMERIC");
       setTargetValue("");
       setLeadMeasureUnit(wig.unit || "");
       setOwnerUserIds([]);
@@ -509,7 +517,7 @@ function WIGDetail({ wig, onBack }: { wig: WIG; onBack: () => void }) {
         <div style={{ height: "100%", backgroundColor: numericTargetReached ? "#f59e0b" : "#18181b", width: `${Math.min(progress, 100)}%` }}></div>
       </div>
       <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", color: "#71717a" }}>
-        <span>{activeWig.trackingType === "MILESTONE" ? "Outcome-based WIG" : `Baseline: ${activeWig.fromValue ?? 0}`}</span>
+        <span>{activeWig.trackingType !== "NUMERIC" ? "Outcome-based WIG" : `Baseline: ${activeWig.fromValue ?? 0}`}</span>
         <span>Deadline: {new Date(activeWig.deadline).toLocaleDateString()}</span>
       </div>
 
@@ -566,12 +574,18 @@ function WIGDetail({ wig, onBack }: { wig: WIG; onBack: () => void }) {
                 >
                   <option value="NUMERIC">Numeric target</option>
                   <option value="MILESTONE">Milestone / qualitative</option>
+                  <option value="BOOLEAN">Boolean / completion</option>
+                  <option value="TIME">Time of day</option>
+                  <option value="TEXT">Text update</option>
+                  <option value="PERCENTAGE">Percentage</option>
+                  <option value="DURATION">Duration</option>
+                  <option value="CHECKLIST">Checklist</option>
                 </select>
               </div>
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: leadMeasureTrackingType === "NUMERIC" ? "1fr 1fr 1fr" : "1fr", gap: "16px" }}>
-              {leadMeasureTrackingType === "NUMERIC" && (
+            <div style={{ display: "grid", gridTemplateColumns: leadMeasureTrackingType === "NUMERIC" || leadMeasureTrackingType === "PERCENTAGE" || leadMeasureTrackingType === "DURATION" ? "1fr 1fr 1fr" : "1fr", gap: "16px" }}>
+              {(leadMeasureTrackingType === "NUMERIC" || leadMeasureTrackingType === "PERCENTAGE" || leadMeasureTrackingType === "DURATION") && (
                 <>
                   <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
                     <label style={{ fontSize: "12px", fontWeight: 600, color: "#18181b" }}>Target Value *</label>
@@ -810,7 +824,7 @@ function WIGDetail({ wig, onBack }: { wig: WIG; onBack: () => void }) {
                     <div>
                       <span style={{ fontSize: "12px", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", color: "#71717a", display: "block", marginBottom: "4px" }}>Progress</span>
                       <span style={{ fontSize: "20px", fontWeight: 600, color: "#18181b" }}>
-                        {lm.trackingType === "MILESTONE"
+                        {isNonNumericLeadMeasure(lm.trackingType)
                           ? `${latestStatus ? latestStatus.replace(/_/g, " ") : "No update"} (${lmProgress}%)`
                           : `${totalLogged.toFixed(1)} / ${(lm.targetValue ?? 0).toFixed(1)} ${lm.unit ?? ""}`}
                       </span>
@@ -836,7 +850,7 @@ function WIGHistoryDetail({ wig, onBack }: { wig: WIG; onBack: () => void }) {
   const finalProgress = getWigProgress(wig);
   const leadMeasureCompletionEvents = wig.leadMeasures
     .map((lm) => {
-      if (lm.trackingType === "MILESTONE") {
+      if (isNonNumericLeadMeasure(lm.trackingType)) {
         const completionLog = [...(lm.activityLogs || [])]
           .sort((a, b) => new Date(a.loggedForDate).getTime() - new Date(b.loggedForDate).getTime())
           .find((log) => log.progressStatus === "DONE");
@@ -913,10 +927,10 @@ function WIGHistoryDetail({ wig, onBack }: { wig: WIG; onBack: () => void }) {
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "16px", flexWrap: "wrap", gap: "12px" }}>
           <div>
             <div style={{ fontSize: "40px", fontWeight: 700, letterSpacing: "-0.03em", color: "#18181b" }}>
-              {wig.trackingType === "MILESTONE" ? `${finalProgress}%` : (wig.currentValue ?? wig.fromValue ?? 0)} <span style={{ fontSize: "18px", fontWeight: 500, color: "#71717a" }}>{wig.trackingType === "MILESTONE" ? "complete" : wig.unit}</span>
+              {wig.trackingType !== "NUMERIC" ? `${finalProgress}%` : (wig.currentValue ?? wig.fromValue ?? 0)} <span style={{ fontSize: "18px", fontWeight: 500, color: "#71717a" }}>{wig.trackingType !== "NUMERIC" ? "complete" : wig.unit}</span>
             </div>
             <div style={{ fontSize: "13px", color: "#71717a", marginTop: "4px" }}>
-              {wig.trackingType === "MILESTONE"
+              {wig.trackingType !== "NUMERIC"
                 ? "Outcome-based goal measured through milestone lead measures."
                 : `Baseline: ${wig.fromValue ?? 0} ${wig.unit ?? ""} -> Target: ${wig.toValue ?? 0} ${wig.unit ?? ""}`}
             </div>
@@ -977,7 +991,7 @@ function WIGHistoryDetail({ wig, onBack }: { wig: WIG; onBack: () => void }) {
             const totalApproved = (lm.activityLogs || []).reduce((sum, log) => sum + (log.value ?? 0), 0);
             const lmPct = getLeadMeasureProgress(lm);
             const lmOnTrack = lmPct >= 100;
-            const latestStatus = lm.trackingType === "MILESTONE"
+            const latestStatus = isNonNumericLeadMeasure(lm.trackingType)
               ? [...(lm.activityLogs || [])].sort((a, b) => new Date(b.loggedForDate).getTime() - new Date(a.loggedForDate).getTime())[0]?.progressStatus
               : null;
 
@@ -987,7 +1001,7 @@ function WIGHistoryDetail({ wig, onBack }: { wig: WIG; onBack: () => void }) {
               if (!log.userId) continue;
               const name = log.user?.name || log.user?.email || log.userId;
               if (!ownerMap[log.userId]) ownerMap[log.userId] = { name, total: 0 };
-              ownerMap[log.userId].total += lm.trackingType === "MILESTONE" ? 1 : (log.value ?? 0);
+              ownerMap[log.userId].total += isNonNumericLeadMeasure(lm.trackingType) ? 1 : (log.value ?? 0);
             }
             const owners = Object.values(ownerMap).sort((a, b) => b.total - a.total);
             const ownerTotal = owners.reduce((sum, owner) => sum + owner.total, 0);
@@ -1010,10 +1024,10 @@ function WIGHistoryDetail({ wig, onBack }: { wig: WIG; onBack: () => void }) {
                 {/* Total vs target */}
                 <div style={{ display: "flex", alignItems: "flex-end", gap: "8px", marginBottom: "10px" }}>
                   <span style={{ fontSize: "28px", fontWeight: 700, color: "#18181b", letterSpacing: "-0.02em" }}>
-                    {lm.trackingType === "MILESTONE" ? `${lmPct}%` : totalApproved.toFixed(1)}
+                    {isNonNumericLeadMeasure(lm.trackingType) ? `${lmPct}%` : totalApproved.toFixed(1)}
                   </span>
                   <span style={{ fontSize: "14px", color: "#71717a", marginBottom: "4px" }}>
-                    {lm.trackingType === "MILESTONE" ? (latestStatus ? latestStatus.replace(/_/g, " ") : "No update") : `/ ${(lm.targetValue ?? 0).toFixed(1)} ${lm.unit ?? ""}`}
+                    {isNonNumericLeadMeasure(lm.trackingType) ? (latestStatus ? latestStatus.replace(/_/g, " ") : "No update") : `/ ${(lm.targetValue ?? 0).toFixed(1)} ${lm.unit ?? ""}`}
                   </span>
                 </div>
 
@@ -1034,7 +1048,7 @@ function WIGHistoryDetail({ wig, onBack }: { wig: WIG; onBack: () => void }) {
                             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "4px" }}>
                               <span style={{ fontSize: "13px", color: "#18181b" }}>{owner.name}</span>
                               <span style={{ fontSize: "13px", fontWeight: 600, color: "#18181b" }}>
-                                {lm.trackingType === "MILESTONE" ? `${owner.total} update${owner.total !== 1 ? "s" : ""}` : `${owner.total.toFixed(1)} ${lm.unit ?? ""}`}
+                                {isNonNumericLeadMeasure(lm.trackingType) ? `${owner.total} update${owner.total !== 1 ? "s" : ""}` : `${owner.total.toFixed(1)} ${lm.unit ?? ""}`}
                                 <span style={{ fontWeight: 400, color: "#71717a", marginLeft: "6px" }}>({share}%)</span>
                               </span>
                             </div>
@@ -1189,7 +1203,9 @@ function WIGCreateForm({ onCancel, onSuccess }: { onCancel: () => void; onSucces
               style={{ border: "1px solid #e4e4e7", backgroundColor: "#ffffff", padding: "10px", fontSize: "16px", color: "#18181b", outline: "none", width: "100%" }}
             >
               <option value="NUMERIC">Numeric: from X to Y</option>
-              <option value="MILESTONE">Milestone: deliver an outcome by a date</option>
+              <option value="MILESTONE">Milestone/project: deliver an outcome by a date</option>
+              <option value="COMPLETION">Completion: not started/in progress/completed</option>
+              <option value="HYBRID">Hybrid/custom: mix milestone and measurable work</option>
             </select>
           </div>
 

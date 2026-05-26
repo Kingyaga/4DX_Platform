@@ -114,9 +114,9 @@ export const sessionsRouter = router({
           message: "Account step already completed.",
         });
       // Observers cannot participate in sessions
-      const sessionWig = await ctx.db.wIG.findUnique({
-        where: { id: session.wigId },
-      });
+      const sessionWig = session.wigId
+        ? await ctx.db.wIG.findUnique({ where: { id: session.wigId } })
+        : null;
 
       if (sessionWig) {
         const observer = await isObserver(
@@ -183,9 +183,9 @@ export const sessionsRouter = router({
           message: "Review step already completed.",
         });
       // Observers cannot participate in sessions
-      const sessionWig = await ctx.db.wIG.findUnique({
-        where: { id: session.wigId },
-      });
+      const sessionWig = session.wigId
+        ? await ctx.db.wIG.findUnique({ where: { id: session.wigId } })
+        : null;
 
       if (sessionWig) {
         const observer = await isObserver(
@@ -246,9 +246,9 @@ export const sessionsRouter = router({
           message: "Commit step already completed.",
         });
       // Observers cannot participate in sessions
-      const sessionWig = await ctx.db.wIG.findUnique({
-        where: { id: session.wigId },
-      });
+      const sessionWig = session.wigId
+        ? await ctx.db.wIG.findUnique({ where: { id: session.wigId } })
+        : null;
 
       if (sessionWig) {
         const observer = await isObserver(

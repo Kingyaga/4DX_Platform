@@ -88,6 +88,24 @@ export default function LoginPage() {
     };
   }, []);
 
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const authError = params.get("error");
+    if (!authError) return;
+
+    if (authError === "OAuthAccountNotLinked") {
+      setError("This Microsoft account matches an existing email. Sign in with your password first, or ask an admin to link the account.");
+      return;
+    }
+
+    if (authError === "AccessDenied") {
+      setError("Microsoft sign-in was denied. Make sure your email is invited, belongs to the allowed company domain, or that Microsoft auto-provisioning is configured.");
+      return;
+    }
+
+    setError("Microsoft sign-in could not be completed. Check the Azure app credentials and redirect URI.");
+  }, []);
+
   const togglePassword = () => {
     setShowPassword(!showPassword);
   };

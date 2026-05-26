@@ -5,7 +5,316 @@ import { notify, notifyMany } from "../notify";
 import { sendSessionReadyEmail } from "../email";
 import { auditLog } from "../audit";
 
+function getWeekEnding(weekStarting: Date) {
+  const weekEnding = new Date(weekStarting);
+  weekEnding.setUTCDate(weekEnding.getUTCDate() + 6);
+  weekEnding.setUTCHours(23, 59, 59, 999);
+  return weekEnding;
+}
+
+function getLeadMeasureScore(leadMeasure: any) {
+  if (leadMeasure.trackingType && !["NUMERIC", "PERCENTAGE", "DURATION"].includes(leadMeasure.trackingType)) {
+    const latest = [...(leadMeasure.activityLogs || [])].sort((a: any, b: any) => new Date(b.loggedForDate).getTime() - new Date(a.loggedForDate).getTime())[0];
+    if (latest?.progressStatus === "DONE") return 100;
+    if (latest?.progressStatus === "IN_PROGRESS") return 50;
+    if (latest?.progressStatus === "BLOCKED") return 25;
+    return 0;
+  }
+
+  const total = (leadMeasure.activityLogs || []).reduce((sum: number, log: any) => sum + (log.value ?? 0), 0);
+  const target = leadMeasure.targetValue ?? 0;
+  return target > 0 ? Math.min(100, Math.round((total / target) * 100)) : 0;
+}
+
+async function buildWeeklySnapshot(ctx: any, teamId: string, weekStarting: Date) {
+  const weekEnding = getWeekEnding(weekStarting);
+  const wigs = await ctx.db.wIG.findMany({
+    where: { teamId, status: "ACTIVE" },
+    include: {
+      leadMeasures: {
+        where: { archivedAt: null },
+        include: {
+          activityLogs: {
+            where: {
+              status: "APPROVED",
+              loggedForDate: { gte: weekStarting, lte: weekEnding },
+            },
+            include: { user: { select: { id: true, name: true, email: true } } },
+            orderBy: { loggedForDate: "desc" },
+          },
+        },
+      },
+    },
+  });
+
+  const wigSnapshots = wigs.map((wig: any) => {
+    const leadMeasures = (wig.leadMeasures || []).map((leadMeasure: any) => {
+      const score = getLeadMeasureScore(leadMeasure);
+      return {
+        id: leadMeasure.id,
+        name: leadMeasure.name,
+        trackingType: leadMeasure.trackingType,
+        targetValue: leadMeasure.targetValue,
+        unit: leadMeasure.unit,
+        activityCount: leadMeasure.activityLogs.length,
+        score,
+        missed: score < 100,
+      };
+    });
+
+    const progress = leadMeasures.length > 0
+      ? Math.round(leadMeasures.reduce((sum: number, leadMeasure: any) => sum + leadMeasure.score, 0) / leadMeasures.length)
+      : 0;
+
+    return {
+      id: wig.id,
+      title: wig.title,
+      trackingType: wig.trackingType,
+      status: wig.status,
+      progress,
+      leadMeasures,
+      activityLogCount: leadMeasures.reduce((sum: number, leadMeasure: any) => sum + leadMeasure.activityCount, 0),
+      missedLeadMeasures: leadMeasures.filter((leadMeasure: any) => leadMeasure.missed).length,
+    };
+  });
+
+  return {
+    capturedAt: new Date().toISOString(),
+    weekStarting: weekStarting.toISOString(),
+    weekEnding: weekEnding.toISOString(),
+    wigs: wigSnapshots,
+    totals: {
+      activeWigs: wigSnapshots.length,
+      leadMeasures: wigSnapshots.reduce((sum: number, wig: any) => sum + wig.leadMeasures.length, 0),
+      activityLogs: wigSnapshots.reduce((sum: number, wig: any) => sum + wig.activityLogCount, 0),
+      missedLeadMeasures: wigSnapshots.reduce((sum: number, wig: any) => sum + wig.missedLeadMeasures, 0),
+      averageProgress: wigSnapshots.length > 0
+        ? Math.round(wigSnapshots.reduce((sum: number, wig: any) => sum + wig.progress, 0) / wigSnapshots.length)
+        : 0,
+    },
+  };
+}
+
 export const sessionsRouter = router({
+  createManual: protectedProcedure
+    .input(
+      z.object({
+        teamSlug: z.string(),
+        title: z.string().min(3).max(160).optional(),
+        weekStarting: z.coerce.date().optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const team = await ctx.db.team.findUnique({
+        where: { slug: input.teamSlug },
+        include: { members: true },
+      });
+
+      if (!team) throw new TRPCError({ code: "NOT_FOUND" });
+
+      const isTeamLead = team.leadUserId === (ctx.session.user as any).id;
+      const isOrgAdmin = await ctx.db.orgMembership.findFirst({
+        where: { userId: (ctx.session.user as any).id, orgId: team.orgId, role: "ADMIN" },
+      });
+
+      if (!isTeamLead && !isOrgAdmin) {
+        throw new TRPCError({ code: "FORBIDDEN", message: "Only a team lead or admin can start a weekly session." });
+      }
+
+      const weekStarting = input.weekStarting ?? getThisMonday();
+      weekStarting.setUTCHours(0, 0, 0, 0);
+
+      const existing = await ctx.db.weeklySession.findFirst({
+        where: { teamId: team.id, weekStarting, wigId: null, userId: null },
+      });
+
+      if (existing) {
+        throw new TRPCError({ code: "CONFLICT", message: "A team weekly session already exists for this week." });
+      }
+
+      const snapshot = await buildWeeklySnapshot(ctx, team.id, weekStarting);
+      const session = await ctx.db.weeklySession.create({
+        data: {
+          title: input.title || `${team.name} Weekly Session`,
+          weekStarting,
+          weekEnding: getWeekEnding(weekStarting),
+          status: "IN_PROGRESS",
+          startedAt: new Date(),
+          teamId: team.id,
+          facilitatorUserId: (ctx.session.user as any).id,
+          snapshotJson: snapshot,
+          timeline: {
+            create: {
+              type: "SESSION_STARTED",
+              actorUserId: (ctx.session.user as any).id,
+              payloadJson: { teamName: team.name, weekStarting: weekStarting.toISOString() },
+            },
+          },
+        },
+        include: {
+          team: true,
+          commitments: true,
+          blockers: true,
+          timeline: { include: { actor: { select: { id: true, name: true, email: true } } }, orderBy: { createdAt: "desc" } },
+        },
+      });
+
+      await notifyMany({
+        db: ctx.db,
+        userIds: team.members.map((member) => member.userId),
+        type: "SESSION_READY",
+        payload: { sessionId: session.id, teamSlug: input.teamSlug, message: "A weekly execution session has started." },
+      });
+
+      return session;
+    }),
+
+  getTeamWeeklySession: protectedProcedure
+    .input(z.object({ teamSlug: z.string(), weekStarting: z.string().optional() }))
+    .query(async ({ ctx, input }) => {
+      const team = await ctx.db.team.findUnique({
+        where: { slug: input.teamSlug },
+        include: { members: true },
+      });
+
+      if (!team) throw new TRPCError({ code: "NOT_FOUND" });
+
+      const isMember = team.members.some((member) => member.userId === (ctx.session.user as any).id);
+      const isOrgAdmin = await ctx.db.orgMembership.findFirst({
+        where: { userId: (ctx.session.user as any).id, orgId: team.orgId, role: "ADMIN" },
+      });
+
+      if (!isMember && !isOrgAdmin) {
+        throw new TRPCError({ code: "FORBIDDEN", message: "You must belong to this team to view its weekly session." });
+      }
+
+      const weekStarting = input.weekStarting ? new Date(input.weekStarting) : getThisMonday();
+      weekStarting.setUTCHours(0, 0, 0, 0);
+
+      return ctx.db.weeklySession.findFirst({
+        where: { teamId: team.id, weekStarting, wigId: null, userId: null },
+        include: {
+          team: true,
+          commitments: { include: { linkedLeadMeasure: { select: { id: true, name: true } } }, orderBy: { createdAt: "asc" } },
+          blockers: { include: { createdBy: { select: { id: true, name: true, email: true } } }, orderBy: { createdAt: "desc" } },
+          timeline: { include: { actor: { select: { id: true, name: true, email: true } } }, orderBy: { createdAt: "desc" } },
+        },
+      });
+    }),
+
+  updateTeamSession: protectedProcedure
+    .input(
+      z.object({
+        sessionId: z.string(),
+        notes: z.string().optional(),
+        confidenceScore: z.number().int().min(1).max(10).optional(),
+        status: z.enum(["PENDING", "IN_PROGRESS", "COMPLETE", "OVERDUE"]).optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const session = await ctx.db.weeklySession.findUnique({ where: { id: input.sessionId }, include: { team: true } });
+      if (!session?.team) throw new TRPCError({ code: "NOT_FOUND" });
+
+      const isTeamLead = session.team.leadUserId === (ctx.session.user as any).id;
+      const isTeamMember = await ctx.db.teamMembership.findUnique({
+        where: { userId_teamId: { userId: (ctx.session.user as any).id, teamId: session.team.id } },
+      });
+      if (!isTeamLead && !isTeamMember) throw new TRPCError({ code: "FORBIDDEN" });
+
+      const updated = await ctx.db.weeklySession.update({
+        where: { id: input.sessionId },
+        data: {
+          notes: input.notes,
+          confidenceScore: input.confidenceScore,
+          status: input.status,
+          completedAt: input.status === "COMPLETE" ? new Date() : undefined,
+          timeline: {
+            create: {
+              type: input.status === "COMPLETE" ? "SESSION_COMPLETED" : "SESSION_UPDATED",
+              actorUserId: (ctx.session.user as any).id,
+              payloadJson: { notesUpdated: input.notes !== undefined, confidenceScore: input.confidenceScore, status: input.status },
+            },
+          },
+        },
+        include: {
+          commitments: true,
+          blockers: true,
+          timeline: { include: { actor: { select: { id: true, name: true, email: true } } }, orderBy: { createdAt: "desc" } },
+        },
+      });
+
+      return updated;
+    }),
+
+  addTeamCommitment: protectedProcedure
+    .input(
+      z.object({
+        sessionId: z.string(),
+        text: z.string().min(5),
+        linkedLeadMeasureId: z.string().optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const session = await ctx.db.weeklySession.findUnique({ where: { id: input.sessionId }, include: { team: true } });
+      if (!session?.team) throw new TRPCError({ code: "NOT_FOUND" });
+
+      const membership = await ctx.db.teamMembership.findUnique({
+        where: { userId_teamId: { userId: (ctx.session.user as any).id, teamId: session.team.id } },
+      });
+      if (!membership) throw new TRPCError({ code: "FORBIDDEN" });
+
+      const commitment = await ctx.db.commitment.create({
+        data: {
+          weeklySessionId: input.sessionId,
+          text: input.text,
+          linkedLeadMeasureId: input.linkedLeadMeasureId,
+        },
+      });
+
+      await ctx.db.sessionTimelineEvent.create({
+        data: {
+          weeklySessionId: input.sessionId,
+          actorUserId: (ctx.session.user as any).id,
+          type: "COMMITMENT_ADDED",
+          payloadJson: { commitmentId: commitment.id, text: commitment.text },
+        },
+      });
+
+      return commitment;
+    }),
+
+  addBlocker: protectedProcedure
+    .input(z.object({ sessionId: z.string(), title: z.string().min(3), details: z.string().optional() }))
+    .mutation(async ({ ctx, input }) => {
+      const session = await ctx.db.weeklySession.findUnique({ where: { id: input.sessionId }, include: { team: true } });
+      if (!session?.team) throw new TRPCError({ code: "NOT_FOUND" });
+
+      const membership = await ctx.db.teamMembership.findUnique({
+        where: { userId_teamId: { userId: (ctx.session.user as any).id, teamId: session.team.id } },
+      });
+      if (!membership) throw new TRPCError({ code: "FORBIDDEN" });
+
+      const blocker = await ctx.db.sessionBlocker.create({
+        data: {
+          weeklySessionId: input.sessionId,
+          title: input.title,
+          details: input.details,
+          createdByUserId: (ctx.session.user as any).id,
+        },
+      });
+
+      await ctx.db.sessionTimelineEvent.create({
+        data: {
+          weeklySessionId: input.sessionId,
+          actorUserId: (ctx.session.user as any).id,
+          type: "BLOCKER_ADDED",
+          payloadJson: { blockerId: blocker.id, title: blocker.title },
+        },
+      });
+
+      return blocker;
+    }),
+
   // Called every Monday to generate sessions for all team members
   generateForTeam: protectedProcedure
     .input(z.object({ teamSlug: z.string() }))
@@ -126,6 +435,9 @@ export const sessionsRouter = router({
       });
 
       if (!session) throw new TRPCError({ code: "NOT_FOUND" });
+      if (!session.userId || !session.wigId) {
+        throw new TRPCError({ code: "BAD_REQUEST", message: "This endpoint only supports legacy member WIG sessions." });
+      }
       if (session.userId !== (ctx.session.user as any).id)
         throw new TRPCError({ code: "FORBIDDEN" });
       if (session.accountDoneAt)
@@ -237,6 +549,9 @@ export const sessionsRouter = router({
       });
 
       if (!session) throw new TRPCError({ code: "NOT_FOUND" });
+      if (!session.userId || !session.wigId) {
+        throw new TRPCError({ code: "BAD_REQUEST", message: "This endpoint only supports legacy member WIG sessions." });
+      }
       if (session.userId !== (ctx.session.user as any).id)
         throw new TRPCError({ code: "FORBIDDEN" });
 
@@ -321,6 +636,9 @@ export const sessionsRouter = router({
       });
 
       if (!session) throw new TRPCError({ code: "NOT_FOUND" });
+      if (!session.userId || !session.wigId) {
+        throw new TRPCError({ code: "BAD_REQUEST", message: "This endpoint only supports legacy member WIG sessions." });
+      }
       if (session.userId !== (ctx.session.user as any).id)
         throw new TRPCError({ code: "FORBIDDEN" });
 
@@ -429,7 +747,7 @@ export const sessionsRouter = router({
         },
       });
 
-      if (completedSession) {
+      if (completedSession?.wig?.team && completedSession.user) {
         await notify({
           db: ctx.db,
           userId: completedSession.wig.team.leadUserId,
@@ -484,6 +802,9 @@ export const sessionsRouter = router({
 
       const sessionsWithPriorCommitments = await Promise.all(
         sessions.map(async (session) => {
+          if (!session.userId || !session.wigId) {
+            return { ...session, commitments: [] };
+          }
           const previousSession = await ctx.db.weeklySession.findFirst({
             where: {
               userId: session.userId,
