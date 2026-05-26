@@ -113,6 +113,7 @@ async function buildReport(ctx: any, teamSlug: string, reportType: ReportType) {
     current: leadMeasure.activityLogs.reduce((sum: number, log: any) => sum + (log.value ?? 0), 0),
     score: leadMeasureScore(leadMeasure),
   }));
+  const incompleteLeadMeasureTotals = leadMeasureTotals.filter((leadMeasure: any) => leadMeasure.score < 100);
   const executionScore = leadMeasureTotals.length > 0
     ? Math.round(
         leadMeasureTotals.reduce((sum: number, leadMeasure: any) => {
@@ -149,7 +150,7 @@ async function buildReport(ctx: any, teamSlug: string, reportType: ReportType) {
   } else {
     rows = [
       ["WIG", "Lead Measure", "Cadence", "Current", "Target", "Unit", "Status"],
-      ...leadMeasureTotals.map((leadMeasure: any) => [
+      ...incompleteLeadMeasureTotals.map((leadMeasure: any) => [
         leadMeasure.wig.title,
         leadMeasure.name,
         leadMeasure.cadence,

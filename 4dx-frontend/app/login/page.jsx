@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { signIn } from "next-auth/react";
 import { LoadingSpinner } from "@/lib/components/loading-spinner";
 
 async function fetchCsrfToken() {
@@ -57,53 +56,14 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [outlookEnabled, setOutlookEnabled] = useState(false);
-  const [providersLoaded, setProvidersLoaded] = useState(false);
   const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-  useEffect(() => {
-    let cancelled = false;
-
-    async function loadProviders() {
-      try {
-        const response = await fetch("/api/auth/providers", {
-          cache: "no-store",
-          credentials: "same-origin",
-        });
-        const providers = response.ok ? await response.json() : {};
-        if (!cancelled) {
-          setOutlookEnabled(Boolean(providers?.["azure-ad"]));
-        }
-      } catch {
-        if (!cancelled) setOutlookEnabled(false);
-      } finally {
-        if (!cancelled) setProvidersLoaded(true);
-      }
-    }
-
-    loadProviders();
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const authError = params.get("error");
     if (!authError) return;
 
-    if (authError === "OAuthAccountNotLinked") {
-      setError("This Microsoft account matches an existing email. Sign in with your password first, or ask an admin to link the account.");
-      return;
-    }
-
-    if (authError === "AccessDenied") {
-      setError("Microsoft sign-in was denied. Make sure your email is invited, belongs to the allowed company domain, or that Microsoft auto-provisioning is configured.");
-      return;
-    }
-
-    setError("Microsoft sign-in could not be completed. Check the Azure app credentials and redirect URI.");
+    setError("Sign in could not be completed. Please try again.");
   }, []);
 
   const togglePassword = () => {
@@ -164,16 +124,6 @@ export default function LoginPage() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleMicrosoftSignIn = async () => {
-    setError("");
-    if (!outlookEnabled) {
-      setError("Outlook sign-in is not configured. Add Microsoft OAuth credentials to enable it.");
-      return;
-    }
-
-    await signIn("azure-ad", { callbackUrl: "/dashboard" });
   };
 
   return (
@@ -298,23 +248,6 @@ export default function LoginPage() {
             )}
           </button>
           </form>
-
-          <button
-            className="btn-signin"
-            type="button"
-            onClick={handleMicrosoftSignIn}
-            disabled={!providersLoaded || !outlookEnabled}
-            style={{
-              marginTop: "12px",
-              backgroundColor: "#ffffff",
-              color: !providersLoaded || !outlookEnabled ? "#71717a" : "#111827",
-              border: "1px solid #d4d4d8",
-              cursor: !providersLoaded || !outlookEnabled ? "not-allowed" : "pointer",
-              opacity: !providersLoaded || !outlookEnabled ? 0.75 : 1,
-            }}
-          >
-            Sign in with Outlook
-          </button>
 
           <p className="signup-prompt">
             Access to this platform is invite only. Ask your administrator to create your account or send an invite.

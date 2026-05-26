@@ -70,6 +70,7 @@ const allNavItems: NavItem[] = [
   { icon: "admin_panel_settings", label: "Dashboard", href: "/dashboard/admin", roles: ["ADMIN"] },
   { icon: "groups", label: "Teams", href: "/dashboard/admin/teams", roles: ["ADMIN"] },
   { icon: "people", label: "Users", href: "/dashboard/admin/users", roles: ["ADMIN"] },
+  { icon: "mail", label: "Invites", href: "/dashboard/admin/invites", roles: ["ADMIN"] },
   { icon: "insights", label: "Org Activity", href: "/dashboard/admin/activity", roles: ["ADMIN"] },
 ];
 

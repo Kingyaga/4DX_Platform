@@ -5,8 +5,9 @@ import bcrypt from "bcryptjs";
 export async function POST(req: Request) {
   try {
     const { email, name, password, token } = await req.json();
+    const normalizedEmail = typeof email === "string" ? email.trim().toLowerCase() : "";
 
-    if (!email || !name || !password) {
+    if (!normalizedEmail || !name || !password) {
       return NextResponse.json(
         { error: "Name, email, and password are required." },
         { status: 400 },
@@ -55,7 +56,7 @@ export async function POST(req: Request) {
     }
 
     // If invite was for a specific email, enforce it
-    if (invite.email && invite.email.toLowerCase() !== email.toLowerCase()) {
+    if (invite.email && invite.email.toLowerCase() !== normalizedEmail) {
       return NextResponse.json(
         { error: "This invite was sent to a different email address." },
         { status: 403 },
@@ -63,7 +64,7 @@ export async function POST(req: Request) {
     }
 
     // Check if email already registered
-    const existing = await db.user.findUnique({ where: { email } });
+    const existing = await db.user.findUnique({ where: { email: normalizedEmail } });
     if (existing) {
       return NextResponse.json(
         { error: "An account with this email already exists." },
@@ -77,7 +78,7 @@ export async function POST(req: Request) {
     const user = await db.$transaction(async (tx) => {
       // Create the user
       const newUser = await tx.user.create({
-        data: { email, name, passwordHash },
+        data: { email: normalizedEmail, name, passwordHash, mustChangePassword: true },
       });
 
       // Auto-assign MEMBER role in the org
@@ -85,7 +86,7 @@ export async function POST(req: Request) {
         data: {
           userId: newUser.id,
           orgId: invite.orgId,
-          role: "MEMBER",
+          role: invite.role,
         },
       });
 

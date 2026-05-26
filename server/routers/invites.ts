@@ -3,6 +3,22 @@ import { router, protectedProcedure, publicProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
 import crypto from "crypto";
 
+function getInviteBaseUrl() {
+  const configuredUrl =
+    process.env.FRONTEND_URL ||
+    process.env.NEXT_PUBLIC_APP_URL ||
+    process.env.NEXT_PUBLIC_NEXTAUTH_URL;
+
+  if (configuredUrl) return configuredUrl.replace(/\/$/, "");
+
+  const nextAuthUrl = process.env.NEXTAUTH_URL;
+  if (nextAuthUrl) {
+    return nextAuthUrl.replace(":3001", ":3000").replace(/\/$/, "");
+  }
+
+  return "http://localhost:3000";
+}
+
 export const invitesRouter = router({
   // Admin generates an invite link
   create: protectedProcedure
@@ -78,13 +94,7 @@ export const invitesRouter = router({
       });
 
       // Return the full invite URL
-      const baseUrl = (
-        process.env.NEXT_PUBLIC_APP_URL ||
-        process.env.NEXT_PUBLIC_NEXTAUTH_URL ||
-        process.env.FRONTEND_URL ||
-        process.env.NEXTAUTH_URL ||
-        "http://localhost:3001"
-      ).replace(/\/$/, "");
+      const baseUrl = getInviteBaseUrl();
       return {
         token: invite.token,
         inviteUrl: `${baseUrl}/signup?token=${invite.token}`,

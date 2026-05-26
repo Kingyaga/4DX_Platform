@@ -42,6 +42,8 @@ export default function TeamLeadRequestsPage() {
         trpcCtx.sessions.getCurrentSession.invalidate({ teamSlug: currentTeamSlug || "" }),
       ]);
       setRequestStatusMessage("Request approved — activity log is now active.");
+    } catch (err: any) {
+      setRequestStatusMessage(err?.message || "Unable to approve this request. Please refresh and try again.");
     } finally {
       setProcessingRequestId(null);
       setProcessingRequestAction(null);
@@ -64,6 +66,8 @@ export default function TeamLeadRequestsPage() {
         trpcCtx.sessions.getCurrentSession.invalidate({ teamSlug: currentTeamSlug || "" }),
       ]);
       setRequestStatusMessage("Request declined.");
+    } catch (err: any) {
+      setRequestStatusMessage(err?.message || "Unable to decline this request. Please refresh and try again.");
     } finally {
       setProcessingRequestId(null);
       setProcessingRequestAction(null);
@@ -89,6 +93,8 @@ export default function TeamLeadRequestsPage() {
         trpcCtx.sessions.getCurrentSession.invalidate({ teamSlug: currentTeamSlug }),
       ]);
       setRequestStatusMessage(`${approvedCount} request${approvedCount === 1 ? "" : "s"} approved.`);
+    } catch (err: any) {
+      setRequestStatusMessage(err?.message || "Unable to approve requests. Please refresh and try again.");
     } finally {
       setProcessingRequestId(null);
       setProcessingRequestAction(null);

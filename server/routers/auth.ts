@@ -19,9 +19,21 @@ function getFrontendUrl() {
     process.env.FRONTEND_URL ||
     process.env.NEXT_PUBLIC_APP_URL ||
     process.env.NEXT_PUBLIC_NEXTAUTH_URL ||
-    process.env.NEXTAUTH_URL ||
-    "http://localhost:3001"
+    process.env.NEXTAUTH_URL?.replace(":3001", ":3000") ||
+    "http://localhost:3000"
   ).replace(/\/$/, "");
+}
+
+function getAppLoginUrl() {
+  const baseUrl = (
+    process.env.FRONTEND_URL ||
+    process.env.NEXT_PUBLIC_APP_URL ||
+    process.env.NEXT_PUBLIC_NEXTAUTH_URL ||
+    process.env.NEXTAUTH_URL?.replace(":3001", ":3000") ||
+    "http://localhost:3000"
+  ).replace(/\/$/, "");
+
+  return `${baseUrl}/login`;
 }
 
 export const authRouter = router({
@@ -182,7 +194,7 @@ export const authRouter = router({
       await ctx.db.$transaction([
         ctx.db.user.update({
           where: { id: resetToken.userId },
-          data: { passwordHash },
+          data: { passwordHash, mustChangePassword: false },
         }),
         ctx.db.passwordResetToken.update({
           where: { id: resetToken.id },
@@ -218,7 +230,7 @@ export const authRouter = router({
       if (!user.passwordHash) {
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: "This account uses Microsoft sign-in. Password changes are not available.",
+          message: "This account does not have a password set. Use password reset to create one.",
         });
       }
 
@@ -312,6 +324,7 @@ export const authRouter = router({
           name: input.name,
           email: normalizedEmail,
           passwordHash,
+          mustChangePassword: true,
         },
       });
 
@@ -319,7 +332,7 @@ export const authRouter = router({
         data: {
           userId: user.id,
           orgId: invite.orgId,
-          role: "MEMBER",
+          role: invite.role,
         },
       });
 
@@ -440,8 +453,6 @@ export const authRouter = router({
         assignedTeamName = team.name;
       }
 
-      const loginUrl = `${process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_BACKEND_URL || ""}/login`;
-
       const emailSent = await sendNewUserDetailsEmail({
         to: user.email,
         name: user.name,
@@ -449,7 +460,7 @@ export const authRouter = router({
         temporaryPassword: input.password,
         orgName: org.name,
         teamName: assignedTeamName,
-        loginUrl,
+        loginUrl: getAppLoginUrl(),
       });
 
       return { id: user.id, email: user.email, emailSent };

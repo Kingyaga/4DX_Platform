@@ -413,7 +413,7 @@ export default function AdminPage() {
         <section style={{ display: "flex", flexWrap: "wrap", gap: "14px", alignItems: "center", justifyContent: "space-between" }}>
           <div style={{ display: "flex", flexWrap: "wrap", gap: "12px" }}>
             <Link
-              href="#create-user"
+              href="/dashboard/admin/invites"
               className="click-animation"
               style={{
                 padding: "12px 18px",

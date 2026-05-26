@@ -45,12 +45,18 @@ function normalizeFlexibleActivityValue(input: {
   progressStatus?: ProgressStatus;
 }): NormalizedActivityValue {
   const trackingType = input.trackingType;
+  if (typeof input.value === "number" && input.value < 0) {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: "Activity values cannot be negative.",
+    });
+  }
 
   if (trackingType === "NUMERIC") {
-    if (typeof input.value !== "number" || Number.isNaN(input.value)) {
+    if (typeof input.value !== "number" || Number.isNaN(input.value) || input.value < 0) {
       throw new TRPCError({
         code: "BAD_REQUEST",
-        message: "Numeric lead measures require a valid number.",
+        message: "Numeric lead measures require a valid non-negative number.",
       });
     }
 
@@ -297,17 +303,20 @@ export const activityLogsRouter = router({
         });
       }
 
-      // Verify user is a team member — admins cannot log activity
+      // Verify user belongs to the team. A team lead may log their own execution
+      // even if their lead role exists through Team.leadUserId rather than a membership row.
+      const currentUserId = (ctx.session.user as any).id;
+      const isTeamLead = leadMeasure.wig.team.leadUserId === currentUserId;
       const teamMembership = await ctx.db.teamMembership.findUnique({
         where: {
           userId_teamId: {
-            userId: (ctx.session.user as any).id,
+            userId: currentUserId,
             teamId: leadMeasure.wig.team.id,
           },
         },
       });
 
-      if (!teamMembership) {
+      if (!teamMembership && !isTeamLead) {
         throw new TRPCError({
           code: "FORBIDDEN",
           message: "You must be a team member to log activity.",
@@ -315,13 +324,13 @@ export const activityLogsRouter = router({
       }
 
       const isOwner = leadMeasure.owners.some(
-        (owner) => owner.userId === (ctx.session.user as any).id,
+        (owner) => owner.userId === currentUserId,
       );
 
-      if (!isOwner) {
+      if (!isOwner && !isTeamLead) {
         throw new TRPCError({
           code: "FORBIDDEN",
-          message: "You can only log activity against lead measures you own.",
+          message: "You can only log activity against lead measures you own or lead.",
         });
       }
 
@@ -341,13 +350,13 @@ export const activityLogsRouter = router({
           loggedForDate: input.loggedForDate,
           note: input.note,
           status: "PENDING",
-          userId: (ctx.session.user as any).id,
+          userId: currentUserId,
         },
       });
 
       await auditLog({
         db: ctx.db,
-        actorUserId: (ctx.session.user as any).id,
+        actorUserId: currentUserId,
         entityType: "ACTIVITY_LOG",
         entityId: createdLog.id,
         action: "ACTIVITY_LOGGED",

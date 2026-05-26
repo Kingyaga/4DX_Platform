@@ -203,6 +203,7 @@ export default function ActivityLogPage() {
     e.preventDefault();
     if (!currentTeamSlug || !selectedLeadMeasureId || !logDate) return;
     if (isSelectedNumeric && !value) return;
+    if (selectedTrackingType === "NUMERIC" && Number(value) < 0) return;
     if (selectedTrackingType === "TEXT" && !textValue.trim()) return;
     if (selectedTrackingType === "TIME" && !/^([01]\d|2[0-3]):[0-5]\d$/.test(timeValue)) return;
     if (selectedTrackingType === "PERCENTAGE" && (Number(percentageValue) < 0 || Number(percentageValue) > 100)) return;
@@ -340,9 +341,10 @@ export default function ActivityLogPage() {
               </label>
               <input
                 type="number"
+                min="0"
                 placeholder="0"
                 value={value}
-                onChange={(e) => setValue(e.target.value)}
+                onChange={(e) => setValue(Number(e.target.value) < 0 ? "0" : e.target.value)}
                 disabled={isSubmitting}
                 style={{ width: "100%", height: "48px", padding: "0 16px", border: "1px solid #e4e4e7", backgroundColor: "#ffffff", fontSize: "32px", fontWeight: 700, color: "#18181b", outline: "none", borderRadius: "0", cursor: isSubmitting ? "not-allowed" : "text" }}
               />
@@ -505,9 +507,10 @@ export default function ActivityLogPage() {
                       <div style={{ marginTop: "8px", display: "flex", gap: "8px", alignItems: "center", padding: "8px 16px", border: "1px solid #e4e4e7", backgroundColor: "#f8fafc" }}>
                         {(log.trackingType === "NUMERIC" || log.leadMeasure?.trackingType === "NUMERIC") && (
                           <input
-                            type="number"
-                            value={editValue}
-                            onChange={(e) => setEditValue(e.target.value)}
+	                            type="number"
+	                            min="0"
+	                            value={editValue}
+	                            onChange={(e) => setEditValue(Number(e.target.value) < 0 ? "0" : e.target.value)}
                             style={{ width: "80px", padding: "4px 8px", border: "1px solid #e4e4e7", fontSize: "13px" }}
                           />
                         )}

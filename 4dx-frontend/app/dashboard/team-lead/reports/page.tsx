@@ -102,6 +102,7 @@ export default function TeamLeadReportsPage() {
 
   // Compute report data
   const allLeadMeasures = wigs.flatMap((w: any) => w.leadMeasures || []);
+  const incompleteLeadMeasures = allLeadMeasures.filter((lm: any) => getLeadMeasureScore(lm) < 100);
   const executionScore = allLeadMeasures.length > 0
     ? Math.round(
         allLeadMeasures.reduce((sum: number, lm: any) => {
@@ -374,10 +375,15 @@ export default function TeamLeadReportsPage() {
           <div style={{ border: "1px solid #e4e4e7", borderRadius: "8px", padding: "24px", backgroundColor: "white" }}>
             <h2 style={{ margin: "0 0 16px 0", fontSize: "20px", fontWeight: "600" }}>Lead Measures Report</h2>
             <p style={{ margin: 0, color: "#71717a", fontSize: "14px" }}>
-              Detailed tracking of all lead measures. Track weekly progress and adjust cadence as needed.
+              Detailed tracking of lead measures still in progress. Completed lead measures are excluded.
             </p>
             <div style={{ marginTop: "24px", display: "flex", flexDirection: "column", gap: "12px" }}>
-              {allLeadMeasures.slice(0, 10).map((lm: any, i: number) => {
+              {incompleteLeadMeasures.length === 0 && (
+                <p style={{ margin: 0, color: "#71717a", fontSize: "14px" }}>
+                  No incomplete lead measures to report.
+                </p>
+              )}
+              {incompleteLeadMeasures.slice(0, 10).map((lm: any, i: number) => {
                 const isOnTrack = getLeadMeasureScore(lm) >= 100;
                 return (
                   <div key={i} style={{ padding: "12px", backgroundColor: "#f9fafb", borderRadius: "6px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
