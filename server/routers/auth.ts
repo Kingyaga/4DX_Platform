@@ -101,6 +101,7 @@ export const authRouter = router({
       role: orgRole,
       orgSlug,
       teamMemberships: user.teamMemberships,
+      mustChangePassword: user.mustChangePassword,
     };
   }),
 
@@ -225,7 +226,7 @@ export const authRouter = router({
       const passwordHash = await bcrypt.hash(input.newPassword, 12);
       await ctx.db.user.update({
         where: { id: user.id },
-        data: { passwordHash },
+        data: { passwordHash, mustChangePassword: false },
       });
 
       await ctx.db.notification.create({
@@ -393,6 +394,7 @@ export const authRouter = router({
           name: input.name,
           email: normalizedEmail,
           passwordHash,
+          mustChangePassword: true,
         },
       });
 
@@ -432,6 +434,8 @@ export const authRouter = router({
         assignedTeamName = team.name;
       }
 
+      const loginUrl = `${process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_BACKEND_URL || ""}/login`;
+
       const emailSent = await sendNewUserDetailsEmail({
         to: user.email,
         name: user.name,
@@ -439,6 +443,7 @@ export const authRouter = router({
         temporaryPassword: input.password,
         orgName: org.name,
         teamName: assignedTeamName,
+        loginUrl,
       });
 
       return { id: user.id, email: user.email, emailSent };

@@ -67,23 +67,6 @@ export default function AdminUsersPage() {
           </div>
           <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
             <Link
-              href="/dashboard/admin/invites"
-              style={{
-                padding: "10px 20px",
-                border: "1px solid #18181b",
-                backgroundColor: "transparent",
-                color: "#18181b",
-                fontSize: "12px",
-                fontWeight: 600,
-                textTransform: "uppercase",
-                letterSpacing: "0.05em",
-                textDecoration: "none",
-                display: "inline-block",
-              }}
-            >
-              Invite Members
-            </Link>
-            <Link
               href="/dashboard/admin/users/new"
               style={{
                 padding: "10px 16px",

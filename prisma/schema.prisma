@@ -26,12 +26,13 @@ model Organization {
 // ─── USER ───────────────────────────────────────────────────────────────────
 
 model User {
-  id            String   @id @default(cuid())
-  email         String   @unique
-  name          String
-  passwordHash  String
-  createdAt     DateTime @default(now())
-  defaultTeamId String?
+  id                  String   @id @default(cuid())
+  email               String   @unique
+  name                String
+  passwordHash        String
+  createdAt           DateTime @default(now())
+  defaultTeamId       String?
+  mustChangePassword  Boolean  @default(false)
 
   orgMemberships      OrgMembership[]
   teamMemberships     TeamMembership[]

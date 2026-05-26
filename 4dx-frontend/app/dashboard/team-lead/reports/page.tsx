@@ -82,7 +82,10 @@ export default function TeamLeadReportsPage() {
       )
     : 0;
 
-  const onTrackCount = allLeadMeasures.filter((lm: any) => (lm.activityLogs?.[0]?.value || 0) >= lm.targetValue).length;
+  const onTrackCount = allLeadMeasures.filter((lm: any) => {
+    const total = (lm.activityLogs || []).reduce((s: number, l: any) => s + l.value, 0);
+    return total >= lm.targetValue;
+  }).length;
   const lagMeasures = wigs.map((w: any) => {
     const fromValue = w.fromValue || 0;
     const toValue = w.toValue || 0;
