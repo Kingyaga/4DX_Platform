@@ -16,6 +16,9 @@ type AggregatedActivityLog = ActivityLogEntry & {
   trackingType?: TrackingType;
 };
 
+type MinimalWig = { id: string; title?: string; status?: string; leadMeasures?: unknown[] };
+type MinimalLeadMeasure = { id: string; name: string; unit?: string | null; trackingType?: TrackingType; activityLogs?: ActivityLogEntry[]; owners?: { userId: string }[]; targetValue?: number | null };
+
 function isNumericLike(trackingType?: TrackingType) {
   return trackingType === "NUMERIC" || trackingType === "PERCENTAGE" || trackingType === "DURATION";
 }
@@ -26,14 +29,14 @@ function isStatusDriven(trackingType?: TrackingType) {
 
 function formatActivityValue(log: {
   value?: number | null;
-  valueJson?: any;
+  valueJson?: unknown;
   progressStatus?: ActivityProgressStatus | null;
   trackingType?: TrackingType;
   unit?: string | null;
   note?: string | null;
 }) {
   const trackingType = log.trackingType || "NUMERIC";
-  const payload = typeof log.valueJson === "object" && log.valueJson !== null ? log.valueJson : {};
+  const payload = (typeof log.valueJson === "object" && log.valueJson !== null ? (log.valueJson as Record<string, unknown>) : {}) as Record<string, unknown>;
   if (trackingType === "NUMERIC") return `${log.value ?? 0} ${log.unit ?? ""}`.trim();
   if (trackingType === "PERCENTAGE") return `${log.value ?? payload.value ?? 0}% logged`;
   if (trackingType === "DURATION") return `${log.value ?? payload.minutes ?? 0} min logged`;
@@ -79,7 +82,7 @@ export default function ActivityLogPage() {
   const PREVIEW_COUNT = 10;
   const userId = user?.id;
 
-  const activeWigs = useMemo(() => (wigs as any[]).filter((wig) => wig.status === "ACTIVE"), [wigs]);
+  const activeWigs = useMemo(() => ((wigs ?? []) as MinimalWig[]).filter((wig) => wig.status === "ACTIVE"), [wigs]);
 
   const allLeadMeasures = useMemo(() =>
     activeWigs.flatMap((wig) =>
@@ -112,19 +115,18 @@ export default function ActivityLogPage() {
   // Set default selected lead measure when data loads
   useEffect(() => {
     if (activeWigs.length > 0 && (!selectedWigId || !activeWigs.some((wig) => wig.id === selectedWigId))) {
-      setSelectedWigId(activeWigs[0].id);
+      // Defer state update to avoid synchronous setState within effect
+      setTimeout(() => setSelectedWigId(activeWigs[0].id), 0);
       return;
     }
 
     const selectionStillAvailable = allLeadMeasures.some((lm) => lm.id === selectedLeadMeasureId);
 
     if (hasLeadMeasures && (!selectedLeadMeasureId || !selectionStillAvailable)) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setSelectedLeadMeasureId(allLeadMeasures[0].id);
+      setTimeout(() => setSelectedLeadMeasureId(allLeadMeasures[0].id), 0);
     }
     if (!hasLeadMeasures && selectedLeadMeasureId) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setSelectedLeadMeasureId("");
+      setTimeout(() => setSelectedLeadMeasureId(""), 0);
     }
   }, [activeWigs, allLeadMeasures, hasLeadMeasures, selectedLeadMeasureId, selectedWigId]);
 
@@ -149,27 +151,30 @@ export default function ActivityLogPage() {
 
   // Extract activity logs from WIGs data
   useEffect(() => {
-    if (!wigs.length) {
-      setActivityLogs([]);
-      setLogsError(null);
+    if (!Array.isArray(wigs) || wigs.length === 0) {
+      // Defer to avoid synchronous setState in effect
+      setTimeout(() => {
+        setActivityLogs([]);
+        setLogsError(null);
+      }, 0);
       return;
     }
 
     try {
       const loadedLogs: AggregatedActivityLog[] = [];
 
-      for (const wig of wigs as any[]) {
-        for (const lm of (wig.leadMeasures || []) as any[]) {
+      for (const wig of (wigs as MinimalWig[])) {
+        for (const lm of (wig.leadMeasures || []) as MinimalLeadMeasure[]) {
           // Activity logs might not be included in the response depending on backend query
           const logs = lm.activityLogs;
           if (logs && Array.isArray(logs)) {
             const aggregatedLogs = logs
-              .filter((log: ActivityLogEntry) => (log as any).userId === userId)
+              .filter((log: ActivityLogEntry) => log.userId === userId)
               .map((log: ActivityLogEntry) => ({
                 ...log,
                 leadMeasureId: lm.id,
                 leadMeasureName: lm.name,
-                wigTitle: wig.title,
+                wigTitle: wig.title ?? "",
                 unit: lm.unit,
                 trackingType: lm.trackingType,
               }));
@@ -186,7 +191,7 @@ export default function ActivityLogPage() {
     }
   }, [wigs, logsRefreshIndex, userId]);
 
-  const pendingLogs = (myAllLogs as any[]).filter((log: any) => log.status === "PENDING");
+  const pendingLogs = (Array.isArray(myAllLogs) ? (myAllLogs as ActivityLogEntry[]) : []).filter((log) => log.status === "PENDING");
 
   const sortedLogs = [...activityLogs].sort((a: AggregatedActivityLog, b: AggregatedActivityLog) =>
     new Date(b.loggedForDate).getTime() - new Date(a.loggedForDate).getTime(),
