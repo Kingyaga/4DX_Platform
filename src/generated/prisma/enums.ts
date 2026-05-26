@@ -54,6 +54,24 @@ export const ActivityLogStatus = {
 export type ActivityLogStatus = (typeof ActivityLogStatus)[keyof typeof ActivityLogStatus]
 
 
+export const TrackingType = {
+  NUMERIC: 'NUMERIC',
+  MILESTONE: 'MILESTONE'
+} as const
+
+export type TrackingType = (typeof TrackingType)[keyof typeof TrackingType]
+
+
+export const ActivityProgressStatus = {
+  NOT_STARTED: 'NOT_STARTED',
+  IN_PROGRESS: 'IN_PROGRESS',
+  BLOCKED: 'BLOCKED',
+  DONE: 'DONE'
+} as const
+
+export type ActivityProgressStatus = (typeof ActivityProgressStatus)[keyof typeof ActivityProgressStatus]
+
+
 export const SessionStatus = {
   PENDING: 'PENDING',
   IN_PROGRESS: 'IN_PROGRESS',

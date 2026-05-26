@@ -6,7 +6,7 @@ import { useTeamStore } from "@/lib/stores/team-store";
 import { useUserStore } from "@/lib/stores/user-store";
 import { ErrorState, EmptyState } from "@/lib/components/states";
 import { LoadingSpinner } from "@/lib/components/loading-spinner";
-import type { LeadMeasure, ActivityLogEntry } from "@/lib/types";
+import type { LeadMeasure, ActivityLogEntry, ActivityProgressStatus } from "@/lib/types";
 
 type AggregatedActivityLog = ActivityLogEntry & {
   leadMeasureId: string;
@@ -26,8 +26,10 @@ export default function ActivityLogPage() {
   const [editValue, setEditValue] = useState<string>("");
   const [editNote, setEditNote] = useState<string>("");
   const [hoveredRow, setHoveredRow] = useState<number | null>(null);
+  const [selectedWigId, setSelectedWigId] = useState<string>("");
   const [selectedLeadMeasureId, setSelectedLeadMeasureId] = useState<string>("");
   const [value, setValue] = useState<string>("");
+  const [progressStatus, setProgressStatus] = useState<ActivityProgressStatus>("IN_PROGRESS");
   const [logDate, setLogDate] = useState<string>(new Date().toISOString().split("T")[0]);
   const [note, setNote] = useState<string>("");
   const [activityLogs, setActivityLogs] = useState<AggregatedActivityLog[]>([]);
@@ -39,31 +41,42 @@ export default function ActivityLogPage() {
   const PREVIEW_COUNT = 10;
   const userId = user?.id;
 
+  const activeWigs = useMemo(() => (wigs as any[]).filter((wig) => wig.status === "ACTIVE"), [wigs]);
+
   const allLeadMeasures = useMemo(() =>
-    (wigs as any[]).flatMap((wig) =>
+    activeWigs.flatMap((wig) =>
       (wig.leadMeasures || [])
         .filter((lm: LeadMeasure) => {
           const approvedTotal = (lm.activityLogs || [])
             .filter((log) => log.status === "APPROVED")
-            .reduce((sum, log) => sum + log.value, 0);
+            .reduce((sum, log) => sum + (log.value ?? 0), 0);
+          const isComplete = lm.trackingType === "MILESTONE"
+            ? (lm.activityLogs || []).some((log) => log.status === "APPROVED" && log.progressStatus === "DONE")
+            : approvedTotal >= (lm.targetValue ?? 0);
 
           return (
-            wig.status === "ACTIVE" &&
-            approvedTotal < lm.targetValue &&
+            (!selectedWigId || wig.id === selectedWigId) &&
+            !isComplete &&
             (!userId || (lm.owners || []).some((owner) => owner.userId === userId))
           );
         })
-        .map((lm: LeadMeasure) => ({ id: lm.id, name: lm.name, wigTitle: wig.title, unit: (lm as any).unit || "" })),
-    ), [wigs, userId]
+        .map((lm: LeadMeasure) => ({ id: lm.id, name: lm.name, wigTitle: wig.title, unit: lm.unit || "", trackingType: lm.trackingType })),
+    ), [activeWigs, selectedWigId, userId]
   );
 
   const selectedLM = allLeadMeasures.find((lm) => lm.id === selectedLeadMeasureId);
   const selectedUnit = selectedLM?.unit && selectedLM.unit.toLowerCase() !== "none" ? selectedLM.unit : "";
+  const isSelectedNumeric = selectedLM?.trackingType !== "MILESTONE";
 
   const hasLeadMeasures = allLeadMeasures.length > 0;
 
   // Set default selected lead measure when data loads
   useEffect(() => {
+    if (activeWigs.length > 0 && (!selectedWigId || !activeWigs.some((wig) => wig.id === selectedWigId))) {
+      setSelectedWigId(activeWigs[0].id);
+      return;
+    }
+
     const selectionStillAvailable = allLeadMeasures.some((lm) => lm.id === selectedLeadMeasureId);
 
     if (hasLeadMeasures && (!selectedLeadMeasureId || !selectionStillAvailable)) {
@@ -74,7 +87,7 @@ export default function ActivityLogPage() {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setSelectedLeadMeasureId("");
     }
-  }, [allLeadMeasures, hasLeadMeasures, selectedLeadMeasureId]);
+  }, [activeWigs, allLeadMeasures, hasLeadMeasures, selectedLeadMeasureId, selectedWigId]);
 
   useEffect(() => {
     if (!successMessage) return undefined;
@@ -142,12 +155,14 @@ export default function ActivityLogPage() {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!currentTeamSlug || !selectedLeadMeasureId || !value || !logDate) return;
+    if (!currentTeamSlug || !selectedLeadMeasureId || !logDate) return;
+    if (isSelectedNumeric && !value) return;
 
     try {
       await logActivity({
         leadMeasureId: selectedLeadMeasureId,
-        value: parseFloat(value),
+        value: isSelectedNumeric ? parseFloat(value) : undefined,
+        progressStatus: isSelectedNumeric ? undefined : progressStatus,
         loggedForDate: new Date(logDate),
         note: note || undefined,
       });
@@ -155,6 +170,7 @@ export default function ActivityLogPage() {
       setSuccessMessage("Your request has been sent, awaiting confirmation.");
       setSelectedLeadMeasureId("");
       setValue("");
+      setProgressStatus("IN_PROGRESS");
       setLogDate(new Date().toISOString().split("T")[0]);
       setNote("");
       setLogsRefreshIndex((current) => current + 1);
@@ -189,6 +205,35 @@ export default function ActivityLogPage() {
 
           <div>
             <label style={{ fontSize: "12px", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", color: "#18181b", display: "block", marginBottom: "8px" }}>
+              WIG
+            </label>
+            <div style={{ position: "relative" }}>
+              <select
+                value={selectedWigId}
+                onChange={(e) => {
+                  setSelectedWigId(e.target.value);
+                  setSelectedLeadMeasureId("");
+                }}
+                disabled={isLoading || activeWigs.length === 0}
+                style={{ width: "100%", height: "48px", padding: "0 16px", border: "1px solid #e4e4e7", backgroundColor: isLoading || activeWigs.length === 0 ? "#f4f4f5" : "#ffffff", fontSize: "16px", color: "#18181b", outline: "none", borderRadius: "0", appearance: "none", cursor: isLoading || activeWigs.length === 0 ? "not-allowed" : "pointer" }}
+              >
+                <option value="" disabled>
+                  {isLoading ? "Loading WIGs..." : activeWigs.length ? "Select a WIG" : "No active WIGs available"}
+                </option>
+                {activeWigs.map((wig) => (
+                  <option key={wig.id} value={wig.id}>
+                    {wig.title}
+                  </option>
+                ))}
+              </select>
+              <span className="material-symbols-outlined" style={{ position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)", pointerEvents: "none", color: "#71717a" }}>
+                arrow_drop_down
+              </span>
+            </div>
+          </div>
+
+          <div>
+            <label style={{ fontSize: "12px", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", color: "#18181b", display: "block", marginBottom: "8px" }}>
               Lead Measure
             </label>
             <div style={{ position: "relative" }}>
@@ -214,7 +259,7 @@ export default function ActivityLogPage() {
           </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
-            <div>
+            {isSelectedNumeric ? <div>
               <label style={{ fontSize: "12px", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", color: "#18181b", display: "block", marginBottom: "8px" }}>
                 Value{selectedUnit ? ` (${selectedUnit})` : ""}
               </label>
@@ -226,7 +271,21 @@ export default function ActivityLogPage() {
                 disabled={isSubmitting}
                 style={{ width: "100%", height: "48px", padding: "0 16px", border: "1px solid #e4e4e7", backgroundColor: "#ffffff", fontSize: "32px", fontWeight: 700, color: "#18181b", outline: "none", borderRadius: "0", cursor: isSubmitting ? "not-allowed" : "text" }}
               />
-            </div>
+            </div> : <div>
+              <label style={{ fontSize: "12px", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", color: "#18181b", display: "block", marginBottom: "8px" }}>
+                Progress Status
+              </label>
+              <select
+                value={progressStatus}
+                onChange={(e) => setProgressStatus(e.target.value as ActivityProgressStatus)}
+                disabled={isSubmitting}
+                style={{ width: "100%", height: "48px", padding: "0 16px", border: "1px solid #e4e4e7", backgroundColor: "#ffffff", fontSize: "16px", color: "#18181b", outline: "none", borderRadius: "0" }}
+              >
+                <option value="IN_PROGRESS">In progress</option>
+                <option value="BLOCKED">Blocked</option>
+                <option value="DONE">Done</option>
+              </select>
+            </div>}
             <div>
               <label style={{ fontSize: "12px", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", color: "#18181b", display: "block", marginBottom: "8px" }}>
                 Date
@@ -263,13 +322,13 @@ export default function ActivityLogPage() {
 
           {!hasLeadMeasures && (
             <div style={{ padding: "12px", backgroundColor: "#f8fafc", border: "1px solid #e2e8f0", color: "#475569", fontSize: "14px", borderRadius: "4px" }}>
-              You do not own any lead measures on this team yet. Ask your team lead to assign you before submitting activity.
+              You do not own any active lead measures for the selected WIG. Draft WIGs and inactive lead measures are intentionally hidden here.
             </div>
           )}
 
           <button
             onClick={handleSubmit}
-            disabled={isSubmitting || isLoading || !hasLeadMeasures || !selectedLeadMeasureId || !value}
+            disabled={isSubmitting || isLoading || !hasLeadMeasures || !selectedLeadMeasureId || (isSelectedNumeric && !value)}
             style={{ height: "56px", width: "100%", backgroundColor: isSubmitting || isLoading || !hasLeadMeasures ? "#a1a1a1" : "#000000", color: "#ffffff", fontSize: "12px", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", border: "none", cursor: isSubmitting || isLoading || !hasLeadMeasures ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "12px", marginTop: "16px" }}
           >
             <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>

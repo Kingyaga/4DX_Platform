@@ -393,6 +393,15 @@ export function useUpdateLeadMeasureOwners() {
   };
 }
 
+export function useArchiveLeadMeasure() {
+  const mutation = (trpc as any).leadMeasures.archive.useMutation();
+  return {
+    archiveLeadMeasure: mutation.mutateAsync as (input: { leadMeasureId: string }) => Promise<LeadMeasure>,
+    isLoading: mutation.isPending,
+    error: mutation.error ? parseTRPCError(mutation.error) : null,
+  };
+}
+
 /**
  * Activate a draft WIG after lead measure gates are satisfied
  */
@@ -783,7 +792,7 @@ export function useCreateInvite() {
       email?: string;
       teamSlug?: string;
       expiresInDays?: number;
-    }) => Promise<{ token: string; inviteUrl: string; expiresAt: Date; email?: string }>,
+    }) => Promise<{ token: string; inviteUrl: string; expiresAt: Date; email?: string; teamName?: string | null }>,
     isLoading: mutation.isPending,
     error: mutation.error ? parseTRPCError(mutation.error) : null,
   };
@@ -806,6 +815,7 @@ export function useOrgInvites(orgSlug: string | null) {
       usedAt: Date | null;
       createdAt: Date;
       createdBy: { id: string; name: string; email: string };
+      team?: { id: string; name: string; slug: string } | null;
     }>,
     isLoading: query.isLoading,
     error: query.error ? parseTRPCError(query.error) : null,

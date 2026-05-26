@@ -162,6 +162,7 @@ export const WIGScalarFieldEnum = {
   id: 'id',
   title: 'title',
   description: 'description',
+  trackingType: 'trackingType',
   fromValue: 'fromValue',
   toValue: 'toValue',
   currentValue: 'currentValue',
@@ -181,6 +182,7 @@ export const LeadMeasureScalarFieldEnum = {
   id: 'id',
   name: 'name',
   description: 'description',
+  trackingType: 'trackingType',
   cadence: 'cadence',
   targetValue: 'targetValue',
   unit: 'unit',
@@ -204,6 +206,7 @@ export type LeadMeasureOwnerScalarFieldEnum = (typeof LeadMeasureOwnerScalarFiel
 export const ActivityLogScalarFieldEnum = {
   id: 'id',
   value: 'value',
+  progressStatus: 'progressStatus',
   loggedForDate: 'loggedForDate',
   note: 'note',
   status: 'status',

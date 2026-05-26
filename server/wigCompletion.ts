@@ -1,31 +1,54 @@
 export type LeadMeasureCompletionInput = {
   id: string;
   name?: string | null;
-  targetValue: number;
+  trackingType?: string | null;
+  targetValue?: number | null;
   activityLogs?: Array<{
-    value: number;
+    value?: number | null;
+    progressStatus?: string | null;
     loggedForDate?: Date | string | null;
   }>;
 };
 
 export type WigCompletionInput = {
-  fromValue: number;
+  fromValue?: number | null;
   status: string;
   closedAt: Date | null;
   leadMeasures: LeadMeasureCompletionInput[];
 };
 
 export function getLeadMeasureApprovedTotal(leadMeasure: LeadMeasureCompletionInput) {
-  return (leadMeasure.activityLogs || []).reduce((sum, log) => sum + log.value, 0);
+  return (leadMeasure.activityLogs || []).reduce((sum, log) => sum + (log.value ?? 0), 0);
+}
+
+function getLatestProgressStatus(leadMeasure: LeadMeasureCompletionInput) {
+  return [...(leadMeasure.activityLogs || [])]
+    .sort((a, b) => {
+      const aTime = a.loggedForDate ? new Date(a.loggedForDate).getTime() : 0;
+      const bTime = b.loggedForDate ? new Date(b.loggedForDate).getTime() : 0;
+      return bTime - aTime;
+    })[0]?.progressStatus;
 }
 
 export function isLeadMeasureComplete(leadMeasure: LeadMeasureCompletionInput) {
-  return leadMeasure.targetValue > 0 && getLeadMeasureApprovedTotal(leadMeasure) >= leadMeasure.targetValue;
+  if (leadMeasure.trackingType === "MILESTONE") {
+    return getLatestProgressStatus(leadMeasure) === "DONE";
+  }
+
+  return (leadMeasure.targetValue ?? 0) > 0 && getLeadMeasureApprovedTotal(leadMeasure) >= (leadMeasure.targetValue ?? 0);
 }
 
 export function getLeadMeasureCompletionPercent(leadMeasure: LeadMeasureCompletionInput) {
-  if (leadMeasure.targetValue <= 0) return 0;
-  return Math.min(100, (getLeadMeasureApprovedTotal(leadMeasure) / leadMeasure.targetValue) * 100);
+  if (leadMeasure.trackingType === "MILESTONE") {
+    const status = getLatestProgressStatus(leadMeasure);
+    if (status === "DONE") return 100;
+    if (status === "IN_PROGRESS") return 50;
+    if (status === "BLOCKED") return 25;
+    return 0;
+  }
+
+  if ((leadMeasure.targetValue ?? 0) <= 0) return 0;
+  return Math.min(100, (getLeadMeasureApprovedTotal(leadMeasure) / (leadMeasure.targetValue ?? 0)) * 100);
 }
 
 export function getWigCompletionScore(leadMeasures: LeadMeasureCompletionInput[]) {
@@ -50,8 +73,11 @@ export function getLastCompletedLeadMeasure(leadMeasures: LeadMeasureCompletionI
           return aTime - bTime;
         })
         .find((log) => {
-          total += log.value;
-          return leadMeasure.targetValue > 0 && total >= leadMeasure.targetValue;
+          total += log.value ?? 0;
+          if (leadMeasure.trackingType === "MILESTONE") {
+            return log.progressStatus === "DONE";
+          }
+          return (leadMeasure.targetValue ?? 0) > 0 && total >= (leadMeasure.targetValue ?? 0);
         });
 
       return completionLog
@@ -75,7 +101,7 @@ export function getNextWigCompletionState(wig: WigCompletionInput, now: Date = n
     wig.leadMeasures.length > 0 && wig.leadMeasures.every(isLeadMeasureComplete);
 
   return {
-    currentValue: wig.fromValue + totalApproved,
+    currentValue: (wig.fromValue ?? 0) + totalApproved,
     completionScore: getWigCompletionScore(wig.leadMeasures),
     lastCompletedLeadMeasure: getLastCompletedLeadMeasure(wig.leadMeasures),
     status: allLeadMeasuresCompleted ? "ACHIEVED" : wig.status,

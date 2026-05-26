@@ -2,13 +2,13 @@
 
 import { useState } from "react";
 import { useUserStore } from "@/lib/stores/user-store";
-import { useMyTeams, useCreateInvite, useOrgInvites, useRevokeInvite } from "@/lib/hooks";
+import { useAllTeams, useCreateInvite, useOrgInvites, useRevokeInvite } from "@/lib/hooks";
 import { ErrorState } from "@/lib/components/states";
 import { LoadingSpinner } from "@/lib/components/loading-spinner";
 
 export default function InvitesPage() {
   const { orgSlug } = useUserStore();
-  const { teams } = useMyTeams(orgSlug);
+  const { teams } = useAllTeams(orgSlug);
   const { invites, isLoading, error, refetch } = useOrgInvites(orgSlug);
   const { createInvite, isLoading: isCreating, error: createError } = useCreateInvite();
   const { revokeInvite, isLoading: isRevoking } = useRevokeInvite();
@@ -110,7 +110,7 @@ export default function InvitesPage() {
               style={{ width: "100%", padding: "10px 12px", border: "1px solid #e4e4e7", fontSize: "14px", color: "#18181b", boxSizing: "border-box", backgroundColor: "#ffffff" }}
             >
               <option value="">No team assignment</option>
-              {(teams as any[]).map((team: any) => (
+                {(teams as any[]).map((team: any) => (
                 <option key={team.slug} value={team.slug}>{team.name}</option>
               ))}
             </select>
@@ -193,6 +193,7 @@ export default function InvitesPage() {
                 <tr style={{ backgroundColor: "#f4f4f5" }}>
                   <th style={{ padding: "12px 16px", textAlign: "left", fontSize: "11px", fontWeight: 600, color: "#71717a", textTransform: "uppercase", letterSpacing: "0.05em" }}>Email / Open</th>
                   <th style={{ padding: "12px 16px", textAlign: "left", fontSize: "11px", fontWeight: 600, color: "#71717a", textTransform: "uppercase", letterSpacing: "0.05em" }}>Created By</th>
+                  <th style={{ padding: "12px 16px", textAlign: "left", fontSize: "11px", fontWeight: 600, color: "#71717a", textTransform: "uppercase", letterSpacing: "0.05em" }}>Team</th>
                   <th style={{ padding: "12px 16px", textAlign: "left", fontSize: "11px", fontWeight: 600, color: "#71717a", textTransform: "uppercase", letterSpacing: "0.05em" }}>Expires</th>
                   <th style={{ padding: "12px 16px", textAlign: "left", fontSize: "11px", fontWeight: 600, color: "#71717a", textTransform: "uppercase", letterSpacing: "0.05em" }}>Action</th>
                 </tr>
@@ -205,6 +206,9 @@ export default function InvitesPage() {
                     </td>
                     <td style={{ padding: "14px 16px", fontSize: "13px", color: "#71717a" }}>
                       {inv.createdBy?.name || inv.createdBy?.email}
+                    </td>
+                    <td style={{ padding: "14px 16px", fontSize: "13px", color: "#71717a" }}>
+                      {inv.team?.name ?? <span style={{ fontStyle: "italic" }}>No team yet</span>}
                     </td>
                     <td style={{ padding: "14px 16px", fontSize: "13px", color: "#71717a" }}>
                       {new Date(inv.expiresAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
@@ -238,6 +242,7 @@ export default function InvitesPage() {
                 <tr style={{ backgroundColor: "#f4f4f5" }}>
                   <th style={{ padding: "12px 16px", textAlign: "left", fontSize: "11px", fontWeight: 600, color: "#71717a", textTransform: "uppercase", letterSpacing: "0.05em" }}>Email / Open</th>
                   <th style={{ padding: "12px 16px", textAlign: "left", fontSize: "11px", fontWeight: 600, color: "#71717a", textTransform: "uppercase", letterSpacing: "0.05em" }}>Status</th>
+                  <th style={{ padding: "12px 16px", textAlign: "left", fontSize: "11px", fontWeight: 600, color: "#71717a", textTransform: "uppercase", letterSpacing: "0.05em" }}>Team</th>
                   <th style={{ padding: "12px 16px", textAlign: "left", fontSize: "11px", fontWeight: 600, color: "#71717a", textTransform: "uppercase", letterSpacing: "0.05em" }}>Date</th>
                 </tr>
               </thead>
@@ -256,6 +261,9 @@ export default function InvitesPage() {
                       }}>
                         {inv.usedAt ? "Used" : "Expired"}
                       </span>
+                    </td>
+                    <td style={{ padding: "14px 16px", fontSize: "13px", color: "#71717a" }}>
+                      {inv.team?.name ?? <span style={{ fontStyle: "italic" }}>No team</span>}
                     </td>
                     <td style={{ padding: "14px 16px", fontSize: "13px", color: "#71717a" }}>
                       {inv.usedAt

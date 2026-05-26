@@ -105,6 +105,7 @@ model Team {
   members    TeamMembership[]
   wigs       WIG[]
   invites    Invite[]
+  inviteTokens InviteToken[]
 
   @@index([orgId])
   @@index([leadUserId])
@@ -137,10 +138,11 @@ model WIG {
   id           String    @id @default(cuid())
   title        String
   description  String?
-  fromValue    Float
-  toValue      Float
-  currentValue Float     @default(0)
-  unit         String
+  trackingType TrackingType @default(NUMERIC)
+  fromValue    Float?
+  toValue      Float?
+  currentValue Float?
+  unit         String?
   deadline     DateTime
   status       WIGStatus @default(DRAFT)
   createdAt    DateTime  @default(now())
@@ -173,9 +175,10 @@ model LeadMeasure {
   id          String    @id @default(cuid())
   name        String
   description String?
+  trackingType TrackingType @default(NUMERIC)
   cadence     Cadence
-  targetValue Float
-  unit        String
+  targetValue Float?
+  unit        String?
   createdAt   DateTime  @default(now())
   archivedAt  DateTime?
 
@@ -211,7 +214,8 @@ model LeadMeasureOwner {
 
 model ActivityLog {
   id            String            @id @default(cuid())
-  value         Float
+  value         Float?
+  progressStatus ActivityProgressStatus?
   loggedForDate DateTime
   note          String?
   status        ActivityLogStatus @default(PENDING)
@@ -233,6 +237,18 @@ enum ActivityLogStatus {
   PENDING
   APPROVED
   REJECTED
+}
+
+enum TrackingType {
+  NUMERIC
+  MILESTONE
+}
+
+enum ActivityProgressStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  BLOCKED
+  DONE
 }
 
 // ─── WEEKLY SESSION ──────────────────────────────────────────────────────────
@@ -364,6 +380,7 @@ model InviteToken {
   createdByUserId String
 
   org       Organization @relation(fields: [orgId], references: [id])
+  team      Team?        @relation(fields: [teamId], references: [id])
   createdBy User         @relation(fields: [createdByUserId], references: [id])
 
   @@index([orgId])

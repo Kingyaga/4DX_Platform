@@ -37,6 +37,7 @@ export type ActivityLogSumAggregateOutputType = {
 export type ActivityLogMinAggregateOutputType = {
   id: string | null
   value: number | null
+  progressStatus: $Enums.ActivityProgressStatus | null
   loggedForDate: Date | null
   note: string | null
   status: $Enums.ActivityLogStatus | null
@@ -49,6 +50,7 @@ export type ActivityLogMinAggregateOutputType = {
 export type ActivityLogMaxAggregateOutputType = {
   id: string | null
   value: number | null
+  progressStatus: $Enums.ActivityProgressStatus | null
   loggedForDate: Date | null
   note: string | null
   status: $Enums.ActivityLogStatus | null
@@ -61,6 +63,7 @@ export type ActivityLogMaxAggregateOutputType = {
 export type ActivityLogCountAggregateOutputType = {
   id: number
   value: number
+  progressStatus: number
   loggedForDate: number
   note: number
   status: number
@@ -83,6 +86,7 @@ export type ActivityLogSumAggregateInputType = {
 export type ActivityLogMinAggregateInputType = {
   id?: true
   value?: true
+  progressStatus?: true
   loggedForDate?: true
   note?: true
   status?: true
@@ -95,6 +99,7 @@ export type ActivityLogMinAggregateInputType = {
 export type ActivityLogMaxAggregateInputType = {
   id?: true
   value?: true
+  progressStatus?: true
   loggedForDate?: true
   note?: true
   status?: true
@@ -107,6 +112,7 @@ export type ActivityLogMaxAggregateInputType = {
 export type ActivityLogCountAggregateInputType = {
   id?: true
   value?: true
+  progressStatus?: true
   loggedForDate?: true
   note?: true
   status?: true
@@ -205,7 +211,8 @@ export type ActivityLogGroupByArgs<ExtArgs extends runtime.Types.Extensions.Inte
 
 export type ActivityLogGroupByOutputType = {
   id: string
-  value: number
+  value: number | null
+  progressStatus: $Enums.ActivityProgressStatus | null
   loggedForDate: Date
   note: string | null
   status: $Enums.ActivityLogStatus
@@ -240,7 +247,8 @@ export type ActivityLogWhereInput = {
   OR?: Prisma.ActivityLogWhereInput[]
   NOT?: Prisma.ActivityLogWhereInput | Prisma.ActivityLogWhereInput[]
   id?: Prisma.StringFilter<"ActivityLog"> | string
-  value?: Prisma.FloatFilter<"ActivityLog"> | number
+  value?: Prisma.FloatNullableFilter<"ActivityLog"> | number | null
+  progressStatus?: Prisma.EnumActivityProgressStatusNullableFilter<"ActivityLog"> | $Enums.ActivityProgressStatus | null
   loggedForDate?: Prisma.DateTimeFilter<"ActivityLog"> | Date | string
   note?: Prisma.StringNullableFilter<"ActivityLog"> | string | null
   status?: Prisma.EnumActivityLogStatusFilter<"ActivityLog"> | $Enums.ActivityLogStatus
@@ -254,7 +262,8 @@ export type ActivityLogWhereInput = {
 
 export type ActivityLogOrderByWithRelationInput = {
   id?: Prisma.SortOrder
-  value?: Prisma.SortOrder
+  value?: Prisma.SortOrderInput | Prisma.SortOrder
+  progressStatus?: Prisma.SortOrderInput | Prisma.SortOrder
   loggedForDate?: Prisma.SortOrder
   note?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -271,7 +280,8 @@ export type ActivityLogWhereUniqueInput = Prisma.AtLeast<{
   AND?: Prisma.ActivityLogWhereInput | Prisma.ActivityLogWhereInput[]
   OR?: Prisma.ActivityLogWhereInput[]
   NOT?: Prisma.ActivityLogWhereInput | Prisma.ActivityLogWhereInput[]
-  value?: Prisma.FloatFilter<"ActivityLog"> | number
+  value?: Prisma.FloatNullableFilter<"ActivityLog"> | number | null
+  progressStatus?: Prisma.EnumActivityProgressStatusNullableFilter<"ActivityLog"> | $Enums.ActivityProgressStatus | null
   loggedForDate?: Prisma.DateTimeFilter<"ActivityLog"> | Date | string
   note?: Prisma.StringNullableFilter<"ActivityLog"> | string | null
   status?: Prisma.EnumActivityLogStatusFilter<"ActivityLog"> | $Enums.ActivityLogStatus
@@ -285,7 +295,8 @@ export type ActivityLogWhereUniqueInput = Prisma.AtLeast<{
 
 export type ActivityLogOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
-  value?: Prisma.SortOrder
+  value?: Prisma.SortOrderInput | Prisma.SortOrder
+  progressStatus?: Prisma.SortOrderInput | Prisma.SortOrder
   loggedForDate?: Prisma.SortOrder
   note?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -305,7 +316,8 @@ export type ActivityLogScalarWhereWithAggregatesInput = {
   OR?: Prisma.ActivityLogScalarWhereWithAggregatesInput[]
   NOT?: Prisma.ActivityLogScalarWhereWithAggregatesInput | Prisma.ActivityLogScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"ActivityLog"> | string
-  value?: Prisma.FloatWithAggregatesFilter<"ActivityLog"> | number
+  value?: Prisma.FloatNullableWithAggregatesFilter<"ActivityLog"> | number | null
+  progressStatus?: Prisma.EnumActivityProgressStatusNullableWithAggregatesFilter<"ActivityLog"> | $Enums.ActivityProgressStatus | null
   loggedForDate?: Prisma.DateTimeWithAggregatesFilter<"ActivityLog"> | Date | string
   note?: Prisma.StringNullableWithAggregatesFilter<"ActivityLog"> | string | null
   status?: Prisma.EnumActivityLogStatusWithAggregatesFilter<"ActivityLog"> | $Enums.ActivityLogStatus
@@ -317,7 +329,8 @@ export type ActivityLogScalarWhereWithAggregatesInput = {
 
 export type ActivityLogCreateInput = {
   id?: string
-  value: number
+  value?: number | null
+  progressStatus?: $Enums.ActivityProgressStatus | null
   loggedForDate: Date | string
   note?: string | null
   status?: $Enums.ActivityLogStatus
@@ -329,7 +342,8 @@ export type ActivityLogCreateInput = {
 
 export type ActivityLogUncheckedCreateInput = {
   id?: string
-  value: number
+  value?: number | null
+  progressStatus?: $Enums.ActivityProgressStatus | null
   loggedForDate: Date | string
   note?: string | null
   status?: $Enums.ActivityLogStatus
@@ -341,7 +355,8 @@ export type ActivityLogUncheckedCreateInput = {
 
 export type ActivityLogUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  value?: Prisma.FloatFieldUpdateOperationsInput | number
+  value?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  progressStatus?: Prisma.NullableEnumActivityProgressStatusFieldUpdateOperationsInput | $Enums.ActivityProgressStatus | null
   loggedForDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumActivityLogStatusFieldUpdateOperationsInput | $Enums.ActivityLogStatus
@@ -353,7 +368,8 @@ export type ActivityLogUpdateInput = {
 
 export type ActivityLogUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  value?: Prisma.FloatFieldUpdateOperationsInput | number
+  value?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  progressStatus?: Prisma.NullableEnumActivityProgressStatusFieldUpdateOperationsInput | $Enums.ActivityProgressStatus | null
   loggedForDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumActivityLogStatusFieldUpdateOperationsInput | $Enums.ActivityLogStatus
@@ -365,7 +381,8 @@ export type ActivityLogUncheckedUpdateInput = {
 
 export type ActivityLogCreateManyInput = {
   id?: string
-  value: number
+  value?: number | null
+  progressStatus?: $Enums.ActivityProgressStatus | null
   loggedForDate: Date | string
   note?: string | null
   status?: $Enums.ActivityLogStatus
@@ -377,7 +394,8 @@ export type ActivityLogCreateManyInput = {
 
 export type ActivityLogUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  value?: Prisma.FloatFieldUpdateOperationsInput | number
+  value?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  progressStatus?: Prisma.NullableEnumActivityProgressStatusFieldUpdateOperationsInput | $Enums.ActivityProgressStatus | null
   loggedForDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumActivityLogStatusFieldUpdateOperationsInput | $Enums.ActivityLogStatus
@@ -387,7 +405,8 @@ export type ActivityLogUpdateManyMutationInput = {
 
 export type ActivityLogUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  value?: Prisma.FloatFieldUpdateOperationsInput | number
+  value?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  progressStatus?: Prisma.NullableEnumActivityProgressStatusFieldUpdateOperationsInput | $Enums.ActivityProgressStatus | null
   loggedForDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumActivityLogStatusFieldUpdateOperationsInput | $Enums.ActivityLogStatus
@@ -410,6 +429,7 @@ export type ActivityLogOrderByRelationAggregateInput = {
 export type ActivityLogCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   value?: Prisma.SortOrder
+  progressStatus?: Prisma.SortOrder
   loggedForDate?: Prisma.SortOrder
   note?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -426,6 +446,7 @@ export type ActivityLogAvgOrderByAggregateInput = {
 export type ActivityLogMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   value?: Prisma.SortOrder
+  progressStatus?: Prisma.SortOrder
   loggedForDate?: Prisma.SortOrder
   note?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -438,6 +459,7 @@ export type ActivityLogMaxOrderByAggregateInput = {
 export type ActivityLogMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   value?: Prisma.SortOrder
+  progressStatus?: Prisma.SortOrder
   loggedForDate?: Prisma.SortOrder
   note?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -535,13 +557,18 @@ export type ActivityLogUncheckedUpdateManyWithoutLeadMeasureNestedInput = {
   deleteMany?: Prisma.ActivityLogScalarWhereInput | Prisma.ActivityLogScalarWhereInput[]
 }
 
+export type NullableEnumActivityProgressStatusFieldUpdateOperationsInput = {
+  set?: $Enums.ActivityProgressStatus | null
+}
+
 export type EnumActivityLogStatusFieldUpdateOperationsInput = {
   set?: $Enums.ActivityLogStatus
 }
 
 export type ActivityLogCreateWithoutUserInput = {
   id?: string
-  value: number
+  value?: number | null
+  progressStatus?: $Enums.ActivityProgressStatus | null
   loggedForDate: Date | string
   note?: string | null
   status?: $Enums.ActivityLogStatus
@@ -552,7 +579,8 @@ export type ActivityLogCreateWithoutUserInput = {
 
 export type ActivityLogUncheckedCreateWithoutUserInput = {
   id?: string
-  value: number
+  value?: number | null
+  progressStatus?: $Enums.ActivityProgressStatus | null
   loggedForDate: Date | string
   note?: string | null
   status?: $Enums.ActivityLogStatus
@@ -592,7 +620,8 @@ export type ActivityLogScalarWhereInput = {
   OR?: Prisma.ActivityLogScalarWhereInput[]
   NOT?: Prisma.ActivityLogScalarWhereInput | Prisma.ActivityLogScalarWhereInput[]
   id?: Prisma.StringFilter<"ActivityLog"> | string
-  value?: Prisma.FloatFilter<"ActivityLog"> | number
+  value?: Prisma.FloatNullableFilter<"ActivityLog"> | number | null
+  progressStatus?: Prisma.EnumActivityProgressStatusNullableFilter<"ActivityLog"> | $Enums.ActivityProgressStatus | null
   loggedForDate?: Prisma.DateTimeFilter<"ActivityLog"> | Date | string
   note?: Prisma.StringNullableFilter<"ActivityLog"> | string | null
   status?: Prisma.EnumActivityLogStatusFilter<"ActivityLog"> | $Enums.ActivityLogStatus
@@ -604,7 +633,8 @@ export type ActivityLogScalarWhereInput = {
 
 export type ActivityLogCreateWithoutLeadMeasureInput = {
   id?: string
-  value: number
+  value?: number | null
+  progressStatus?: $Enums.ActivityProgressStatus | null
   loggedForDate: Date | string
   note?: string | null
   status?: $Enums.ActivityLogStatus
@@ -615,7 +645,8 @@ export type ActivityLogCreateWithoutLeadMeasureInput = {
 
 export type ActivityLogUncheckedCreateWithoutLeadMeasureInput = {
   id?: string
-  value: number
+  value?: number | null
+  progressStatus?: $Enums.ActivityProgressStatus | null
   loggedForDate: Date | string
   note?: string | null
   status?: $Enums.ActivityLogStatus
@@ -652,7 +683,8 @@ export type ActivityLogUpdateManyWithWhereWithoutLeadMeasureInput = {
 
 export type ActivityLogCreateManyUserInput = {
   id?: string
-  value: number
+  value?: number | null
+  progressStatus?: $Enums.ActivityProgressStatus | null
   loggedForDate: Date | string
   note?: string | null
   status?: $Enums.ActivityLogStatus
@@ -663,7 +695,8 @@ export type ActivityLogCreateManyUserInput = {
 
 export type ActivityLogUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  value?: Prisma.FloatFieldUpdateOperationsInput | number
+  value?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  progressStatus?: Prisma.NullableEnumActivityProgressStatusFieldUpdateOperationsInput | $Enums.ActivityProgressStatus | null
   loggedForDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumActivityLogStatusFieldUpdateOperationsInput | $Enums.ActivityLogStatus
@@ -674,7 +707,8 @@ export type ActivityLogUpdateWithoutUserInput = {
 
 export type ActivityLogUncheckedUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  value?: Prisma.FloatFieldUpdateOperationsInput | number
+  value?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  progressStatus?: Prisma.NullableEnumActivityProgressStatusFieldUpdateOperationsInput | $Enums.ActivityProgressStatus | null
   loggedForDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumActivityLogStatusFieldUpdateOperationsInput | $Enums.ActivityLogStatus
@@ -685,7 +719,8 @@ export type ActivityLogUncheckedUpdateWithoutUserInput = {
 
 export type ActivityLogUncheckedUpdateManyWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  value?: Prisma.FloatFieldUpdateOperationsInput | number
+  value?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  progressStatus?: Prisma.NullableEnumActivityProgressStatusFieldUpdateOperationsInput | $Enums.ActivityProgressStatus | null
   loggedForDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumActivityLogStatusFieldUpdateOperationsInput | $Enums.ActivityLogStatus
@@ -696,7 +731,8 @@ export type ActivityLogUncheckedUpdateManyWithoutUserInput = {
 
 export type ActivityLogCreateManyLeadMeasureInput = {
   id?: string
-  value: number
+  value?: number | null
+  progressStatus?: $Enums.ActivityProgressStatus | null
   loggedForDate: Date | string
   note?: string | null
   status?: $Enums.ActivityLogStatus
@@ -707,7 +743,8 @@ export type ActivityLogCreateManyLeadMeasureInput = {
 
 export type ActivityLogUpdateWithoutLeadMeasureInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  value?: Prisma.FloatFieldUpdateOperationsInput | number
+  value?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  progressStatus?: Prisma.NullableEnumActivityProgressStatusFieldUpdateOperationsInput | $Enums.ActivityProgressStatus | null
   loggedForDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumActivityLogStatusFieldUpdateOperationsInput | $Enums.ActivityLogStatus
@@ -718,7 +755,8 @@ export type ActivityLogUpdateWithoutLeadMeasureInput = {
 
 export type ActivityLogUncheckedUpdateWithoutLeadMeasureInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  value?: Prisma.FloatFieldUpdateOperationsInput | number
+  value?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  progressStatus?: Prisma.NullableEnumActivityProgressStatusFieldUpdateOperationsInput | $Enums.ActivityProgressStatus | null
   loggedForDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumActivityLogStatusFieldUpdateOperationsInput | $Enums.ActivityLogStatus
@@ -729,7 +767,8 @@ export type ActivityLogUncheckedUpdateWithoutLeadMeasureInput = {
 
 export type ActivityLogUncheckedUpdateManyWithoutLeadMeasureInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  value?: Prisma.FloatFieldUpdateOperationsInput | number
+  value?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  progressStatus?: Prisma.NullableEnumActivityProgressStatusFieldUpdateOperationsInput | $Enums.ActivityProgressStatus | null
   loggedForDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumActivityLogStatusFieldUpdateOperationsInput | $Enums.ActivityLogStatus
@@ -743,6 +782,7 @@ export type ActivityLogUncheckedUpdateManyWithoutLeadMeasureInput = {
 export type ActivityLogSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   value?: boolean
+  progressStatus?: boolean
   loggedForDate?: boolean
   note?: boolean
   status?: boolean
@@ -757,6 +797,7 @@ export type ActivityLogSelect<ExtArgs extends runtime.Types.Extensions.InternalA
 export type ActivityLogSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   value?: boolean
+  progressStatus?: boolean
   loggedForDate?: boolean
   note?: boolean
   status?: boolean
@@ -771,6 +812,7 @@ export type ActivityLogSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
 export type ActivityLogSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   value?: boolean
+  progressStatus?: boolean
   loggedForDate?: boolean
   note?: boolean
   status?: boolean
@@ -785,6 +827,7 @@ export type ActivityLogSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
 export type ActivityLogSelectScalar = {
   id?: boolean
   value?: boolean
+  progressStatus?: boolean
   loggedForDate?: boolean
   note?: boolean
   status?: boolean
@@ -794,7 +837,7 @@ export type ActivityLogSelectScalar = {
   userId?: boolean
 }
 
-export type ActivityLogOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "value" | "loggedForDate" | "note" | "status" | "createdAt" | "editedAt" | "leadMeasureId" | "userId", ExtArgs["result"]["activityLog"]>
+export type ActivityLogOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "value" | "progressStatus" | "loggedForDate" | "note" | "status" | "createdAt" | "editedAt" | "leadMeasureId" | "userId", ExtArgs["result"]["activityLog"]>
 export type ActivityLogInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   leadMeasure?: boolean | Prisma.LeadMeasureDefaultArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -816,7 +859,8 @@ export type $ActivityLogPayload<ExtArgs extends runtime.Types.Extensions.Interna
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
-    value: number
+    value: number | null
+    progressStatus: $Enums.ActivityProgressStatus | null
     loggedForDate: Date
     note: string | null
     status: $Enums.ActivityLogStatus
@@ -1251,6 +1295,7 @@ export interface Prisma__ActivityLogClient<T, Null = never, ExtArgs extends runt
 export interface ActivityLogFieldRefs {
   readonly id: Prisma.FieldRef<"ActivityLog", 'String'>
   readonly value: Prisma.FieldRef<"ActivityLog", 'Float'>
+  readonly progressStatus: Prisma.FieldRef<"ActivityLog", 'ActivityProgressStatus'>
   readonly loggedForDate: Prisma.FieldRef<"ActivityLog", 'DateTime'>
   readonly note: Prisma.FieldRef<"ActivityLog", 'String'>
   readonly status: Prisma.FieldRef<"ActivityLog", 'ActivityLogStatus'>

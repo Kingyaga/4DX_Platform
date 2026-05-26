@@ -7,6 +7,21 @@ import { ErrorState, EmptyState } from "@/lib/components/states";
 import { LoadingSpinner } from "@/lib/components/loading-spinner";
 import type { LeadMeasure, ActivityLogEntry } from "@/lib/types";
 
+function getLeadMeasureProgress(leadMeasure: LeadMeasure) {
+  if (leadMeasure.trackingType === "MILESTONE") {
+    const latest = [...(leadMeasure.activityLogs || [])].sort((a, b) => new Date(b.loggedForDate).getTime() - new Date(a.loggedForDate).getTime())[0];
+    if (latest?.progressStatus === "DONE") return 100;
+    if (latest?.progressStatus === "IN_PROGRESS") return 50;
+    if (latest?.progressStatus === "BLOCKED") return 25;
+    return 0;
+  }
+
+  const target = leadMeasure.targetValue ?? 0;
+  if (target <= 0) return 0;
+  const current = (leadMeasure.activityLogs || []).reduce((sum, log) => sum + (log.value ?? 0), 0);
+  return Math.min(100, Math.round((current / target) * 100));
+}
+
 export default function ScoreboardPage() {
   const { currentTeamSlug } = useTeamStore();
   const { wigs, isLoading, error, refetch } = useWIGs(currentTeamSlug);
@@ -54,7 +69,8 @@ export default function ScoreboardPage() {
     return "#ba1a1a";
   };
 
-  const formatValue = (value: number, unit: string): string => {
+  const formatValue = (value: number | null | undefined, unit: string | null | undefined): string => {
+    if (value === null || value === undefined) return "Milestone";
     if (!unit || unit.toLowerCase() === "none") return `${value}`;
     if (unit === "$") return `$${value.toLocaleString()}`;
     return `${value} ${unit}`;
@@ -69,28 +85,28 @@ export default function ScoreboardPage() {
     const bodyTextColor = isDark ? "#d4d4d8" : "#52525b";
     const completionScore = selected.leadMeasures.length > 0
       ? Math.round(
-          selected.leadMeasures.reduce((sum: number, lm: LeadMeasure) => {
-            const current = (lm.activityLogs || []).reduce((logSum: number, log: ActivityLogEntry) => logSum + log.value, 0);
-            return sum + Math.min(100, lm.targetValue > 0 ? (current / lm.targetValue) * 100 : 0);
-          }, 0) / selected.leadMeasures.length,
+          selected.leadMeasures.reduce((sum: number, lm: LeadMeasure) => sum + getLeadMeasureProgress(lm), 0) / selected.leadMeasures.length,
         )
       : 0;
 
     return (
       <>
         {/* WIG Selector Tabs */}
-        <div style={{ display: "flex", gap: "0", marginBottom: "32px", border: cardBorder, backgroundColor: cardBg, overflowX: "auto" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "12px", marginBottom: "32px" }}>
           {activeWigs.map((wig) => {
-            const statusColor = getStatusColor(wig.currentValue, wig.toValue, wig.fromValue);
+            const wigScore = wig.leadMeasures.length
+              ? Math.round(wig.leadMeasures.reduce((sum: number, lm: LeadMeasure) => sum + getLeadMeasureProgress(lm), 0) / wig.leadMeasures.length)
+              : 0;
+            const statusColor = wig.trackingType === "MILESTONE" ? (wigScore >= 75 ? "#16A34A" : "#EAB308") : getStatusColor(wig.currentValue ?? 0, wig.toValue ?? 1, wig.fromValue ?? 0);
             return (
               <button
                 key={wig.id}
                 onClick={() => setSelectedWigId(wig.id)}
                 style={{
                   padding: "16px 20px",
-                  border: "none",
-                  borderRight: cardBorder,
-                  backgroundColor: selected.id === wig.id ? "#18181b" : "transparent",
+                  border: selected.id === wig.id ? "1px solid #18181b" : cardBorder,
+                  borderRadius: "8px",
+                  backgroundColor: selected.id === wig.id ? "#18181b" : cardBg,
                   cursor: "pointer",
                   textAlign: "left",
                   minWidth: "200px",
@@ -103,13 +119,16 @@ export default function ScoreboardPage() {
                   </span>
                 </div>
                 <div style={{ fontSize: "13px", fontWeight: 600, color: selected.id === wig.id ? "#ffffff" : headingColor, lineHeight: "1.3" }}>{wig.title}</div>
+                <div style={{ marginTop: "10px", fontSize: "12px", color: selected.id === wig.id ? "#d4d4d8" : secondaryColor }}>
+                  {wigScore}% lead measure score
+                </div>
               </button>
             );
           })}
         </div>
 
         {/* Target reached banner */}
-        {selected.currentValue >= selected.toValue && (
+        {completionScore >= 100 && (
           <div style={{ marginBottom: "20px", padding: "16px 20px", backgroundColor: "#fffbeb", border: "1px solid #f59e0b", display: "flex", alignItems: "center", gap: "12px" }}>
             <span className="material-symbols-outlined" style={{ fontSize: "28px", color: "#f59e0b" }}>emoji_events</span>
             <div>
@@ -136,7 +155,7 @@ export default function ScoreboardPage() {
             <div style={{ textAlign: "right" }}>
               <span style={{ fontSize: "12px", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", color: secondaryColor, display: "block", marginBottom: "8px" }}>Lag Value</span>
               <span style={{ fontSize: "20px", fontWeight: 600, color: headingColor }}>
-                {formatValue(selected.currentValue, selected.unit)}
+                {selected.trackingType === "MILESTONE" ? `${completionScore}% complete` : formatValue(selected.currentValue, selected.unit)}
               </span>
               <span style={{ fontSize: "12px", color: secondaryColor, display: "block", marginTop: "4px" }}>
                 {daysRemaining} day{daysRemaining !== 1 ? "s" : ""} remaining
@@ -147,13 +166,13 @@ export default function ScoreboardPage() {
             <div
               style={{
                 height: "100%",
-                backgroundColor: getStatusColor(selected.currentValue, selected.toValue, selected.fromValue),
+                backgroundColor: selected.trackingType === "MILESTONE" ? "#18181b" : getStatusColor(selected.currentValue ?? 0, selected.toValue ?? 1, selected.fromValue ?? 0),
                 width: `${completionScore}%`,
               }}
             ></div>
           </div>
           <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", color: secondaryColor }}>
-            <span>Baseline: {formatValue(selected.fromValue, selected.unit)}</span>
+            <span>{selected.trackingType === "MILESTONE" ? "Milestone WIG" : `Baseline: ${formatValue(selected.fromValue, selected.unit)}`}</span>
             <span>Deadline: {new Date(selected.deadline).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</span>
           </div>
           <p style={{ fontSize: "12px", color: secondaryColor, marginTop: "8px", fontStyle: "italic" }}>
@@ -166,11 +185,12 @@ export default function ScoreboardPage() {
         <div style={{ display: "grid", gridTemplateColumns: isDark ? "1fr 1fr 1fr" : "1fr 1fr", gap: "16px" }}>
           {selected.leadMeasures.map((lm: LeadMeasure, i: number) => {
             const recentLogs = (lm.activityLogs || []).slice(0, 6).reverse();
-            const trend = recentLogs.map((log: ActivityLogEntry) => log.value);
+            const trend = recentLogs.map((log: ActivityLogEntry) => log.value ?? 0);
             // Cumulative total of all approved activity (correct 4DX lead measure tracking)
-            const current = (lm.activityLogs || []).reduce((sum: number, log: ActivityLogEntry) => sum + log.value, 0);
-            const onTrack = current >= lm.targetValue;
-            const pct = Math.min(100, Math.round((current / lm.targetValue) * 100));
+            const current = (lm.activityLogs || []).reduce((sum: number, log: ActivityLogEntry) => sum + (log.value ?? 0), 0);
+            const pct = getLeadMeasureProgress(lm);
+            const onTrack = pct >= 100;
+            const latestStatus = [...(lm.activityLogs || [])].sort((a, b) => new Date(b.loggedForDate).getTime() - new Date(a.loggedForDate).getTime())[0]?.progressStatus;
 
             // Group activity logs by owner for per-owner contribution
             const ownerContributions: Record<string, { name: string; total: number }> = {};
@@ -180,7 +200,7 @@ export default function ScoreboardPage() {
               if (!ownerContributions[log.userId]) {
                 ownerContributions[log.userId] = { name: ownerName, total: 0 };
               }
-              ownerContributions[log.userId].total += log.value;
+              ownerContributions[log.userId].total += log.value ?? 0;
             }
             const ownerList = Object.values(ownerContributions).sort((a, b) => b.total - a.total);
 
@@ -192,13 +212,17 @@ export default function ScoreboardPage() {
                     <span style={{ fontSize: "16px", fontWeight: 500, color: headingColor }}>{lm.name}</span>
                   </div>
                   <span style={{ fontSize: "12px", fontWeight: 600, color: onTrack ? "#16A34A" : "#ba1a1a", textTransform: "uppercase", letterSpacing: "0.05em" }}>
-                    {onTrack ? "Completed" : "Behind"}
+                    {onTrack ? "Completed" : lm.trackingType === "MILESTONE" ? latestStatus?.replace(/_/g, " ") || "Pending" : "Behind"}
                   </span>
                 </div>
 
                 <div style={{ display: "flex", alignItems: "flex-end", gap: "8px", marginBottom: "12px" }}>
-                  <span style={{ fontSize: isDark ? "40px" : "32px", fontWeight: 700, color: headingColor, letterSpacing: "-0.03em" }}>{current}</span>
-                  <span style={{ fontSize: "16px", color: secondaryColor, marginBottom: "6px" }}>/ {lm.targetValue} {lm.unit}</span>
+                  <span style={{ fontSize: isDark ? "40px" : "32px", fontWeight: 700, color: headingColor, letterSpacing: "-0.03em" }}>
+                    {lm.trackingType === "MILESTONE" ? `${pct}%` : current}
+                  </span>
+                  <span style={{ fontSize: "16px", color: secondaryColor, marginBottom: "6px" }}>
+                    {lm.trackingType === "MILESTONE" ? latestStatus?.replace(/_/g, " ") || "No update" : `/ ${lm.targetValue ?? 0} ${lm.unit ?? ""}`}
+                  </span>
                 </div>
 
                 <div style={{ width: "100%", height: "4px", backgroundColor: isDark ? "#3f3f46" : "#e4e4e7", marginBottom: "16px" }}>

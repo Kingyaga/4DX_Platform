@@ -9,10 +9,11 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  // Find active WIGs where progress is below 50% of target with less than 25% of time remaining
+  // Find active numeric WIGs where progress is below 50% of target with less than 25% of time remaining.
+  // Milestone WIGs need a different risk model and are intentionally skipped here.
   const now = new Date();
   const wigs = await db.wIG.findMany({
-    where: { status: "ACTIVE" },
+    where: { status: "ACTIVE", trackingType: "NUMERIC" },
     include: {
       team: {
         include: {
@@ -27,7 +28,11 @@ export async function POST(req: Request) {
   let notified = 0;
 
   for (const wig of wigs) {
+    if (wig.fromValue === null || wig.toValue === null || wig.currentValue === null) continue;
+
     const totalDays = (wig.deadline.getTime() - wig.createdAt.getTime()) / 86_400_000;
+    if (totalDays <= 0) continue;
+
     const daysRemaining = (wig.deadline.getTime() - now.getTime()) / 86_400_000;
     const timeRemainingPct = daysRemaining / totalDays;
 

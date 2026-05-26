@@ -566,7 +566,7 @@ export const teamsRouter = router({
           .find((lm) => lm.id === lmId);
 
         const logs = activityLogs.filter((l) => l.leadMeasureId === lmId);
-        const total = logs.reduce((sum, l) => sum + l.value, 0);
+        const total = logs.reduce((sum, l) => sum + (l.value ?? 0), 0);
 
         return {
           leadMeasureId: lmId,

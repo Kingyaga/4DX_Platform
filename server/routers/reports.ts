@@ -26,6 +26,35 @@ function reportTitle(reportType: ReportType) {
   }
 }
 
+function leadMeasureScore(leadMeasure: any) {
+  if (leadMeasure.trackingType === "MILESTONE") {
+    const latest = [...(leadMeasure.activityLogs || [])].sort((a: any, b: any) => new Date(b.loggedForDate).getTime() - new Date(a.loggedForDate).getTime())[0];
+    if (latest?.progressStatus === "DONE") return 100;
+    if (latest?.progressStatus === "IN_PROGRESS") return 50;
+    if (latest?.progressStatus === "BLOCKED") return 25;
+    return 0;
+  }
+
+  const current = leadMeasure.activityLogs.reduce((sum: number, log: any) => sum + (log.value ?? 0), 0);
+  const target = leadMeasure.targetValue ?? 0;
+  return target > 0 ? Math.min((current / target) * 100, 100) : 0;
+}
+
+function wigScore(wig: any) {
+  if (wig.trackingType === "MILESTONE") {
+    const leadMeasures = wig.leadMeasures || [];
+    return leadMeasures.length > 0
+      ? Math.round(leadMeasures.reduce((sum: number, leadMeasure: any) => sum + leadMeasureScore(leadMeasure), 0) / leadMeasures.length)
+      : 0;
+  }
+
+  const fromValue = wig.fromValue ?? 0;
+  const toValue = wig.toValue ?? 0;
+  const currentValue = wig.currentValue ?? fromValue;
+  const denominator = toValue - fromValue;
+  return denominator > 0 ? Math.max(0, Math.min(100, Math.round(((currentValue - fromValue) / denominator) * 100))) : 0;
+}
+
 async function assertCanUseTeamReports(ctx: any, teamSlug: string) {
   const team = await ctx.db.team.findUnique({
     where: { slug: teamSlug },
@@ -81,16 +110,17 @@ async function buildReport(ctx: any, teamSlug: string, reportType: ReportType) {
   );
   const leadMeasureTotals = leadMeasures.map((leadMeasure: any) => ({
     ...leadMeasure,
-    current: leadMeasure.activityLogs.reduce((sum: number, log: any) => sum + log.value, 0),
+    current: leadMeasure.activityLogs.reduce((sum: number, log: any) => sum + (log.value ?? 0), 0),
+    score: leadMeasureScore(leadMeasure),
   }));
   const executionScore = leadMeasureTotals.length > 0
     ? Math.round(
         leadMeasureTotals.reduce((sum: number, leadMeasure: any) => {
-          return sum + Math.min((leadMeasure.current / (leadMeasure.targetValue || 1)) * 100, 100);
+          return sum + leadMeasure.score;
         }, 0) / leadMeasureTotals.length,
       )
     : 0;
-  const onTrackCount = leadMeasureTotals.filter((leadMeasure: any) => leadMeasure.current >= leadMeasure.targetValue).length;
+  const onTrackCount = leadMeasureTotals.filter((leadMeasure: any) => leadMeasure.score >= 100).length;
 
   let rows: string[][];
   if (reportType === "execution") {
@@ -106,14 +136,12 @@ async function buildReport(ctx: any, teamSlug: string, reportType: ReportType) {
     rows = [
       ["WIG", "Baseline", "Current", "Target", "Progress", "Status"],
       ...wigs.map((wig: any) => {
-        const denominator = wig.toValue - wig.fromValue;
-        const rawProgress = denominator > 0 ? ((wig.currentValue - wig.fromValue) / denominator) * 100 : 0;
         return [
           wig.title,
-          String(wig.fromValue),
-          String(wig.currentValue),
-          String(wig.toValue),
-          `${Math.max(0, Math.min(100, Math.round(rawProgress)))}%`,
+          wig.trackingType === "MILESTONE" ? "Outcome" : String(wig.fromValue ?? 0),
+          wig.trackingType === "MILESTONE" ? `${wigScore(wig)}%` : String(wig.currentValue ?? wig.fromValue ?? 0),
+          wig.trackingType === "MILESTONE" ? "Milestone" : String(wig.toValue ?? 0),
+          `${wigScore(wig)}%`,
           wig.status,
         ];
       }),
@@ -125,10 +153,10 @@ async function buildReport(ctx: any, teamSlug: string, reportType: ReportType) {
         leadMeasure.wig.title,
         leadMeasure.name,
         leadMeasure.cadence,
-        String(leadMeasure.current),
-        String(leadMeasure.targetValue),
-        leadMeasure.unit,
-        leadMeasure.current >= leadMeasure.targetValue ? "ON TRACK" : "BEHIND",
+        leadMeasure.trackingType === "MILESTONE" ? `${leadMeasure.score}%` : String(leadMeasure.current),
+        leadMeasure.trackingType === "MILESTONE" ? "Done" : String(leadMeasure.targetValue ?? 0),
+        leadMeasure.trackingType === "MILESTONE" ? "Status" : (leadMeasure.unit ?? ""),
+        leadMeasure.score >= 100 ? "ON TRACK" : "BEHIND",
       ]),
     ];
   }

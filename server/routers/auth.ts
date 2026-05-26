@@ -249,11 +249,10 @@ export const authRouter = router({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const invite = await ctx.db.invite.findUnique({
+      const invite = await ctx.db.inviteToken.findUnique({
         where: { token: input.token },
         include: {
           org: true,
-          team: true,
         },
       });
 
@@ -326,7 +325,7 @@ export const authRouter = router({
         });
       }
 
-      await ctx.db.invite.update({
+      await ctx.db.inviteToken.update({
         where: { id: invite.id },
         data: { usedAt: new Date() },
       });

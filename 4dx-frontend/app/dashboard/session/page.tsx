@@ -8,6 +8,21 @@ import { ErrorState } from "@/lib/components/states";
 import { LoadingSpinner } from "@/lib/components/loading-spinner";
 import type { WeeklySession, LeadMeasure } from "@/lib/types";
 
+function getLeadMeasureProgress(leadMeasure: LeadMeasure) {
+  if (leadMeasure.trackingType === "MILESTONE") {
+    const latestStatus = leadMeasure.activityLogs?.[0]?.progressStatus;
+    if (latestStatus === "DONE") return { value: 100, label: "Done", onTrack: true };
+    if (latestStatus === "IN_PROGRESS") return { value: 50, label: "In progress", onTrack: true };
+    if (latestStatus === "BLOCKED") return { value: 25, label: "Blocked", onTrack: false };
+    return { value: 0, label: "Not started", onTrack: false };
+  }
+
+  const total = (leadMeasure.activityLogs || []).reduce((sum, log) => sum + (log.value ?? 0), 0);
+  const target = leadMeasure.targetValue ?? 0;
+  const pct = target > 0 ? Math.min(100, Math.round((total / target) * 100)) : 0;
+  return { value: pct, label: `${total} / ${target} ${leadMeasure.unit ?? ""}`.trim(), onTrack: target > 0 && total >= target };
+}
+
 export default function WeeklySessionPage() {
   const { currentTeamSlug } = useTeamStore();
   const { sessions, isLoading, error } = useCurrentSessions(currentTeamSlug);
@@ -338,26 +353,45 @@ function StepReview({ session }: { session: WeeklySession }) {
         <div style={{ padding: "20px", display: "flex", flexDirection: "column", gap: "16px" }}>
           {session.wig ? (
             <>
+              {(() => {
+                const fromValue = session.wig.fromValue ?? 0;
+                const toValue = session.wig.toValue ?? 0;
+                const currentValue = session.wig.currentValue ?? fromValue;
+                const denominator = toValue - fromValue;
+                const wigProgress =
+                  session.wig.trackingType === "MILESTONE"
+                    ? session.wig.leadMeasures.length > 0
+                      ? Math.round(session.wig.leadMeasures.reduce((sum, lm) => sum + getLeadMeasureProgress(lm).value, 0) / session.wig.leadMeasures.length)
+                      : 0
+                    : denominator > 0
+                      ? Math.min(100, Math.round(((currentValue - fromValue) / denominator) * 100))
+                      : 0;
+
+                return (
               <div style={{ border: "1px solid #e4e4e7" }}>
                 <div style={{ padding: "16px", backgroundColor: "#f4f4f5", borderBottom: "1px solid #e4e4e7" }}>
                   <span style={{ fontSize: "12px", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", color: "#71717a" }}>Lag Measure</span>
                 </div>
                 <div style={{ padding: "24px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "24px" }}>
                   <div>
-                    <div style={{ fontSize: "32px", fontWeight: 700, color: "#18181b" }}>{session.wig.currentValue}</div>
-                    <div style={{ fontSize: "12px", color: "#71717a", marginTop: "4px" }}>{session.wig.unit}</div>
+                    <div style={{ fontSize: "32px", fontWeight: 700, color: "#18181b" }}>
+                      {session.wig.trackingType === "MILESTONE" ? `${wigProgress}%` : currentValue}
+                    </div>
+                    <div style={{ fontSize: "12px", color: "#71717a", marginTop: "4px" }}>{session.wig.trackingType === "MILESTONE" ? "Milestone progress" : session.wig.unit}</div>
                   </div>
                   <div style={{ flex: 1, maxWidth: "400px" }}>
                     <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
-                      <span style={{ fontSize: "12px", fontWeight: 600, color: "#71717a" }}>From: {session.wig.fromValue}</span>
-                      <span style={{ fontSize: "12px", fontWeight: 600, color: "#71717a" }}>To: {session.wig.toValue}</span>
+                      <span style={{ fontSize: "12px", fontWeight: 600, color: "#71717a" }}>{session.wig.trackingType === "MILESTONE" ? "Status" : `From: ${fromValue}`}</span>
+                      <span style={{ fontSize: "12px", fontWeight: 600, color: "#71717a" }}>{session.wig.trackingType === "MILESTONE" ? "Outcome based" : `To: ${toValue}`}</span>
                     </div>
                     <div style={{ height: "8px", backgroundColor: "#e4e4e7" }}>
-                      <div style={{ height: "100%", backgroundColor: "#18181b", width: `${((session.wig.currentValue - session.wig.fromValue) / (session.wig.toValue - session.wig.fromValue)) * 100}%` }}></div>
+                      <div style={{ height: "100%", backgroundColor: "#18181b", width: `${wigProgress}%` }}></div>
                     </div>
                   </div>
                 </div>
               </div>
+                );
+              })()}
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
                 {session.wig.leadMeasures.slice(0, 2).map((lm: LeadMeasure) => (
                   <div key={lm.id} style={{ border: "1px solid #e4e4e7", display: "flex", flexDirection: "column" }}>
@@ -367,19 +401,17 @@ function StepReview({ session }: { session: WeeklySession }) {
                     <div style={{ padding: "24px", flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center" }}>
                       <div style={{ fontSize: "14px", fontWeight: 500, color: "#18181b", marginBottom: "16px" }}>{lm.name}</div>
                       {(() => {
-                        const cumulativeTotal = (lm.activityLogs || []).reduce((s, l) => s + l.value, 0);
-                        const progressPct = Math.min(100, Math.round((cumulativeTotal / lm.targetValue) * 100));
-                        const onTrack = cumulativeTotal >= lm.targetValue;
+                        const progress = getLeadMeasureProgress(lm);
                         return (
                           <>
                             <div style={{ fontSize: "32px", fontWeight: 700, color: "#18181b", marginBottom: "8px" }}>
-                              {cumulativeTotal} / {lm.targetValue}
+                              {lm.trackingType === "MILESTONE" ? `${progress.value}%` : progress.label}
                             </div>
                             <div style={{ width: "100%", height: "4px", backgroundColor: "#e4e4e7", marginBottom: "8px" }}>
-                              <div style={{ height: "100%", backgroundColor: "#18181b", width: `${progressPct}%` }}></div>
+                              <div style={{ height: "100%", backgroundColor: "#18181b", width: `${progress.value}%` }}></div>
                             </div>
-                            <span style={{ fontSize: "12px", fontWeight: 500, color: onTrack ? "#16A34A" : "#ba1a1a" }}>
-                              {onTrack ? "On Track" : "Behind"}
+                            <span style={{ fontSize: "12px", fontWeight: 500, color: progress.onTrack ? "#16A34A" : "#ba1a1a" }}>
+                              {progress.label}
                             </span>
                           </>
                         );

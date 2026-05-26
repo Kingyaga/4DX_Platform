@@ -223,6 +223,7 @@ export type InviteTokenWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"InviteToken"> | Date | string
   createdByUserId?: Prisma.StringFilter<"InviteToken"> | string
   org?: Prisma.XOR<Prisma.OrganizationScalarRelationFilter, Prisma.OrganizationWhereInput>
+  team?: Prisma.XOR<Prisma.TeamNullableScalarRelationFilter, Prisma.TeamWhereInput> | null
   createdBy?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }
 
@@ -238,6 +239,7 @@ export type InviteTokenOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   createdByUserId?: Prisma.SortOrder
   org?: Prisma.OrganizationOrderByWithRelationInput
+  team?: Prisma.TeamOrderByWithRelationInput
   createdBy?: Prisma.UserOrderByWithRelationInput
 }
 
@@ -256,6 +258,7 @@ export type InviteTokenWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"InviteToken"> | Date | string
   createdByUserId?: Prisma.StringFilter<"InviteToken"> | string
   org?: Prisma.XOR<Prisma.OrganizationScalarRelationFilter, Prisma.OrganizationWhereInput>
+  team?: Prisma.XOR<Prisma.TeamNullableScalarRelationFilter, Prisma.TeamWhereInput> | null
   createdBy?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }, "id" | "token">
 
@@ -295,12 +298,12 @@ export type InviteTokenCreateInput = {
   id?: string
   token: string
   email?: string | null
-  teamId?: string | null
   role?: $Enums.OrgRole
   usedAt?: Date | string | null
   expiresAt: Date | string
   createdAt?: Date | string
   org: Prisma.OrganizationCreateNestedOneWithoutInviteTokensInput
+  team?: Prisma.TeamCreateNestedOneWithoutInviteTokensInput
   createdBy: Prisma.UserCreateNestedOneWithoutCreatedInvitesInput
 }
 
@@ -321,12 +324,12 @@ export type InviteTokenUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   token?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  teamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumOrgRoleFieldUpdateOperationsInput | $Enums.OrgRole
   usedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   org?: Prisma.OrganizationUpdateOneRequiredWithoutInviteTokensNestedInput
+  team?: Prisma.TeamUpdateOneWithoutInviteTokensNestedInput
   createdBy?: Prisma.UserUpdateOneRequiredWithoutCreatedInvitesNestedInput
 }
 
@@ -360,7 +363,6 @@ export type InviteTokenUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   token?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  teamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumOrgRoleFieldUpdateOperationsInput | $Enums.OrgRole
   usedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -513,15 +515,57 @@ export type InviteTokenUncheckedUpdateManyWithoutCreatedByNestedInput = {
   deleteMany?: Prisma.InviteTokenScalarWhereInput | Prisma.InviteTokenScalarWhereInput[]
 }
 
+export type InviteTokenCreateNestedManyWithoutTeamInput = {
+  create?: Prisma.XOR<Prisma.InviteTokenCreateWithoutTeamInput, Prisma.InviteTokenUncheckedCreateWithoutTeamInput> | Prisma.InviteTokenCreateWithoutTeamInput[] | Prisma.InviteTokenUncheckedCreateWithoutTeamInput[]
+  connectOrCreate?: Prisma.InviteTokenCreateOrConnectWithoutTeamInput | Prisma.InviteTokenCreateOrConnectWithoutTeamInput[]
+  createMany?: Prisma.InviteTokenCreateManyTeamInputEnvelope
+  connect?: Prisma.InviteTokenWhereUniqueInput | Prisma.InviteTokenWhereUniqueInput[]
+}
+
+export type InviteTokenUncheckedCreateNestedManyWithoutTeamInput = {
+  create?: Prisma.XOR<Prisma.InviteTokenCreateWithoutTeamInput, Prisma.InviteTokenUncheckedCreateWithoutTeamInput> | Prisma.InviteTokenCreateWithoutTeamInput[] | Prisma.InviteTokenUncheckedCreateWithoutTeamInput[]
+  connectOrCreate?: Prisma.InviteTokenCreateOrConnectWithoutTeamInput | Prisma.InviteTokenCreateOrConnectWithoutTeamInput[]
+  createMany?: Prisma.InviteTokenCreateManyTeamInputEnvelope
+  connect?: Prisma.InviteTokenWhereUniqueInput | Prisma.InviteTokenWhereUniqueInput[]
+}
+
+export type InviteTokenUpdateManyWithoutTeamNestedInput = {
+  create?: Prisma.XOR<Prisma.InviteTokenCreateWithoutTeamInput, Prisma.InviteTokenUncheckedCreateWithoutTeamInput> | Prisma.InviteTokenCreateWithoutTeamInput[] | Prisma.InviteTokenUncheckedCreateWithoutTeamInput[]
+  connectOrCreate?: Prisma.InviteTokenCreateOrConnectWithoutTeamInput | Prisma.InviteTokenCreateOrConnectWithoutTeamInput[]
+  upsert?: Prisma.InviteTokenUpsertWithWhereUniqueWithoutTeamInput | Prisma.InviteTokenUpsertWithWhereUniqueWithoutTeamInput[]
+  createMany?: Prisma.InviteTokenCreateManyTeamInputEnvelope
+  set?: Prisma.InviteTokenWhereUniqueInput | Prisma.InviteTokenWhereUniqueInput[]
+  disconnect?: Prisma.InviteTokenWhereUniqueInput | Prisma.InviteTokenWhereUniqueInput[]
+  delete?: Prisma.InviteTokenWhereUniqueInput | Prisma.InviteTokenWhereUniqueInput[]
+  connect?: Prisma.InviteTokenWhereUniqueInput | Prisma.InviteTokenWhereUniqueInput[]
+  update?: Prisma.InviteTokenUpdateWithWhereUniqueWithoutTeamInput | Prisma.InviteTokenUpdateWithWhereUniqueWithoutTeamInput[]
+  updateMany?: Prisma.InviteTokenUpdateManyWithWhereWithoutTeamInput | Prisma.InviteTokenUpdateManyWithWhereWithoutTeamInput[]
+  deleteMany?: Prisma.InviteTokenScalarWhereInput | Prisma.InviteTokenScalarWhereInput[]
+}
+
+export type InviteTokenUncheckedUpdateManyWithoutTeamNestedInput = {
+  create?: Prisma.XOR<Prisma.InviteTokenCreateWithoutTeamInput, Prisma.InviteTokenUncheckedCreateWithoutTeamInput> | Prisma.InviteTokenCreateWithoutTeamInput[] | Prisma.InviteTokenUncheckedCreateWithoutTeamInput[]
+  connectOrCreate?: Prisma.InviteTokenCreateOrConnectWithoutTeamInput | Prisma.InviteTokenCreateOrConnectWithoutTeamInput[]
+  upsert?: Prisma.InviteTokenUpsertWithWhereUniqueWithoutTeamInput | Prisma.InviteTokenUpsertWithWhereUniqueWithoutTeamInput[]
+  createMany?: Prisma.InviteTokenCreateManyTeamInputEnvelope
+  set?: Prisma.InviteTokenWhereUniqueInput | Prisma.InviteTokenWhereUniqueInput[]
+  disconnect?: Prisma.InviteTokenWhereUniqueInput | Prisma.InviteTokenWhereUniqueInput[]
+  delete?: Prisma.InviteTokenWhereUniqueInput | Prisma.InviteTokenWhereUniqueInput[]
+  connect?: Prisma.InviteTokenWhereUniqueInput | Prisma.InviteTokenWhereUniqueInput[]
+  update?: Prisma.InviteTokenUpdateWithWhereUniqueWithoutTeamInput | Prisma.InviteTokenUpdateWithWhereUniqueWithoutTeamInput[]
+  updateMany?: Prisma.InviteTokenUpdateManyWithWhereWithoutTeamInput | Prisma.InviteTokenUpdateManyWithWhereWithoutTeamInput[]
+  deleteMany?: Prisma.InviteTokenScalarWhereInput | Prisma.InviteTokenScalarWhereInput[]
+}
+
 export type InviteTokenCreateWithoutOrgInput = {
   id?: string
   token: string
   email?: string | null
-  teamId?: string | null
   role?: $Enums.OrgRole
   usedAt?: Date | string | null
   expiresAt: Date | string
   createdAt?: Date | string
+  team?: Prisma.TeamCreateNestedOneWithoutInviteTokensInput
   createdBy: Prisma.UserCreateNestedOneWithoutCreatedInvitesInput
 }
 
@@ -583,12 +627,12 @@ export type InviteTokenCreateWithoutCreatedByInput = {
   id?: string
   token: string
   email?: string | null
-  teamId?: string | null
   role?: $Enums.OrgRole
   usedAt?: Date | string | null
   expiresAt: Date | string
   createdAt?: Date | string
   org: Prisma.OrganizationCreateNestedOneWithoutInviteTokensInput
+  team?: Prisma.TeamCreateNestedOneWithoutInviteTokensInput
 }
 
 export type InviteTokenUncheckedCreateWithoutCreatedByInput = {
@@ -629,6 +673,56 @@ export type InviteTokenUpdateManyWithWhereWithoutCreatedByInput = {
   data: Prisma.XOR<Prisma.InviteTokenUpdateManyMutationInput, Prisma.InviteTokenUncheckedUpdateManyWithoutCreatedByInput>
 }
 
+export type InviteTokenCreateWithoutTeamInput = {
+  id?: string
+  token: string
+  email?: string | null
+  role?: $Enums.OrgRole
+  usedAt?: Date | string | null
+  expiresAt: Date | string
+  createdAt?: Date | string
+  org: Prisma.OrganizationCreateNestedOneWithoutInviteTokensInput
+  createdBy: Prisma.UserCreateNestedOneWithoutCreatedInvitesInput
+}
+
+export type InviteTokenUncheckedCreateWithoutTeamInput = {
+  id?: string
+  token: string
+  email?: string | null
+  orgId: string
+  role?: $Enums.OrgRole
+  usedAt?: Date | string | null
+  expiresAt: Date | string
+  createdAt?: Date | string
+  createdByUserId: string
+}
+
+export type InviteTokenCreateOrConnectWithoutTeamInput = {
+  where: Prisma.InviteTokenWhereUniqueInput
+  create: Prisma.XOR<Prisma.InviteTokenCreateWithoutTeamInput, Prisma.InviteTokenUncheckedCreateWithoutTeamInput>
+}
+
+export type InviteTokenCreateManyTeamInputEnvelope = {
+  data: Prisma.InviteTokenCreateManyTeamInput | Prisma.InviteTokenCreateManyTeamInput[]
+  skipDuplicates?: boolean
+}
+
+export type InviteTokenUpsertWithWhereUniqueWithoutTeamInput = {
+  where: Prisma.InviteTokenWhereUniqueInput
+  update: Prisma.XOR<Prisma.InviteTokenUpdateWithoutTeamInput, Prisma.InviteTokenUncheckedUpdateWithoutTeamInput>
+  create: Prisma.XOR<Prisma.InviteTokenCreateWithoutTeamInput, Prisma.InviteTokenUncheckedCreateWithoutTeamInput>
+}
+
+export type InviteTokenUpdateWithWhereUniqueWithoutTeamInput = {
+  where: Prisma.InviteTokenWhereUniqueInput
+  data: Prisma.XOR<Prisma.InviteTokenUpdateWithoutTeamInput, Prisma.InviteTokenUncheckedUpdateWithoutTeamInput>
+}
+
+export type InviteTokenUpdateManyWithWhereWithoutTeamInput = {
+  where: Prisma.InviteTokenScalarWhereInput
+  data: Prisma.XOR<Prisma.InviteTokenUpdateManyMutationInput, Prisma.InviteTokenUncheckedUpdateManyWithoutTeamInput>
+}
+
 export type InviteTokenCreateManyOrgInput = {
   id?: string
   token: string
@@ -645,11 +739,11 @@ export type InviteTokenUpdateWithoutOrgInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   token?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  teamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumOrgRoleFieldUpdateOperationsInput | $Enums.OrgRole
   usedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  team?: Prisma.TeamUpdateOneWithoutInviteTokensNestedInput
   createdBy?: Prisma.UserUpdateOneRequiredWithoutCreatedInvitesNestedInput
 }
 
@@ -693,12 +787,12 @@ export type InviteTokenUpdateWithoutCreatedByInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   token?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  teamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumOrgRoleFieldUpdateOperationsInput | $Enums.OrgRole
   usedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   org?: Prisma.OrganizationUpdateOneRequiredWithoutInviteTokensNestedInput
+  team?: Prisma.TeamUpdateOneWithoutInviteTokensNestedInput
 }
 
 export type InviteTokenUncheckedUpdateWithoutCreatedByInput = {
@@ -725,6 +819,54 @@ export type InviteTokenUncheckedUpdateManyWithoutCreatedByInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
+export type InviteTokenCreateManyTeamInput = {
+  id?: string
+  token: string
+  email?: string | null
+  orgId: string
+  role?: $Enums.OrgRole
+  usedAt?: Date | string | null
+  expiresAt: Date | string
+  createdAt?: Date | string
+  createdByUserId: string
+}
+
+export type InviteTokenUpdateWithoutTeamInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  token?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumOrgRoleFieldUpdateOperationsInput | $Enums.OrgRole
+  usedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  org?: Prisma.OrganizationUpdateOneRequiredWithoutInviteTokensNestedInput
+  createdBy?: Prisma.UserUpdateOneRequiredWithoutCreatedInvitesNestedInput
+}
+
+export type InviteTokenUncheckedUpdateWithoutTeamInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  token?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgId?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumOrgRoleFieldUpdateOperationsInput | $Enums.OrgRole
+  usedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdByUserId?: Prisma.StringFieldUpdateOperationsInput | string
+}
+
+export type InviteTokenUncheckedUpdateManyWithoutTeamInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  token?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgId?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumOrgRoleFieldUpdateOperationsInput | $Enums.OrgRole
+  usedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdByUserId?: Prisma.StringFieldUpdateOperationsInput | string
+}
+
 
 
 export type InviteTokenSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -739,6 +881,7 @@ export type InviteTokenSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   createdAt?: boolean
   createdByUserId?: boolean
   org?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
+  team?: boolean | Prisma.InviteToken$teamArgs<ExtArgs>
   createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["inviteToken"]>
 
@@ -754,6 +897,7 @@ export type InviteTokenSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   createdAt?: boolean
   createdByUserId?: boolean
   org?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
+  team?: boolean | Prisma.InviteToken$teamArgs<ExtArgs>
   createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["inviteToken"]>
 
@@ -769,6 +913,7 @@ export type InviteTokenSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   createdAt?: boolean
   createdByUserId?: boolean
   org?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
+  team?: boolean | Prisma.InviteToken$teamArgs<ExtArgs>
   createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["inviteToken"]>
 
@@ -788,14 +933,17 @@ export type InviteTokenSelectScalar = {
 export type InviteTokenOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "token" | "email" | "orgId" | "teamId" | "role" | "usedAt" | "expiresAt" | "createdAt" | "createdByUserId", ExtArgs["result"]["inviteToken"]>
 export type InviteTokenInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   org?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
+  team?: boolean | Prisma.InviteToken$teamArgs<ExtArgs>
   createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
 export type InviteTokenIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   org?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
+  team?: boolean | Prisma.InviteToken$teamArgs<ExtArgs>
   createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
 export type InviteTokenIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   org?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
+  team?: boolean | Prisma.InviteToken$teamArgs<ExtArgs>
   createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
 
@@ -803,6 +951,7 @@ export type $InviteTokenPayload<ExtArgs extends runtime.Types.Extensions.Interna
   name: "InviteToken"
   objects: {
     org: Prisma.$OrganizationPayload<ExtArgs>
+    team: Prisma.$TeamPayload<ExtArgs> | null
     createdBy: Prisma.$UserPayload<ExtArgs>
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
@@ -1211,6 +1360,7 @@ readonly fields: InviteTokenFieldRefs;
 export interface Prisma__InviteTokenClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   org<T extends Prisma.OrganizationDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.OrganizationDefaultArgs<ExtArgs>>): Prisma.Prisma__OrganizationClient<runtime.Types.Result.GetResult<Prisma.$OrganizationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  team<T extends Prisma.InviteToken$teamArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.InviteToken$teamArgs<ExtArgs>>): Prisma.Prisma__TeamClient<runtime.Types.Result.GetResult<Prisma.$TeamPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   createdBy<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -1649,6 +1799,25 @@ export type InviteTokenDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.I
    * Limit how many InviteTokens to delete.
    */
   limit?: number
+}
+
+/**
+ * InviteToken.team
+ */
+export type InviteToken$teamArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Team
+   */
+  select?: Prisma.TeamSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Team
+   */
+  omit?: Prisma.TeamOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TeamInclude<ExtArgs> | null
+  where?: Prisma.TeamWhereInput
 }
 
 /**

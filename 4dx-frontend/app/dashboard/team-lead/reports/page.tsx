@@ -7,6 +7,35 @@ import { useWIGs, useMyTeams, useTeamSessions, useExportReport, useShareReport }
 import { ErrorState, EmptyState } from "@/lib/components/states";
 import Link from "next/link";
 
+function getLeadMeasureScore(leadMeasure: any) {
+  if (leadMeasure.trackingType === "MILESTONE") {
+    const latest = [...(leadMeasure.activityLogs || [])].sort((a: any, b: any) => new Date(b.loggedForDate).getTime() - new Date(a.loggedForDate).getTime())[0];
+    if (latest?.progressStatus === "DONE") return 100;
+    if (latest?.progressStatus === "IN_PROGRESS") return 50;
+    if (latest?.progressStatus === "BLOCKED") return 25;
+    return 0;
+  }
+
+  const current = (leadMeasure.activityLogs || []).reduce((sum: number, log: any) => sum + (log.value ?? 0), 0);
+  const target = leadMeasure.targetValue ?? 0;
+  return target > 0 ? Math.min((current / target) * 100, 100) : 0;
+}
+
+function getWigScore(wig: any) {
+  if (wig.trackingType === "MILESTONE") {
+    const leadMeasures = wig.leadMeasures || [];
+    return leadMeasures.length > 0
+      ? Math.round(leadMeasures.reduce((sum: number, leadMeasure: any) => sum + getLeadMeasureScore(leadMeasure), 0) / leadMeasures.length)
+      : 0;
+  }
+
+  const fromValue = wig.fromValue ?? 0;
+  const toValue = wig.toValue ?? 0;
+  const currentValue = wig.currentValue ?? fromValue;
+  const denominator = toValue - fromValue;
+  return denominator > 0 ? Math.max(0, Math.min(100, Math.round(((currentValue - fromValue) / denominator) * 100))) : 0;
+}
+
 export default function TeamLeadReportsPage() {
   const { orgSlug } = useUserStore();
   const { currentTeamSlug, setCurrentTeamSlug } = useTeamStore();
@@ -76,26 +105,23 @@ export default function TeamLeadReportsPage() {
   const executionScore = allLeadMeasures.length > 0
     ? Math.round(
         allLeadMeasures.reduce((sum: number, lm: any) => {
-          const current = (lm.activityLogs || []).reduce((s: number, l: any) => s + l.value, 0);
-          return sum + Math.min((current / (lm.targetValue || 1)) * 100, 100);
+          return sum + getLeadMeasureScore(lm);
         }, 0) / allLeadMeasures.length
       )
     : 0;
 
-  const onTrackCount = allLeadMeasures.filter((lm: any) => (lm.activityLogs?.[0]?.value || 0) >= lm.targetValue).length;
+  const onTrackCount = allLeadMeasures.filter((lm: any) => getLeadMeasureScore(lm) >= 100).length;
   const lagMeasures = wigs.map((w: any) => {
     const fromValue = w.fromValue || 0;
     const toValue = w.toValue || 0;
     const currentValue = w.currentValue ?? fromValue;
-    const denominator = toValue - fromValue;
-    const rawProgress = denominator > 0 ? ((currentValue - fromValue) / denominator) * 100 : 0;
 
     return {
       title: w.title,
       baseline: fromValue,
       current: currentValue,
       target: toValue,
-      progress: Math.max(0, Math.min(100, Math.round(rawProgress))),
+      progress: getWigScore(w),
     };
   });
 
@@ -352,8 +378,7 @@ export default function TeamLeadReportsPage() {
             </p>
             <div style={{ marginTop: "24px", display: "flex", flexDirection: "column", gap: "12px" }}>
               {allLeadMeasures.slice(0, 10).map((lm: any, i: number) => {
-                const current = (lm.activityLogs || []).reduce((s: number, l: any) => s + l.value, 0);
-                const isOnTrack = current >= lm.targetValue;
+                const isOnTrack = getLeadMeasureScore(lm) >= 100;
                 return (
                   <div key={i} style={{ padding: "12px", backgroundColor: "#f9fafb", borderRadius: "6px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                     <div>

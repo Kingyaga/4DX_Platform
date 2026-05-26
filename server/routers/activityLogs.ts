@@ -97,7 +97,8 @@ export const activityLogsRouter = router({
     .input(
       z.object({
         leadMeasureId: z.string(),
-        value: z.number(),
+        value: z.number().optional(),
+        progressStatus: z.enum(["NOT_STARTED", "IN_PROGRESS", "BLOCKED", "DONE"]).optional(),
         loggedForDate: z.coerce.date(),
         note: z.string().optional(),
       }),
@@ -114,15 +115,29 @@ export const activityLogsRouter = router({
 
       if (!leadMeasure) throw new TRPCError({ code: "NOT_FOUND" });
 
-      if (CLOSED_WIG_STATUSES.includes(leadMeasure.wig.status as any)) {
+      if (leadMeasure.wig.status !== "ACTIVE") {
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: "This WIG is closed. Create or select an active WIG before logging activity.",
+          message: "Only active WIGs can accept activity logs.",
+        });
+      }
+
+      if (leadMeasure.trackingType === "NUMERIC" && input.value === undefined) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Numeric lead measures require a value.",
+        });
+      }
+
+      if (leadMeasure.trackingType === "MILESTONE" && !input.progressStatus) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Milestone lead measures require a progress status.",
         });
       }
 
       const currentTotal = await getLeadMeasureTotal(ctx.db, leadMeasure.id);
-      if (currentTotal >= leadMeasure.targetValue) {
+      if (leadMeasure.trackingType === "NUMERIC" && currentTotal >= (leadMeasure.targetValue ?? 0)) {
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: "This lead measure is already complete and no longer accepts activity logs.",
@@ -161,6 +176,7 @@ export const activityLogsRouter = router({
         data: {
           leadMeasureId: input.leadMeasureId,
           value: input.value,
+          progressStatus: input.progressStatus,
           loggedForDate: input.loggedForDate,
           note: input.note,
           status: "PENDING",
@@ -177,6 +193,7 @@ export const activityLogsRouter = router({
         after: {
           leadMeasureId: createdLog.leadMeasureId,
           value: createdLog.value,
+          progressStatus: createdLog.progressStatus,
           loggedForDate: createdLog.loggedForDate,
           note: createdLog.note,
         },
@@ -271,7 +288,8 @@ export const activityLogsRouter = router({
         type: "ACTIVITY_APPROVED",
         payload: {
           leadMeasureName: log.leadMeasure.name,
-          value: log.value,
+          value: log.value ?? 0,
+          progressStatus: log.progressStatus,
           wigTitle: log.leadMeasure.wig.title,
         },
       });
@@ -281,6 +299,7 @@ export const activityLogsRouter = router({
         name: log.user.name || log.user.email,
         leadMeasureName: log.leadMeasure.name,
         value: log.value,
+        progressStatus: log.progressStatus,
         unit: log.leadMeasure.wig.unit ?? "",
       }).catch(() => {});
 
@@ -436,7 +455,8 @@ export const activityLogsRouter = router({
         type: "ACTIVITY_DECLINED",
         payload: {
           leadMeasureName: log.leadMeasure.name,
-          value: log.value,
+          value: log.value ?? 0,
+          progressStatus: log.progressStatus,
           wigTitle: log.leadMeasure.wig.title,
         },
       });
@@ -446,6 +466,7 @@ export const activityLogsRouter = router({
         name: log.user.name || log.user.email,
         leadMeasureName: log.leadMeasure.name,
         value: log.value,
+        progressStatus: log.progressStatus,
       }).catch(() => {});
 
       return declined;
@@ -473,6 +494,7 @@ export const activityLogsRouter = router({
               id: true,
               name: true,
               unit: true,
+              trackingType: true,
               wig: {
                 select: { title: true, unit: true },
               },
@@ -488,7 +510,8 @@ export const activityLogsRouter = router({
     .input(
       z.object({
         logId: z.string(),
-        value: z.number(),
+        value: z.number().optional(),
+        progressStatus: z.enum(["NOT_STARTED", "IN_PROGRESS", "BLOCKED", "DONE"]).optional(),
         note: z.string().optional(),
       }),
     )
@@ -522,6 +545,7 @@ export const activityLogsRouter = router({
         where: { id: input.logId },
         data: {
           value: input.value,
+          progressStatus: input.progressStatus,
           note: input.note,
           editedAt: new Date(),
         },
@@ -539,6 +563,7 @@ export const activityLogsRouter = router({
         } as Prisma.InputJsonValue,
         after: {
           value: updatedLog.value,
+          progressStatus: updatedLog.progressStatus,
           note: updatedLog.note,
         } as Prisma.InputJsonValue,
       });

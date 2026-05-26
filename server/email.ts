@@ -246,21 +246,27 @@ export async function sendActivityApprovedEmail({
   leadMeasureName,
   value,
   unit,
+  progressStatus,
 }: {
   to: string;
   name: string;
   leadMeasureName: string;
-  value: number;
-  unit: string;
+  value?: number | null;
+  unit?: string | null;
+  progressStatus?: string | null;
 }) {
   try {
+    const recorded = progressStatus
+      ? progressStatus.replace(/_/g, " ").toLowerCase()
+      : `${value ?? 0} ${unit ? escapeHtml(unit) : ""}`.trim();
+
     await sendEmail({
       to,
       subject: `Activity approved: ${leadMeasureName}`,
       html: `
         <h2>Hi ${escapeHtml(name)},</h2>
         <p>Your activity log for <strong>${escapeHtml(leadMeasureName)}</strong> has been approved.</p>
-        <p>Value recorded: <strong>${value} ${escapeHtml(unit)}</strong></p>
+        <p>Progress recorded: <strong>${recorded}</strong></p>
         <p>This contribution is now reflected on your team's scoreboard.</p>
       `,
     });
@@ -274,19 +280,25 @@ export async function sendActivityDeclinedEmail({
   name,
   leadMeasureName,
   value,
+  progressStatus,
 }: {
   to: string;
   name: string;
   leadMeasureName: string;
-  value: number;
+  value?: number | null;
+  progressStatus?: string | null;
 }) {
   try {
+    const recorded = progressStatus
+      ? progressStatus.replace(/_/g, " ").toLowerCase()
+      : String(value ?? 0);
+
     await sendEmail({
       to,
       subject: `Activity log declined: ${leadMeasureName}`,
       html: `
         <h2>Hi ${escapeHtml(name)},</h2>
-        <p>Your activity log of <strong>${value}</strong> for <strong>${escapeHtml(leadMeasureName)}</strong> was declined by your team lead.</p>
+        <p>Your activity log of <strong>${recorded}</strong> for <strong>${escapeHtml(leadMeasureName)}</strong> was declined by your team lead.</p>
         <p>If you believe this is an error, please speak with your team lead directly.</p>
       `,
     });

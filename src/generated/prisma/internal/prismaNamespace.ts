@@ -1793,6 +1793,7 @@ export const WIGScalarFieldEnum = {
   id: 'id',
   title: 'title',
   description: 'description',
+  trackingType: 'trackingType',
   fromValue: 'fromValue',
   toValue: 'toValue',
   currentValue: 'currentValue',
@@ -1812,6 +1813,7 @@ export const LeadMeasureScalarFieldEnum = {
   id: 'id',
   name: 'name',
   description: 'description',
+  trackingType: 'trackingType',
   cadence: 'cadence',
   targetValue: 'targetValue',
   unit: 'unit',
@@ -1835,6 +1837,7 @@ export type LeadMeasureOwnerScalarFieldEnum = (typeof LeadMeasureOwnerScalarFiel
 export const ActivityLogScalarFieldEnum = {
   id: 'id',
   value: 'value',
+  progressStatus: 'progressStatus',
   loggedForDate: 'loggedForDate',
   note: 'note',
   status: 'status',
@@ -2055,6 +2058,20 @@ export type ListEnumTeamRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$Pri
 
 
 /**
+ * Reference to a field of type 'TrackingType'
+ */
+export type EnumTrackingTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TrackingType'>
+    
+
+
+/**
+ * Reference to a field of type 'TrackingType[]'
+ */
+export type ListEnumTrackingTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TrackingType[]'>
+    
+
+
+/**
  * Reference to a field of type 'Float'
  */
 export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
@@ -2093,6 +2110,20 @@ export type EnumCadenceFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaMo
  * Reference to a field of type 'Cadence[]'
  */
 export type ListEnumCadenceFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Cadence[]'>
+    
+
+
+/**
+ * Reference to a field of type 'ActivityProgressStatus'
+ */
+export type EnumActivityProgressStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ActivityProgressStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'ActivityProgressStatus[]'
+ */
+export type ListEnumActivityProgressStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ActivityProgressStatus[]'>
     
 
 

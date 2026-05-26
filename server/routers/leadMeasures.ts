@@ -12,13 +12,21 @@ export const leadMeasuresRouter = router({
         wigId: z.string(),
         name: z.string().min(3),
         description: z.string().optional(),
+        trackingType: z.enum(["NUMERIC", "MILESTONE"]).default("NUMERIC"),
         cadence: z.enum(["WEEKLY", "BIWEEKLY"]),
-        targetValue: z.number(),
-        unit: z.string().min(1),
+        targetValue: z.number().optional(),
+        unit: z.string().optional(),
         ownerUserIds: z.array(z.string()).min(1).max(10),
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      if (input.trackingType === "NUMERIC" && ((input.targetValue ?? 0) <= 0 || !input.unit)) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Numeric lead measures require a positive target value and unit.",
+        });
+      }
+
       const wig = await ctx.db.wIG.findUnique({
         where: { id: input.wigId },
         include: {
@@ -79,6 +87,7 @@ export const leadMeasuresRouter = router({
           wigId: input.wigId,
           name: input.name,
           description: input.description,
+          trackingType: input.trackingType,
           cadence: input.cadence,
           targetValue: input.targetValue,
           unit: input.unit,
@@ -111,6 +120,7 @@ export const leadMeasuresRouter = router({
         name: z.string().min(3).optional(),
         description: z.string().optional(),
         cadence: z.enum(["WEEKLY", "BIWEEKLY"]).optional(),
+        trackingType: z.enum(["NUMERIC", "MILESTONE"]).optional(),
         targetValue: z.number().optional(),
         unit: z.string().optional(),
       }),

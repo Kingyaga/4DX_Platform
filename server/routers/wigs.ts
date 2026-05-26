@@ -17,16 +17,24 @@ export const wigsRouter = router({
       z.object({
         teamSlug: z.string(),
         title: z.string().min(3).max(200),
-        fromValue: wigValueSchema,
-        toValue: wigValueSchema,
-        unit: z.string().min(1),
+        trackingType: z.enum(["NUMERIC", "MILESTONE"]).default("NUMERIC"),
+        fromValue: wigValueSchema.optional(),
+        toValue: wigValueSchema.optional(),
+        unit: z.string().optional(),
         deadline: z.coerce.date(),
         description: z.string().optional(),
       }),
     )
 
     .mutation(async ({ ctx, input }) => {
-      if (input.toValue <= input.fromValue) {
+      if (input.trackingType === "NUMERIC" && (input.fromValue === undefined || input.toValue === undefined || !input.unit)) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Numeric WIGs require current value, target value, and unit.",
+        });
+      }
+
+      if (input.trackingType === "NUMERIC" && input.toValue! <= input.fromValue!) {
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: "Target value must be greater than the current value.",
@@ -69,9 +77,10 @@ export const wigsRouter = router({
       const createdWIG = await ctx.db.wIG.create({
         data: {
           title: input.title,
+          trackingType: input.trackingType,
           fromValue: input.fromValue,
           toValue: input.toValue,
-          currentValue: input.fromValue,
+          currentValue: input.trackingType === "NUMERIC" ? input.fromValue : 0,
           unit: input.unit,
           deadline: input.deadline,
           description: input.description,

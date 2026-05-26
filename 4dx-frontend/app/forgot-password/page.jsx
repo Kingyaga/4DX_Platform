@@ -35,36 +35,53 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <main className="min-h-screen flex items-center justify-center px-6" style={{ background: "linear-gradient(135deg, #f7f9fd 0%, #ffffff 48%, #eef2f7 100%)" }}>
+    <main
+      className="min-h-screen flex items-center justify-center px-6"
+      style={{
+        background:
+          "radial-gradient(circle at 20% 20%, rgba(15, 23, 42, 0.08), transparent 28%), linear-gradient(135deg, #f8fafc 0%, #ffffff 46%, #eef2f7 100%)",
+        fontFamily: "'Inter', sans-serif",
+      }}
+    >
       <form
         onSubmit={handleSubmit}
-        className="w-full max-w-md border border-gray-200 bg-white p-8 shadow-sm"
-        style={{ borderRadius: "8px" }}
+        className="w-full border border-gray-200 bg-white shadow-sm"
+        style={{
+          maxWidth: "560px",
+          borderRadius: "8px",
+          padding: "44px",
+          boxShadow: "0 24px 70px rgba(15, 23, 42, 0.12)",
+        }}
       >
-        <div className="mb-6">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">4DX Platform</p>
-          <h1 className="mt-2 text-2xl font-semibold text-gray-950">Reset password</h1>
+        <div style={{ marginBottom: "28px" }}>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: "10px", padding: "8px 12px", border: "1px solid #e4e4e7", borderRadius: "999px", color: "#52525b", fontSize: "12px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em" }}>
+            <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>lock_reset</span>
+            4DX Platform
+          </div>
+          <h1 style={{ margin: "22px 0 0 0", fontSize: "38px", lineHeight: 1.05, fontWeight: 750, letterSpacing: "-0.03em", color: "#111827" }}>
+            Reset your password
+          </h1>
         </div>
-        <p className="text-sm leading-6 text-gray-600">
+        <p style={{ fontSize: "16px", lineHeight: 1.7, color: "#52525b", margin: 0 }}>
           Enter your account email and we will send a secure reset link.
         </p>
 
-        <label className="mt-6 block text-sm font-semibold text-gray-800">
+        <label style={{ display: "block", marginTop: "32px", fontSize: "14px", fontWeight: 700, color: "#27272a" }}>
           Email address
           <input
             type="email"
             value={email}
             onChange={(event) => setEmail(event.target.value.toLowerCase())}
-            className="mt-2 w-full border border-gray-300 px-3 py-3 text-sm outline-none focus:border-gray-900"
-            style={{ borderRadius: "6px" }}
+            className="w-full border border-gray-300 outline-none focus:border-gray-900"
+            style={{ marginTop: "10px", borderRadius: "8px", padding: "16px 18px", fontSize: "17px", color: "#111827" }}
             autoComplete="email"
             aria-invalid={Boolean(error)}
           />
         </label>
 
-        {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
+        {error && <p style={{ marginTop: "14px", fontSize: "14px", color: "#b91c1c", fontWeight: 600 }}>{error}</p>}
         {message && (
-          <div className="mt-4 border border-green-200 bg-green-50 p-4 text-sm text-green-800" style={{ borderRadius: "6px" }}>
+          <div className="border border-green-200 bg-green-50 text-sm text-green-800" style={{ marginTop: "18px", borderRadius: "8px", padding: "18px" }}>
             <p className="font-semibold">{message}</p>
             {resetUrl && (
               <Link href={resetUrl} className="mt-3 inline-flex font-semibold text-green-900 underline">
@@ -77,13 +94,13 @@ export default function ForgotPasswordPage() {
         <button
           type="submit"
           disabled={isLoading}
-          className="mt-6 flex w-full items-center justify-center bg-gray-950 px-4 py-3 text-sm font-semibold text-white disabled:opacity-60"
-          style={{ borderRadius: "6px" }}
+          className="flex w-full items-center justify-center bg-gray-950 font-semibold text-white disabled:opacity-60"
+          style={{ marginTop: "28px", borderRadius: "8px", padding: "16px 18px", fontSize: "15px" }}
         >
           {isLoading ? <LoadingSpinner size="small" text="" /> : "Send reset link"}
         </button>
 
-        <Link href="/login" className="mt-5 block text-center text-sm font-semibold text-gray-700">
+        <Link href="/login" className="block text-center font-semibold text-gray-700" style={{ marginTop: "22px", fontSize: "14px" }}>
           Back to sign in
         </Link>
       </form>

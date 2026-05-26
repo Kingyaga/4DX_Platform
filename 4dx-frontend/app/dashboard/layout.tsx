@@ -61,7 +61,6 @@ const allNavItems: NavItem[] = [
   { icon: "history", label: "Activity Log", href: "/dashboard/activity", roles: ["TEAM_LEAD", "MEMBER"] },
   { icon: "event", label: "Weekly Session", href: "/dashboard/session", roles: ["TEAM_LEAD", "MEMBER"] },
   { icon: "groups", label: "Members", href: "/dashboard/members", roles: ["TEAM_LEAD", "MEMBER"] },
-  { icon: "dashboard_customize", label: "Org Dashboard", href: "/dashboard", roles: ["TEAM_LEAD"] },
   { icon: "leaderboard", label: "Team Lead Dashboard", href: "/dashboard/team-lead", roles: ["TEAM_LEAD"] },
   { icon: "pending_actions", label: "Requests", href: "/dashboard/team-lead/requests", roles: ["TEAM_LEAD"] },
   { icon: "bar_chart", label: "Team Reports", href: "/dashboard/team-lead/reports", roles: ["TEAM_LEAD"] },
@@ -208,6 +207,8 @@ export default function DashboardLayout({
   const isActive = (href: string): boolean => {
     return pathname === href || activeHref === href;
   };
+
+  const hasNoTeamAssignment = userRole !== "ADMIN" && !teamsLoading && teams.length === 0;
 
   return (
     <div
@@ -604,7 +605,20 @@ export default function DashboardLayout({
             </span>
           </Link>
         )}
-        {children}
+        {hasNoTeamAssignment ? (
+          <main style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "32px" }}>
+            <section style={{ width: "100%", maxWidth: "720px", backgroundColor: "#ffffff", border: "1px solid #e4e4e7", padding: "40px", boxShadow: "0 18px 48px rgba(15, 23, 42, 0.08)" }}>
+              <span className="material-symbols-outlined" style={{ fontSize: "40px", color: "#71717a", marginBottom: "16px" }}>groups</span>
+              <h1 style={{ margin: 0, fontSize: "28px", fontWeight: 700, color: "#18181b" }}>Team assignment pending</h1>
+              <p style={{ margin: "12px 0 0 0", fontSize: "15px", lineHeight: 1.7, color: "#52525b" }}>
+                Your account is active in the organization, but you have not been added to a team yet. Once an admin assigns you to a team, your WIGs, scoreboard, sessions, and activity log tools will appear here.
+              </p>
+              <div style={{ marginTop: "24px", padding: "16px", backgroundColor: "#f8fafc", border: "1px solid #e2e8f0", color: "#475569", fontSize: "14px", lineHeight: 1.6 }}>
+                You can still open Settings from the sidebar to manage your profile and password while you wait.
+              </div>
+            </section>
+          </main>
+        ) : children}
       </div>
     </div>
   );

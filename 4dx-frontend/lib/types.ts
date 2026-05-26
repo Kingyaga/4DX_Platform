@@ -120,15 +120,18 @@ export interface MyTeamsResponse extends TeamWithoutWigs {
 // ─── WIG (WILDLY IMPORTANT GOAL) ───────────────────────────────────────────
 
 export type WIGStatus = "DRAFT" | "ACTIVE" | "ACHIEVED" | "MISSED" | "ABANDONED";
+export type TrackingType = "NUMERIC" | "MILESTONE";
+export type ActivityProgressStatus = "NOT_STARTED" | "IN_PROGRESS" | "BLOCKED" | "DONE";
 
 export interface WIG {
   id: string;
   title: string;
   description: string | null;
-  fromValue: number;
-  toValue: number;
-  currentValue: number;
-  unit: string;
+  trackingType: TrackingType;
+  fromValue: number | null;
+  toValue: number | null;
+  currentValue: number | null;
+  unit: string | null;
   deadline: Date;
   status: WIGStatus;
   createdAt: Date;
@@ -141,9 +144,10 @@ export interface WIG {
 export interface CreateWIGInput {
   teamSlug: string;
   title: string;
-  fromValue: number;
-  toValue: number;
-  unit: string;
+  trackingType?: TrackingType;
+  fromValue?: number;
+  toValue?: number;
+  unit?: string;
   deadline: string; // ISO string
   description?: string;
 }
@@ -174,7 +178,8 @@ export interface LeadMeasureOwner {
 
 export interface ActivityLogEntry {
   id: string;
-  value: number;
+  value: number | null;
+  progressStatus: ActivityProgressStatus | null;
   loggedForDate: Date;
   note: string | null;
   status: "PENDING" | "APPROVED" | "REJECTED";
@@ -191,9 +196,10 @@ export interface LeadMeasure {
   id: string;
   name: string;
   description: string | null;
+  trackingType: TrackingType;
   cadence: Cadence;
-  targetValue: number;
-  unit: string;
+  targetValue: number | null;
+  unit: string | null;
   createdAt: Date;
   archivedAt: Date | null;
   wigId: string;
@@ -205,8 +211,9 @@ export interface CreateLeadMeasureInput {
   wigId: string;
   name: string;
   cadence: Cadence;
-  targetValue: number;
-  unit: string;
+  trackingType?: TrackingType;
+  targetValue?: number;
+  unit?: string;
   ownerUserIds: string[];
   description?: string;
 }
@@ -216,6 +223,7 @@ export interface UpdateLeadMeasureInput {
   data: {
     name?: string;
     cadence?: Cadence;
+    trackingType?: TrackingType;
     targetValue?: number;
     unit?: string;
     description?: string;
@@ -226,7 +234,8 @@ export interface UpdateLeadMeasureInput {
 
 export interface ActivityLog {
   id: string;
-  value: number;
+  value: number | null;
+  progressStatus: ActivityProgressStatus | null;
   loggedForDate: Date;
   note: string | null;
   status: "PENDING" | "APPROVED" | "REJECTED";
@@ -242,14 +251,16 @@ export interface ActivityLog {
 
 export interface LogActivityInput {
   leadMeasureId: string;
-  value: number;
+  value?: number;
+  progressStatus?: ActivityProgressStatus;
   loggedForDate: string; // ISO string
   note?: string;
 }
 
 export interface EditActivityInput {
   logId: string;
-  value: number;
+  value?: number;
+  progressStatus?: ActivityProgressStatus;
   note?: string;
 }
 

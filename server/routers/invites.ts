@@ -40,6 +40,7 @@ export const invitesRouter = router({
 
       // Get teamId if teamSlug provided
       let teamId: string | undefined;
+      let teamName: string | undefined;
       if (input.teamSlug) {
         const team = await ctx.db.team.findUnique({
           where: { slug: input.teamSlug },
@@ -49,7 +50,14 @@ export const invitesRouter = router({
             code: "NOT_FOUND",
             message: "Team not found.",
           });
+        if (team.orgId !== org.id) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Selected team does not belong to this organization.",
+          });
+        }
         teamId = team.id;
+        teamName = team.name;
       }
 
       // Generate a secure random token
@@ -70,12 +78,20 @@ export const invitesRouter = router({
       });
 
       // Return the full invite URL
-      const baseUrl = process.env.NEXTAUTH_URL ?? "http://localhost:3001";
+      const baseUrl = (
+        process.env.NEXT_PUBLIC_APP_URL ||
+        process.env.NEXT_PUBLIC_NEXTAUTH_URL ||
+        process.env.FRONTEND_URL ||
+        process.env.NEXTAUTH_URL ||
+        "http://localhost:3001"
+      ).replace(/\/$/, "");
       return {
         token: invite.token,
         inviteUrl: `${baseUrl}/signup?token=${invite.token}`,
         expiresAt: invite.expiresAt,
         email: invite.email,
+        teamId: invite.teamId,
+        teamName,
       };
     }),
 
@@ -87,6 +103,7 @@ export const invitesRouter = router({
         where: { token: input.token },
         include: {
           org: { select: { id: true, name: true, slug: true } },
+          team: { select: { id: true, name: true, slug: true } },
         },
       });
 
@@ -116,6 +133,8 @@ export const invitesRouter = router({
         email: invite.email,
         orgName: invite.org.name,
         orgSlug: invite.org.slug,
+        teamName: invite.team?.name ?? null,
+        teamSlug: invite.team?.slug ?? null,
       };
     }),
 
@@ -146,6 +165,7 @@ export const invitesRouter = router({
         where: { orgId: org.id },
         include: {
           createdBy: { select: { id: true, name: true, email: true } },
+          team: { select: { id: true, name: true, slug: true } },
         },
         orderBy: { createdAt: "desc" },
       });

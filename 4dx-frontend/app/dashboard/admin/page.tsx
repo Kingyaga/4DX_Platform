@@ -11,6 +11,34 @@ import type { WIG, LeadMeasure, User } from "@/lib/types";
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
+function leadMeasureScore(leadMeasure: LeadMeasure) {
+  if (leadMeasure.trackingType === "MILESTONE") {
+    const latestStatus = leadMeasure.activityLogs?.[0]?.progressStatus;
+    if (latestStatus === "DONE") return 100;
+    if (latestStatus === "IN_PROGRESS") return 50;
+    if (latestStatus === "BLOCKED") return 25;
+    return 0;
+  }
+
+  const current = (leadMeasure.activityLogs || []).reduce((sum, log) => sum + (log.value ?? 0), 0);
+  const target = leadMeasure.targetValue ?? 0;
+  return target > 0 ? Math.min((current / target) * 100, 100) : 0;
+}
+
+function wigProgress(wig: WIG) {
+  if (wig.trackingType === "MILESTONE") {
+    const leadMeasures = wig.leadMeasures || [];
+    if (leadMeasures.length === 0) return 0;
+    return leadMeasures.reduce((sum, leadMeasure) => sum + leadMeasureScore(leadMeasure), 0) / leadMeasures.length;
+  }
+
+  const fromValue = wig.fromValue ?? 0;
+  const toValue = wig.toValue ?? 0;
+  const currentValue = wig.currentValue ?? fromValue;
+  const denominator = toValue - fromValue;
+  return denominator > 0 ? ((currentValue - fromValue) / denominator) * 100 : 0;
+}
+
 export default function AdminPage() {
   const { orgSlug } = useUserStore();
   const { org, isLoading, error } = useOrgDashboard(orgSlug);
@@ -146,25 +174,20 @@ export default function AdminPage() {
   const executionScore = allLeadMeasures.length > 0
     ? Math.round(
         allLeadMeasures.reduce((sum: number, lm: LeadMeasure) => {
-          const currentValue = (lm.activityLogs || []).reduce((s, l) => s + l.value, 0);
-          const onTrack = currentValue >= (lm.targetValue || 0) ? 100 : (currentValue / (lm.targetValue || 1)) * 100;
-          return sum + Math.min(onTrack, 100);
+          return sum + leadMeasureScore(lm);
         }, 0) / allLeadMeasures.length
       )
     : 0;
 
   // At Risk WIGs: count WIGs where current < midpoint
-  const atRiskWIGs = allWIGs.filter((wig: WIG) => {
-    const midpoint = wig.fromValue + (wig.toValue - wig.fromValue) * 0.5;
-    return wig.currentValue < midpoint;
-  }).length;
+  const atRiskWIGs = allWIGs.filter((wig: WIG) => wig.status === "ACTIVE" && wigProgress(wig) < 50).length;
 
   // ─── Generate week bars for trends ─────────────────────────────────────────
   // (already computed above with useMemo)
 
   // Completion stats
   const onTrackCount = allLeadMeasures.filter(
-    (lm: LeadMeasure) => (lm.activityLogs || []).reduce((s, l) => s + l.value, 0) >= lm.targetValue
+    (lm: LeadMeasure) => leadMeasureScore(lm) >= 100
   ).length;
   const completionRate = allLeadMeasures.length > 0 ? Math.round((onTrackCount / allLeadMeasures.length) * 100) : 0;
 
@@ -179,8 +202,7 @@ export default function AdminPage() {
       teamLMs.length > 0
         ? Math.round(
             teamLMs.reduce((sum: number, lm: LeadMeasure) => {
-              const current = (lm.activityLogs || []).reduce((s, l) => s + l.value, 0);
-              return sum + Math.min((current / (lm.targetValue || 1)) * 100, 100);
+              return sum + leadMeasureScore(lm);
             }, 0) / teamLMs.length
           )
         : 0;
@@ -194,8 +216,7 @@ export default function AdminPage() {
     const avgScore = teamLMs.length > 0
       ? Math.round(
           teamLMs.reduce((sum: number, lm: LeadMeasure) => {
-            const current = (lm.activityLogs || []).reduce((s, l) => s + l.value, 0);
-            return sum + Math.min((current / (lm.targetValue || 1)) * 100, 100);
+            return sum + leadMeasureScore(lm);
           }, 0) / teamLMs.length
         )
       : 0;
@@ -205,7 +226,7 @@ export default function AdminPage() {
       tagVariant: "error",
       timestamp: "Just now",
       team: worstTeam.name,
-      description: `Execution score is ${avgScore}%. ${teamLMs.filter((lm: LeadMeasure) => (lm.activityLogs || []).reduce((s, l) => s + l.value, 0) < lm.targetValue).length} lead measures need attention.`,
+      description: `Execution score is ${avgScore}%. ${teamLMs.filter((lm: LeadMeasure) => leadMeasureScore(lm) < 100).length} lead measures need attention.`,
       href: "/dashboard/admin/execution-details",
     });
   }
@@ -235,8 +256,7 @@ export default function AdminPage() {
 
   // Alert 3: WIGs at risk (progress < 30% with < 30 days left - simplified for demo)
   const riskyWIGs = allWIGs.filter((wig: WIG) => {
-    const progressPercent = wig.toValue > wig.fromValue ? (wig.currentValue - wig.fromValue) / (wig.toValue - wig.fromValue) : 0;
-    return progressPercent < 0.3;
+    return wig.status === "ACTIVE" && wigProgress(wig) < 30;
   });
 
   if (riskyWIGs.length > 0) {
@@ -271,13 +291,12 @@ export default function AdminPage() {
       teamLMs.length > 0
         ? Math.round(
             teamLMs.reduce((sum: number, lm: LeadMeasure) => {
-              const current = (lm.activityLogs || []).reduce((s, l) => s + l.value, 0);
-              return sum + Math.min((current / (lm.targetValue || 1)) * 100, 100);
+              return sum + leadMeasureScore(lm);
             }, 0) / teamLMs.length
           )
         : 50;
 
-    const onTrackLMs = teamLMs.filter((lm: LeadMeasure) => (lm.activityLogs || []).reduce((s, l) => s + l.value, 0) >= lm.targetValue).length;
+    const onTrackLMs = teamLMs.filter((lm: LeadMeasure) => leadMeasureScore(lm) >= 100).length;
     const leadMeasureHealth = teamLMs.length > 0 ? Math.round((onTrackLMs / teamLMs.length) * 100) : 50;
 
     let status: "on-track" | "warning" | "critical" = "on-track";
