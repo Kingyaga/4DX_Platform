@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { Prisma } from "@/generated/prisma/client";
+import { ActivityProgressStatus, Prisma } from "@/generated/prisma/client";
 import { router, protectedProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
 import { auditLog } from "../audit";
@@ -8,10 +8,23 @@ import { sendActivityApprovedEmail, sendActivityDeclinedEmail, sendWigClosedEmai
 import { getNextWigCompletionState } from "../wigCompletion";
 
 const CLOSED_WIG_STATUSES = ["ACHIEVED", "MISSED", "ABANDONED"] as const;
+const PROGRESS_STATUSES = ["NOT_STARTED", "IN_PROGRESS", "BLOCKED", "DONE"] as const;
+const progressStatusSchema = z.enum(PROGRESS_STATUSES);
+type ProgressStatus = ActivityProgressStatus;
+type NormalizedActivityValue = {
+  value: number | null;
+  valueJson: Prisma.InputJsonValue;
+  progressStatus: ActivityProgressStatus | null;
+};
+
+function isNumericLikeTrackingType(trackingType: string) {
+  return ["NUMERIC", "PERCENTAGE", "DURATION"].includes(trackingType);
+}
 
 function buildActivityPayload(input: {
   trackingType: string;
   value?: number | null;
+  valueJson?: unknown;
   progressStatus?: string | null;
   note?: string | null;
 }) {
@@ -19,9 +32,140 @@ function buildActivityPayload(input: {
     version: 1,
     trackingType: input.trackingType,
     value: input.value ?? null,
+    valueJson: input.valueJson ?? null,
     progressStatus: input.progressStatus ?? null,
     note: input.note ?? null,
   } satisfies Prisma.InputJsonValue;
+}
+
+function normalizeFlexibleActivityValue(input: {
+  trackingType: string;
+  value?: number | null;
+  valueJson?: unknown;
+  progressStatus?: ProgressStatus;
+}): NormalizedActivityValue {
+  const trackingType = input.trackingType;
+
+  if (trackingType === "NUMERIC") {
+    if (typeof input.value !== "number" || Number.isNaN(input.value)) {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: "Numeric lead measures require a valid number.",
+      });
+    }
+
+    return {
+      value: input.value,
+      valueJson: { kind: "number", value: input.value } satisfies Prisma.InputJsonValue,
+      progressStatus: input.progressStatus ?? null,
+    };
+  }
+
+  if (trackingType === "PERCENTAGE") {
+    if (typeof input.value !== "number" || input.value < 0 || input.value > 100) {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: "Percentage lead measures require a value from 0 to 100.",
+      });
+    }
+
+    return {
+      value: input.value,
+      valueJson: { kind: "percentage", value: input.value } satisfies Prisma.InputJsonValue,
+      progressStatus:
+        input.progressStatus ??
+        (input.value >= 100 ? "DONE" : input.value > 0 ? "IN_PROGRESS" : "NOT_STARTED"),
+    };
+  }
+
+  if (trackingType === "DURATION") {
+    if (typeof input.value !== "number" || input.value < 0) {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: "Duration lead measures require a positive duration in minutes.",
+      });
+    }
+
+    return {
+      value: input.value,
+      valueJson: { kind: "duration", minutes: input.value } satisfies Prisma.InputJsonValue,
+      progressStatus: input.progressStatus ?? "IN_PROGRESS",
+    };
+  }
+
+  if (["BOOLEAN", "COMPLETION", "MILESTONE"].includes(trackingType)) {
+    if (typeof input.valueJson !== "boolean") {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: "Completion lead measures require a completed/not completed value.",
+      });
+    }
+
+    return {
+      value: null,
+      valueJson: input.valueJson,
+      progressStatus: input.valueJson ? "DONE" : "NOT_STARTED",
+    };
+  }
+
+  if (trackingType === "TIME") {
+    if (typeof input.valueJson !== "string" || !/^\d{2}:\d{2}$/.test(input.valueJson)) {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: "Time lead measures require a valid time.",
+      });
+    }
+
+    return {
+      value: null,
+      valueJson: input.valueJson,
+      progressStatus: input.progressStatus ?? "DONE",
+    };
+  }
+
+  if (trackingType === "CHECKLIST") {
+    if (!Array.isArray(input.valueJson) || input.valueJson.some((item) => typeof item !== "string")) {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: "Checklist lead measures require one or more checklist items.",
+      });
+    }
+
+    return {
+      value: null,
+      valueJson: input.valueJson,
+      progressStatus: input.progressStatus ?? "DONE",
+    };
+  }
+
+  if (["TEXT", "CUSTOM", "HYBRID"].includes(trackingType)) {
+    if (typeof input.valueJson !== "string" || input.valueJson.trim().length === 0) {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: "This lead measure requires a text update.",
+      });
+    }
+
+    return {
+      value: null,
+      valueJson: input.valueJson.trim(),
+      progressStatus: input.progressStatus ?? "DONE",
+    };
+  }
+
+  if (isNumericLikeTrackingType(trackingType)) {
+    return {
+      value: input.value ?? null,
+      valueJson: input.valueJson as Prisma.InputJsonValue,
+      progressStatus: input.progressStatus ?? null,
+    };
+  }
+
+  return {
+    value: input.value ?? null,
+    valueJson: (input.valueJson ?? null) as Prisma.InputJsonValue,
+    progressStatus: input.progressStatus ?? null,
+  };
 }
 
 async function getLeadMeasureTotal(
@@ -48,7 +192,7 @@ async function getNextWigState(
         include: {
           activityLogs: {
             where: { status: "APPROVED" },
-            select: { value: true },
+            select: { value: true, valueJson: true, progressStatus: true, loggedForDate: true },
           },
         },
       },
@@ -113,7 +257,8 @@ export const activityLogsRouter = router({
       z.object({
         leadMeasureId: z.string(),
         value: z.number().optional(),
-        progressStatus: z.enum(["NOT_STARTED", "IN_PROGRESS", "BLOCKED", "DONE"]).optional(),
+        valueJson: z.unknown().optional(),
+        progressStatus: progressStatusSchema.optional(),
         loggedForDate: z.coerce.date(),
         note: z.string().optional(),
       }),
@@ -137,22 +282,15 @@ export const activityLogsRouter = router({
         });
       }
 
-      if (leadMeasure.trackingType === "NUMERIC" && input.value === undefined) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "Numeric lead measures require a value.",
-        });
-      }
-
-      if (leadMeasure.trackingType === "MILESTONE" && !input.progressStatus) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "Milestone lead measures require a progress status.",
-        });
-      }
+      const normalizedActivity = normalizeFlexibleActivityValue({
+        trackingType: leadMeasure.trackingType,
+        value: input.value,
+        valueJson: input.valueJson,
+        progressStatus: input.progressStatus,
+      });
 
       const currentTotal = await getLeadMeasureTotal(ctx.db, leadMeasure.id);
-      if (leadMeasure.trackingType === "NUMERIC" && currentTotal >= (leadMeasure.targetValue ?? 0)) {
+      if (isNumericLikeTrackingType(leadMeasure.trackingType) && currentTotal >= (leadMeasure.targetValue ?? 0)) {
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: "This lead measure is already complete and no longer accepts activity logs.",
@@ -190,12 +328,14 @@ export const activityLogsRouter = router({
       const createdLog = await ctx.db.activityLog.create({
         data: {
           leadMeasureId: input.leadMeasureId,
-          value: input.value,
-          progressStatus: input.progressStatus,
-          payloadJson: buildActivityPayload({
+          trackingType: leadMeasure.trackingType,
+          value: normalizedActivity.value,
+          progressStatus: normalizedActivity.progressStatus,
+          valueJson: buildActivityPayload({
             trackingType: leadMeasure.trackingType,
-            value: input.value,
-            progressStatus: input.progressStatus,
+            value: normalizedActivity.value,
+            valueJson: normalizedActivity.valueJson,
+            progressStatus: normalizedActivity.progressStatus,
             note: input.note,
           }),
           loggedForDate: input.loggedForDate,
@@ -214,6 +354,7 @@ export const activityLogsRouter = router({
         after: {
           leadMeasureId: createdLog.leadMeasureId,
           value: createdLog.value,
+          valueJson: createdLog.valueJson,
           progressStatus: createdLog.progressStatus,
           loggedForDate: createdLog.loggedForDate,
           note: createdLog.note,
@@ -532,7 +673,8 @@ export const activityLogsRouter = router({
       z.object({
         logId: z.string(),
         value: z.number().optional(),
-        progressStatus: z.enum(["NOT_STARTED", "IN_PROGRESS", "BLOCKED", "DONE"]).optional(),
+        valueJson: z.unknown().optional(),
+        progressStatus: progressStatusSchema.optional(),
         note: z.string().optional(),
       }),
     )
@@ -565,16 +707,24 @@ export const activityLogsRouter = router({
         });
       }
 
+      const normalizedActivity = normalizeFlexibleActivityValue({
+        trackingType: log.leadMeasure.trackingType,
+        value: input.value,
+        valueJson: input.valueJson,
+        progressStatus: input.progressStatus,
+      });
+
       const updatedLog = await ctx.db.activityLog.update({
         where: { id: input.logId },
         data: {
-          value: input.value,
-          progressStatus: input.progressStatus,
+          value: normalizedActivity.value,
+          progressStatus: normalizedActivity.progressStatus,
           note: input.note,
-          payloadJson: buildActivityPayload({
+          valueJson: buildActivityPayload({
             trackingType: log.leadMeasure.trackingType,
-            value: input.value,
-            progressStatus: input.progressStatus,
+            value: normalizedActivity.value,
+            valueJson: normalizedActivity.valueJson,
+            progressStatus: normalizedActivity.progressStatus,
             note: input.note,
           }),
           editedAt: new Date(),
@@ -589,10 +739,12 @@ export const activityLogsRouter = router({
         action: "ACTIVITY_EDITED",
         before: {
           value: log.value,
+          valueJson: log.valueJson,
           note: log.note,
         } as Prisma.InputJsonValue,
         after: {
           value: updatedLog.value,
+          valueJson: updatedLog.valueJson,
           progressStatus: updatedLog.progressStatus,
           note: updatedLog.note,
         } as Prisma.InputJsonValue,

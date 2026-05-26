@@ -16,8 +16,7 @@ type AggregatedActivityLog = ActivityLogEntry & {
   trackingType?: TrackingType;
 };
 
-type MinimalWig = { id: string; title?: string; status?: string; leadMeasures?: unknown[] };
-type MinimalLeadMeasure = { id: string; name: string; unit?: string | null; trackingType?: TrackingType; activityLogs?: ActivityLogEntry[]; owners?: { userId: string }[]; targetValue?: number | null };
+type MinimalWig = { id: string; title?: string; status?: string; leadMeasures?: LeadMeasure[] };
 
 function isNumericLike(trackingType?: TrackingType) {
   return trackingType === "NUMERIC" || trackingType === "PERCENTAGE" || trackingType === "DURATION";
@@ -34,7 +33,7 @@ function formatActivityValue(log: {
   trackingType?: TrackingType;
   unit?: string | null;
   note?: string | null;
-}) {
+}): string {
   const trackingType = log.trackingType || "NUMERIC";
   const payload = (typeof log.valueJson === "object" && log.valueJson !== null ? (log.valueJson as Record<string, unknown>) : {}) as Record<string, unknown>;
   if (trackingType === "NUMERIC") return `${log.value ?? 0} ${log.unit ?? ""}`.trim();
@@ -43,8 +42,10 @@ function formatActivityValue(log: {
   if (trackingType === "BOOLEAN" || trackingType === "COMPLETION" || trackingType === "MILESTONE") {
     return payload.completed || log.progressStatus === "DONE" ? "Completed" : "Not completed";
   }
-  if (trackingType === "TIME") return `Completed at ${payload.time ?? "selected time"}`;
-  if (trackingType === "TEXT" || trackingType === "CUSTOM" || trackingType === "HYBRID") return payload.text || log.note || "Text update";
+  if (trackingType === "TIME") return `Completed at ${typeof payload.time === "string" ? payload.time : "selected time"}`;
+  if (trackingType === "TEXT" || trackingType === "CUSTOM" || trackingType === "HYBRID") {
+    return typeof payload.text === "string" && payload.text.trim().length > 0 ? payload.text : log.note || "Text update";
+  }
   if (trackingType === "CHECKLIST") return Array.isArray(payload.items) ? `${payload.items.length} checklist item${payload.items.length === 1 ? "" : "s"} logged` : "Checklist logged";
   return log.progressStatus?.replace(/_/g, " ").toLowerCase() || "Logged";
 }
@@ -87,7 +88,7 @@ export default function ActivityLogPage() {
   const allLeadMeasures = useMemo(() =>
     activeWigs.flatMap((wig) =>
       (wig.leadMeasures || [])
-        .filter((lm: LeadMeasure) => {
+        .filter((lm) => {
           const approvedTotal = (lm.activityLogs || [])
             .filter((log) => log.status === "APPROVED")
             .reduce((sum, log) => sum + (log.value ?? 0), 0);
@@ -101,7 +102,7 @@ export default function ActivityLogPage() {
             (!userId || (lm.owners || []).some((owner) => owner.userId === userId))
           );
         })
-        .map((lm: LeadMeasure) => ({ id: lm.id, name: lm.name, wigTitle: wig.title, unit: lm.unit || "", trackingType: lm.trackingType })),
+        .map((lm) => ({ id: lm.id, name: lm.name, wigTitle: wig.title, unit: lm.unit || "", trackingType: lm.trackingType })),
     ), [activeWigs, selectedWigId, userId]
   );
 
@@ -164,7 +165,7 @@ export default function ActivityLogPage() {
       const loadedLogs: AggregatedActivityLog[] = [];
 
       for (const wig of (wigs as MinimalWig[])) {
-        for (const lm of (wig.leadMeasures || []) as MinimalLeadMeasure[]) {
+        for (const lm of wig.leadMeasures || []) {
           // Activity logs might not be included in the response depending on backend query
           const logs = lm.activityLogs;
           if (logs && Array.isArray(logs)) {

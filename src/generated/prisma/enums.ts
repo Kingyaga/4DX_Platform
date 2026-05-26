@@ -91,14 +91,6 @@ export const SessionStatus = {
 export type SessionStatus = (typeof SessionStatus)[keyof typeof SessionStatus]
 
 
-export const BlockerStatus = {
-  OPEN: 'OPEN',
-  RESOLVED: 'RESOLVED'
-} as const
-
-export type BlockerStatus = (typeof BlockerStatus)[keyof typeof BlockerStatus]
-
-
 export const CommitmentStatus = {
   PENDING: 'PENDING',
   DONE: 'DONE',
@@ -117,3 +109,11 @@ export const NotDoneReason = {
 } as const
 
 export type NotDoneReason = (typeof NotDoneReason)[keyof typeof NotDoneReason]
+
+
+export const BlockerStatus = {
+  OPEN: 'OPEN',
+  RESOLVED: 'RESOLVED'
+} as const
+
+export type BlockerStatus = (typeof BlockerStatus)[keyof typeof BlockerStatus]

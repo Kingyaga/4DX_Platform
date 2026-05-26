@@ -131,9 +131,10 @@ export default function TeamLeadPage() {
 
   // Compute metrics
   const totalWIGs = wigs.length;
-  const activeWIGs = wigs.filter((w: any) => w.status === "ACTIVE").length;
+  const activeWigList = wigs.filter((w: any) => w.status === "ACTIVE");
+  const activeWIGs = activeWigList.length;
 
-  const allLeadMeasures = wigs.flatMap((w: any) => w.leadMeasures || []);
+  const allLeadMeasures = activeWigList.flatMap((w: any) => w.leadMeasures || []);
   const onTrackCount = allLeadMeasures.filter((lm: any) => getLeadMeasureScore(lm) >= 100).length;
   const executionScore = allLeadMeasures.length > 0 ? Math.round((onTrackCount / allLeadMeasures.length) * 100) : 0;
 
@@ -247,11 +248,11 @@ export default function TeamLeadPage() {
             </Link>
           </div>
 
-          {wigs.length === 0 ? (
-            <p style={{ margin: 0, color: "#a1a1aa", fontSize: "14px" }}>No WIGs yet</p>
+          {activeWigList.length === 0 ? (
+            <p style={{ margin: 0, color: "#a1a1aa", fontSize: "14px" }}>No active WIGs yet</p>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-              {wigs.slice(0, 5).map((wig: any) => (
+              {activeWigList.slice(0, 5).map((wig: any) => (
                 <div
                   key={wig.id}
                   style={{

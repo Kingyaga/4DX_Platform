@@ -1217,7 +1217,7 @@ export type UserCreateWithoutFacilitatedSessionsInput = {
   id?: string
   email: string
   name: string
-  passwordHash: string
+  passwordHash?: string | null
   createdAt?: Date | string
   defaultTeamId?: string | null
   mustChangePassword?: boolean
@@ -1239,7 +1239,7 @@ export type UserUncheckedCreateWithoutFacilitatedSessionsInput = {
   id?: string
   email: string
   name: string
-  passwordHash: string
+  passwordHash?: string | null
   createdAt?: Date | string
   defaultTeamId?: string | null
   mustChangePassword?: boolean
@@ -1332,7 +1332,7 @@ export type UserUpdateWithoutFacilitatedSessionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
-  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   defaultTeamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1354,7 +1354,7 @@ export type UserUncheckedUpdateWithoutFacilitatedSessionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
-  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   defaultTeamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1376,7 +1376,7 @@ export type UserCreateWithoutSessionBlockersInput = {
   id?: string
   email: string
   name: string
-  passwordHash: string
+  passwordHash?: string | null
   createdAt?: Date | string
   defaultTeamId?: string | null
   mustChangePassword?: boolean
@@ -1398,7 +1398,7 @@ export type UserUncheckedCreateWithoutSessionBlockersInput = {
   id?: string
   email: string
   name: string
-  passwordHash: string
+  passwordHash?: string | null
   createdAt?: Date | string
   defaultTeamId?: string | null
   mustChangePassword?: boolean
@@ -1436,7 +1436,7 @@ export type UserUpdateWithoutSessionBlockersInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
-  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   defaultTeamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1458,7 +1458,7 @@ export type UserUncheckedUpdateWithoutSessionBlockersInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
-  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   defaultTeamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1480,7 +1480,7 @@ export type UserCreateWithoutSessionTimelineInput = {
   id?: string
   email: string
   name: string
-  passwordHash: string
+  passwordHash?: string | null
   createdAt?: Date | string
   defaultTeamId?: string | null
   mustChangePassword?: boolean
@@ -1502,7 +1502,7 @@ export type UserUncheckedCreateWithoutSessionTimelineInput = {
   id?: string
   email: string
   name: string
-  passwordHash: string
+  passwordHash?: string | null
   createdAt?: Date | string
   defaultTeamId?: string | null
   mustChangePassword?: boolean
@@ -1540,7 +1540,7 @@ export type UserUpdateWithoutSessionTimelineInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
-  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   defaultTeamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1562,7 +1562,7 @@ export type UserUncheckedUpdateWithoutSessionTimelineInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
-  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   defaultTeamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean

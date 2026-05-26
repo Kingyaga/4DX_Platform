@@ -73,6 +73,11 @@ export type ActivityLog = Prisma.ActivityLogModel
  */
 export type WeeklySession = Prisma.WeeklySessionModel
 /**
+ * Model Commitment
+ * 
+ */
+export type Commitment = Prisma.CommitmentModel
+/**
  * Model SessionBlocker
  * 
  */
@@ -82,11 +87,6 @@ export type SessionBlocker = Prisma.SessionBlockerModel
  * 
  */
 export type SessionTimelineEvent = Prisma.SessionTimelineEventModel
-/**
- * Model Commitment
- * 
- */
-export type Commitment = Prisma.CommitmentModel
 /**
  * Model Notification
  * 

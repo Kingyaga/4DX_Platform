@@ -63,6 +63,8 @@ export const ModelName = {
   ActivityLog: 'ActivityLog',
   WeeklySession: 'WeeklySession',
   Commitment: 'Commitment',
+  SessionBlocker: 'SessionBlocker',
+  SessionTimelineEvent: 'SessionTimelineEvent',
   Notification: 'Notification',
   AuditLog: 'AuditLog',
   ApiKey: 'ApiKey',
@@ -206,9 +208,10 @@ export type LeadMeasureOwnerScalarFieldEnum = (typeof LeadMeasureOwnerScalarFiel
 
 export const ActivityLogScalarFieldEnum = {
   id: 'id',
+  trackingType: 'trackingType',
   value: 'value',
+  valueJson: 'valueJson',
   progressStatus: 'progressStatus',
-  payloadJson: 'payloadJson',
   loggedForDate: 'loggedForDate',
   note: 'note',
   status: 'status',
@@ -223,15 +226,23 @@ export type ActivityLogScalarFieldEnum = (typeof ActivityLogScalarFieldEnum)[key
 
 export const WeeklySessionScalarFieldEnum = {
   id: 'id',
+  title: 'title',
   weekStarting: 'weekStarting',
+  weekEnding: 'weekEnding',
   status: 'status',
+  snapshotJson: 'snapshotJson',
+  notes: 'notes',
+  confidenceScore: 'confidenceScore',
   accountDoneAt: 'accountDoneAt',
   reviewDoneAt: 'reviewDoneAt',
   commitDoneAt: 'commitDoneAt',
-  snapshotJson: 'snapshotJson',
+  startedAt: 'startedAt',
+  completedAt: 'completedAt',
   createdAt: 'createdAt',
   wigId: 'wigId',
-  userId: 'userId'
+  userId: 'userId',
+  teamId: 'teamId',
+  facilitatorUserId: 'facilitatorUserId'
 } as const
 
 export type WeeklySessionScalarFieldEnum = (typeof WeeklySessionScalarFieldEnum)[keyof typeof WeeklySessionScalarFieldEnum]
@@ -244,11 +255,38 @@ export const CommitmentScalarFieldEnum = {
   notDoneReason: 'notDoneReason',
   reflection: 'reflection',
   resolvedAt: 'resolvedAt',
+  createdAt: 'createdAt',
   weeklySessionId: 'weeklySessionId',
   linkedLeadMeasureId: 'linkedLeadMeasureId'
 } as const
 
 export type CommitmentScalarFieldEnum = (typeof CommitmentScalarFieldEnum)[keyof typeof CommitmentScalarFieldEnum]
+
+
+export const SessionBlockerScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  details: 'details',
+  status: 'status',
+  createdAt: 'createdAt',
+  resolvedAt: 'resolvedAt',
+  weeklySessionId: 'weeklySessionId',
+  createdByUserId: 'createdByUserId'
+} as const
+
+export type SessionBlockerScalarFieldEnum = (typeof SessionBlockerScalarFieldEnum)[keyof typeof SessionBlockerScalarFieldEnum]
+
+
+export const SessionTimelineEventScalarFieldEnum = {
+  id: 'id',
+  type: 'type',
+  payloadJson: 'payloadJson',
+  createdAt: 'createdAt',
+  weeklySessionId: 'weeklySessionId',
+  actorUserId: 'actorUserId'
+} as const
+
+export type SessionTimelineEventScalarFieldEnum = (typeof SessionTimelineEventScalarFieldEnum)[keyof typeof SessionTimelineEventScalarFieldEnum]
 
 
 export const NotificationScalarFieldEnum = {
