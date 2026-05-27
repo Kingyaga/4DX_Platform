@@ -126,11 +126,17 @@ export const sessionsRouter = router({
       weekStarting.setUTCHours(0, 0, 0, 0);
 
       const existing = await ctx.db.weeklySession.findFirst({
-        where: { teamId: team.id, weekStarting, wigId: null, userId: null },
+        where: {
+          teamId: team.id,
+          weekStarting,
+          wigId: null,
+          userId: null,
+          status: { not: "COMPLETE" },
+        },
       });
 
       if (existing) {
-        throw new TRPCError({ code: "CONFLICT", message: "A team weekly session already exists for this week." });
+        throw new TRPCError({ code: "CONFLICT", message: "A weekly session is already in progress for this team." });
       }
 
       const snapshot = await buildWeeklySnapshot(ctx, team.id, weekStarting);
@@ -200,6 +206,7 @@ export const sessionsRouter = router({
           blockers: { include: { createdBy: { select: { id: true, name: true, email: true } } }, orderBy: { createdAt: "desc" } },
           timeline: { include: { actor: { select: { id: true, name: true, email: true } } }, orderBy: { createdAt: "desc" } },
         },
+        orderBy: { createdAt: "desc" },
       });
     }),
 
@@ -889,7 +896,10 @@ export const sessionsRouter = router({
 
       return ctx.db.weeklySession.findMany({
         where: {
-          wig: { teamId: team.id },
+          OR: [
+            { teamId: team.id, wigId: null, userId: null },
+            { wig: { teamId: team.id } },
+          ],
           weekStarting: weekFilter,
         },
         include: {
@@ -899,9 +909,15 @@ export const sessionsRouter = router({
           wig: {
             select: { id: true, title: true },
           },
+          team: {
+            select: { id: true, name: true, slug: true },
+          },
+          facilitator: {
+            select: { id: true, name: true, email: true },
+          },
           commitments: true,
         },
-        orderBy: { user: { name: "asc" } },
+        orderBy: { createdAt: "desc" },
       });
     }),
 });
