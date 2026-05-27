@@ -173,7 +173,6 @@ model ActivityLog {
   userId         String
   status         ActivityLogStatus       @default(PENDING)
   progressStatus ActivityProgressStatus?
-  payloadJson    Json?
   trackingType   TrackingType            @default(NUMERIC)
   valueJson      Json?
   leadMeasure    LeadMeasure             @relation(fields: [leadMeasureId], references: [id])
@@ -182,7 +181,6 @@ model ActivityLog {
   @@index([leadMeasureId])
   @@index([userId])
   @@index([loggedForDate])
-  @@index([payloadJson], type: Gin)
 }
 
 model WeeklySession {

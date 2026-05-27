@@ -217,7 +217,6 @@ export const ActivityLogScalarFieldEnum = {
   userId: 'userId',
   status: 'status',
   progressStatus: 'progressStatus',
-  payloadJson: 'payloadJson',
   trackingType: 'trackingType',
   valueJson: 'valueJson'
 } as const
