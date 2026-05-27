@@ -36,45 +36,46 @@ export type ActivityLogSumAggregateOutputType = {
 
 export type ActivityLogMinAggregateOutputType = {
   id: string | null
-  trackingType: $Enums.TrackingType | null
   value: number | null
-  progressStatus: $Enums.ActivityProgressStatus | null
   loggedForDate: Date | null
   note: string | null
-  status: $Enums.ActivityLogStatus | null
   createdAt: Date | null
   editedAt: Date | null
   leadMeasureId: string | null
   userId: string | null
+  status: $Enums.ActivityLogStatus | null
+  progressStatus: $Enums.ActivityProgressStatus | null
+  trackingType: $Enums.TrackingType | null
 }
 
 export type ActivityLogMaxAggregateOutputType = {
   id: string | null
-  trackingType: $Enums.TrackingType | null
   value: number | null
-  progressStatus: $Enums.ActivityProgressStatus | null
   loggedForDate: Date | null
   note: string | null
-  status: $Enums.ActivityLogStatus | null
   createdAt: Date | null
   editedAt: Date | null
   leadMeasureId: string | null
   userId: string | null
+  status: $Enums.ActivityLogStatus | null
+  progressStatus: $Enums.ActivityProgressStatus | null
+  trackingType: $Enums.TrackingType | null
 }
 
 export type ActivityLogCountAggregateOutputType = {
   id: number
-  trackingType: number
   value: number
-  valueJson: number
-  progressStatus: number
   loggedForDate: number
   note: number
-  status: number
   createdAt: number
   editedAt: number
   leadMeasureId: number
   userId: number
+  status: number
+  progressStatus: number
+  payloadJson: number
+  trackingType: number
+  valueJson: number
   _all: number
 }
 
@@ -89,45 +90,46 @@ export type ActivityLogSumAggregateInputType = {
 
 export type ActivityLogMinAggregateInputType = {
   id?: true
-  trackingType?: true
   value?: true
-  progressStatus?: true
   loggedForDate?: true
   note?: true
-  status?: true
   createdAt?: true
   editedAt?: true
   leadMeasureId?: true
   userId?: true
+  status?: true
+  progressStatus?: true
+  trackingType?: true
 }
 
 export type ActivityLogMaxAggregateInputType = {
   id?: true
-  trackingType?: true
   value?: true
-  progressStatus?: true
   loggedForDate?: true
   note?: true
-  status?: true
   createdAt?: true
   editedAt?: true
   leadMeasureId?: true
   userId?: true
+  status?: true
+  progressStatus?: true
+  trackingType?: true
 }
 
 export type ActivityLogCountAggregateInputType = {
   id?: true
-  trackingType?: true
   value?: true
-  valueJson?: true
-  progressStatus?: true
   loggedForDate?: true
   note?: true
-  status?: true
   createdAt?: true
   editedAt?: true
   leadMeasureId?: true
   userId?: true
+  status?: true
+  progressStatus?: true
+  payloadJson?: true
+  trackingType?: true
+  valueJson?: true
   _all?: true
 }
 
@@ -219,17 +221,18 @@ export type ActivityLogGroupByArgs<ExtArgs extends runtime.Types.Extensions.Inte
 
 export type ActivityLogGroupByOutputType = {
   id: string
-  trackingType: $Enums.TrackingType
   value: number | null
-  valueJson: runtime.JsonValue | null
-  progressStatus: $Enums.ActivityProgressStatus | null
   loggedForDate: Date
   note: string | null
-  status: $Enums.ActivityLogStatus
   createdAt: Date
   editedAt: Date | null
   leadMeasureId: string
   userId: string
+  status: $Enums.ActivityLogStatus
+  progressStatus: $Enums.ActivityProgressStatus | null
+  payloadJson: runtime.JsonValue | null
+  trackingType: $Enums.TrackingType
+  valueJson: runtime.JsonValue | null
   _count: ActivityLogCountAggregateOutputType | null
   _avg: ActivityLogAvgAggregateOutputType | null
   _sum: ActivityLogSumAggregateOutputType | null
@@ -257,34 +260,36 @@ export type ActivityLogWhereInput = {
   OR?: Prisma.ActivityLogWhereInput[]
   NOT?: Prisma.ActivityLogWhereInput | Prisma.ActivityLogWhereInput[]
   id?: Prisma.StringFilter<"ActivityLog"> | string
-  trackingType?: Prisma.EnumTrackingTypeFilter<"ActivityLog"> | $Enums.TrackingType
   value?: Prisma.FloatNullableFilter<"ActivityLog"> | number | null
-  valueJson?: Prisma.JsonNullableFilter<"ActivityLog">
-  progressStatus?: Prisma.EnumActivityProgressStatusNullableFilter<"ActivityLog"> | $Enums.ActivityProgressStatus | null
   loggedForDate?: Prisma.DateTimeFilter<"ActivityLog"> | Date | string
   note?: Prisma.StringNullableFilter<"ActivityLog"> | string | null
-  status?: Prisma.EnumActivityLogStatusFilter<"ActivityLog"> | $Enums.ActivityLogStatus
   createdAt?: Prisma.DateTimeFilter<"ActivityLog"> | Date | string
   editedAt?: Prisma.DateTimeNullableFilter<"ActivityLog"> | Date | string | null
   leadMeasureId?: Prisma.StringFilter<"ActivityLog"> | string
   userId?: Prisma.StringFilter<"ActivityLog"> | string
+  status?: Prisma.EnumActivityLogStatusFilter<"ActivityLog"> | $Enums.ActivityLogStatus
+  progressStatus?: Prisma.EnumActivityProgressStatusNullableFilter<"ActivityLog"> | $Enums.ActivityProgressStatus | null
+  payloadJson?: Prisma.JsonNullableFilter<"ActivityLog">
+  trackingType?: Prisma.EnumTrackingTypeFilter<"ActivityLog"> | $Enums.TrackingType
+  valueJson?: Prisma.JsonNullableFilter<"ActivityLog">
   leadMeasure?: Prisma.XOR<Prisma.LeadMeasureScalarRelationFilter, Prisma.LeadMeasureWhereInput>
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }
 
 export type ActivityLogOrderByWithRelationInput = {
   id?: Prisma.SortOrder
-  trackingType?: Prisma.SortOrder
   value?: Prisma.SortOrderInput | Prisma.SortOrder
-  valueJson?: Prisma.SortOrderInput | Prisma.SortOrder
-  progressStatus?: Prisma.SortOrderInput | Prisma.SortOrder
   loggedForDate?: Prisma.SortOrder
   note?: Prisma.SortOrderInput | Prisma.SortOrder
-  status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   editedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   leadMeasureId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  status?: Prisma.SortOrder
+  progressStatus?: Prisma.SortOrderInput | Prisma.SortOrder
+  payloadJson?: Prisma.SortOrderInput | Prisma.SortOrder
+  trackingType?: Prisma.SortOrder
+  valueJson?: Prisma.SortOrderInput | Prisma.SortOrder
   leadMeasure?: Prisma.LeadMeasureOrderByWithRelationInput
   user?: Prisma.UserOrderByWithRelationInput
 }
@@ -294,34 +299,36 @@ export type ActivityLogWhereUniqueInput = Prisma.AtLeast<{
   AND?: Prisma.ActivityLogWhereInput | Prisma.ActivityLogWhereInput[]
   OR?: Prisma.ActivityLogWhereInput[]
   NOT?: Prisma.ActivityLogWhereInput | Prisma.ActivityLogWhereInput[]
-  trackingType?: Prisma.EnumTrackingTypeFilter<"ActivityLog"> | $Enums.TrackingType
   value?: Prisma.FloatNullableFilter<"ActivityLog"> | number | null
-  valueJson?: Prisma.JsonNullableFilter<"ActivityLog">
-  progressStatus?: Prisma.EnumActivityProgressStatusNullableFilter<"ActivityLog"> | $Enums.ActivityProgressStatus | null
   loggedForDate?: Prisma.DateTimeFilter<"ActivityLog"> | Date | string
   note?: Prisma.StringNullableFilter<"ActivityLog"> | string | null
-  status?: Prisma.EnumActivityLogStatusFilter<"ActivityLog"> | $Enums.ActivityLogStatus
   createdAt?: Prisma.DateTimeFilter<"ActivityLog"> | Date | string
   editedAt?: Prisma.DateTimeNullableFilter<"ActivityLog"> | Date | string | null
   leadMeasureId?: Prisma.StringFilter<"ActivityLog"> | string
   userId?: Prisma.StringFilter<"ActivityLog"> | string
+  status?: Prisma.EnumActivityLogStatusFilter<"ActivityLog"> | $Enums.ActivityLogStatus
+  progressStatus?: Prisma.EnumActivityProgressStatusNullableFilter<"ActivityLog"> | $Enums.ActivityProgressStatus | null
+  payloadJson?: Prisma.JsonNullableFilter<"ActivityLog">
+  trackingType?: Prisma.EnumTrackingTypeFilter<"ActivityLog"> | $Enums.TrackingType
+  valueJson?: Prisma.JsonNullableFilter<"ActivityLog">
   leadMeasure?: Prisma.XOR<Prisma.LeadMeasureScalarRelationFilter, Prisma.LeadMeasureWhereInput>
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }, "id">
 
 export type ActivityLogOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
-  trackingType?: Prisma.SortOrder
   value?: Prisma.SortOrderInput | Prisma.SortOrder
-  valueJson?: Prisma.SortOrderInput | Prisma.SortOrder
-  progressStatus?: Prisma.SortOrderInput | Prisma.SortOrder
   loggedForDate?: Prisma.SortOrder
   note?: Prisma.SortOrderInput | Prisma.SortOrder
-  status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   editedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   leadMeasureId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  status?: Prisma.SortOrder
+  progressStatus?: Prisma.SortOrderInput | Prisma.SortOrder
+  payloadJson?: Prisma.SortOrderInput | Prisma.SortOrder
+  trackingType?: Prisma.SortOrder
+  valueJson?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.ActivityLogCountOrderByAggregateInput
   _avg?: Prisma.ActivityLogAvgOrderByAggregateInput
   _max?: Prisma.ActivityLogMaxOrderByAggregateInput
@@ -334,120 +341,128 @@ export type ActivityLogScalarWhereWithAggregatesInput = {
   OR?: Prisma.ActivityLogScalarWhereWithAggregatesInput[]
   NOT?: Prisma.ActivityLogScalarWhereWithAggregatesInput | Prisma.ActivityLogScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"ActivityLog"> | string
-  trackingType?: Prisma.EnumTrackingTypeWithAggregatesFilter<"ActivityLog"> | $Enums.TrackingType
   value?: Prisma.FloatNullableWithAggregatesFilter<"ActivityLog"> | number | null
-  valueJson?: Prisma.JsonNullableWithAggregatesFilter<"ActivityLog">
-  progressStatus?: Prisma.EnumActivityProgressStatusNullableWithAggregatesFilter<"ActivityLog"> | $Enums.ActivityProgressStatus | null
   loggedForDate?: Prisma.DateTimeWithAggregatesFilter<"ActivityLog"> | Date | string
   note?: Prisma.StringNullableWithAggregatesFilter<"ActivityLog"> | string | null
-  status?: Prisma.EnumActivityLogStatusWithAggregatesFilter<"ActivityLog"> | $Enums.ActivityLogStatus
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"ActivityLog"> | Date | string
   editedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"ActivityLog"> | Date | string | null
   leadMeasureId?: Prisma.StringWithAggregatesFilter<"ActivityLog"> | string
   userId?: Prisma.StringWithAggregatesFilter<"ActivityLog"> | string
+  status?: Prisma.EnumActivityLogStatusWithAggregatesFilter<"ActivityLog"> | $Enums.ActivityLogStatus
+  progressStatus?: Prisma.EnumActivityProgressStatusNullableWithAggregatesFilter<"ActivityLog"> | $Enums.ActivityProgressStatus | null
+  payloadJson?: Prisma.JsonNullableWithAggregatesFilter<"ActivityLog">
+  trackingType?: Prisma.EnumTrackingTypeWithAggregatesFilter<"ActivityLog"> | $Enums.TrackingType
+  valueJson?: Prisma.JsonNullableWithAggregatesFilter<"ActivityLog">
 }
 
 export type ActivityLogCreateInput = {
   id?: string
-  trackingType?: $Enums.TrackingType
   value?: number | null
-  valueJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  progressStatus?: $Enums.ActivityProgressStatus | null
   loggedForDate: Date | string
   note?: string | null
-  status?: $Enums.ActivityLogStatus
   createdAt?: Date | string
   editedAt?: Date | string | null
+  status?: $Enums.ActivityLogStatus
+  progressStatus?: $Enums.ActivityProgressStatus | null
+  payloadJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  trackingType?: $Enums.TrackingType
+  valueJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   leadMeasure: Prisma.LeadMeasureCreateNestedOneWithoutActivityLogsInput
   user: Prisma.UserCreateNestedOneWithoutActivityLogsInput
 }
 
 export type ActivityLogUncheckedCreateInput = {
   id?: string
-  trackingType?: $Enums.TrackingType
   value?: number | null
-  valueJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  progressStatus?: $Enums.ActivityProgressStatus | null
   loggedForDate: Date | string
   note?: string | null
-  status?: $Enums.ActivityLogStatus
   createdAt?: Date | string
   editedAt?: Date | string | null
   leadMeasureId: string
   userId: string
+  status?: $Enums.ActivityLogStatus
+  progressStatus?: $Enums.ActivityProgressStatus | null
+  payloadJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  trackingType?: $Enums.TrackingType
+  valueJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type ActivityLogUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  trackingType?: Prisma.EnumTrackingTypeFieldUpdateOperationsInput | $Enums.TrackingType
   value?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
-  valueJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  progressStatus?: Prisma.NullableEnumActivityProgressStatusFieldUpdateOperationsInput | $Enums.ActivityProgressStatus | null
   loggedForDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  status?: Prisma.EnumActivityLogStatusFieldUpdateOperationsInput | $Enums.ActivityLogStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   editedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  status?: Prisma.EnumActivityLogStatusFieldUpdateOperationsInput | $Enums.ActivityLogStatus
+  progressStatus?: Prisma.NullableEnumActivityProgressStatusFieldUpdateOperationsInput | $Enums.ActivityProgressStatus | null
+  payloadJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  trackingType?: Prisma.EnumTrackingTypeFieldUpdateOperationsInput | $Enums.TrackingType
+  valueJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   leadMeasure?: Prisma.LeadMeasureUpdateOneRequiredWithoutActivityLogsNestedInput
   user?: Prisma.UserUpdateOneRequiredWithoutActivityLogsNestedInput
 }
 
 export type ActivityLogUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  trackingType?: Prisma.EnumTrackingTypeFieldUpdateOperationsInput | $Enums.TrackingType
   value?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
-  valueJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  progressStatus?: Prisma.NullableEnumActivityProgressStatusFieldUpdateOperationsInput | $Enums.ActivityProgressStatus | null
   loggedForDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  status?: Prisma.EnumActivityLogStatusFieldUpdateOperationsInput | $Enums.ActivityLogStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   editedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   leadMeasureId?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumActivityLogStatusFieldUpdateOperationsInput | $Enums.ActivityLogStatus
+  progressStatus?: Prisma.NullableEnumActivityProgressStatusFieldUpdateOperationsInput | $Enums.ActivityProgressStatus | null
+  payloadJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  trackingType?: Prisma.EnumTrackingTypeFieldUpdateOperationsInput | $Enums.TrackingType
+  valueJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type ActivityLogCreateManyInput = {
   id?: string
-  trackingType?: $Enums.TrackingType
   value?: number | null
-  valueJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  progressStatus?: $Enums.ActivityProgressStatus | null
   loggedForDate: Date | string
   note?: string | null
-  status?: $Enums.ActivityLogStatus
   createdAt?: Date | string
   editedAt?: Date | string | null
   leadMeasureId: string
   userId: string
+  status?: $Enums.ActivityLogStatus
+  progressStatus?: $Enums.ActivityProgressStatus | null
+  payloadJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  trackingType?: $Enums.TrackingType
+  valueJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type ActivityLogUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  trackingType?: Prisma.EnumTrackingTypeFieldUpdateOperationsInput | $Enums.TrackingType
   value?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
-  valueJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  progressStatus?: Prisma.NullableEnumActivityProgressStatusFieldUpdateOperationsInput | $Enums.ActivityProgressStatus | null
   loggedForDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  status?: Prisma.EnumActivityLogStatusFieldUpdateOperationsInput | $Enums.ActivityLogStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   editedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  status?: Prisma.EnumActivityLogStatusFieldUpdateOperationsInput | $Enums.ActivityLogStatus
+  progressStatus?: Prisma.NullableEnumActivityProgressStatusFieldUpdateOperationsInput | $Enums.ActivityProgressStatus | null
+  payloadJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  trackingType?: Prisma.EnumTrackingTypeFieldUpdateOperationsInput | $Enums.TrackingType
+  valueJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type ActivityLogUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  trackingType?: Prisma.EnumTrackingTypeFieldUpdateOperationsInput | $Enums.TrackingType
   value?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
-  valueJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  progressStatus?: Prisma.NullableEnumActivityProgressStatusFieldUpdateOperationsInput | $Enums.ActivityProgressStatus | null
   loggedForDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  status?: Prisma.EnumActivityLogStatusFieldUpdateOperationsInput | $Enums.ActivityLogStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   editedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   leadMeasureId?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumActivityLogStatusFieldUpdateOperationsInput | $Enums.ActivityLogStatus
+  progressStatus?: Prisma.NullableEnumActivityProgressStatusFieldUpdateOperationsInput | $Enums.ActivityProgressStatus | null
+  payloadJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  trackingType?: Prisma.EnumTrackingTypeFieldUpdateOperationsInput | $Enums.TrackingType
+  valueJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type ActivityLogListRelationFilter = {
@@ -462,17 +477,18 @@ export type ActivityLogOrderByRelationAggregateInput = {
 
 export type ActivityLogCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  trackingType?: Prisma.SortOrder
   value?: Prisma.SortOrder
-  valueJson?: Prisma.SortOrder
-  progressStatus?: Prisma.SortOrder
   loggedForDate?: Prisma.SortOrder
   note?: Prisma.SortOrder
-  status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   editedAt?: Prisma.SortOrder
   leadMeasureId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  status?: Prisma.SortOrder
+  progressStatus?: Prisma.SortOrder
+  payloadJson?: Prisma.SortOrder
+  trackingType?: Prisma.SortOrder
+  valueJson?: Prisma.SortOrder
 }
 
 export type ActivityLogAvgOrderByAggregateInput = {
@@ -481,30 +497,30 @@ export type ActivityLogAvgOrderByAggregateInput = {
 
 export type ActivityLogMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  trackingType?: Prisma.SortOrder
   value?: Prisma.SortOrder
-  progressStatus?: Prisma.SortOrder
   loggedForDate?: Prisma.SortOrder
   note?: Prisma.SortOrder
-  status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   editedAt?: Prisma.SortOrder
   leadMeasureId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  status?: Prisma.SortOrder
+  progressStatus?: Prisma.SortOrder
+  trackingType?: Prisma.SortOrder
 }
 
 export type ActivityLogMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  trackingType?: Prisma.SortOrder
   value?: Prisma.SortOrder
-  progressStatus?: Prisma.SortOrder
   loggedForDate?: Prisma.SortOrder
   note?: Prisma.SortOrder
-  status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   editedAt?: Prisma.SortOrder
   leadMeasureId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  status?: Prisma.SortOrder
+  progressStatus?: Prisma.SortOrder
+  trackingType?: Prisma.SortOrder
 }
 
 export type ActivityLogSumOrderByAggregateInput = {
@@ -595,40 +611,42 @@ export type ActivityLogUncheckedUpdateManyWithoutLeadMeasureNestedInput = {
   deleteMany?: Prisma.ActivityLogScalarWhereInput | Prisma.ActivityLogScalarWhereInput[]
 }
 
-export type NullableEnumActivityProgressStatusFieldUpdateOperationsInput = {
-  set?: $Enums.ActivityProgressStatus | null
-}
-
 export type EnumActivityLogStatusFieldUpdateOperationsInput = {
   set?: $Enums.ActivityLogStatus
 }
 
+export type NullableEnumActivityProgressStatusFieldUpdateOperationsInput = {
+  set?: $Enums.ActivityProgressStatus | null
+}
+
 export type ActivityLogCreateWithoutUserInput = {
   id?: string
-  trackingType?: $Enums.TrackingType
   value?: number | null
-  valueJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  progressStatus?: $Enums.ActivityProgressStatus | null
   loggedForDate: Date | string
   note?: string | null
-  status?: $Enums.ActivityLogStatus
   createdAt?: Date | string
   editedAt?: Date | string | null
+  status?: $Enums.ActivityLogStatus
+  progressStatus?: $Enums.ActivityProgressStatus | null
+  payloadJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  trackingType?: $Enums.TrackingType
+  valueJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   leadMeasure: Prisma.LeadMeasureCreateNestedOneWithoutActivityLogsInput
 }
 
 export type ActivityLogUncheckedCreateWithoutUserInput = {
   id?: string
-  trackingType?: $Enums.TrackingType
   value?: number | null
-  valueJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  progressStatus?: $Enums.ActivityProgressStatus | null
   loggedForDate: Date | string
   note?: string | null
-  status?: $Enums.ActivityLogStatus
   createdAt?: Date | string
   editedAt?: Date | string | null
   leadMeasureId: string
+  status?: $Enums.ActivityLogStatus
+  progressStatus?: $Enums.ActivityProgressStatus | null
+  payloadJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  trackingType?: $Enums.TrackingType
+  valueJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type ActivityLogCreateOrConnectWithoutUserInput = {
@@ -662,45 +680,48 @@ export type ActivityLogScalarWhereInput = {
   OR?: Prisma.ActivityLogScalarWhereInput[]
   NOT?: Prisma.ActivityLogScalarWhereInput | Prisma.ActivityLogScalarWhereInput[]
   id?: Prisma.StringFilter<"ActivityLog"> | string
-  trackingType?: Prisma.EnumTrackingTypeFilter<"ActivityLog"> | $Enums.TrackingType
   value?: Prisma.FloatNullableFilter<"ActivityLog"> | number | null
-  valueJson?: Prisma.JsonNullableFilter<"ActivityLog">
-  progressStatus?: Prisma.EnumActivityProgressStatusNullableFilter<"ActivityLog"> | $Enums.ActivityProgressStatus | null
   loggedForDate?: Prisma.DateTimeFilter<"ActivityLog"> | Date | string
   note?: Prisma.StringNullableFilter<"ActivityLog"> | string | null
-  status?: Prisma.EnumActivityLogStatusFilter<"ActivityLog"> | $Enums.ActivityLogStatus
   createdAt?: Prisma.DateTimeFilter<"ActivityLog"> | Date | string
   editedAt?: Prisma.DateTimeNullableFilter<"ActivityLog"> | Date | string | null
   leadMeasureId?: Prisma.StringFilter<"ActivityLog"> | string
   userId?: Prisma.StringFilter<"ActivityLog"> | string
+  status?: Prisma.EnumActivityLogStatusFilter<"ActivityLog"> | $Enums.ActivityLogStatus
+  progressStatus?: Prisma.EnumActivityProgressStatusNullableFilter<"ActivityLog"> | $Enums.ActivityProgressStatus | null
+  payloadJson?: Prisma.JsonNullableFilter<"ActivityLog">
+  trackingType?: Prisma.EnumTrackingTypeFilter<"ActivityLog"> | $Enums.TrackingType
+  valueJson?: Prisma.JsonNullableFilter<"ActivityLog">
 }
 
 export type ActivityLogCreateWithoutLeadMeasureInput = {
   id?: string
-  trackingType?: $Enums.TrackingType
   value?: number | null
-  valueJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  progressStatus?: $Enums.ActivityProgressStatus | null
   loggedForDate: Date | string
   note?: string | null
-  status?: $Enums.ActivityLogStatus
   createdAt?: Date | string
   editedAt?: Date | string | null
+  status?: $Enums.ActivityLogStatus
+  progressStatus?: $Enums.ActivityProgressStatus | null
+  payloadJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  trackingType?: $Enums.TrackingType
+  valueJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   user: Prisma.UserCreateNestedOneWithoutActivityLogsInput
 }
 
 export type ActivityLogUncheckedCreateWithoutLeadMeasureInput = {
   id?: string
-  trackingType?: $Enums.TrackingType
   value?: number | null
-  valueJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  progressStatus?: $Enums.ActivityProgressStatus | null
   loggedForDate: Date | string
   note?: string | null
-  status?: $Enums.ActivityLogStatus
   createdAt?: Date | string
   editedAt?: Date | string | null
   userId: string
+  status?: $Enums.ActivityLogStatus
+  progressStatus?: $Enums.ActivityProgressStatus | null
+  payloadJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  trackingType?: $Enums.TrackingType
+  valueJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type ActivityLogCreateOrConnectWithoutLeadMeasureInput = {
@@ -731,185 +752,197 @@ export type ActivityLogUpdateManyWithWhereWithoutLeadMeasureInput = {
 
 export type ActivityLogCreateManyUserInput = {
   id?: string
-  trackingType?: $Enums.TrackingType
   value?: number | null
-  valueJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  progressStatus?: $Enums.ActivityProgressStatus | null
   loggedForDate: Date | string
   note?: string | null
-  status?: $Enums.ActivityLogStatus
   createdAt?: Date | string
   editedAt?: Date | string | null
   leadMeasureId: string
+  status?: $Enums.ActivityLogStatus
+  progressStatus?: $Enums.ActivityProgressStatus | null
+  payloadJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  trackingType?: $Enums.TrackingType
+  valueJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type ActivityLogUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  trackingType?: Prisma.EnumTrackingTypeFieldUpdateOperationsInput | $Enums.TrackingType
   value?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
-  valueJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  progressStatus?: Prisma.NullableEnumActivityProgressStatusFieldUpdateOperationsInput | $Enums.ActivityProgressStatus | null
   loggedForDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  status?: Prisma.EnumActivityLogStatusFieldUpdateOperationsInput | $Enums.ActivityLogStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   editedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  status?: Prisma.EnumActivityLogStatusFieldUpdateOperationsInput | $Enums.ActivityLogStatus
+  progressStatus?: Prisma.NullableEnumActivityProgressStatusFieldUpdateOperationsInput | $Enums.ActivityProgressStatus | null
+  payloadJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  trackingType?: Prisma.EnumTrackingTypeFieldUpdateOperationsInput | $Enums.TrackingType
+  valueJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   leadMeasure?: Prisma.LeadMeasureUpdateOneRequiredWithoutActivityLogsNestedInput
 }
 
 export type ActivityLogUncheckedUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  trackingType?: Prisma.EnumTrackingTypeFieldUpdateOperationsInput | $Enums.TrackingType
   value?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
-  valueJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  progressStatus?: Prisma.NullableEnumActivityProgressStatusFieldUpdateOperationsInput | $Enums.ActivityProgressStatus | null
   loggedForDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  status?: Prisma.EnumActivityLogStatusFieldUpdateOperationsInput | $Enums.ActivityLogStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   editedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   leadMeasureId?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumActivityLogStatusFieldUpdateOperationsInput | $Enums.ActivityLogStatus
+  progressStatus?: Prisma.NullableEnumActivityProgressStatusFieldUpdateOperationsInput | $Enums.ActivityProgressStatus | null
+  payloadJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  trackingType?: Prisma.EnumTrackingTypeFieldUpdateOperationsInput | $Enums.TrackingType
+  valueJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type ActivityLogUncheckedUpdateManyWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  trackingType?: Prisma.EnumTrackingTypeFieldUpdateOperationsInput | $Enums.TrackingType
   value?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
-  valueJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  progressStatus?: Prisma.NullableEnumActivityProgressStatusFieldUpdateOperationsInput | $Enums.ActivityProgressStatus | null
   loggedForDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  status?: Prisma.EnumActivityLogStatusFieldUpdateOperationsInput | $Enums.ActivityLogStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   editedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   leadMeasureId?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumActivityLogStatusFieldUpdateOperationsInput | $Enums.ActivityLogStatus
+  progressStatus?: Prisma.NullableEnumActivityProgressStatusFieldUpdateOperationsInput | $Enums.ActivityProgressStatus | null
+  payloadJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  trackingType?: Prisma.EnumTrackingTypeFieldUpdateOperationsInput | $Enums.TrackingType
+  valueJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type ActivityLogCreateManyLeadMeasureInput = {
   id?: string
-  trackingType?: $Enums.TrackingType
   value?: number | null
-  valueJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  progressStatus?: $Enums.ActivityProgressStatus | null
   loggedForDate: Date | string
   note?: string | null
-  status?: $Enums.ActivityLogStatus
   createdAt?: Date | string
   editedAt?: Date | string | null
   userId: string
+  status?: $Enums.ActivityLogStatus
+  progressStatus?: $Enums.ActivityProgressStatus | null
+  payloadJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  trackingType?: $Enums.TrackingType
+  valueJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type ActivityLogUpdateWithoutLeadMeasureInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  trackingType?: Prisma.EnumTrackingTypeFieldUpdateOperationsInput | $Enums.TrackingType
   value?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
-  valueJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  progressStatus?: Prisma.NullableEnumActivityProgressStatusFieldUpdateOperationsInput | $Enums.ActivityProgressStatus | null
   loggedForDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  status?: Prisma.EnumActivityLogStatusFieldUpdateOperationsInput | $Enums.ActivityLogStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   editedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  status?: Prisma.EnumActivityLogStatusFieldUpdateOperationsInput | $Enums.ActivityLogStatus
+  progressStatus?: Prisma.NullableEnumActivityProgressStatusFieldUpdateOperationsInput | $Enums.ActivityProgressStatus | null
+  payloadJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  trackingType?: Prisma.EnumTrackingTypeFieldUpdateOperationsInput | $Enums.TrackingType
+  valueJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   user?: Prisma.UserUpdateOneRequiredWithoutActivityLogsNestedInput
 }
 
 export type ActivityLogUncheckedUpdateWithoutLeadMeasureInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  trackingType?: Prisma.EnumTrackingTypeFieldUpdateOperationsInput | $Enums.TrackingType
   value?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
-  valueJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  progressStatus?: Prisma.NullableEnumActivityProgressStatusFieldUpdateOperationsInput | $Enums.ActivityProgressStatus | null
   loggedForDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  status?: Prisma.EnumActivityLogStatusFieldUpdateOperationsInput | $Enums.ActivityLogStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   editedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   userId?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumActivityLogStatusFieldUpdateOperationsInput | $Enums.ActivityLogStatus
+  progressStatus?: Prisma.NullableEnumActivityProgressStatusFieldUpdateOperationsInput | $Enums.ActivityProgressStatus | null
+  payloadJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  trackingType?: Prisma.EnumTrackingTypeFieldUpdateOperationsInput | $Enums.TrackingType
+  valueJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type ActivityLogUncheckedUpdateManyWithoutLeadMeasureInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  trackingType?: Prisma.EnumTrackingTypeFieldUpdateOperationsInput | $Enums.TrackingType
   value?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
-  valueJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  progressStatus?: Prisma.NullableEnumActivityProgressStatusFieldUpdateOperationsInput | $Enums.ActivityProgressStatus | null
   loggedForDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  status?: Prisma.EnumActivityLogStatusFieldUpdateOperationsInput | $Enums.ActivityLogStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   editedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   userId?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumActivityLogStatusFieldUpdateOperationsInput | $Enums.ActivityLogStatus
+  progressStatus?: Prisma.NullableEnumActivityProgressStatusFieldUpdateOperationsInput | $Enums.ActivityProgressStatus | null
+  payloadJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  trackingType?: Prisma.EnumTrackingTypeFieldUpdateOperationsInput | $Enums.TrackingType
+  valueJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 
 
 export type ActivityLogSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
-  trackingType?: boolean
   value?: boolean
-  valueJson?: boolean
-  progressStatus?: boolean
   loggedForDate?: boolean
   note?: boolean
-  status?: boolean
   createdAt?: boolean
   editedAt?: boolean
   leadMeasureId?: boolean
   userId?: boolean
+  status?: boolean
+  progressStatus?: boolean
+  payloadJson?: boolean
+  trackingType?: boolean
+  valueJson?: boolean
   leadMeasure?: boolean | Prisma.LeadMeasureDefaultArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["activityLog"]>
 
 export type ActivityLogSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
-  trackingType?: boolean
   value?: boolean
-  valueJson?: boolean
-  progressStatus?: boolean
   loggedForDate?: boolean
   note?: boolean
-  status?: boolean
   createdAt?: boolean
   editedAt?: boolean
   leadMeasureId?: boolean
   userId?: boolean
+  status?: boolean
+  progressStatus?: boolean
+  payloadJson?: boolean
+  trackingType?: boolean
+  valueJson?: boolean
   leadMeasure?: boolean | Prisma.LeadMeasureDefaultArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["activityLog"]>
 
 export type ActivityLogSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
-  trackingType?: boolean
   value?: boolean
-  valueJson?: boolean
-  progressStatus?: boolean
   loggedForDate?: boolean
   note?: boolean
-  status?: boolean
   createdAt?: boolean
   editedAt?: boolean
   leadMeasureId?: boolean
   userId?: boolean
+  status?: boolean
+  progressStatus?: boolean
+  payloadJson?: boolean
+  trackingType?: boolean
+  valueJson?: boolean
   leadMeasure?: boolean | Prisma.LeadMeasureDefaultArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["activityLog"]>
 
 export type ActivityLogSelectScalar = {
   id?: boolean
-  trackingType?: boolean
   value?: boolean
-  valueJson?: boolean
-  progressStatus?: boolean
   loggedForDate?: boolean
   note?: boolean
-  status?: boolean
   createdAt?: boolean
   editedAt?: boolean
   leadMeasureId?: boolean
   userId?: boolean
+  status?: boolean
+  progressStatus?: boolean
+  payloadJson?: boolean
+  trackingType?: boolean
+  valueJson?: boolean
 }
 
-export type ActivityLogOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "trackingType" | "value" | "valueJson" | "progressStatus" | "loggedForDate" | "note" | "status" | "createdAt" | "editedAt" | "leadMeasureId" | "userId", ExtArgs["result"]["activityLog"]>
+export type ActivityLogOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "value" | "loggedForDate" | "note" | "createdAt" | "editedAt" | "leadMeasureId" | "userId" | "status" | "progressStatus" | "payloadJson" | "trackingType" | "valueJson", ExtArgs["result"]["activityLog"]>
 export type ActivityLogInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   leadMeasure?: boolean | Prisma.LeadMeasureDefaultArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -931,17 +964,18 @@ export type $ActivityLogPayload<ExtArgs extends runtime.Types.Extensions.Interna
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
-    trackingType: $Enums.TrackingType
     value: number | null
-    valueJson: runtime.JsonValue | null
-    progressStatus: $Enums.ActivityProgressStatus | null
     loggedForDate: Date
     note: string | null
-    status: $Enums.ActivityLogStatus
     createdAt: Date
     editedAt: Date | null
     leadMeasureId: string
     userId: string
+    status: $Enums.ActivityLogStatus
+    progressStatus: $Enums.ActivityProgressStatus | null
+    payloadJson: runtime.JsonValue | null
+    trackingType: $Enums.TrackingType
+    valueJson: runtime.JsonValue | null
   }, ExtArgs["result"]["activityLog"]>
   composites: {}
 }
@@ -1368,17 +1402,18 @@ export interface Prisma__ActivityLogClient<T, Null = never, ExtArgs extends runt
  */
 export interface ActivityLogFieldRefs {
   readonly id: Prisma.FieldRef<"ActivityLog", 'String'>
-  readonly trackingType: Prisma.FieldRef<"ActivityLog", 'TrackingType'>
   readonly value: Prisma.FieldRef<"ActivityLog", 'Float'>
-  readonly valueJson: Prisma.FieldRef<"ActivityLog", 'Json'>
-  readonly progressStatus: Prisma.FieldRef<"ActivityLog", 'ActivityProgressStatus'>
   readonly loggedForDate: Prisma.FieldRef<"ActivityLog", 'DateTime'>
   readonly note: Prisma.FieldRef<"ActivityLog", 'String'>
-  readonly status: Prisma.FieldRef<"ActivityLog", 'ActivityLogStatus'>
   readonly createdAt: Prisma.FieldRef<"ActivityLog", 'DateTime'>
   readonly editedAt: Prisma.FieldRef<"ActivityLog", 'DateTime'>
   readonly leadMeasureId: Prisma.FieldRef<"ActivityLog", 'String'>
   readonly userId: Prisma.FieldRef<"ActivityLog", 'String'>
+  readonly status: Prisma.FieldRef<"ActivityLog", 'ActivityLogStatus'>
+  readonly progressStatus: Prisma.FieldRef<"ActivityLog", 'ActivityProgressStatus'>
+  readonly payloadJson: Prisma.FieldRef<"ActivityLog", 'Json'>
+  readonly trackingType: Prisma.FieldRef<"ActivityLog", 'TrackingType'>
+  readonly valueJson: Prisma.FieldRef<"ActivityLog", 'Json'>
 }
     
 

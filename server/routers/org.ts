@@ -34,7 +34,7 @@ export const orgRouter = router({
           slug: input.slug,
           memberships: {
             create: {
-              userId: (ctx.session.user as any).id,
+              userId: ctx.session.user.id,
               role: "ADMIN",
             },
           },
@@ -43,7 +43,7 @@ export const orgRouter = router({
 
       await auditLog({
         db: ctx.db,
-        actorUserId: (ctx.session.user as any).id,
+        actorUserId: ctx.session.user.id,
         entityType: "ORGANIZATION",
         entityId: createdOrg.id,
         action: "ORG_CREATED",
@@ -70,7 +70,7 @@ export const orgRouter = router({
       const membership = await ctx.db.orgMembership.findUnique({
         where: {
           userId_orgId: {
-            userId: (ctx.session.user as any).id,
+            userId: ctx.session.user.id,
             orgId: org.id,
           },
         },
@@ -154,7 +154,7 @@ export const orgRouter = router({
       const membership = await ctx.db.orgMembership.findUnique({
         where: {
           userId_orgId: {
-            userId: (ctx.session.user as any).id,
+            userId: ctx.session.user.id,
             orgId: org.id,
           },
         },
@@ -222,7 +222,7 @@ export const orgRouter = router({
       const membership = await ctx.db.orgMembership.findUnique({
         where: {
           userId_orgId: {
-            userId: (ctx.session.user as any).id,
+            userId: ctx.session.user.id,
             orgId: org.id,
           },
         },
@@ -266,7 +266,7 @@ export const orgRouter = router({
       const membership = await ctx.db.orgMembership.findUnique({
         where: {
           userId_orgId: {
-            userId: (ctx.session.user as any).id,
+            userId: ctx.session.user.id,
             orgId: org.id,
           },
         },
@@ -319,7 +319,7 @@ export const orgRouter = router({
 
       await auditLog({
         db: ctx.db,
-        actorUserId: (ctx.session.user as any).id,
+        actorUserId: ctx.session.user.id,
         entityType: "ORG_MEMBER",
         entityId: newMembership.id,
         action: "ORG_MEMBER_INVITED",
@@ -352,7 +352,7 @@ export const orgRouter = router({
       const membership = await ctx.db.orgMembership.findUnique({
         where: {
           userId_orgId: {
-            userId: (ctx.session.user as any).id,
+            userId: ctx.session.user.id,
             orgId: org.id,
           },
         },
@@ -363,7 +363,7 @@ export const orgRouter = router({
       }
 
       // Prevent admin from demoting themselves
-      if (input.userId === (ctx.session.user as any).id) {
+      if (input.userId === ctx.session.user.id) {
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: "You cannot change your own role.",
@@ -408,7 +408,7 @@ export const orgRouter = router({
 
       await auditLog({
         db: ctx.db,
-        actorUserId: (ctx.session.user as any).id,
+        actorUserId: ctx.session.user.id,
         entityType: "ORG_MEMBER",
         entityId: updatedMembership.id,
         action: "ORG_MEMBER_ROLE_UPDATED",
@@ -440,7 +440,7 @@ export const orgRouter = router({
       const membership = await ctx.db.orgMembership.findUnique({
         where: {
           userId_orgId: {
-            userId: (ctx.session.user as any).id,
+            userId: ctx.session.user.id,
             orgId: org.id,
           },
         },
@@ -458,7 +458,10 @@ export const orgRouter = router({
       const orgMemberIds = orgMemberships.map((m) => m.userId);
 
       return ctx.db.auditLog.findMany({
-        where: { actorUserId: { in: orgMemberIds } },
+        where: {
+          orgId: ctx.session.user.orgId,
+          actorUserId: { in: orgMemberIds },
+        },
         take: input.limit ?? 50,
         orderBy: { createdAt: "desc" },
         include: {
@@ -479,7 +482,7 @@ export const orgRouter = router({
       const membership = await ctx.db.orgMembership.findUnique({
         where: {
           userId_orgId: {
-            userId: (ctx.session.user as any).id,
+            userId: ctx.session.user.id,
             orgId: org.id,
           },
         },

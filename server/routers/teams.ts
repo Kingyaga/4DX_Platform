@@ -29,7 +29,7 @@ export const teamsRouter = router({
       const membership = await ctx.db.orgMembership.findUnique({
         where: {
           userId_orgId: {
-            userId: (ctx.session.user as any).id,
+            userId: ctx.session.user.id,
             orgId: org.id,
           },
         },
@@ -42,7 +42,7 @@ export const teamsRouter = router({
         });
       }
 
-      const teamLeadUserId = (ctx.session.user as any).id;
+      const teamLeadUserId = ctx.session.user.id;
       const team = await ctx.db.team.create({
         data: {
           name: input.name,
@@ -95,9 +95,9 @@ export const teamsRouter = router({
       if (!team) throw new TRPCError({ code: "NOT_FOUND" });
 
       const isOrgAdmin = team.org.memberships.some(
-        (m) => m.userId === (ctx.session.user as any).id && m.role === "ADMIN",
+        (m) => m.userId === ctx.session.user.id && m.role === "ADMIN",
       );
-      const isTeamLead = team.leadUserId === (ctx.session.user as any).id;
+      const isTeamLead = team.leadUserId === ctx.session.user.id;
 
       if (!isOrgAdmin && !isTeamLead) {
         throw new TRPCError({
@@ -150,7 +150,7 @@ export const teamsRouter = router({
 
       await auditLog({
         db: ctx.db,
-        actorUserId: (ctx.session.user as any).id,
+        actorUserId: ctx.session.user.id,
         entityType: "TEAM_MEMBER",
         entityId: newMembership.id,
         action: "TEAM_MEMBER_ADDED",
@@ -184,7 +184,7 @@ export const teamsRouter = router({
       if (!team) throw new TRPCError({ code: "NOT_FOUND" });
 
       const isOrgAdmin = team.org.memberships.some(
-        (m) => m.userId === (ctx.session.user as any).id && m.role === "ADMIN",
+        (m) => m.userId === ctx.session.user.id && m.role === "ADMIN",
       );
 
       if (!isOrgAdmin) {
@@ -225,7 +225,7 @@ export const teamsRouter = router({
 
       await auditLog({
         db: ctx.db,
-        actorUserId: (ctx.session.user as any).id,
+        actorUserId: ctx.session.user.id,
         entityType: "TEAM",
         entityId: team.id,
         action: "TEAM_LEAD_ASSIGNED",
@@ -254,7 +254,7 @@ export const teamsRouter = router({
       const orgMembership = await ctx.db.orgMembership.findUnique({
         where: {
           userId_orgId: {
-            userId: (ctx.session.user as any).id,
+            userId: ctx.session.user.id,
             orgId: team.orgId,
           },
         },
@@ -285,7 +285,7 @@ export const teamsRouter = router({
 
       await auditLog({
         db: ctx.db,
-        actorUserId: (ctx.session.user as any).id,
+        actorUserId: ctx.session.user.id,
         entityType: "TEAM",
         entityId: team.id,
         action: "TEAM_ARCHIVED",
@@ -334,7 +334,7 @@ export const teamsRouter = router({
 
       if (!org) throw new TRPCError({ code: "NOT_FOUND" });
 
-      const userId = (ctx.session.user as any).id;
+      const userId = ctx.session.user.id;
       return ctx.db.team.findMany({
         where: {
           orgId: org.id,
@@ -374,7 +374,7 @@ export const teamsRouter = router({
       const membership = await ctx.db.orgMembership.findUnique({
         where: {
           userId_orgId: {
-            userId: (ctx.session.user as any).id,
+            userId: ctx.session.user.id,
             orgId: org.id,
           },
         },
@@ -426,9 +426,9 @@ export const teamsRouter = router({
       if (!team) throw new TRPCError({ code: "NOT_FOUND" });
 
       const isOrgAdmin = team.org.memberships.some(
-        (m) => m.userId === (ctx.session.user as any).id && m.role === "ADMIN",
+        (m) => m.userId === ctx.session.user.id && m.role === "ADMIN",
       );
-      const isTeamLead = team.leadUserId === (ctx.session.user as any).id;
+      const isTeamLead = team.leadUserId === ctx.session.user.id;
 
       if (!isOrgAdmin && !isTeamLead) {
         throw new TRPCError({
@@ -473,7 +473,7 @@ export const teamsRouter = router({
 
       await auditLog({
         db: ctx.db,
-        actorUserId: (ctx.session.user as any).id,
+        actorUserId: ctx.session.user.id,
         entityType: "TEAM_MEMBER",
         entityId: `${team.id}-${input.userId}`,
         action: "TEAM_MEMBER_REMOVED",

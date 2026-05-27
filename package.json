@@ -7,6 +7,8 @@
     "build": "next build",
     "start": "next start -p 3001",
     "lint": "eslint",
+    "test": "vitest run",
+    "test:ui": "vitest --ui",
     "test:backend": "tsx --test server/**/*.test.ts",
     "notify:wigs-at-risk": "ts-node --compiler-options {\"module\":\"CommonJS\"} -r tsconfig-paths/register scripts/check-wigs-at-risk.ts",
     "cron:generate-sessions": "ts-node --compiler-options {\"module\":\"CommonJS\"} -r tsconfig-paths/register scripts/generate-weekly-sessions.ts",
@@ -33,18 +35,23 @@
   "devDependencies": {
     "@prisma/engines": "^7.8.0",
     "@tailwindcss/postcss": "^4",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
     "@types/bcryptjs": "^3.0.0",
     "@types/node": "^20",
     "@types/pg": "^8.20.0",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@vitest/ui": "^4.1.7",
     "eslint": "^9",
     "eslint-config-next": "16.2.4",
+    "jsdom": "^29.1.1",
     "prisma": "^7.8.0",
     "tailwindcss": "^4",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
     "tsx": "^4.21.0",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.1.7"
   }
 }

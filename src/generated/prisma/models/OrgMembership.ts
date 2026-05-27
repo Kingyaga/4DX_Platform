@@ -174,8 +174,8 @@ export type OrgMembershipWhereInput = {
   role?: Prisma.EnumOrgRoleFilter<"OrgMembership"> | $Enums.OrgRole
   userId?: Prisma.StringFilter<"OrgMembership"> | string
   orgId?: Prisma.StringFilter<"OrgMembership"> | string
-  user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   org?: Prisma.XOR<Prisma.OrganizationScalarRelationFilter, Prisma.OrganizationWhereInput>
+  user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }
 
 export type OrgMembershipOrderByWithRelationInput = {
@@ -183,8 +183,8 @@ export type OrgMembershipOrderByWithRelationInput = {
   role?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   orgId?: Prisma.SortOrder
-  user?: Prisma.UserOrderByWithRelationInput
   org?: Prisma.OrganizationOrderByWithRelationInput
+  user?: Prisma.UserOrderByWithRelationInput
 }
 
 export type OrgMembershipWhereUniqueInput = Prisma.AtLeast<{
@@ -196,8 +196,8 @@ export type OrgMembershipWhereUniqueInput = Prisma.AtLeast<{
   role?: Prisma.EnumOrgRoleFilter<"OrgMembership"> | $Enums.OrgRole
   userId?: Prisma.StringFilter<"OrgMembership"> | string
   orgId?: Prisma.StringFilter<"OrgMembership"> | string
-  user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   org?: Prisma.XOR<Prisma.OrganizationScalarRelationFilter, Prisma.OrganizationWhereInput>
+  user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }, "id" | "userId_orgId">
 
 export type OrgMembershipOrderByWithAggregationInput = {
@@ -223,8 +223,8 @@ export type OrgMembershipScalarWhereWithAggregatesInput = {
 export type OrgMembershipCreateInput = {
   id?: string
   role: $Enums.OrgRole
-  user: Prisma.UserCreateNestedOneWithoutOrgMembershipsInput
   org: Prisma.OrganizationCreateNestedOneWithoutMembershipsInput
+  user: Prisma.UserCreateNestedOneWithoutOrgMembershipsInput
 }
 
 export type OrgMembershipUncheckedCreateInput = {
@@ -237,8 +237,8 @@ export type OrgMembershipUncheckedCreateInput = {
 export type OrgMembershipUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumOrgRoleFieldUpdateOperationsInput | $Enums.OrgRole
-  user?: Prisma.UserUpdateOneRequiredWithoutOrgMembershipsNestedInput
   org?: Prisma.OrganizationUpdateOneRequiredWithoutMembershipsNestedInput
+  user?: Prisma.UserUpdateOneRequiredWithoutOrgMembershipsNestedInput
 }
 
 export type OrgMembershipUncheckedUpdateInput = {
@@ -532,8 +532,8 @@ export type OrgMembershipSelect<ExtArgs extends runtime.Types.Extensions.Interna
   role?: boolean
   userId?: boolean
   orgId?: boolean
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   org?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["orgMembership"]>
 
 export type OrgMembershipSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -541,8 +541,8 @@ export type OrgMembershipSelectCreateManyAndReturn<ExtArgs extends runtime.Types
   role?: boolean
   userId?: boolean
   orgId?: boolean
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   org?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["orgMembership"]>
 
 export type OrgMembershipSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -550,8 +550,8 @@ export type OrgMembershipSelectUpdateManyAndReturn<ExtArgs extends runtime.Types
   role?: boolean
   userId?: boolean
   orgId?: boolean
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   org?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["orgMembership"]>
 
 export type OrgMembershipSelectScalar = {
@@ -563,23 +563,23 @@ export type OrgMembershipSelectScalar = {
 
 export type OrgMembershipOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "role" | "userId" | "orgId", ExtArgs["result"]["orgMembership"]>
 export type OrgMembershipInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   org?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
 export type OrgMembershipIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   org?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
 export type OrgMembershipIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   org?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
 
 export type $OrgMembershipPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "OrgMembership"
   objects: {
-    user: Prisma.$UserPayload<ExtArgs>
     org: Prisma.$OrganizationPayload<ExtArgs>
+    user: Prisma.$UserPayload<ExtArgs>
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -980,8 +980,8 @@ readonly fields: OrgMembershipFieldRefs;
  */
 export interface Prisma__OrgMembershipClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   org<T extends Prisma.OrganizationDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.OrganizationDefaultArgs<ExtArgs>>): Prisma.Prisma__OrganizationClient<runtime.Types.Result.GetResult<Prisma.$OrganizationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.

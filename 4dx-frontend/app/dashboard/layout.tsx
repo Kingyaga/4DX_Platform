@@ -18,6 +18,7 @@ import {
 import { useUserStore } from "@/lib/stores/user-store";
 import { useTeamStore } from "@/lib/stores/team-store";
 import { LoadingSpinner } from "@/lib/components/loading-spinner";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { getDefaultRouteForRole, getTeamRole, isRouteAllowedForRole } from "@/lib/team-routing";
 import type { MyTeamsResponse } from "@/lib/types";
 
@@ -81,7 +82,7 @@ export default function DashboardLayout({
 }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { status } = useSession();
+  const { data: session, status } = useSession();
 
   // Fetch current user profile with role from backend
   const { data: meData, isLoading: userLoading, refetch: refetchMe } = useCurrentUser();
@@ -100,6 +101,13 @@ export default function DashboardLayout({
   const [forcePasswordError, setForcePasswordError] = useState("");
   const [forceCurrentPassword, setForceCurrentPassword] = useState("");
   const { changePassword, isLoading: isChangingForcePassword } = useChangePassword();
+  const sessionExpiresAt = session?.expires ? new Date(session.expires).getTime() : null;
+  const sessionMsRemaining = sessionExpiresAt ? sessionExpiresAt - Date.now() : null;
+  const showSessionExpiryWarning =
+    status === "authenticated" &&
+    sessionMsRemaining !== null &&
+    sessionMsRemaining > 0 &&
+    sessionMsRemaining <= 5 * 60 * 1000;
 
   const handleForcePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -678,6 +686,25 @@ export default function DashboardLayout({
             </span>
           </Link>
         )}
+        {showSessionExpiryWarning && (
+          <div
+            role="status"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              padding: "10px 24px",
+              backgroundColor: "#fef3c7",
+              color: "#92400e",
+              fontSize: "13px",
+              fontWeight: 700,
+              flexShrink: 0,
+            }}
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>timer</span>
+            Your session expires in less than 5 minutes.
+          </div>
+        )}
         {userRole === "TEAM_LEAD" && pendingRequestCount > 0 && pathname !== "/dashboard/team-lead/requests" && (
           <Link
             href="/dashboard/team-lead/requests"
@@ -705,6 +732,7 @@ export default function DashboardLayout({
             </span>
           </Link>
         )}
+        <ErrorBoundary>
         {hasNoTeamAssignment ? (
           <main style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "32px" }}>
             <section style={{ width: "100%", maxWidth: "720px", backgroundColor: "#ffffff", border: "1px solid #e4e4e7", padding: "40px", boxShadow: "0 18px 48px rgba(15, 23, 42, 0.08)" }}>
@@ -719,6 +747,7 @@ export default function DashboardLayout({
             </section>
           </main>
         ) : children}
+        </ErrorBoundary>
       </div>
     </div>
   );

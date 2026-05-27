@@ -27,6 +27,7 @@ type AuditAction =
 interface AuditParams {
   db: PrismaClient;
   actorUserId: string;
+  orgId?: string;
   entityType: string;
   entityId: string;
   action: AuditAction;
@@ -37,6 +38,7 @@ interface AuditParams {
 export async function auditLog({
   db,
   actorUserId,
+  orgId,
   entityType,
   entityId,
   action,
@@ -44,9 +46,23 @@ export async function auditLog({
   after,
 }: AuditParams) {
   try {
+    const scopedOrgId =
+      orgId ??
+      (
+        await db.orgMembership.findFirst({
+          where: { userId: actorUserId },
+          select: { orgId: true },
+        })
+      )?.orgId;
+
+    if (!scopedOrgId) {
+      throw new Error("Audit log org scope could not be resolved.");
+    }
+
     await db.auditLog.create({
       data: {
         actorUserId,
+        orgId: scopedOrgId,
         entityType,
         entityId,
         action,

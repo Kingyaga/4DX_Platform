@@ -113,9 +113,9 @@ export const sessionsRouter = router({
 
       if (!team) throw new TRPCError({ code: "NOT_FOUND" });
 
-      const isTeamLead = team.leadUserId === (ctx.session.user as any).id;
+      const isTeamLead = team.leadUserId === ctx.session.user.id;
       const isOrgAdmin = await ctx.db.orgMembership.findFirst({
-        where: { userId: (ctx.session.user as any).id, orgId: team.orgId, role: "ADMIN" },
+        where: { userId: ctx.session.user.id, orgId: team.orgId, role: "ADMIN" },
       });
 
       if (!isTeamLead && !isOrgAdmin) {
@@ -142,12 +142,12 @@ export const sessionsRouter = router({
           status: "IN_PROGRESS",
           startedAt: new Date(),
           teamId: team.id,
-          facilitatorUserId: (ctx.session.user as any).id,
+          facilitatorUserId: ctx.session.user.id,
           snapshotJson: snapshot,
           timeline: {
             create: {
               type: "SESSION_STARTED",
-              actorUserId: (ctx.session.user as any).id,
+              actorUserId: ctx.session.user.id,
               payloadJson: { teamName: team.name, weekStarting: weekStarting.toISOString() },
             },
           },
@@ -180,9 +180,9 @@ export const sessionsRouter = router({
 
       if (!team) throw new TRPCError({ code: "NOT_FOUND" });
 
-      const isMember = team.members.some((member) => member.userId === (ctx.session.user as any).id);
+      const isMember = team.members.some((member) => member.userId === ctx.session.user.id);
       const isOrgAdmin = await ctx.db.orgMembership.findFirst({
-        where: { userId: (ctx.session.user as any).id, orgId: team.orgId, role: "ADMIN" },
+        where: { userId: ctx.session.user.id, orgId: team.orgId, role: "ADMIN" },
       });
 
       if (!isMember && !isOrgAdmin) {
@@ -216,9 +216,9 @@ export const sessionsRouter = router({
       const session = await ctx.db.weeklySession.findUnique({ where: { id: input.sessionId }, include: { team: true } });
       if (!session?.team) throw new TRPCError({ code: "NOT_FOUND" });
 
-      const isTeamLead = session.team.leadUserId === (ctx.session.user as any).id;
+      const isTeamLead = session.team.leadUserId === ctx.session.user.id;
       const isTeamMember = await ctx.db.teamMembership.findUnique({
-        where: { userId_teamId: { userId: (ctx.session.user as any).id, teamId: session.team.id } },
+        where: { userId_teamId: { userId: ctx.session.user.id, teamId: session.team.id } },
       });
       if (!isTeamLead && !isTeamMember) throw new TRPCError({ code: "FORBIDDEN" });
 
@@ -232,7 +232,7 @@ export const sessionsRouter = router({
           timeline: {
             create: {
               type: input.status === "COMPLETE" ? "SESSION_COMPLETED" : "SESSION_UPDATED",
-              actorUserId: (ctx.session.user as any).id,
+              actorUserId: ctx.session.user.id,
               payloadJson: { notesUpdated: input.notes !== undefined, confidenceScore: input.confidenceScore, status: input.status },
             },
           },
@@ -260,7 +260,7 @@ export const sessionsRouter = router({
       if (!session?.team) throw new TRPCError({ code: "NOT_FOUND" });
 
       const membership = await ctx.db.teamMembership.findUnique({
-        where: { userId_teamId: { userId: (ctx.session.user as any).id, teamId: session.team.id } },
+        where: { userId_teamId: { userId: ctx.session.user.id, teamId: session.team.id } },
       });
       if (!membership) throw new TRPCError({ code: "FORBIDDEN" });
 
@@ -275,7 +275,7 @@ export const sessionsRouter = router({
       await ctx.db.sessionTimelineEvent.create({
         data: {
           weeklySessionId: input.sessionId,
-          actorUserId: (ctx.session.user as any).id,
+          actorUserId: ctx.session.user.id,
           type: "COMMITMENT_ADDED",
           payloadJson: { commitmentId: commitment.id, text: commitment.text },
         },
@@ -291,7 +291,7 @@ export const sessionsRouter = router({
       if (!session?.team) throw new TRPCError({ code: "NOT_FOUND" });
 
       const membership = await ctx.db.teamMembership.findUnique({
-        where: { userId_teamId: { userId: (ctx.session.user as any).id, teamId: session.team.id } },
+        where: { userId_teamId: { userId: ctx.session.user.id, teamId: session.team.id } },
       });
       if (!membership) throw new TRPCError({ code: "FORBIDDEN" });
 
@@ -300,14 +300,14 @@ export const sessionsRouter = router({
           weeklySessionId: input.sessionId,
           title: input.title,
           details: input.details,
-          createdByUserId: (ctx.session.user as any).id,
+          createdByUserId: ctx.session.user.id,
         },
       });
 
       await ctx.db.sessionTimelineEvent.create({
         data: {
           weeklySessionId: input.sessionId,
-          actorUserId: (ctx.session.user as any).id,
+          actorUserId: ctx.session.user.id,
           type: "BLOCKER_ADDED",
           payloadJson: { blockerId: blocker.id, title: blocker.title },
         },
@@ -333,7 +333,7 @@ export const sessionsRouter = router({
 
       if (!team) throw new TRPCError({ code: "NOT_FOUND" });
 
-      if (team.leadUserId !== (ctx.session.user as any).id) {
+      if (team.leadUserId !== ctx.session.user.id) {
         throw new TRPCError({ code: "FORBIDDEN" });
       }
 
@@ -371,7 +371,7 @@ export const sessionsRouter = router({
       if (sessionsToCreate.length > 0) {
         await auditLog({
           db: ctx.db,
-          actorUserId: (ctx.session.user as any).id,
+          actorUserId: ctx.session.user.id,
           entityType: "TEAM_SESSION_GENERATION",
           entityId: input.teamSlug,
           action: "SESSION_GENERATED",
@@ -443,7 +443,7 @@ export const sessionsRouter = router({
       if (!session.userId || !session.wigId) {
         throw new TRPCError({ code: "BAD_REQUEST", message: "This endpoint only supports legacy member WIG sessions." });
       }
-      if (session.userId !== (ctx.session.user as any).id)
+      if (session.userId !== ctx.session.user.id)
         throw new TRPCError({ code: "FORBIDDEN" });
       if (session.accountDoneAt)
         throw new TRPCError({
@@ -461,7 +461,7 @@ export const sessionsRouter = router({
         const teamMembership = await ctx.db.teamMembership.findUnique({
           where: {
             userId_teamId: {
-              userId: (ctx.session.user as any).id,
+              userId: ctx.session.user.id,
               teamId: sessionWig.team.id,
             },
           },
@@ -531,7 +531,7 @@ export const sessionsRouter = router({
 
       await auditLog({
         db: ctx.db,
-        actorUserId: (ctx.session.user as any).id,
+        actorUserId: ctx.session.user.id,
         entityType: "WEEKLY_SESSION",
         entityId: input.sessionId,
         action: "SESSION_ACCOUNT_COMPLETED",
@@ -557,7 +557,7 @@ export const sessionsRouter = router({
       if (!session.userId || !session.wigId) {
         throw new TRPCError({ code: "BAD_REQUEST", message: "This endpoint only supports legacy member WIG sessions." });
       }
-      if (session.userId !== (ctx.session.user as any).id)
+      if (session.userId !== ctx.session.user.id)
         throw new TRPCError({ code: "FORBIDDEN" });
 
       // Verify user is a team member
@@ -570,7 +570,7 @@ export const sessionsRouter = router({
         const teamMembership = await ctx.db.teamMembership.findUnique({
           where: {
             userId_teamId: {
-              userId: (ctx.session.user as any).id,
+              userId: ctx.session.user.id,
               teamId: sessionWig.team.id,
             },
           },
@@ -606,7 +606,7 @@ export const sessionsRouter = router({
 
       await auditLog({
         db: ctx.db,
-        actorUserId: (ctx.session.user as any).id,
+        actorUserId: ctx.session.user.id,
         entityType: "WEEKLY_SESSION",
         entityId: input.sessionId,
         action: "SESSION_REVIEW_COMPLETED",
@@ -644,7 +644,7 @@ export const sessionsRouter = router({
       if (!session.userId || !session.wigId) {
         throw new TRPCError({ code: "BAD_REQUEST", message: "This endpoint only supports legacy member WIG sessions." });
       }
-      if (session.userId !== (ctx.session.user as any).id)
+      if (session.userId !== ctx.session.user.id)
         throw new TRPCError({ code: "FORBIDDEN" });
 
       // Verify user is a team member
@@ -657,7 +657,7 @@ export const sessionsRouter = router({
         const teamMembership = await ctx.db.teamMembership.findUnique({
           where: {
             userId_teamId: {
-              userId: (ctx.session.user as any).id,
+              userId: ctx.session.user.id,
               teamId: sessionWig.team.id,
             },
           },
@@ -732,7 +732,7 @@ export const sessionsRouter = router({
 
       await auditLog({
         db: ctx.db,
-        actorUserId: (ctx.session.user as any).id,
+        actorUserId: ctx.session.user.id,
         entityType: "WEEKLY_SESSION",
         entityId: input.sessionId,
         action: "SESSION_COMMIT_COMPLETED",
@@ -782,7 +782,7 @@ export const sessionsRouter = router({
 
       const sessions = await ctx.db.weeklySession.findMany({
         where: {
-          userId: (ctx.session.user as any).id,
+          userId: ctx.session.user.id,
           wig: { teamId: team.id },
           weekStarting: monday,
         },
@@ -844,7 +844,7 @@ export const sessionsRouter = router({
       });
 
       if (!session) throw new TRPCError({ code: "NOT_FOUND" });
-      if (session.userId !== (ctx.session.user as any).id)
+      if (session.userId !== ctx.session.user.id)
         throw new TRPCError({ code: "FORBIDDEN" });
 
       return session;
@@ -866,10 +866,10 @@ export const sessionsRouter = router({
 
       if (!team) throw new TRPCError({ code: "NOT_FOUND" });
 
-      const isTeamLead = team.leadUserId === (ctx.session.user as any).id;
+      const isTeamLead = team.leadUserId === ctx.session.user.id;
       const isOrgAdmin = await ctx.db.orgMembership.findFirst({
         where: {
-          userId: (ctx.session.user as any).id,
+          userId: ctx.session.user.id,
           orgId: team.orgId,
           role: "ADMIN",
         },

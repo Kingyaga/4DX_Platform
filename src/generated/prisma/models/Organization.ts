@@ -182,11 +182,12 @@ export type OrganizationWhereInput = {
   slug?: Prisma.StringFilter<"Organization"> | string
   timezone?: Prisma.StringFilter<"Organization"> | string
   createdAt?: Prisma.DateTimeFilter<"Organization"> | Date | string
+  apiKeys?: Prisma.ApiKeyListRelationFilter
+  invites?: Prisma.InviteListRelationFilter
+  inviteTokens?: Prisma.InviteTokenListRelationFilter
+  auditLogs?: Prisma.AuditLogListRelationFilter
   memberships?: Prisma.OrgMembershipListRelationFilter
   teams?: Prisma.TeamListRelationFilter
-  invites?: Prisma.InviteListRelationFilter
-  apiKeys?: Prisma.ApiKeyListRelationFilter
-  inviteTokens?: Prisma.InviteTokenListRelationFilter
 }
 
 export type OrganizationOrderByWithRelationInput = {
@@ -195,11 +196,12 @@ export type OrganizationOrderByWithRelationInput = {
   slug?: Prisma.SortOrder
   timezone?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  apiKeys?: Prisma.ApiKeyOrderByRelationAggregateInput
+  invites?: Prisma.InviteOrderByRelationAggregateInput
+  inviteTokens?: Prisma.InviteTokenOrderByRelationAggregateInput
+  auditLogs?: Prisma.AuditLogOrderByRelationAggregateInput
   memberships?: Prisma.OrgMembershipOrderByRelationAggregateInput
   teams?: Prisma.TeamOrderByRelationAggregateInput
-  invites?: Prisma.InviteOrderByRelationAggregateInput
-  apiKeys?: Prisma.ApiKeyOrderByRelationAggregateInput
-  inviteTokens?: Prisma.InviteTokenOrderByRelationAggregateInput
 }
 
 export type OrganizationWhereUniqueInput = Prisma.AtLeast<{
@@ -211,11 +213,12 @@ export type OrganizationWhereUniqueInput = Prisma.AtLeast<{
   name?: Prisma.StringFilter<"Organization"> | string
   timezone?: Prisma.StringFilter<"Organization"> | string
   createdAt?: Prisma.DateTimeFilter<"Organization"> | Date | string
+  apiKeys?: Prisma.ApiKeyListRelationFilter
+  invites?: Prisma.InviteListRelationFilter
+  inviteTokens?: Prisma.InviteTokenListRelationFilter
+  auditLogs?: Prisma.AuditLogListRelationFilter
   memberships?: Prisma.OrgMembershipListRelationFilter
   teams?: Prisma.TeamListRelationFilter
-  invites?: Prisma.InviteListRelationFilter
-  apiKeys?: Prisma.ApiKeyListRelationFilter
-  inviteTokens?: Prisma.InviteTokenListRelationFilter
 }, "id" | "slug">
 
 export type OrganizationOrderByWithAggregationInput = {
@@ -246,11 +249,12 @@ export type OrganizationCreateInput = {
   slug: string
   timezone?: string
   createdAt?: Date | string
+  apiKeys?: Prisma.ApiKeyCreateNestedManyWithoutOrgInput
+  invites?: Prisma.InviteCreateNestedManyWithoutOrgInput
+  inviteTokens?: Prisma.InviteTokenCreateNestedManyWithoutOrgInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutOrgInput
   memberships?: Prisma.OrgMembershipCreateNestedManyWithoutOrgInput
   teams?: Prisma.TeamCreateNestedManyWithoutOrgInput
-  invites?: Prisma.InviteCreateNestedManyWithoutOrgInput
-  apiKeys?: Prisma.ApiKeyCreateNestedManyWithoutOrgInput
-  inviteTokens?: Prisma.InviteTokenCreateNestedManyWithoutOrgInput
 }
 
 export type OrganizationUncheckedCreateInput = {
@@ -259,11 +263,12 @@ export type OrganizationUncheckedCreateInput = {
   slug: string
   timezone?: string
   createdAt?: Date | string
+  apiKeys?: Prisma.ApiKeyUncheckedCreateNestedManyWithoutOrgInput
+  invites?: Prisma.InviteUncheckedCreateNestedManyWithoutOrgInput
+  inviteTokens?: Prisma.InviteTokenUncheckedCreateNestedManyWithoutOrgInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutOrgInput
   memberships?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutOrgInput
   teams?: Prisma.TeamUncheckedCreateNestedManyWithoutOrgInput
-  invites?: Prisma.InviteUncheckedCreateNestedManyWithoutOrgInput
-  apiKeys?: Prisma.ApiKeyUncheckedCreateNestedManyWithoutOrgInput
-  inviteTokens?: Prisma.InviteTokenUncheckedCreateNestedManyWithoutOrgInput
 }
 
 export type OrganizationUpdateInput = {
@@ -272,11 +277,12 @@ export type OrganizationUpdateInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  apiKeys?: Prisma.ApiKeyUpdateManyWithoutOrgNestedInput
+  invites?: Prisma.InviteUpdateManyWithoutOrgNestedInput
+  inviteTokens?: Prisma.InviteTokenUpdateManyWithoutOrgNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutOrgNestedInput
   memberships?: Prisma.OrgMembershipUpdateManyWithoutOrgNestedInput
   teams?: Prisma.TeamUpdateManyWithoutOrgNestedInput
-  invites?: Prisma.InviteUpdateManyWithoutOrgNestedInput
-  apiKeys?: Prisma.ApiKeyUpdateManyWithoutOrgNestedInput
-  inviteTokens?: Prisma.InviteTokenUpdateManyWithoutOrgNestedInput
 }
 
 export type OrganizationUncheckedUpdateInput = {
@@ -285,11 +291,12 @@ export type OrganizationUncheckedUpdateInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  apiKeys?: Prisma.ApiKeyUncheckedUpdateManyWithoutOrgNestedInput
+  invites?: Prisma.InviteUncheckedUpdateManyWithoutOrgNestedInput
+  inviteTokens?: Prisma.InviteTokenUncheckedUpdateManyWithoutOrgNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutOrgNestedInput
   memberships?: Prisma.OrgMembershipUncheckedUpdateManyWithoutOrgNestedInput
   teams?: Prisma.TeamUncheckedUpdateManyWithoutOrgNestedInput
-  invites?: Prisma.InviteUncheckedUpdateManyWithoutOrgNestedInput
-  apiKeys?: Prisma.ApiKeyUncheckedUpdateManyWithoutOrgNestedInput
-  inviteTokens?: Prisma.InviteTokenUncheckedUpdateManyWithoutOrgNestedInput
 }
 
 export type OrganizationCreateManyInput = {
@@ -395,6 +402,20 @@ export type OrganizationUpdateOneRequiredWithoutTeamsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.OrganizationUpdateToOneWithWhereWithoutTeamsInput, Prisma.OrganizationUpdateWithoutTeamsInput>, Prisma.OrganizationUncheckedUpdateWithoutTeamsInput>
 }
 
+export type OrganizationCreateNestedOneWithoutAuditLogsInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutAuditLogsInput, Prisma.OrganizationUncheckedCreateWithoutAuditLogsInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutAuditLogsInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+}
+
+export type OrganizationUpdateOneRequiredWithoutAuditLogsNestedInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutAuditLogsInput, Prisma.OrganizationUncheckedCreateWithoutAuditLogsInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutAuditLogsInput
+  upsert?: Prisma.OrganizationUpsertWithoutAuditLogsInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.OrganizationUpdateToOneWithWhereWithoutAuditLogsInput, Prisma.OrganizationUpdateWithoutAuditLogsInput>, Prisma.OrganizationUncheckedUpdateWithoutAuditLogsInput>
+}
+
 export type OrganizationCreateNestedOneWithoutApiKeysInput = {
   create?: Prisma.XOR<Prisma.OrganizationCreateWithoutApiKeysInput, Prisma.OrganizationUncheckedCreateWithoutApiKeysInput>
   connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutApiKeysInput
@@ -429,10 +450,11 @@ export type OrganizationCreateWithoutMembershipsInput = {
   slug: string
   timezone?: string
   createdAt?: Date | string
-  teams?: Prisma.TeamCreateNestedManyWithoutOrgInput
-  invites?: Prisma.InviteCreateNestedManyWithoutOrgInput
   apiKeys?: Prisma.ApiKeyCreateNestedManyWithoutOrgInput
+  invites?: Prisma.InviteCreateNestedManyWithoutOrgInput
   inviteTokens?: Prisma.InviteTokenCreateNestedManyWithoutOrgInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutOrgInput
+  teams?: Prisma.TeamCreateNestedManyWithoutOrgInput
 }
 
 export type OrganizationUncheckedCreateWithoutMembershipsInput = {
@@ -441,10 +463,11 @@ export type OrganizationUncheckedCreateWithoutMembershipsInput = {
   slug: string
   timezone?: string
   createdAt?: Date | string
-  teams?: Prisma.TeamUncheckedCreateNestedManyWithoutOrgInput
-  invites?: Prisma.InviteUncheckedCreateNestedManyWithoutOrgInput
   apiKeys?: Prisma.ApiKeyUncheckedCreateNestedManyWithoutOrgInput
+  invites?: Prisma.InviteUncheckedCreateNestedManyWithoutOrgInput
   inviteTokens?: Prisma.InviteTokenUncheckedCreateNestedManyWithoutOrgInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutOrgInput
+  teams?: Prisma.TeamUncheckedCreateNestedManyWithoutOrgInput
 }
 
 export type OrganizationCreateOrConnectWithoutMembershipsInput = {
@@ -469,10 +492,11 @@ export type OrganizationUpdateWithoutMembershipsInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  teams?: Prisma.TeamUpdateManyWithoutOrgNestedInput
-  invites?: Prisma.InviteUpdateManyWithoutOrgNestedInput
   apiKeys?: Prisma.ApiKeyUpdateManyWithoutOrgNestedInput
+  invites?: Prisma.InviteUpdateManyWithoutOrgNestedInput
   inviteTokens?: Prisma.InviteTokenUpdateManyWithoutOrgNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutOrgNestedInput
+  teams?: Prisma.TeamUpdateManyWithoutOrgNestedInput
 }
 
 export type OrganizationUncheckedUpdateWithoutMembershipsInput = {
@@ -481,10 +505,11 @@ export type OrganizationUncheckedUpdateWithoutMembershipsInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  teams?: Prisma.TeamUncheckedUpdateManyWithoutOrgNestedInput
-  invites?: Prisma.InviteUncheckedUpdateManyWithoutOrgNestedInput
   apiKeys?: Prisma.ApiKeyUncheckedUpdateManyWithoutOrgNestedInput
+  invites?: Prisma.InviteUncheckedUpdateManyWithoutOrgNestedInput
   inviteTokens?: Prisma.InviteTokenUncheckedUpdateManyWithoutOrgNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutOrgNestedInput
+  teams?: Prisma.TeamUncheckedUpdateManyWithoutOrgNestedInput
 }
 
 export type OrganizationCreateWithoutInvitesInput = {
@@ -493,10 +518,11 @@ export type OrganizationCreateWithoutInvitesInput = {
   slug: string
   timezone?: string
   createdAt?: Date | string
-  memberships?: Prisma.OrgMembershipCreateNestedManyWithoutOrgInput
-  teams?: Prisma.TeamCreateNestedManyWithoutOrgInput
   apiKeys?: Prisma.ApiKeyCreateNestedManyWithoutOrgInput
   inviteTokens?: Prisma.InviteTokenCreateNestedManyWithoutOrgInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutOrgInput
+  memberships?: Prisma.OrgMembershipCreateNestedManyWithoutOrgInput
+  teams?: Prisma.TeamCreateNestedManyWithoutOrgInput
 }
 
 export type OrganizationUncheckedCreateWithoutInvitesInput = {
@@ -505,10 +531,11 @@ export type OrganizationUncheckedCreateWithoutInvitesInput = {
   slug: string
   timezone?: string
   createdAt?: Date | string
-  memberships?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutOrgInput
-  teams?: Prisma.TeamUncheckedCreateNestedManyWithoutOrgInput
   apiKeys?: Prisma.ApiKeyUncheckedCreateNestedManyWithoutOrgInput
   inviteTokens?: Prisma.InviteTokenUncheckedCreateNestedManyWithoutOrgInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutOrgInput
+  memberships?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutOrgInput
+  teams?: Prisma.TeamUncheckedCreateNestedManyWithoutOrgInput
 }
 
 export type OrganizationCreateOrConnectWithoutInvitesInput = {
@@ -533,10 +560,11 @@ export type OrganizationUpdateWithoutInvitesInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  memberships?: Prisma.OrgMembershipUpdateManyWithoutOrgNestedInput
-  teams?: Prisma.TeamUpdateManyWithoutOrgNestedInput
   apiKeys?: Prisma.ApiKeyUpdateManyWithoutOrgNestedInput
   inviteTokens?: Prisma.InviteTokenUpdateManyWithoutOrgNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutOrgNestedInput
+  memberships?: Prisma.OrgMembershipUpdateManyWithoutOrgNestedInput
+  teams?: Prisma.TeamUpdateManyWithoutOrgNestedInput
 }
 
 export type OrganizationUncheckedUpdateWithoutInvitesInput = {
@@ -545,10 +573,11 @@ export type OrganizationUncheckedUpdateWithoutInvitesInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  memberships?: Prisma.OrgMembershipUncheckedUpdateManyWithoutOrgNestedInput
-  teams?: Prisma.TeamUncheckedUpdateManyWithoutOrgNestedInput
   apiKeys?: Prisma.ApiKeyUncheckedUpdateManyWithoutOrgNestedInput
   inviteTokens?: Prisma.InviteTokenUncheckedUpdateManyWithoutOrgNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutOrgNestedInput
+  memberships?: Prisma.OrgMembershipUncheckedUpdateManyWithoutOrgNestedInput
+  teams?: Prisma.TeamUncheckedUpdateManyWithoutOrgNestedInput
 }
 
 export type OrganizationCreateWithoutTeamsInput = {
@@ -557,10 +586,11 @@ export type OrganizationCreateWithoutTeamsInput = {
   slug: string
   timezone?: string
   createdAt?: Date | string
-  memberships?: Prisma.OrgMembershipCreateNestedManyWithoutOrgInput
-  invites?: Prisma.InviteCreateNestedManyWithoutOrgInput
   apiKeys?: Prisma.ApiKeyCreateNestedManyWithoutOrgInput
+  invites?: Prisma.InviteCreateNestedManyWithoutOrgInput
   inviteTokens?: Prisma.InviteTokenCreateNestedManyWithoutOrgInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutOrgInput
+  memberships?: Prisma.OrgMembershipCreateNestedManyWithoutOrgInput
 }
 
 export type OrganizationUncheckedCreateWithoutTeamsInput = {
@@ -569,10 +599,11 @@ export type OrganizationUncheckedCreateWithoutTeamsInput = {
   slug: string
   timezone?: string
   createdAt?: Date | string
-  memberships?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutOrgInput
-  invites?: Prisma.InviteUncheckedCreateNestedManyWithoutOrgInput
   apiKeys?: Prisma.ApiKeyUncheckedCreateNestedManyWithoutOrgInput
+  invites?: Prisma.InviteUncheckedCreateNestedManyWithoutOrgInput
   inviteTokens?: Prisma.InviteTokenUncheckedCreateNestedManyWithoutOrgInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutOrgInput
+  memberships?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutOrgInput
 }
 
 export type OrganizationCreateOrConnectWithoutTeamsInput = {
@@ -597,10 +628,11 @@ export type OrganizationUpdateWithoutTeamsInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  memberships?: Prisma.OrgMembershipUpdateManyWithoutOrgNestedInput
-  invites?: Prisma.InviteUpdateManyWithoutOrgNestedInput
   apiKeys?: Prisma.ApiKeyUpdateManyWithoutOrgNestedInput
+  invites?: Prisma.InviteUpdateManyWithoutOrgNestedInput
   inviteTokens?: Prisma.InviteTokenUpdateManyWithoutOrgNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutOrgNestedInput
+  memberships?: Prisma.OrgMembershipUpdateManyWithoutOrgNestedInput
 }
 
 export type OrganizationUncheckedUpdateWithoutTeamsInput = {
@@ -609,10 +641,79 @@ export type OrganizationUncheckedUpdateWithoutTeamsInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  memberships?: Prisma.OrgMembershipUncheckedUpdateManyWithoutOrgNestedInput
-  invites?: Prisma.InviteUncheckedUpdateManyWithoutOrgNestedInput
   apiKeys?: Prisma.ApiKeyUncheckedUpdateManyWithoutOrgNestedInput
+  invites?: Prisma.InviteUncheckedUpdateManyWithoutOrgNestedInput
   inviteTokens?: Prisma.InviteTokenUncheckedUpdateManyWithoutOrgNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutOrgNestedInput
+  memberships?: Prisma.OrgMembershipUncheckedUpdateManyWithoutOrgNestedInput
+}
+
+export type OrganizationCreateWithoutAuditLogsInput = {
+  id?: string
+  name: string
+  slug: string
+  timezone?: string
+  createdAt?: Date | string
+  apiKeys?: Prisma.ApiKeyCreateNestedManyWithoutOrgInput
+  invites?: Prisma.InviteCreateNestedManyWithoutOrgInput
+  inviteTokens?: Prisma.InviteTokenCreateNestedManyWithoutOrgInput
+  memberships?: Prisma.OrgMembershipCreateNestedManyWithoutOrgInput
+  teams?: Prisma.TeamCreateNestedManyWithoutOrgInput
+}
+
+export type OrganizationUncheckedCreateWithoutAuditLogsInput = {
+  id?: string
+  name: string
+  slug: string
+  timezone?: string
+  createdAt?: Date | string
+  apiKeys?: Prisma.ApiKeyUncheckedCreateNestedManyWithoutOrgInput
+  invites?: Prisma.InviteUncheckedCreateNestedManyWithoutOrgInput
+  inviteTokens?: Prisma.InviteTokenUncheckedCreateNestedManyWithoutOrgInput
+  memberships?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutOrgInput
+  teams?: Prisma.TeamUncheckedCreateNestedManyWithoutOrgInput
+}
+
+export type OrganizationCreateOrConnectWithoutAuditLogsInput = {
+  where: Prisma.OrganizationWhereUniqueInput
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutAuditLogsInput, Prisma.OrganizationUncheckedCreateWithoutAuditLogsInput>
+}
+
+export type OrganizationUpsertWithoutAuditLogsInput = {
+  update: Prisma.XOR<Prisma.OrganizationUpdateWithoutAuditLogsInput, Prisma.OrganizationUncheckedUpdateWithoutAuditLogsInput>
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutAuditLogsInput, Prisma.OrganizationUncheckedCreateWithoutAuditLogsInput>
+  where?: Prisma.OrganizationWhereInput
+}
+
+export type OrganizationUpdateToOneWithWhereWithoutAuditLogsInput = {
+  where?: Prisma.OrganizationWhereInput
+  data: Prisma.XOR<Prisma.OrganizationUpdateWithoutAuditLogsInput, Prisma.OrganizationUncheckedUpdateWithoutAuditLogsInput>
+}
+
+export type OrganizationUpdateWithoutAuditLogsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  apiKeys?: Prisma.ApiKeyUpdateManyWithoutOrgNestedInput
+  invites?: Prisma.InviteUpdateManyWithoutOrgNestedInput
+  inviteTokens?: Prisma.InviteTokenUpdateManyWithoutOrgNestedInput
+  memberships?: Prisma.OrgMembershipUpdateManyWithoutOrgNestedInput
+  teams?: Prisma.TeamUpdateManyWithoutOrgNestedInput
+}
+
+export type OrganizationUncheckedUpdateWithoutAuditLogsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  apiKeys?: Prisma.ApiKeyUncheckedUpdateManyWithoutOrgNestedInput
+  invites?: Prisma.InviteUncheckedUpdateManyWithoutOrgNestedInput
+  inviteTokens?: Prisma.InviteTokenUncheckedUpdateManyWithoutOrgNestedInput
+  memberships?: Prisma.OrgMembershipUncheckedUpdateManyWithoutOrgNestedInput
+  teams?: Prisma.TeamUncheckedUpdateManyWithoutOrgNestedInput
 }
 
 export type OrganizationCreateWithoutApiKeysInput = {
@@ -621,10 +722,11 @@ export type OrganizationCreateWithoutApiKeysInput = {
   slug: string
   timezone?: string
   createdAt?: Date | string
-  memberships?: Prisma.OrgMembershipCreateNestedManyWithoutOrgInput
-  teams?: Prisma.TeamCreateNestedManyWithoutOrgInput
   invites?: Prisma.InviteCreateNestedManyWithoutOrgInput
   inviteTokens?: Prisma.InviteTokenCreateNestedManyWithoutOrgInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutOrgInput
+  memberships?: Prisma.OrgMembershipCreateNestedManyWithoutOrgInput
+  teams?: Prisma.TeamCreateNestedManyWithoutOrgInput
 }
 
 export type OrganizationUncheckedCreateWithoutApiKeysInput = {
@@ -633,10 +735,11 @@ export type OrganizationUncheckedCreateWithoutApiKeysInput = {
   slug: string
   timezone?: string
   createdAt?: Date | string
-  memberships?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutOrgInput
-  teams?: Prisma.TeamUncheckedCreateNestedManyWithoutOrgInput
   invites?: Prisma.InviteUncheckedCreateNestedManyWithoutOrgInput
   inviteTokens?: Prisma.InviteTokenUncheckedCreateNestedManyWithoutOrgInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutOrgInput
+  memberships?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutOrgInput
+  teams?: Prisma.TeamUncheckedCreateNestedManyWithoutOrgInput
 }
 
 export type OrganizationCreateOrConnectWithoutApiKeysInput = {
@@ -661,10 +764,11 @@ export type OrganizationUpdateWithoutApiKeysInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  memberships?: Prisma.OrgMembershipUpdateManyWithoutOrgNestedInput
-  teams?: Prisma.TeamUpdateManyWithoutOrgNestedInput
   invites?: Prisma.InviteUpdateManyWithoutOrgNestedInput
   inviteTokens?: Prisma.InviteTokenUpdateManyWithoutOrgNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutOrgNestedInput
+  memberships?: Prisma.OrgMembershipUpdateManyWithoutOrgNestedInput
+  teams?: Prisma.TeamUpdateManyWithoutOrgNestedInput
 }
 
 export type OrganizationUncheckedUpdateWithoutApiKeysInput = {
@@ -673,10 +777,11 @@ export type OrganizationUncheckedUpdateWithoutApiKeysInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  memberships?: Prisma.OrgMembershipUncheckedUpdateManyWithoutOrgNestedInput
-  teams?: Prisma.TeamUncheckedUpdateManyWithoutOrgNestedInput
   invites?: Prisma.InviteUncheckedUpdateManyWithoutOrgNestedInput
   inviteTokens?: Prisma.InviteTokenUncheckedUpdateManyWithoutOrgNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutOrgNestedInput
+  memberships?: Prisma.OrgMembershipUncheckedUpdateManyWithoutOrgNestedInput
+  teams?: Prisma.TeamUncheckedUpdateManyWithoutOrgNestedInput
 }
 
 export type OrganizationCreateWithoutInviteTokensInput = {
@@ -685,10 +790,11 @@ export type OrganizationCreateWithoutInviteTokensInput = {
   slug: string
   timezone?: string
   createdAt?: Date | string
+  apiKeys?: Prisma.ApiKeyCreateNestedManyWithoutOrgInput
+  invites?: Prisma.InviteCreateNestedManyWithoutOrgInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutOrgInput
   memberships?: Prisma.OrgMembershipCreateNestedManyWithoutOrgInput
   teams?: Prisma.TeamCreateNestedManyWithoutOrgInput
-  invites?: Prisma.InviteCreateNestedManyWithoutOrgInput
-  apiKeys?: Prisma.ApiKeyCreateNestedManyWithoutOrgInput
 }
 
 export type OrganizationUncheckedCreateWithoutInviteTokensInput = {
@@ -697,10 +803,11 @@ export type OrganizationUncheckedCreateWithoutInviteTokensInput = {
   slug: string
   timezone?: string
   createdAt?: Date | string
+  apiKeys?: Prisma.ApiKeyUncheckedCreateNestedManyWithoutOrgInput
+  invites?: Prisma.InviteUncheckedCreateNestedManyWithoutOrgInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutOrgInput
   memberships?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutOrgInput
   teams?: Prisma.TeamUncheckedCreateNestedManyWithoutOrgInput
-  invites?: Prisma.InviteUncheckedCreateNestedManyWithoutOrgInput
-  apiKeys?: Prisma.ApiKeyUncheckedCreateNestedManyWithoutOrgInput
 }
 
 export type OrganizationCreateOrConnectWithoutInviteTokensInput = {
@@ -725,10 +832,11 @@ export type OrganizationUpdateWithoutInviteTokensInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  apiKeys?: Prisma.ApiKeyUpdateManyWithoutOrgNestedInput
+  invites?: Prisma.InviteUpdateManyWithoutOrgNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutOrgNestedInput
   memberships?: Prisma.OrgMembershipUpdateManyWithoutOrgNestedInput
   teams?: Prisma.TeamUpdateManyWithoutOrgNestedInput
-  invites?: Prisma.InviteUpdateManyWithoutOrgNestedInput
-  apiKeys?: Prisma.ApiKeyUpdateManyWithoutOrgNestedInput
 }
 
 export type OrganizationUncheckedUpdateWithoutInviteTokensInput = {
@@ -737,10 +845,11 @@ export type OrganizationUncheckedUpdateWithoutInviteTokensInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  apiKeys?: Prisma.ApiKeyUncheckedUpdateManyWithoutOrgNestedInput
+  invites?: Prisma.InviteUncheckedUpdateManyWithoutOrgNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutOrgNestedInput
   memberships?: Prisma.OrgMembershipUncheckedUpdateManyWithoutOrgNestedInput
   teams?: Prisma.TeamUncheckedUpdateManyWithoutOrgNestedInput
-  invites?: Prisma.InviteUncheckedUpdateManyWithoutOrgNestedInput
-  apiKeys?: Prisma.ApiKeyUncheckedUpdateManyWithoutOrgNestedInput
 }
 
 
@@ -749,19 +858,21 @@ export type OrganizationUncheckedUpdateWithoutInviteTokensInput = {
  */
 
 export type OrganizationCountOutputType = {
+  apiKeys: number
+  invites: number
+  inviteTokens: number
+  auditLogs: number
   memberships: number
   teams: number
-  invites: number
-  apiKeys: number
-  inviteTokens: number
 }
 
 export type OrganizationCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  apiKeys?: boolean | OrganizationCountOutputTypeCountApiKeysArgs
+  invites?: boolean | OrganizationCountOutputTypeCountInvitesArgs
+  inviteTokens?: boolean | OrganizationCountOutputTypeCountInviteTokensArgs
+  auditLogs?: boolean | OrganizationCountOutputTypeCountAuditLogsArgs
   memberships?: boolean | OrganizationCountOutputTypeCountMembershipsArgs
   teams?: boolean | OrganizationCountOutputTypeCountTeamsArgs
-  invites?: boolean | OrganizationCountOutputTypeCountInvitesArgs
-  apiKeys?: boolean | OrganizationCountOutputTypeCountApiKeysArgs
-  inviteTokens?: boolean | OrganizationCountOutputTypeCountInviteTokensArgs
 }
 
 /**
@@ -772,6 +883,34 @@ export type OrganizationCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types
    * Select specific fields to fetch from the OrganizationCountOutputType
    */
   select?: Prisma.OrganizationCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * OrganizationCountOutputType without action
+ */
+export type OrganizationCountOutputTypeCountApiKeysArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ApiKeyWhereInput
+}
+
+/**
+ * OrganizationCountOutputType without action
+ */
+export type OrganizationCountOutputTypeCountInvitesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.InviteWhereInput
+}
+
+/**
+ * OrganizationCountOutputType without action
+ */
+export type OrganizationCountOutputTypeCountInviteTokensArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.InviteTokenWhereInput
+}
+
+/**
+ * OrganizationCountOutputType without action
+ */
+export type OrganizationCountOutputTypeCountAuditLogsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AuditLogWhereInput
 }
 
 /**
@@ -788,27 +927,6 @@ export type OrganizationCountOutputTypeCountTeamsArgs<ExtArgs extends runtime.Ty
   where?: Prisma.TeamWhereInput
 }
 
-/**
- * OrganizationCountOutputType without action
- */
-export type OrganizationCountOutputTypeCountInvitesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.InviteWhereInput
-}
-
-/**
- * OrganizationCountOutputType without action
- */
-export type OrganizationCountOutputTypeCountApiKeysArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.ApiKeyWhereInput
-}
-
-/**
- * OrganizationCountOutputType without action
- */
-export type OrganizationCountOutputTypeCountInviteTokensArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.InviteTokenWhereInput
-}
-
 
 export type OrganizationSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -816,11 +934,12 @@ export type OrganizationSelect<ExtArgs extends runtime.Types.Extensions.Internal
   slug?: boolean
   timezone?: boolean
   createdAt?: boolean
+  apiKeys?: boolean | Prisma.Organization$apiKeysArgs<ExtArgs>
+  invites?: boolean | Prisma.Organization$invitesArgs<ExtArgs>
+  inviteTokens?: boolean | Prisma.Organization$inviteTokensArgs<ExtArgs>
+  auditLogs?: boolean | Prisma.Organization$auditLogsArgs<ExtArgs>
   memberships?: boolean | Prisma.Organization$membershipsArgs<ExtArgs>
   teams?: boolean | Prisma.Organization$teamsArgs<ExtArgs>
-  invites?: boolean | Prisma.Organization$invitesArgs<ExtArgs>
-  apiKeys?: boolean | Prisma.Organization$apiKeysArgs<ExtArgs>
-  inviteTokens?: boolean | Prisma.Organization$inviteTokensArgs<ExtArgs>
   _count?: boolean | Prisma.OrganizationCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["organization"]>
 
@@ -850,11 +969,12 @@ export type OrganizationSelectScalar = {
 
 export type OrganizationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "slug" | "timezone" | "createdAt", ExtArgs["result"]["organization"]>
 export type OrganizationInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  apiKeys?: boolean | Prisma.Organization$apiKeysArgs<ExtArgs>
+  invites?: boolean | Prisma.Organization$invitesArgs<ExtArgs>
+  inviteTokens?: boolean | Prisma.Organization$inviteTokensArgs<ExtArgs>
+  auditLogs?: boolean | Prisma.Organization$auditLogsArgs<ExtArgs>
   memberships?: boolean | Prisma.Organization$membershipsArgs<ExtArgs>
   teams?: boolean | Prisma.Organization$teamsArgs<ExtArgs>
-  invites?: boolean | Prisma.Organization$invitesArgs<ExtArgs>
-  apiKeys?: boolean | Prisma.Organization$apiKeysArgs<ExtArgs>
-  inviteTokens?: boolean | Prisma.Organization$inviteTokensArgs<ExtArgs>
   _count?: boolean | Prisma.OrganizationCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type OrganizationIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -863,11 +983,12 @@ export type OrganizationIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types
 export type $OrganizationPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Organization"
   objects: {
+    apiKeys: Prisma.$ApiKeyPayload<ExtArgs>[]
+    invites: Prisma.$InvitePayload<ExtArgs>[]
+    inviteTokens: Prisma.$InviteTokenPayload<ExtArgs>[]
+    auditLogs: Prisma.$AuditLogPayload<ExtArgs>[]
     memberships: Prisma.$OrgMembershipPayload<ExtArgs>[]
     teams: Prisma.$TeamPayload<ExtArgs>[]
-    invites: Prisma.$InvitePayload<ExtArgs>[]
-    apiKeys: Prisma.$ApiKeyPayload<ExtArgs>[]
-    inviteTokens: Prisma.$InviteTokenPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1269,11 +1390,12 @@ readonly fields: OrganizationFieldRefs;
  */
 export interface Prisma__OrganizationClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  apiKeys<T extends Prisma.Organization$apiKeysArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$apiKeysArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ApiKeyPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  invites<T extends Prisma.Organization$invitesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$invitesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$InvitePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  inviteTokens<T extends Prisma.Organization$inviteTokensArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$inviteTokensArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$InviteTokenPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  auditLogs<T extends Prisma.Organization$auditLogsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$auditLogsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AuditLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   memberships<T extends Prisma.Organization$membershipsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$membershipsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrgMembershipPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   teams<T extends Prisma.Organization$teamsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$teamsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TeamPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  invites<T extends Prisma.Organization$invitesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$invitesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$InvitePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  apiKeys<T extends Prisma.Organization$apiKeysArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$apiKeysArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ApiKeyPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  inviteTokens<T extends Prisma.Organization$inviteTokensArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$inviteTokensArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$InviteTokenPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1701,6 +1823,102 @@ export type OrganizationDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.
 }
 
 /**
+ * Organization.apiKeys
+ */
+export type Organization$apiKeysArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ApiKey
+   */
+  select?: Prisma.ApiKeySelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ApiKey
+   */
+  omit?: Prisma.ApiKeyOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ApiKeyInclude<ExtArgs> | null
+  where?: Prisma.ApiKeyWhereInput
+  orderBy?: Prisma.ApiKeyOrderByWithRelationInput | Prisma.ApiKeyOrderByWithRelationInput[]
+  cursor?: Prisma.ApiKeyWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ApiKeyScalarFieldEnum | Prisma.ApiKeyScalarFieldEnum[]
+}
+
+/**
+ * Organization.invites
+ */
+export type Organization$invitesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Invite
+   */
+  select?: Prisma.InviteSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Invite
+   */
+  omit?: Prisma.InviteOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.InviteInclude<ExtArgs> | null
+  where?: Prisma.InviteWhereInput
+  orderBy?: Prisma.InviteOrderByWithRelationInput | Prisma.InviteOrderByWithRelationInput[]
+  cursor?: Prisma.InviteWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.InviteScalarFieldEnum | Prisma.InviteScalarFieldEnum[]
+}
+
+/**
+ * Organization.inviteTokens
+ */
+export type Organization$inviteTokensArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the InviteToken
+   */
+  select?: Prisma.InviteTokenSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the InviteToken
+   */
+  omit?: Prisma.InviteTokenOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.InviteTokenInclude<ExtArgs> | null
+  where?: Prisma.InviteTokenWhereInput
+  orderBy?: Prisma.InviteTokenOrderByWithRelationInput | Prisma.InviteTokenOrderByWithRelationInput[]
+  cursor?: Prisma.InviteTokenWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.InviteTokenScalarFieldEnum | Prisma.InviteTokenScalarFieldEnum[]
+}
+
+/**
+ * Organization.auditLogs
+ */
+export type Organization$auditLogsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AuditLog
+   */
+  select?: Prisma.AuditLogSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the AuditLog
+   */
+  omit?: Prisma.AuditLogOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AuditLogInclude<ExtArgs> | null
+  where?: Prisma.AuditLogWhereInput
+  orderBy?: Prisma.AuditLogOrderByWithRelationInput | Prisma.AuditLogOrderByWithRelationInput[]
+  cursor?: Prisma.AuditLogWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AuditLogScalarFieldEnum | Prisma.AuditLogScalarFieldEnum[]
+}
+
+/**
  * Organization.memberships
  */
 export type Organization$membershipsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1746,78 +1964,6 @@ export type Organization$teamsArgs<ExtArgs extends runtime.Types.Extensions.Inte
   take?: number
   skip?: number
   distinct?: Prisma.TeamScalarFieldEnum | Prisma.TeamScalarFieldEnum[]
-}
-
-/**
- * Organization.invites
- */
-export type Organization$invitesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the Invite
-   */
-  select?: Prisma.InviteSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the Invite
-   */
-  omit?: Prisma.InviteOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.InviteInclude<ExtArgs> | null
-  where?: Prisma.InviteWhereInput
-  orderBy?: Prisma.InviteOrderByWithRelationInput | Prisma.InviteOrderByWithRelationInput[]
-  cursor?: Prisma.InviteWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.InviteScalarFieldEnum | Prisma.InviteScalarFieldEnum[]
-}
-
-/**
- * Organization.apiKeys
- */
-export type Organization$apiKeysArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the ApiKey
-   */
-  select?: Prisma.ApiKeySelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the ApiKey
-   */
-  omit?: Prisma.ApiKeyOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.ApiKeyInclude<ExtArgs> | null
-  where?: Prisma.ApiKeyWhereInput
-  orderBy?: Prisma.ApiKeyOrderByWithRelationInput | Prisma.ApiKeyOrderByWithRelationInput[]
-  cursor?: Prisma.ApiKeyWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.ApiKeyScalarFieldEnum | Prisma.ApiKeyScalarFieldEnum[]
-}
-
-/**
- * Organization.inviteTokens
- */
-export type Organization$inviteTokensArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the InviteToken
-   */
-  select?: Prisma.InviteTokenSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the InviteToken
-   */
-  omit?: Prisma.InviteTokenOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.InviteTokenInclude<ExtArgs> | null
-  where?: Prisma.InviteTokenWhereInput
-  orderBy?: Prisma.InviteTokenOrderByWithRelationInput | Prisma.InviteTokenOrderByWithRelationInput[]
-  cursor?: Prisma.InviteTokenWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.InviteTokenScalarFieldEnum | Prisma.InviteTokenScalarFieldEnum[]
 }
 
 /**

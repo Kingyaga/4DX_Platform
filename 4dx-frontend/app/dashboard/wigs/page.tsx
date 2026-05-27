@@ -8,6 +8,8 @@ import { WIGListSkeleton } from "@/lib/components/skeletons";
 import { ErrorState, EmptyState } from "@/lib/components/states";
 import type { WIG, LeadMeasure, TeamMember, TrackingType } from "@/lib/types";
 
+type CreateWigTrackingType = "NUMERIC" | "MILESTONE" | "COMPLETION" | "HYBRID" | "CUSTOM";
+
 function isNonNumericWig(trackingType: TrackingType) {
   return trackingType !== "NUMERIC";
 }
@@ -1077,7 +1079,7 @@ function WIGHistoryDetail({ wig, onBack }: { wig: WIG; onBack: () => void }) {
 
 function WIGCreateForm({ onCancel, onSuccess }: { onCancel: () => void; onSuccess: () => void }) {
   const [title, setTitle] = useState("");
-  const [trackingType, setTrackingType] = useState<TrackingType>("NUMERIC");
+  const [trackingType, setTrackingType] = useState<CreateWigTrackingType>("NUMERIC");
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [unit, setUnit] = useState("USD");
@@ -1199,7 +1201,7 @@ function WIGCreateForm({ onCancel, onSuccess }: { onCancel: () => void; onSucces
             <label style={{ fontSize: "12px", fontWeight: 500, color: "#18181b" }}>Tracking Style *</label>
             <select
               value={trackingType}
-              onChange={(e) => setTrackingType(e.target.value as TrackingType)}
+              onChange={(e) => setTrackingType(e.target.value as CreateWigTrackingType)}
               style={{ border: "1px solid #e4e4e7", backgroundColor: "#ffffff", padding: "10px", fontSize: "16px", color: "#18181b", outline: "none", width: "100%" }}
             >
               <option value="NUMERIC">Numeric: from X to Y</option>

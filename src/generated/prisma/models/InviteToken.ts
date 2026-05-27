@@ -222,9 +222,9 @@ export type InviteTokenWhereInput = {
   expiresAt?: Prisma.DateTimeFilter<"InviteToken"> | Date | string
   createdAt?: Prisma.DateTimeFilter<"InviteToken"> | Date | string
   createdByUserId?: Prisma.StringFilter<"InviteToken"> | string
+  createdBy?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   org?: Prisma.XOR<Prisma.OrganizationScalarRelationFilter, Prisma.OrganizationWhereInput>
   team?: Prisma.XOR<Prisma.TeamNullableScalarRelationFilter, Prisma.TeamWhereInput> | null
-  createdBy?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }
 
 export type InviteTokenOrderByWithRelationInput = {
@@ -238,9 +238,9 @@ export type InviteTokenOrderByWithRelationInput = {
   expiresAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   createdByUserId?: Prisma.SortOrder
+  createdBy?: Prisma.UserOrderByWithRelationInput
   org?: Prisma.OrganizationOrderByWithRelationInput
   team?: Prisma.TeamOrderByWithRelationInput
-  createdBy?: Prisma.UserOrderByWithRelationInput
 }
 
 export type InviteTokenWhereUniqueInput = Prisma.AtLeast<{
@@ -257,9 +257,9 @@ export type InviteTokenWhereUniqueInput = Prisma.AtLeast<{
   expiresAt?: Prisma.DateTimeFilter<"InviteToken"> | Date | string
   createdAt?: Prisma.DateTimeFilter<"InviteToken"> | Date | string
   createdByUserId?: Prisma.StringFilter<"InviteToken"> | string
+  createdBy?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   org?: Prisma.XOR<Prisma.OrganizationScalarRelationFilter, Prisma.OrganizationWhereInput>
   team?: Prisma.XOR<Prisma.TeamNullableScalarRelationFilter, Prisma.TeamWhereInput> | null
-  createdBy?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }, "id" | "token">
 
 export type InviteTokenOrderByWithAggregationInput = {
@@ -302,9 +302,9 @@ export type InviteTokenCreateInput = {
   usedAt?: Date | string | null
   expiresAt: Date | string
   createdAt?: Date | string
+  createdBy: Prisma.UserCreateNestedOneWithoutCreatedInvitesInput
   org: Prisma.OrganizationCreateNestedOneWithoutInviteTokensInput
   team?: Prisma.TeamCreateNestedOneWithoutInviteTokensInput
-  createdBy: Prisma.UserCreateNestedOneWithoutCreatedInvitesInput
 }
 
 export type InviteTokenUncheckedCreateInput = {
@@ -328,9 +328,9 @@ export type InviteTokenUpdateInput = {
   usedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdBy?: Prisma.UserUpdateOneRequiredWithoutCreatedInvitesNestedInput
   org?: Prisma.OrganizationUpdateOneRequiredWithoutInviteTokensNestedInput
   team?: Prisma.TeamUpdateOneWithoutInviteTokensNestedInput
-  createdBy?: Prisma.UserUpdateOneRequiredWithoutCreatedInvitesNestedInput
 }
 
 export type InviteTokenUncheckedUpdateInput = {
@@ -565,8 +565,8 @@ export type InviteTokenCreateWithoutOrgInput = {
   usedAt?: Date | string | null
   expiresAt: Date | string
   createdAt?: Date | string
-  team?: Prisma.TeamCreateNestedOneWithoutInviteTokensInput
   createdBy: Prisma.UserCreateNestedOneWithoutCreatedInvitesInput
+  team?: Prisma.TeamCreateNestedOneWithoutInviteTokensInput
 }
 
 export type InviteTokenUncheckedCreateWithoutOrgInput = {
@@ -681,8 +681,8 @@ export type InviteTokenCreateWithoutTeamInput = {
   usedAt?: Date | string | null
   expiresAt: Date | string
   createdAt?: Date | string
-  org: Prisma.OrganizationCreateNestedOneWithoutInviteTokensInput
   createdBy: Prisma.UserCreateNestedOneWithoutCreatedInvitesInput
+  org: Prisma.OrganizationCreateNestedOneWithoutInviteTokensInput
 }
 
 export type InviteTokenUncheckedCreateWithoutTeamInput = {
@@ -743,8 +743,8 @@ export type InviteTokenUpdateWithoutOrgInput = {
   usedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  team?: Prisma.TeamUpdateOneWithoutInviteTokensNestedInput
   createdBy?: Prisma.UserUpdateOneRequiredWithoutCreatedInvitesNestedInput
+  team?: Prisma.TeamUpdateOneWithoutInviteTokensNestedInput
 }
 
 export type InviteTokenUncheckedUpdateWithoutOrgInput = {
@@ -839,8 +839,8 @@ export type InviteTokenUpdateWithoutTeamInput = {
   usedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  org?: Prisma.OrganizationUpdateOneRequiredWithoutInviteTokensNestedInput
   createdBy?: Prisma.UserUpdateOneRequiredWithoutCreatedInvitesNestedInput
+  org?: Prisma.OrganizationUpdateOneRequiredWithoutInviteTokensNestedInput
 }
 
 export type InviteTokenUncheckedUpdateWithoutTeamInput = {
@@ -880,9 +880,9 @@ export type InviteTokenSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   expiresAt?: boolean
   createdAt?: boolean
   createdByUserId?: boolean
+  createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   org?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   team?: boolean | Prisma.InviteToken$teamArgs<ExtArgs>
-  createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["inviteToken"]>
 
 export type InviteTokenSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -896,9 +896,9 @@ export type InviteTokenSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   expiresAt?: boolean
   createdAt?: boolean
   createdByUserId?: boolean
+  createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   org?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   team?: boolean | Prisma.InviteToken$teamArgs<ExtArgs>
-  createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["inviteToken"]>
 
 export type InviteTokenSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -912,9 +912,9 @@ export type InviteTokenSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   expiresAt?: boolean
   createdAt?: boolean
   createdByUserId?: boolean
+  createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   org?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   team?: boolean | Prisma.InviteToken$teamArgs<ExtArgs>
-  createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["inviteToken"]>
 
 export type InviteTokenSelectScalar = {
@@ -932,27 +932,27 @@ export type InviteTokenSelectScalar = {
 
 export type InviteTokenOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "token" | "email" | "orgId" | "teamId" | "role" | "usedAt" | "expiresAt" | "createdAt" | "createdByUserId", ExtArgs["result"]["inviteToken"]>
 export type InviteTokenInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   org?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   team?: boolean | Prisma.InviteToken$teamArgs<ExtArgs>
-  createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
 export type InviteTokenIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   org?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   team?: boolean | Prisma.InviteToken$teamArgs<ExtArgs>
-  createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
 export type InviteTokenIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   org?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   team?: boolean | Prisma.InviteToken$teamArgs<ExtArgs>
-  createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
 
 export type $InviteTokenPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "InviteToken"
   objects: {
+    createdBy: Prisma.$UserPayload<ExtArgs>
     org: Prisma.$OrganizationPayload<ExtArgs>
     team: Prisma.$TeamPayload<ExtArgs> | null
-    createdBy: Prisma.$UserPayload<ExtArgs>
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1359,9 +1359,9 @@ readonly fields: InviteTokenFieldRefs;
  */
 export interface Prisma__InviteTokenClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  createdBy<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   org<T extends Prisma.OrganizationDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.OrganizationDefaultArgs<ExtArgs>>): Prisma.Prisma__OrganizationClient<runtime.Types.Result.GetResult<Prisma.$OrganizationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   team<T extends Prisma.InviteToken$teamArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.InviteToken$teamArgs<ExtArgs>>): Prisma.Prisma__TeamClient<runtime.Types.Result.GetResult<Prisma.$TeamPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-  createdBy<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.

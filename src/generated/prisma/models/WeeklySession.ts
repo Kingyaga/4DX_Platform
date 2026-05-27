@@ -36,61 +36,61 @@ export type WeeklySessionSumAggregateOutputType = {
 
 export type WeeklySessionMinAggregateOutputType = {
   id: string | null
-  title: string | null
   weekStarting: Date | null
-  weekEnding: Date | null
   status: $Enums.SessionStatus | null
-  notes: string | null
-  confidenceScore: number | null
   accountDoneAt: Date | null
   reviewDoneAt: Date | null
   commitDoneAt: Date | null
-  startedAt: Date | null
-  completedAt: Date | null
   createdAt: Date | null
   wigId: string | null
   userId: string | null
+  title: string | null
+  weekEnding: Date | null
+  notes: string | null
+  confidenceScore: number | null
+  startedAt: Date | null
+  completedAt: Date | null
   teamId: string | null
   facilitatorUserId: string | null
 }
 
 export type WeeklySessionMaxAggregateOutputType = {
   id: string | null
-  title: string | null
   weekStarting: Date | null
-  weekEnding: Date | null
   status: $Enums.SessionStatus | null
-  notes: string | null
-  confidenceScore: number | null
   accountDoneAt: Date | null
   reviewDoneAt: Date | null
   commitDoneAt: Date | null
-  startedAt: Date | null
-  completedAt: Date | null
   createdAt: Date | null
   wigId: string | null
   userId: string | null
+  title: string | null
+  weekEnding: Date | null
+  notes: string | null
+  confidenceScore: number | null
+  startedAt: Date | null
+  completedAt: Date | null
   teamId: string | null
   facilitatorUserId: string | null
 }
 
 export type WeeklySessionCountAggregateOutputType = {
   id: number
-  title: number
   weekStarting: number
-  weekEnding: number
   status: number
-  snapshotJson: number
-  notes: number
-  confidenceScore: number
   accountDoneAt: number
   reviewDoneAt: number
   commitDoneAt: number
-  startedAt: number
-  completedAt: number
   createdAt: number
   wigId: number
   userId: number
+  snapshotJson: number
+  title: number
+  weekEnding: number
+  notes: number
+  confidenceScore: number
+  startedAt: number
+  completedAt: number
   teamId: number
   facilitatorUserId: number
   _all: number
@@ -107,61 +107,61 @@ export type WeeklySessionSumAggregateInputType = {
 
 export type WeeklySessionMinAggregateInputType = {
   id?: true
-  title?: true
   weekStarting?: true
-  weekEnding?: true
   status?: true
-  notes?: true
-  confidenceScore?: true
   accountDoneAt?: true
   reviewDoneAt?: true
   commitDoneAt?: true
-  startedAt?: true
-  completedAt?: true
   createdAt?: true
   wigId?: true
   userId?: true
+  title?: true
+  weekEnding?: true
+  notes?: true
+  confidenceScore?: true
+  startedAt?: true
+  completedAt?: true
   teamId?: true
   facilitatorUserId?: true
 }
 
 export type WeeklySessionMaxAggregateInputType = {
   id?: true
-  title?: true
   weekStarting?: true
-  weekEnding?: true
   status?: true
-  notes?: true
-  confidenceScore?: true
   accountDoneAt?: true
   reviewDoneAt?: true
   commitDoneAt?: true
-  startedAt?: true
-  completedAt?: true
   createdAt?: true
   wigId?: true
   userId?: true
+  title?: true
+  weekEnding?: true
+  notes?: true
+  confidenceScore?: true
+  startedAt?: true
+  completedAt?: true
   teamId?: true
   facilitatorUserId?: true
 }
 
 export type WeeklySessionCountAggregateInputType = {
   id?: true
-  title?: true
   weekStarting?: true
-  weekEnding?: true
   status?: true
-  snapshotJson?: true
-  notes?: true
-  confidenceScore?: true
   accountDoneAt?: true
   reviewDoneAt?: true
   commitDoneAt?: true
-  startedAt?: true
-  completedAt?: true
   createdAt?: true
   wigId?: true
   userId?: true
+  snapshotJson?: true
+  title?: true
+  weekEnding?: true
+  notes?: true
+  confidenceScore?: true
+  startedAt?: true
+  completedAt?: true
   teamId?: true
   facilitatorUserId?: true
   _all?: true
@@ -255,21 +255,21 @@ export type WeeklySessionGroupByArgs<ExtArgs extends runtime.Types.Extensions.In
 
 export type WeeklySessionGroupByOutputType = {
   id: string
-  title: string | null
   weekStarting: Date
-  weekEnding: Date | null
   status: $Enums.SessionStatus
-  snapshotJson: runtime.JsonValue | null
-  notes: string | null
-  confidenceScore: number | null
   accountDoneAt: Date | null
   reviewDoneAt: Date | null
   commitDoneAt: Date | null
-  startedAt: Date | null
-  completedAt: Date | null
   createdAt: Date
   wigId: string | null
   userId: string | null
+  snapshotJson: runtime.JsonValue | null
+  title: string | null
+  weekEnding: Date | null
+  notes: string | null
+  confidenceScore: number | null
+  startedAt: Date | null
+  completedAt: Date | null
   teamId: string | null
   facilitatorUserId: string | null
   _count: WeeklySessionCountAggregateOutputType | null
@@ -299,58 +299,58 @@ export type WeeklySessionWhereInput = {
   OR?: Prisma.WeeklySessionWhereInput[]
   NOT?: Prisma.WeeklySessionWhereInput | Prisma.WeeklySessionWhereInput[]
   id?: Prisma.StringFilter<"WeeklySession"> | string
-  title?: Prisma.StringNullableFilter<"WeeklySession"> | string | null
   weekStarting?: Prisma.DateTimeFilter<"WeeklySession"> | Date | string
-  weekEnding?: Prisma.DateTimeNullableFilter<"WeeklySession"> | Date | string | null
   status?: Prisma.EnumSessionStatusFilter<"WeeklySession"> | $Enums.SessionStatus
-  snapshotJson?: Prisma.JsonNullableFilter<"WeeklySession">
-  notes?: Prisma.StringNullableFilter<"WeeklySession"> | string | null
-  confidenceScore?: Prisma.IntNullableFilter<"WeeklySession"> | number | null
   accountDoneAt?: Prisma.DateTimeNullableFilter<"WeeklySession"> | Date | string | null
   reviewDoneAt?: Prisma.DateTimeNullableFilter<"WeeklySession"> | Date | string | null
   commitDoneAt?: Prisma.DateTimeNullableFilter<"WeeklySession"> | Date | string | null
-  startedAt?: Prisma.DateTimeNullableFilter<"WeeklySession"> | Date | string | null
-  completedAt?: Prisma.DateTimeNullableFilter<"WeeklySession"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"WeeklySession"> | Date | string
   wigId?: Prisma.StringNullableFilter<"WeeklySession"> | string | null
   userId?: Prisma.StringNullableFilter<"WeeklySession"> | string | null
+  snapshotJson?: Prisma.JsonNullableFilter<"WeeklySession">
+  title?: Prisma.StringNullableFilter<"WeeklySession"> | string | null
+  weekEnding?: Prisma.DateTimeNullableFilter<"WeeklySession"> | Date | string | null
+  notes?: Prisma.StringNullableFilter<"WeeklySession"> | string | null
+  confidenceScore?: Prisma.IntNullableFilter<"WeeklySession"> | number | null
+  startedAt?: Prisma.DateTimeNullableFilter<"WeeklySession"> | Date | string | null
+  completedAt?: Prisma.DateTimeNullableFilter<"WeeklySession"> | Date | string | null
   teamId?: Prisma.StringNullableFilter<"WeeklySession"> | string | null
   facilitatorUserId?: Prisma.StringNullableFilter<"WeeklySession"> | string | null
-  wig?: Prisma.XOR<Prisma.WIGNullableScalarRelationFilter, Prisma.WIGWhereInput> | null
-  user?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
-  team?: Prisma.XOR<Prisma.TeamNullableScalarRelationFilter, Prisma.TeamWhereInput> | null
-  facilitator?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   commitments?: Prisma.CommitmentListRelationFilter
   blockers?: Prisma.SessionBlockerListRelationFilter
   timeline?: Prisma.SessionTimelineEventListRelationFilter
+  facilitator?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
+  team?: Prisma.XOR<Prisma.TeamNullableScalarRelationFilter, Prisma.TeamWhereInput> | null
+  user?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
+  wig?: Prisma.XOR<Prisma.WIGNullableScalarRelationFilter, Prisma.WIGWhereInput> | null
 }
 
 export type WeeklySessionOrderByWithRelationInput = {
   id?: Prisma.SortOrder
-  title?: Prisma.SortOrderInput | Prisma.SortOrder
   weekStarting?: Prisma.SortOrder
-  weekEnding?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
-  snapshotJson?: Prisma.SortOrderInput | Prisma.SortOrder
-  notes?: Prisma.SortOrderInput | Prisma.SortOrder
-  confidenceScore?: Prisma.SortOrderInput | Prisma.SortOrder
   accountDoneAt?: Prisma.SortOrderInput | Prisma.SortOrder
   reviewDoneAt?: Prisma.SortOrderInput | Prisma.SortOrder
   commitDoneAt?: Prisma.SortOrderInput | Prisma.SortOrder
-  startedAt?: Prisma.SortOrderInput | Prisma.SortOrder
-  completedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   wigId?: Prisma.SortOrderInput | Prisma.SortOrder
   userId?: Prisma.SortOrderInput | Prisma.SortOrder
+  snapshotJson?: Prisma.SortOrderInput | Prisma.SortOrder
+  title?: Prisma.SortOrderInput | Prisma.SortOrder
+  weekEnding?: Prisma.SortOrderInput | Prisma.SortOrder
+  notes?: Prisma.SortOrderInput | Prisma.SortOrder
+  confidenceScore?: Prisma.SortOrderInput | Prisma.SortOrder
+  startedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  completedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   teamId?: Prisma.SortOrderInput | Prisma.SortOrder
   facilitatorUserId?: Prisma.SortOrderInput | Prisma.SortOrder
-  wig?: Prisma.WIGOrderByWithRelationInput
-  user?: Prisma.UserOrderByWithRelationInput
-  team?: Prisma.TeamOrderByWithRelationInput
-  facilitator?: Prisma.UserOrderByWithRelationInput
   commitments?: Prisma.CommitmentOrderByRelationAggregateInput
   blockers?: Prisma.SessionBlockerOrderByRelationAggregateInput
   timeline?: Prisma.SessionTimelineEventOrderByRelationAggregateInput
+  facilitator?: Prisma.UserOrderByWithRelationInput
+  team?: Prisma.TeamOrderByWithRelationInput
+  user?: Prisma.UserOrderByWithRelationInput
+  wig?: Prisma.WIGOrderByWithRelationInput
 }
 
 export type WeeklySessionWhereUniqueInput = Prisma.AtLeast<{
@@ -358,49 +358,49 @@ export type WeeklySessionWhereUniqueInput = Prisma.AtLeast<{
   AND?: Prisma.WeeklySessionWhereInput | Prisma.WeeklySessionWhereInput[]
   OR?: Prisma.WeeklySessionWhereInput[]
   NOT?: Prisma.WeeklySessionWhereInput | Prisma.WeeklySessionWhereInput[]
-  title?: Prisma.StringNullableFilter<"WeeklySession"> | string | null
   weekStarting?: Prisma.DateTimeFilter<"WeeklySession"> | Date | string
-  weekEnding?: Prisma.DateTimeNullableFilter<"WeeklySession"> | Date | string | null
   status?: Prisma.EnumSessionStatusFilter<"WeeklySession"> | $Enums.SessionStatus
-  snapshotJson?: Prisma.JsonNullableFilter<"WeeklySession">
-  notes?: Prisma.StringNullableFilter<"WeeklySession"> | string | null
-  confidenceScore?: Prisma.IntNullableFilter<"WeeklySession"> | number | null
   accountDoneAt?: Prisma.DateTimeNullableFilter<"WeeklySession"> | Date | string | null
   reviewDoneAt?: Prisma.DateTimeNullableFilter<"WeeklySession"> | Date | string | null
   commitDoneAt?: Prisma.DateTimeNullableFilter<"WeeklySession"> | Date | string | null
-  startedAt?: Prisma.DateTimeNullableFilter<"WeeklySession"> | Date | string | null
-  completedAt?: Prisma.DateTimeNullableFilter<"WeeklySession"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"WeeklySession"> | Date | string
   wigId?: Prisma.StringNullableFilter<"WeeklySession"> | string | null
   userId?: Prisma.StringNullableFilter<"WeeklySession"> | string | null
+  snapshotJson?: Prisma.JsonNullableFilter<"WeeklySession">
+  title?: Prisma.StringNullableFilter<"WeeklySession"> | string | null
+  weekEnding?: Prisma.DateTimeNullableFilter<"WeeklySession"> | Date | string | null
+  notes?: Prisma.StringNullableFilter<"WeeklySession"> | string | null
+  confidenceScore?: Prisma.IntNullableFilter<"WeeklySession"> | number | null
+  startedAt?: Prisma.DateTimeNullableFilter<"WeeklySession"> | Date | string | null
+  completedAt?: Prisma.DateTimeNullableFilter<"WeeklySession"> | Date | string | null
   teamId?: Prisma.StringNullableFilter<"WeeklySession"> | string | null
   facilitatorUserId?: Prisma.StringNullableFilter<"WeeklySession"> | string | null
-  wig?: Prisma.XOR<Prisma.WIGNullableScalarRelationFilter, Prisma.WIGWhereInput> | null
-  user?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
-  team?: Prisma.XOR<Prisma.TeamNullableScalarRelationFilter, Prisma.TeamWhereInput> | null
-  facilitator?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   commitments?: Prisma.CommitmentListRelationFilter
   blockers?: Prisma.SessionBlockerListRelationFilter
   timeline?: Prisma.SessionTimelineEventListRelationFilter
+  facilitator?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
+  team?: Prisma.XOR<Prisma.TeamNullableScalarRelationFilter, Prisma.TeamWhereInput> | null
+  user?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
+  wig?: Prisma.XOR<Prisma.WIGNullableScalarRelationFilter, Prisma.WIGWhereInput> | null
 }, "id">
 
 export type WeeklySessionOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
-  title?: Prisma.SortOrderInput | Prisma.SortOrder
   weekStarting?: Prisma.SortOrder
-  weekEnding?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
-  snapshotJson?: Prisma.SortOrderInput | Prisma.SortOrder
-  notes?: Prisma.SortOrderInput | Prisma.SortOrder
-  confidenceScore?: Prisma.SortOrderInput | Prisma.SortOrder
   accountDoneAt?: Prisma.SortOrderInput | Prisma.SortOrder
   reviewDoneAt?: Prisma.SortOrderInput | Prisma.SortOrder
   commitDoneAt?: Prisma.SortOrderInput | Prisma.SortOrder
-  startedAt?: Prisma.SortOrderInput | Prisma.SortOrder
-  completedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   wigId?: Prisma.SortOrderInput | Prisma.SortOrder
   userId?: Prisma.SortOrderInput | Prisma.SortOrder
+  snapshotJson?: Prisma.SortOrderInput | Prisma.SortOrder
+  title?: Prisma.SortOrderInput | Prisma.SortOrder
+  weekEnding?: Prisma.SortOrderInput | Prisma.SortOrder
+  notes?: Prisma.SortOrderInput | Prisma.SortOrder
+  confidenceScore?: Prisma.SortOrderInput | Prisma.SortOrder
+  startedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  completedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   teamId?: Prisma.SortOrderInput | Prisma.SortOrder
   facilitatorUserId?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.WeeklySessionCountOrderByAggregateInput
@@ -415,66 +415,66 @@ export type WeeklySessionScalarWhereWithAggregatesInput = {
   OR?: Prisma.WeeklySessionScalarWhereWithAggregatesInput[]
   NOT?: Prisma.WeeklySessionScalarWhereWithAggregatesInput | Prisma.WeeklySessionScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"WeeklySession"> | string
-  title?: Prisma.StringNullableWithAggregatesFilter<"WeeklySession"> | string | null
   weekStarting?: Prisma.DateTimeWithAggregatesFilter<"WeeklySession"> | Date | string
-  weekEnding?: Prisma.DateTimeNullableWithAggregatesFilter<"WeeklySession"> | Date | string | null
   status?: Prisma.EnumSessionStatusWithAggregatesFilter<"WeeklySession"> | $Enums.SessionStatus
-  snapshotJson?: Prisma.JsonNullableWithAggregatesFilter<"WeeklySession">
-  notes?: Prisma.StringNullableWithAggregatesFilter<"WeeklySession"> | string | null
-  confidenceScore?: Prisma.IntNullableWithAggregatesFilter<"WeeklySession"> | number | null
   accountDoneAt?: Prisma.DateTimeNullableWithAggregatesFilter<"WeeklySession"> | Date | string | null
   reviewDoneAt?: Prisma.DateTimeNullableWithAggregatesFilter<"WeeklySession"> | Date | string | null
   commitDoneAt?: Prisma.DateTimeNullableWithAggregatesFilter<"WeeklySession"> | Date | string | null
-  startedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"WeeklySession"> | Date | string | null
-  completedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"WeeklySession"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"WeeklySession"> | Date | string
   wigId?: Prisma.StringNullableWithAggregatesFilter<"WeeklySession"> | string | null
   userId?: Prisma.StringNullableWithAggregatesFilter<"WeeklySession"> | string | null
+  snapshotJson?: Prisma.JsonNullableWithAggregatesFilter<"WeeklySession">
+  title?: Prisma.StringNullableWithAggregatesFilter<"WeeklySession"> | string | null
+  weekEnding?: Prisma.DateTimeNullableWithAggregatesFilter<"WeeklySession"> | Date | string | null
+  notes?: Prisma.StringNullableWithAggregatesFilter<"WeeklySession"> | string | null
+  confidenceScore?: Prisma.IntNullableWithAggregatesFilter<"WeeklySession"> | number | null
+  startedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"WeeklySession"> | Date | string | null
+  completedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"WeeklySession"> | Date | string | null
   teamId?: Prisma.StringNullableWithAggregatesFilter<"WeeklySession"> | string | null
   facilitatorUserId?: Prisma.StringNullableWithAggregatesFilter<"WeeklySession"> | string | null
 }
 
 export type WeeklySessionCreateInput = {
   id?: string
-  title?: string | null
   weekStarting: Date | string
-  weekEnding?: Date | string | null
   status?: $Enums.SessionStatus
-  snapshotJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  notes?: string | null
-  confidenceScore?: number | null
   accountDoneAt?: Date | string | null
   reviewDoneAt?: Date | string | null
   commitDoneAt?: Date | string | null
+  createdAt?: Date | string
+  snapshotJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  title?: string | null
+  weekEnding?: Date | string | null
+  notes?: string | null
+  confidenceScore?: number | null
   startedAt?: Date | string | null
   completedAt?: Date | string | null
-  createdAt?: Date | string
-  wig?: Prisma.WIGCreateNestedOneWithoutWeeklySessionsInput
-  user?: Prisma.UserCreateNestedOneWithoutWeeklySessionsInput
-  team?: Prisma.TeamCreateNestedOneWithoutWeeklySessionsInput
-  facilitator?: Prisma.UserCreateNestedOneWithoutFacilitatedSessionsInput
   commitments?: Prisma.CommitmentCreateNestedManyWithoutWeeklySessionInput
   blockers?: Prisma.SessionBlockerCreateNestedManyWithoutWeeklySessionInput
   timeline?: Prisma.SessionTimelineEventCreateNestedManyWithoutWeeklySessionInput
+  facilitator?: Prisma.UserCreateNestedOneWithoutFacilitatedSessionsInput
+  team?: Prisma.TeamCreateNestedOneWithoutWeeklySessionsInput
+  user?: Prisma.UserCreateNestedOneWithoutWeeklySessionsInput
+  wig?: Prisma.WIGCreateNestedOneWithoutWeeklySessionsInput
 }
 
 export type WeeklySessionUncheckedCreateInput = {
   id?: string
-  title?: string | null
   weekStarting: Date | string
-  weekEnding?: Date | string | null
   status?: $Enums.SessionStatus
-  snapshotJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  notes?: string | null
-  confidenceScore?: number | null
   accountDoneAt?: Date | string | null
   reviewDoneAt?: Date | string | null
   commitDoneAt?: Date | string | null
-  startedAt?: Date | string | null
-  completedAt?: Date | string | null
   createdAt?: Date | string
   wigId?: string | null
   userId?: string | null
+  snapshotJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  title?: string | null
+  weekEnding?: Date | string | null
+  notes?: string | null
+  confidenceScore?: number | null
+  startedAt?: Date | string | null
+  completedAt?: Date | string | null
   teamId?: string | null
   facilitatorUserId?: string | null
   commitments?: Prisma.CommitmentUncheckedCreateNestedManyWithoutWeeklySessionInput
@@ -484,45 +484,45 @@ export type WeeklySessionUncheckedCreateInput = {
 
 export type WeeklySessionUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   weekStarting?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  weekEnding?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.EnumSessionStatusFieldUpdateOperationsInput | $Enums.SessionStatus
-  snapshotJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  confidenceScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   accountDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   reviewDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   commitDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  snapshotJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  weekEnding?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confidenceScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  wig?: Prisma.WIGUpdateOneWithoutWeeklySessionsNestedInput
-  user?: Prisma.UserUpdateOneWithoutWeeklySessionsNestedInput
-  team?: Prisma.TeamUpdateOneWithoutWeeklySessionsNestedInput
-  facilitator?: Prisma.UserUpdateOneWithoutFacilitatedSessionsNestedInput
   commitments?: Prisma.CommitmentUpdateManyWithoutWeeklySessionNestedInput
   blockers?: Prisma.SessionBlockerUpdateManyWithoutWeeklySessionNestedInput
   timeline?: Prisma.SessionTimelineEventUpdateManyWithoutWeeklySessionNestedInput
+  facilitator?: Prisma.UserUpdateOneWithoutFacilitatedSessionsNestedInput
+  team?: Prisma.TeamUpdateOneWithoutWeeklySessionsNestedInput
+  user?: Prisma.UserUpdateOneWithoutWeeklySessionsNestedInput
+  wig?: Prisma.WIGUpdateOneWithoutWeeklySessionsNestedInput
 }
 
 export type WeeklySessionUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   weekStarting?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  weekEnding?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.EnumSessionStatusFieldUpdateOperationsInput | $Enums.SessionStatus
-  snapshotJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  confidenceScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   accountDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   reviewDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   commitDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   wigId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   userId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  snapshotJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  weekEnding?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confidenceScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   teamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   facilitatorUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   commitments?: Prisma.CommitmentUncheckedUpdateManyWithoutWeeklySessionNestedInput
@@ -532,59 +532,59 @@ export type WeeklySessionUncheckedUpdateInput = {
 
 export type WeeklySessionCreateManyInput = {
   id?: string
-  title?: string | null
   weekStarting: Date | string
-  weekEnding?: Date | string | null
   status?: $Enums.SessionStatus
-  snapshotJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  notes?: string | null
-  confidenceScore?: number | null
   accountDoneAt?: Date | string | null
   reviewDoneAt?: Date | string | null
   commitDoneAt?: Date | string | null
-  startedAt?: Date | string | null
-  completedAt?: Date | string | null
   createdAt?: Date | string
   wigId?: string | null
   userId?: string | null
+  snapshotJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  title?: string | null
+  weekEnding?: Date | string | null
+  notes?: string | null
+  confidenceScore?: number | null
+  startedAt?: Date | string | null
+  completedAt?: Date | string | null
   teamId?: string | null
   facilitatorUserId?: string | null
 }
 
 export type WeeklySessionUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   weekStarting?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  weekEnding?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.EnumSessionStatusFieldUpdateOperationsInput | $Enums.SessionStatus
-  snapshotJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  confidenceScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   accountDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   reviewDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   commitDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  snapshotJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  weekEnding?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confidenceScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type WeeklySessionUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   weekStarting?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  weekEnding?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.EnumSessionStatusFieldUpdateOperationsInput | $Enums.SessionStatus
-  snapshotJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  confidenceScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   accountDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   reviewDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   commitDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   wigId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   userId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  snapshotJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  weekEnding?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confidenceScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   teamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   facilitatorUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
@@ -601,21 +601,21 @@ export type WeeklySessionOrderByRelationAggregateInput = {
 
 export type WeeklySessionCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  title?: Prisma.SortOrder
   weekStarting?: Prisma.SortOrder
-  weekEnding?: Prisma.SortOrder
   status?: Prisma.SortOrder
-  snapshotJson?: Prisma.SortOrder
-  notes?: Prisma.SortOrder
-  confidenceScore?: Prisma.SortOrder
   accountDoneAt?: Prisma.SortOrder
   reviewDoneAt?: Prisma.SortOrder
   commitDoneAt?: Prisma.SortOrder
-  startedAt?: Prisma.SortOrder
-  completedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   wigId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  snapshotJson?: Prisma.SortOrder
+  title?: Prisma.SortOrder
+  weekEnding?: Prisma.SortOrder
+  notes?: Prisma.SortOrder
+  confidenceScore?: Prisma.SortOrder
+  startedAt?: Prisma.SortOrder
+  completedAt?: Prisma.SortOrder
   teamId?: Prisma.SortOrder
   facilitatorUserId?: Prisma.SortOrder
 }
@@ -626,40 +626,40 @@ export type WeeklySessionAvgOrderByAggregateInput = {
 
 export type WeeklySessionMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  title?: Prisma.SortOrder
   weekStarting?: Prisma.SortOrder
-  weekEnding?: Prisma.SortOrder
   status?: Prisma.SortOrder
-  notes?: Prisma.SortOrder
-  confidenceScore?: Prisma.SortOrder
   accountDoneAt?: Prisma.SortOrder
   reviewDoneAt?: Prisma.SortOrder
   commitDoneAt?: Prisma.SortOrder
-  startedAt?: Prisma.SortOrder
-  completedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   wigId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  title?: Prisma.SortOrder
+  weekEnding?: Prisma.SortOrder
+  notes?: Prisma.SortOrder
+  confidenceScore?: Prisma.SortOrder
+  startedAt?: Prisma.SortOrder
+  completedAt?: Prisma.SortOrder
   teamId?: Prisma.SortOrder
   facilitatorUserId?: Prisma.SortOrder
 }
 
 export type WeeklySessionMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  title?: Prisma.SortOrder
   weekStarting?: Prisma.SortOrder
-  weekEnding?: Prisma.SortOrder
   status?: Prisma.SortOrder
-  notes?: Prisma.SortOrder
-  confidenceScore?: Prisma.SortOrder
   accountDoneAt?: Prisma.SortOrder
   reviewDoneAt?: Prisma.SortOrder
   commitDoneAt?: Prisma.SortOrder
-  startedAt?: Prisma.SortOrder
-  completedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   wigId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  title?: Prisma.SortOrder
+  weekEnding?: Prisma.SortOrder
+  notes?: Prisma.SortOrder
+  confidenceScore?: Prisma.SortOrder
+  startedAt?: Prisma.SortOrder
+  completedAt?: Prisma.SortOrder
   teamId?: Prisma.SortOrder
   facilitatorUserId?: Prisma.SortOrder
 }
@@ -673,13 +673,6 @@ export type WeeklySessionScalarRelationFilter = {
   isNot?: Prisma.WeeklySessionWhereInput
 }
 
-export type WeeklySessionCreateNestedManyWithoutUserInput = {
-  create?: Prisma.XOR<Prisma.WeeklySessionCreateWithoutUserInput, Prisma.WeeklySessionUncheckedCreateWithoutUserInput> | Prisma.WeeklySessionCreateWithoutUserInput[] | Prisma.WeeklySessionUncheckedCreateWithoutUserInput[]
-  connectOrCreate?: Prisma.WeeklySessionCreateOrConnectWithoutUserInput | Prisma.WeeklySessionCreateOrConnectWithoutUserInput[]
-  createMany?: Prisma.WeeklySessionCreateManyUserInputEnvelope
-  connect?: Prisma.WeeklySessionWhereUniqueInput | Prisma.WeeklySessionWhereUniqueInput[]
-}
-
 export type WeeklySessionCreateNestedManyWithoutFacilitatorInput = {
   create?: Prisma.XOR<Prisma.WeeklySessionCreateWithoutFacilitatorInput, Prisma.WeeklySessionUncheckedCreateWithoutFacilitatorInput> | Prisma.WeeklySessionCreateWithoutFacilitatorInput[] | Prisma.WeeklySessionUncheckedCreateWithoutFacilitatorInput[]
   connectOrCreate?: Prisma.WeeklySessionCreateOrConnectWithoutFacilitatorInput | Prisma.WeeklySessionCreateOrConnectWithoutFacilitatorInput[]
@@ -687,7 +680,7 @@ export type WeeklySessionCreateNestedManyWithoutFacilitatorInput = {
   connect?: Prisma.WeeklySessionWhereUniqueInput | Prisma.WeeklySessionWhereUniqueInput[]
 }
 
-export type WeeklySessionUncheckedCreateNestedManyWithoutUserInput = {
+export type WeeklySessionCreateNestedManyWithoutUserInput = {
   create?: Prisma.XOR<Prisma.WeeklySessionCreateWithoutUserInput, Prisma.WeeklySessionUncheckedCreateWithoutUserInput> | Prisma.WeeklySessionCreateWithoutUserInput[] | Prisma.WeeklySessionUncheckedCreateWithoutUserInput[]
   connectOrCreate?: Prisma.WeeklySessionCreateOrConnectWithoutUserInput | Prisma.WeeklySessionCreateOrConnectWithoutUserInput[]
   createMany?: Prisma.WeeklySessionCreateManyUserInputEnvelope
@@ -701,18 +694,11 @@ export type WeeklySessionUncheckedCreateNestedManyWithoutFacilitatorInput = {
   connect?: Prisma.WeeklySessionWhereUniqueInput | Prisma.WeeklySessionWhereUniqueInput[]
 }
 
-export type WeeklySessionUpdateManyWithoutUserNestedInput = {
+export type WeeklySessionUncheckedCreateNestedManyWithoutUserInput = {
   create?: Prisma.XOR<Prisma.WeeklySessionCreateWithoutUserInput, Prisma.WeeklySessionUncheckedCreateWithoutUserInput> | Prisma.WeeklySessionCreateWithoutUserInput[] | Prisma.WeeklySessionUncheckedCreateWithoutUserInput[]
   connectOrCreate?: Prisma.WeeklySessionCreateOrConnectWithoutUserInput | Prisma.WeeklySessionCreateOrConnectWithoutUserInput[]
-  upsert?: Prisma.WeeklySessionUpsertWithWhereUniqueWithoutUserInput | Prisma.WeeklySessionUpsertWithWhereUniqueWithoutUserInput[]
   createMany?: Prisma.WeeklySessionCreateManyUserInputEnvelope
-  set?: Prisma.WeeklySessionWhereUniqueInput | Prisma.WeeklySessionWhereUniqueInput[]
-  disconnect?: Prisma.WeeklySessionWhereUniqueInput | Prisma.WeeklySessionWhereUniqueInput[]
-  delete?: Prisma.WeeklySessionWhereUniqueInput | Prisma.WeeklySessionWhereUniqueInput[]
   connect?: Prisma.WeeklySessionWhereUniqueInput | Prisma.WeeklySessionWhereUniqueInput[]
-  update?: Prisma.WeeklySessionUpdateWithWhereUniqueWithoutUserInput | Prisma.WeeklySessionUpdateWithWhereUniqueWithoutUserInput[]
-  updateMany?: Prisma.WeeklySessionUpdateManyWithWhereWithoutUserInput | Prisma.WeeklySessionUpdateManyWithWhereWithoutUserInput[]
-  deleteMany?: Prisma.WeeklySessionScalarWhereInput | Prisma.WeeklySessionScalarWhereInput[]
 }
 
 export type WeeklySessionUpdateManyWithoutFacilitatorNestedInput = {
@@ -729,7 +715,7 @@ export type WeeklySessionUpdateManyWithoutFacilitatorNestedInput = {
   deleteMany?: Prisma.WeeklySessionScalarWhereInput | Prisma.WeeklySessionScalarWhereInput[]
 }
 
-export type WeeklySessionUncheckedUpdateManyWithoutUserNestedInput = {
+export type WeeklySessionUpdateManyWithoutUserNestedInput = {
   create?: Prisma.XOR<Prisma.WeeklySessionCreateWithoutUserInput, Prisma.WeeklySessionUncheckedCreateWithoutUserInput> | Prisma.WeeklySessionCreateWithoutUserInput[] | Prisma.WeeklySessionUncheckedCreateWithoutUserInput[]
   connectOrCreate?: Prisma.WeeklySessionCreateOrConnectWithoutUserInput | Prisma.WeeklySessionCreateOrConnectWithoutUserInput[]
   upsert?: Prisma.WeeklySessionUpsertWithWhereUniqueWithoutUserInput | Prisma.WeeklySessionUpsertWithWhereUniqueWithoutUserInput[]
@@ -754,6 +740,20 @@ export type WeeklySessionUncheckedUpdateManyWithoutFacilitatorNestedInput = {
   connect?: Prisma.WeeklySessionWhereUniqueInput | Prisma.WeeklySessionWhereUniqueInput[]
   update?: Prisma.WeeklySessionUpdateWithWhereUniqueWithoutFacilitatorInput | Prisma.WeeklySessionUpdateWithWhereUniqueWithoutFacilitatorInput[]
   updateMany?: Prisma.WeeklySessionUpdateManyWithWhereWithoutFacilitatorInput | Prisma.WeeklySessionUpdateManyWithWhereWithoutFacilitatorInput[]
+  deleteMany?: Prisma.WeeklySessionScalarWhereInput | Prisma.WeeklySessionScalarWhereInput[]
+}
+
+export type WeeklySessionUncheckedUpdateManyWithoutUserNestedInput = {
+  create?: Prisma.XOR<Prisma.WeeklySessionCreateWithoutUserInput, Prisma.WeeklySessionUncheckedCreateWithoutUserInput> | Prisma.WeeklySessionCreateWithoutUserInput[] | Prisma.WeeklySessionUncheckedCreateWithoutUserInput[]
+  connectOrCreate?: Prisma.WeeklySessionCreateOrConnectWithoutUserInput | Prisma.WeeklySessionCreateOrConnectWithoutUserInput[]
+  upsert?: Prisma.WeeklySessionUpsertWithWhereUniqueWithoutUserInput | Prisma.WeeklySessionUpsertWithWhereUniqueWithoutUserInput[]
+  createMany?: Prisma.WeeklySessionCreateManyUserInputEnvelope
+  set?: Prisma.WeeklySessionWhereUniqueInput | Prisma.WeeklySessionWhereUniqueInput[]
+  disconnect?: Prisma.WeeklySessionWhereUniqueInput | Prisma.WeeklySessionWhereUniqueInput[]
+  delete?: Prisma.WeeklySessionWhereUniqueInput | Prisma.WeeklySessionWhereUniqueInput[]
+  connect?: Prisma.WeeklySessionWhereUniqueInput | Prisma.WeeklySessionWhereUniqueInput[]
+  update?: Prisma.WeeklySessionUpdateWithWhereUniqueWithoutUserInput | Prisma.WeeklySessionUpdateWithWhereUniqueWithoutUserInput[]
+  updateMany?: Prisma.WeeklySessionUpdateManyWithWhereWithoutUserInput | Prisma.WeeklySessionUpdateManyWithWhereWithoutUserInput[]
   deleteMany?: Prisma.WeeklySessionScalarWhereInput | Prisma.WeeklySessionScalarWhereInput[]
 }
 
@@ -895,102 +895,46 @@ export type WeeklySessionUpdateOneRequiredWithoutTimelineNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.WeeklySessionUpdateToOneWithWhereWithoutTimelineInput, Prisma.WeeklySessionUpdateWithoutTimelineInput>, Prisma.WeeklySessionUncheckedUpdateWithoutTimelineInput>
 }
 
-export type WeeklySessionCreateWithoutUserInput = {
-  id?: string
-  title?: string | null
-  weekStarting: Date | string
-  weekEnding?: Date | string | null
-  status?: $Enums.SessionStatus
-  snapshotJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  notes?: string | null
-  confidenceScore?: number | null
-  accountDoneAt?: Date | string | null
-  reviewDoneAt?: Date | string | null
-  commitDoneAt?: Date | string | null
-  startedAt?: Date | string | null
-  completedAt?: Date | string | null
-  createdAt?: Date | string
-  wig?: Prisma.WIGCreateNestedOneWithoutWeeklySessionsInput
-  team?: Prisma.TeamCreateNestedOneWithoutWeeklySessionsInput
-  facilitator?: Prisma.UserCreateNestedOneWithoutFacilitatedSessionsInput
-  commitments?: Prisma.CommitmentCreateNestedManyWithoutWeeklySessionInput
-  blockers?: Prisma.SessionBlockerCreateNestedManyWithoutWeeklySessionInput
-  timeline?: Prisma.SessionTimelineEventCreateNestedManyWithoutWeeklySessionInput
-}
-
-export type WeeklySessionUncheckedCreateWithoutUserInput = {
-  id?: string
-  title?: string | null
-  weekStarting: Date | string
-  weekEnding?: Date | string | null
-  status?: $Enums.SessionStatus
-  snapshotJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  notes?: string | null
-  confidenceScore?: number | null
-  accountDoneAt?: Date | string | null
-  reviewDoneAt?: Date | string | null
-  commitDoneAt?: Date | string | null
-  startedAt?: Date | string | null
-  completedAt?: Date | string | null
-  createdAt?: Date | string
-  wigId?: string | null
-  teamId?: string | null
-  facilitatorUserId?: string | null
-  commitments?: Prisma.CommitmentUncheckedCreateNestedManyWithoutWeeklySessionInput
-  blockers?: Prisma.SessionBlockerUncheckedCreateNestedManyWithoutWeeklySessionInput
-  timeline?: Prisma.SessionTimelineEventUncheckedCreateNestedManyWithoutWeeklySessionInput
-}
-
-export type WeeklySessionCreateOrConnectWithoutUserInput = {
-  where: Prisma.WeeklySessionWhereUniqueInput
-  create: Prisma.XOR<Prisma.WeeklySessionCreateWithoutUserInput, Prisma.WeeklySessionUncheckedCreateWithoutUserInput>
-}
-
-export type WeeklySessionCreateManyUserInputEnvelope = {
-  data: Prisma.WeeklySessionCreateManyUserInput | Prisma.WeeklySessionCreateManyUserInput[]
-  skipDuplicates?: boolean
-}
-
 export type WeeklySessionCreateWithoutFacilitatorInput = {
   id?: string
-  title?: string | null
   weekStarting: Date | string
-  weekEnding?: Date | string | null
   status?: $Enums.SessionStatus
-  snapshotJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  notes?: string | null
-  confidenceScore?: number | null
   accountDoneAt?: Date | string | null
   reviewDoneAt?: Date | string | null
   commitDoneAt?: Date | string | null
+  createdAt?: Date | string
+  snapshotJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  title?: string | null
+  weekEnding?: Date | string | null
+  notes?: string | null
+  confidenceScore?: number | null
   startedAt?: Date | string | null
   completedAt?: Date | string | null
-  createdAt?: Date | string
-  wig?: Prisma.WIGCreateNestedOneWithoutWeeklySessionsInput
-  user?: Prisma.UserCreateNestedOneWithoutWeeklySessionsInput
-  team?: Prisma.TeamCreateNestedOneWithoutWeeklySessionsInput
   commitments?: Prisma.CommitmentCreateNestedManyWithoutWeeklySessionInput
   blockers?: Prisma.SessionBlockerCreateNestedManyWithoutWeeklySessionInput
   timeline?: Prisma.SessionTimelineEventCreateNestedManyWithoutWeeklySessionInput
+  team?: Prisma.TeamCreateNestedOneWithoutWeeklySessionsInput
+  user?: Prisma.UserCreateNestedOneWithoutWeeklySessionsInput
+  wig?: Prisma.WIGCreateNestedOneWithoutWeeklySessionsInput
 }
 
 export type WeeklySessionUncheckedCreateWithoutFacilitatorInput = {
   id?: string
-  title?: string | null
   weekStarting: Date | string
-  weekEnding?: Date | string | null
   status?: $Enums.SessionStatus
-  snapshotJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  notes?: string | null
-  confidenceScore?: number | null
   accountDoneAt?: Date | string | null
   reviewDoneAt?: Date | string | null
   commitDoneAt?: Date | string | null
-  startedAt?: Date | string | null
-  completedAt?: Date | string | null
   createdAt?: Date | string
   wigId?: string | null
   userId?: string | null
+  snapshotJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  title?: string | null
+  weekEnding?: Date | string | null
+  notes?: string | null
+  confidenceScore?: number | null
+  startedAt?: Date | string | null
+  completedAt?: Date | string | null
   teamId?: string | null
   commitments?: Prisma.CommitmentUncheckedCreateNestedManyWithoutWeeklySessionInput
   blockers?: Prisma.SessionBlockerUncheckedCreateNestedManyWithoutWeeklySessionInput
@@ -1007,44 +951,60 @@ export type WeeklySessionCreateManyFacilitatorInputEnvelope = {
   skipDuplicates?: boolean
 }
 
-export type WeeklySessionUpsertWithWhereUniqueWithoutUserInput = {
+export type WeeklySessionCreateWithoutUserInput = {
+  id?: string
+  weekStarting: Date | string
+  status?: $Enums.SessionStatus
+  accountDoneAt?: Date | string | null
+  reviewDoneAt?: Date | string | null
+  commitDoneAt?: Date | string | null
+  createdAt?: Date | string
+  snapshotJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  title?: string | null
+  weekEnding?: Date | string | null
+  notes?: string | null
+  confidenceScore?: number | null
+  startedAt?: Date | string | null
+  completedAt?: Date | string | null
+  commitments?: Prisma.CommitmentCreateNestedManyWithoutWeeklySessionInput
+  blockers?: Prisma.SessionBlockerCreateNestedManyWithoutWeeklySessionInput
+  timeline?: Prisma.SessionTimelineEventCreateNestedManyWithoutWeeklySessionInput
+  facilitator?: Prisma.UserCreateNestedOneWithoutFacilitatedSessionsInput
+  team?: Prisma.TeamCreateNestedOneWithoutWeeklySessionsInput
+  wig?: Prisma.WIGCreateNestedOneWithoutWeeklySessionsInput
+}
+
+export type WeeklySessionUncheckedCreateWithoutUserInput = {
+  id?: string
+  weekStarting: Date | string
+  status?: $Enums.SessionStatus
+  accountDoneAt?: Date | string | null
+  reviewDoneAt?: Date | string | null
+  commitDoneAt?: Date | string | null
+  createdAt?: Date | string
+  wigId?: string | null
+  snapshotJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  title?: string | null
+  weekEnding?: Date | string | null
+  notes?: string | null
+  confidenceScore?: number | null
+  startedAt?: Date | string | null
+  completedAt?: Date | string | null
+  teamId?: string | null
+  facilitatorUserId?: string | null
+  commitments?: Prisma.CommitmentUncheckedCreateNestedManyWithoutWeeklySessionInput
+  blockers?: Prisma.SessionBlockerUncheckedCreateNestedManyWithoutWeeklySessionInput
+  timeline?: Prisma.SessionTimelineEventUncheckedCreateNestedManyWithoutWeeklySessionInput
+}
+
+export type WeeklySessionCreateOrConnectWithoutUserInput = {
   where: Prisma.WeeklySessionWhereUniqueInput
-  update: Prisma.XOR<Prisma.WeeklySessionUpdateWithoutUserInput, Prisma.WeeklySessionUncheckedUpdateWithoutUserInput>
   create: Prisma.XOR<Prisma.WeeklySessionCreateWithoutUserInput, Prisma.WeeklySessionUncheckedCreateWithoutUserInput>
 }
 
-export type WeeklySessionUpdateWithWhereUniqueWithoutUserInput = {
-  where: Prisma.WeeklySessionWhereUniqueInput
-  data: Prisma.XOR<Prisma.WeeklySessionUpdateWithoutUserInput, Prisma.WeeklySessionUncheckedUpdateWithoutUserInput>
-}
-
-export type WeeklySessionUpdateManyWithWhereWithoutUserInput = {
-  where: Prisma.WeeklySessionScalarWhereInput
-  data: Prisma.XOR<Prisma.WeeklySessionUpdateManyMutationInput, Prisma.WeeklySessionUncheckedUpdateManyWithoutUserInput>
-}
-
-export type WeeklySessionScalarWhereInput = {
-  AND?: Prisma.WeeklySessionScalarWhereInput | Prisma.WeeklySessionScalarWhereInput[]
-  OR?: Prisma.WeeklySessionScalarWhereInput[]
-  NOT?: Prisma.WeeklySessionScalarWhereInput | Prisma.WeeklySessionScalarWhereInput[]
-  id?: Prisma.StringFilter<"WeeklySession"> | string
-  title?: Prisma.StringNullableFilter<"WeeklySession"> | string | null
-  weekStarting?: Prisma.DateTimeFilter<"WeeklySession"> | Date | string
-  weekEnding?: Prisma.DateTimeNullableFilter<"WeeklySession"> | Date | string | null
-  status?: Prisma.EnumSessionStatusFilter<"WeeklySession"> | $Enums.SessionStatus
-  snapshotJson?: Prisma.JsonNullableFilter<"WeeklySession">
-  notes?: Prisma.StringNullableFilter<"WeeklySession"> | string | null
-  confidenceScore?: Prisma.IntNullableFilter<"WeeklySession"> | number | null
-  accountDoneAt?: Prisma.DateTimeNullableFilter<"WeeklySession"> | Date | string | null
-  reviewDoneAt?: Prisma.DateTimeNullableFilter<"WeeklySession"> | Date | string | null
-  commitDoneAt?: Prisma.DateTimeNullableFilter<"WeeklySession"> | Date | string | null
-  startedAt?: Prisma.DateTimeNullableFilter<"WeeklySession"> | Date | string | null
-  completedAt?: Prisma.DateTimeNullableFilter<"WeeklySession"> | Date | string | null
-  createdAt?: Prisma.DateTimeFilter<"WeeklySession"> | Date | string
-  wigId?: Prisma.StringNullableFilter<"WeeklySession"> | string | null
-  userId?: Prisma.StringNullableFilter<"WeeklySession"> | string | null
-  teamId?: Prisma.StringNullableFilter<"WeeklySession"> | string | null
-  facilitatorUserId?: Prisma.StringNullableFilter<"WeeklySession"> | string | null
+export type WeeklySessionCreateManyUserInputEnvelope = {
+  data: Prisma.WeeklySessionCreateManyUserInput | Prisma.WeeklySessionCreateManyUserInput[]
+  skipDuplicates?: boolean
 }
 
 export type WeeklySessionUpsertWithWhereUniqueWithoutFacilitatorInput = {
@@ -1063,46 +1023,86 @@ export type WeeklySessionUpdateManyWithWhereWithoutFacilitatorInput = {
   data: Prisma.XOR<Prisma.WeeklySessionUpdateManyMutationInput, Prisma.WeeklySessionUncheckedUpdateManyWithoutFacilitatorInput>
 }
 
+export type WeeklySessionScalarWhereInput = {
+  AND?: Prisma.WeeklySessionScalarWhereInput | Prisma.WeeklySessionScalarWhereInput[]
+  OR?: Prisma.WeeklySessionScalarWhereInput[]
+  NOT?: Prisma.WeeklySessionScalarWhereInput | Prisma.WeeklySessionScalarWhereInput[]
+  id?: Prisma.StringFilter<"WeeklySession"> | string
+  weekStarting?: Prisma.DateTimeFilter<"WeeklySession"> | Date | string
+  status?: Prisma.EnumSessionStatusFilter<"WeeklySession"> | $Enums.SessionStatus
+  accountDoneAt?: Prisma.DateTimeNullableFilter<"WeeklySession"> | Date | string | null
+  reviewDoneAt?: Prisma.DateTimeNullableFilter<"WeeklySession"> | Date | string | null
+  commitDoneAt?: Prisma.DateTimeNullableFilter<"WeeklySession"> | Date | string | null
+  createdAt?: Prisma.DateTimeFilter<"WeeklySession"> | Date | string
+  wigId?: Prisma.StringNullableFilter<"WeeklySession"> | string | null
+  userId?: Prisma.StringNullableFilter<"WeeklySession"> | string | null
+  snapshotJson?: Prisma.JsonNullableFilter<"WeeklySession">
+  title?: Prisma.StringNullableFilter<"WeeklySession"> | string | null
+  weekEnding?: Prisma.DateTimeNullableFilter<"WeeklySession"> | Date | string | null
+  notes?: Prisma.StringNullableFilter<"WeeklySession"> | string | null
+  confidenceScore?: Prisma.IntNullableFilter<"WeeklySession"> | number | null
+  startedAt?: Prisma.DateTimeNullableFilter<"WeeklySession"> | Date | string | null
+  completedAt?: Prisma.DateTimeNullableFilter<"WeeklySession"> | Date | string | null
+  teamId?: Prisma.StringNullableFilter<"WeeklySession"> | string | null
+  facilitatorUserId?: Prisma.StringNullableFilter<"WeeklySession"> | string | null
+}
+
+export type WeeklySessionUpsertWithWhereUniqueWithoutUserInput = {
+  where: Prisma.WeeklySessionWhereUniqueInput
+  update: Prisma.XOR<Prisma.WeeklySessionUpdateWithoutUserInput, Prisma.WeeklySessionUncheckedUpdateWithoutUserInput>
+  create: Prisma.XOR<Prisma.WeeklySessionCreateWithoutUserInput, Prisma.WeeklySessionUncheckedCreateWithoutUserInput>
+}
+
+export type WeeklySessionUpdateWithWhereUniqueWithoutUserInput = {
+  where: Prisma.WeeklySessionWhereUniqueInput
+  data: Prisma.XOR<Prisma.WeeklySessionUpdateWithoutUserInput, Prisma.WeeklySessionUncheckedUpdateWithoutUserInput>
+}
+
+export type WeeklySessionUpdateManyWithWhereWithoutUserInput = {
+  where: Prisma.WeeklySessionScalarWhereInput
+  data: Prisma.XOR<Prisma.WeeklySessionUpdateManyMutationInput, Prisma.WeeklySessionUncheckedUpdateManyWithoutUserInput>
+}
+
 export type WeeklySessionCreateWithoutTeamInput = {
   id?: string
-  title?: string | null
   weekStarting: Date | string
-  weekEnding?: Date | string | null
   status?: $Enums.SessionStatus
-  snapshotJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  notes?: string | null
-  confidenceScore?: number | null
   accountDoneAt?: Date | string | null
   reviewDoneAt?: Date | string | null
   commitDoneAt?: Date | string | null
+  createdAt?: Date | string
+  snapshotJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  title?: string | null
+  weekEnding?: Date | string | null
+  notes?: string | null
+  confidenceScore?: number | null
   startedAt?: Date | string | null
   completedAt?: Date | string | null
-  createdAt?: Date | string
-  wig?: Prisma.WIGCreateNestedOneWithoutWeeklySessionsInput
-  user?: Prisma.UserCreateNestedOneWithoutWeeklySessionsInput
-  facilitator?: Prisma.UserCreateNestedOneWithoutFacilitatedSessionsInput
   commitments?: Prisma.CommitmentCreateNestedManyWithoutWeeklySessionInput
   blockers?: Prisma.SessionBlockerCreateNestedManyWithoutWeeklySessionInput
   timeline?: Prisma.SessionTimelineEventCreateNestedManyWithoutWeeklySessionInput
+  facilitator?: Prisma.UserCreateNestedOneWithoutFacilitatedSessionsInput
+  user?: Prisma.UserCreateNestedOneWithoutWeeklySessionsInput
+  wig?: Prisma.WIGCreateNestedOneWithoutWeeklySessionsInput
 }
 
 export type WeeklySessionUncheckedCreateWithoutTeamInput = {
   id?: string
-  title?: string | null
   weekStarting: Date | string
-  weekEnding?: Date | string | null
   status?: $Enums.SessionStatus
-  snapshotJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  notes?: string | null
-  confidenceScore?: number | null
   accountDoneAt?: Date | string | null
   reviewDoneAt?: Date | string | null
   commitDoneAt?: Date | string | null
-  startedAt?: Date | string | null
-  completedAt?: Date | string | null
   createdAt?: Date | string
   wigId?: string | null
   userId?: string | null
+  snapshotJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  title?: string | null
+  weekEnding?: Date | string | null
+  notes?: string | null
+  confidenceScore?: number | null
+  startedAt?: Date | string | null
+  completedAt?: Date | string | null
   facilitatorUserId?: string | null
   commitments?: Prisma.CommitmentUncheckedCreateNestedManyWithoutWeeklySessionInput
   blockers?: Prisma.SessionBlockerUncheckedCreateNestedManyWithoutWeeklySessionInput
@@ -1137,43 +1137,43 @@ export type WeeklySessionUpdateManyWithWhereWithoutTeamInput = {
 
 export type WeeklySessionCreateWithoutWigInput = {
   id?: string
-  title?: string | null
   weekStarting: Date | string
-  weekEnding?: Date | string | null
   status?: $Enums.SessionStatus
-  snapshotJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  notes?: string | null
-  confidenceScore?: number | null
   accountDoneAt?: Date | string | null
   reviewDoneAt?: Date | string | null
   commitDoneAt?: Date | string | null
+  createdAt?: Date | string
+  snapshotJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  title?: string | null
+  weekEnding?: Date | string | null
+  notes?: string | null
+  confidenceScore?: number | null
   startedAt?: Date | string | null
   completedAt?: Date | string | null
-  createdAt?: Date | string
-  user?: Prisma.UserCreateNestedOneWithoutWeeklySessionsInput
-  team?: Prisma.TeamCreateNestedOneWithoutWeeklySessionsInput
-  facilitator?: Prisma.UserCreateNestedOneWithoutFacilitatedSessionsInput
   commitments?: Prisma.CommitmentCreateNestedManyWithoutWeeklySessionInput
   blockers?: Prisma.SessionBlockerCreateNestedManyWithoutWeeklySessionInput
   timeline?: Prisma.SessionTimelineEventCreateNestedManyWithoutWeeklySessionInput
+  facilitator?: Prisma.UserCreateNestedOneWithoutFacilitatedSessionsInput
+  team?: Prisma.TeamCreateNestedOneWithoutWeeklySessionsInput
+  user?: Prisma.UserCreateNestedOneWithoutWeeklySessionsInput
 }
 
 export type WeeklySessionUncheckedCreateWithoutWigInput = {
   id?: string
-  title?: string | null
   weekStarting: Date | string
-  weekEnding?: Date | string | null
   status?: $Enums.SessionStatus
-  snapshotJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  notes?: string | null
-  confidenceScore?: number | null
   accountDoneAt?: Date | string | null
   reviewDoneAt?: Date | string | null
   commitDoneAt?: Date | string | null
-  startedAt?: Date | string | null
-  completedAt?: Date | string | null
   createdAt?: Date | string
   userId?: string | null
+  snapshotJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  title?: string | null
+  weekEnding?: Date | string | null
+  notes?: string | null
+  confidenceScore?: number | null
+  startedAt?: Date | string | null
+  completedAt?: Date | string | null
   teamId?: string | null
   facilitatorUserId?: string | null
   commitments?: Prisma.CommitmentUncheckedCreateNestedManyWithoutWeeklySessionInput
@@ -1209,44 +1209,44 @@ export type WeeklySessionUpdateManyWithWhereWithoutWigInput = {
 
 export type WeeklySessionCreateWithoutCommitmentsInput = {
   id?: string
-  title?: string | null
   weekStarting: Date | string
-  weekEnding?: Date | string | null
   status?: $Enums.SessionStatus
-  snapshotJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  notes?: string | null
-  confidenceScore?: number | null
   accountDoneAt?: Date | string | null
   reviewDoneAt?: Date | string | null
   commitDoneAt?: Date | string | null
+  createdAt?: Date | string
+  snapshotJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  title?: string | null
+  weekEnding?: Date | string | null
+  notes?: string | null
+  confidenceScore?: number | null
   startedAt?: Date | string | null
   completedAt?: Date | string | null
-  createdAt?: Date | string
-  wig?: Prisma.WIGCreateNestedOneWithoutWeeklySessionsInput
-  user?: Prisma.UserCreateNestedOneWithoutWeeklySessionsInput
-  team?: Prisma.TeamCreateNestedOneWithoutWeeklySessionsInput
-  facilitator?: Prisma.UserCreateNestedOneWithoutFacilitatedSessionsInput
   blockers?: Prisma.SessionBlockerCreateNestedManyWithoutWeeklySessionInput
   timeline?: Prisma.SessionTimelineEventCreateNestedManyWithoutWeeklySessionInput
+  facilitator?: Prisma.UserCreateNestedOneWithoutFacilitatedSessionsInput
+  team?: Prisma.TeamCreateNestedOneWithoutWeeklySessionsInput
+  user?: Prisma.UserCreateNestedOneWithoutWeeklySessionsInput
+  wig?: Prisma.WIGCreateNestedOneWithoutWeeklySessionsInput
 }
 
 export type WeeklySessionUncheckedCreateWithoutCommitmentsInput = {
   id?: string
-  title?: string | null
   weekStarting: Date | string
-  weekEnding?: Date | string | null
   status?: $Enums.SessionStatus
-  snapshotJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  notes?: string | null
-  confidenceScore?: number | null
   accountDoneAt?: Date | string | null
   reviewDoneAt?: Date | string | null
   commitDoneAt?: Date | string | null
-  startedAt?: Date | string | null
-  completedAt?: Date | string | null
   createdAt?: Date | string
   wigId?: string | null
   userId?: string | null
+  snapshotJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  title?: string | null
+  weekEnding?: Date | string | null
+  notes?: string | null
+  confidenceScore?: number | null
+  startedAt?: Date | string | null
+  completedAt?: Date | string | null
   teamId?: string | null
   facilitatorUserId?: string | null
   blockers?: Prisma.SessionBlockerUncheckedCreateNestedManyWithoutWeeklySessionInput
@@ -1271,44 +1271,44 @@ export type WeeklySessionUpdateToOneWithWhereWithoutCommitmentsInput = {
 
 export type WeeklySessionUpdateWithoutCommitmentsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   weekStarting?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  weekEnding?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.EnumSessionStatusFieldUpdateOperationsInput | $Enums.SessionStatus
-  snapshotJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  confidenceScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   accountDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   reviewDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   commitDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  snapshotJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  weekEnding?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confidenceScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  wig?: Prisma.WIGUpdateOneWithoutWeeklySessionsNestedInput
-  user?: Prisma.UserUpdateOneWithoutWeeklySessionsNestedInput
-  team?: Prisma.TeamUpdateOneWithoutWeeklySessionsNestedInput
-  facilitator?: Prisma.UserUpdateOneWithoutFacilitatedSessionsNestedInput
   blockers?: Prisma.SessionBlockerUpdateManyWithoutWeeklySessionNestedInput
   timeline?: Prisma.SessionTimelineEventUpdateManyWithoutWeeklySessionNestedInput
+  facilitator?: Prisma.UserUpdateOneWithoutFacilitatedSessionsNestedInput
+  team?: Prisma.TeamUpdateOneWithoutWeeklySessionsNestedInput
+  user?: Prisma.UserUpdateOneWithoutWeeklySessionsNestedInput
+  wig?: Prisma.WIGUpdateOneWithoutWeeklySessionsNestedInput
 }
 
 export type WeeklySessionUncheckedUpdateWithoutCommitmentsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   weekStarting?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  weekEnding?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.EnumSessionStatusFieldUpdateOperationsInput | $Enums.SessionStatus
-  snapshotJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  confidenceScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   accountDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   reviewDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   commitDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   wigId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   userId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  snapshotJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  weekEnding?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confidenceScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   teamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   facilitatorUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   blockers?: Prisma.SessionBlockerUncheckedUpdateManyWithoutWeeklySessionNestedInput
@@ -1317,44 +1317,44 @@ export type WeeklySessionUncheckedUpdateWithoutCommitmentsInput = {
 
 export type WeeklySessionCreateWithoutBlockersInput = {
   id?: string
-  title?: string | null
   weekStarting: Date | string
-  weekEnding?: Date | string | null
   status?: $Enums.SessionStatus
-  snapshotJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  notes?: string | null
-  confidenceScore?: number | null
   accountDoneAt?: Date | string | null
   reviewDoneAt?: Date | string | null
   commitDoneAt?: Date | string | null
+  createdAt?: Date | string
+  snapshotJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  title?: string | null
+  weekEnding?: Date | string | null
+  notes?: string | null
+  confidenceScore?: number | null
   startedAt?: Date | string | null
   completedAt?: Date | string | null
-  createdAt?: Date | string
-  wig?: Prisma.WIGCreateNestedOneWithoutWeeklySessionsInput
-  user?: Prisma.UserCreateNestedOneWithoutWeeklySessionsInput
-  team?: Prisma.TeamCreateNestedOneWithoutWeeklySessionsInput
-  facilitator?: Prisma.UserCreateNestedOneWithoutFacilitatedSessionsInput
   commitments?: Prisma.CommitmentCreateNestedManyWithoutWeeklySessionInput
   timeline?: Prisma.SessionTimelineEventCreateNestedManyWithoutWeeklySessionInput
+  facilitator?: Prisma.UserCreateNestedOneWithoutFacilitatedSessionsInput
+  team?: Prisma.TeamCreateNestedOneWithoutWeeklySessionsInput
+  user?: Prisma.UserCreateNestedOneWithoutWeeklySessionsInput
+  wig?: Prisma.WIGCreateNestedOneWithoutWeeklySessionsInput
 }
 
 export type WeeklySessionUncheckedCreateWithoutBlockersInput = {
   id?: string
-  title?: string | null
   weekStarting: Date | string
-  weekEnding?: Date | string | null
   status?: $Enums.SessionStatus
-  snapshotJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  notes?: string | null
-  confidenceScore?: number | null
   accountDoneAt?: Date | string | null
   reviewDoneAt?: Date | string | null
   commitDoneAt?: Date | string | null
-  startedAt?: Date | string | null
-  completedAt?: Date | string | null
   createdAt?: Date | string
   wigId?: string | null
   userId?: string | null
+  snapshotJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  title?: string | null
+  weekEnding?: Date | string | null
+  notes?: string | null
+  confidenceScore?: number | null
+  startedAt?: Date | string | null
+  completedAt?: Date | string | null
   teamId?: string | null
   facilitatorUserId?: string | null
   commitments?: Prisma.CommitmentUncheckedCreateNestedManyWithoutWeeklySessionInput
@@ -1379,44 +1379,44 @@ export type WeeklySessionUpdateToOneWithWhereWithoutBlockersInput = {
 
 export type WeeklySessionUpdateWithoutBlockersInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   weekStarting?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  weekEnding?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.EnumSessionStatusFieldUpdateOperationsInput | $Enums.SessionStatus
-  snapshotJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  confidenceScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   accountDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   reviewDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   commitDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  snapshotJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  weekEnding?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confidenceScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  wig?: Prisma.WIGUpdateOneWithoutWeeklySessionsNestedInput
-  user?: Prisma.UserUpdateOneWithoutWeeklySessionsNestedInput
-  team?: Prisma.TeamUpdateOneWithoutWeeklySessionsNestedInput
-  facilitator?: Prisma.UserUpdateOneWithoutFacilitatedSessionsNestedInput
   commitments?: Prisma.CommitmentUpdateManyWithoutWeeklySessionNestedInput
   timeline?: Prisma.SessionTimelineEventUpdateManyWithoutWeeklySessionNestedInput
+  facilitator?: Prisma.UserUpdateOneWithoutFacilitatedSessionsNestedInput
+  team?: Prisma.TeamUpdateOneWithoutWeeklySessionsNestedInput
+  user?: Prisma.UserUpdateOneWithoutWeeklySessionsNestedInput
+  wig?: Prisma.WIGUpdateOneWithoutWeeklySessionsNestedInput
 }
 
 export type WeeklySessionUncheckedUpdateWithoutBlockersInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   weekStarting?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  weekEnding?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.EnumSessionStatusFieldUpdateOperationsInput | $Enums.SessionStatus
-  snapshotJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  confidenceScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   accountDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   reviewDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   commitDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   wigId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   userId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  snapshotJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  weekEnding?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confidenceScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   teamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   facilitatorUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   commitments?: Prisma.CommitmentUncheckedUpdateManyWithoutWeeklySessionNestedInput
@@ -1425,44 +1425,44 @@ export type WeeklySessionUncheckedUpdateWithoutBlockersInput = {
 
 export type WeeklySessionCreateWithoutTimelineInput = {
   id?: string
-  title?: string | null
   weekStarting: Date | string
-  weekEnding?: Date | string | null
   status?: $Enums.SessionStatus
-  snapshotJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  notes?: string | null
-  confidenceScore?: number | null
   accountDoneAt?: Date | string | null
   reviewDoneAt?: Date | string | null
   commitDoneAt?: Date | string | null
+  createdAt?: Date | string
+  snapshotJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  title?: string | null
+  weekEnding?: Date | string | null
+  notes?: string | null
+  confidenceScore?: number | null
   startedAt?: Date | string | null
   completedAt?: Date | string | null
-  createdAt?: Date | string
-  wig?: Prisma.WIGCreateNestedOneWithoutWeeklySessionsInput
-  user?: Prisma.UserCreateNestedOneWithoutWeeklySessionsInput
-  team?: Prisma.TeamCreateNestedOneWithoutWeeklySessionsInput
-  facilitator?: Prisma.UserCreateNestedOneWithoutFacilitatedSessionsInput
   commitments?: Prisma.CommitmentCreateNestedManyWithoutWeeklySessionInput
   blockers?: Prisma.SessionBlockerCreateNestedManyWithoutWeeklySessionInput
+  facilitator?: Prisma.UserCreateNestedOneWithoutFacilitatedSessionsInput
+  team?: Prisma.TeamCreateNestedOneWithoutWeeklySessionsInput
+  user?: Prisma.UserCreateNestedOneWithoutWeeklySessionsInput
+  wig?: Prisma.WIGCreateNestedOneWithoutWeeklySessionsInput
 }
 
 export type WeeklySessionUncheckedCreateWithoutTimelineInput = {
   id?: string
-  title?: string | null
   weekStarting: Date | string
-  weekEnding?: Date | string | null
   status?: $Enums.SessionStatus
-  snapshotJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  notes?: string | null
-  confidenceScore?: number | null
   accountDoneAt?: Date | string | null
   reviewDoneAt?: Date | string | null
   commitDoneAt?: Date | string | null
-  startedAt?: Date | string | null
-  completedAt?: Date | string | null
   createdAt?: Date | string
   wigId?: string | null
   userId?: string | null
+  snapshotJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  title?: string | null
+  weekEnding?: Date | string | null
+  notes?: string | null
+  confidenceScore?: number | null
+  startedAt?: Date | string | null
+  completedAt?: Date | string | null
   teamId?: string | null
   facilitatorUserId?: string | null
   commitments?: Prisma.CommitmentUncheckedCreateNestedManyWithoutWeeklySessionInput
@@ -1487,129 +1487,195 @@ export type WeeklySessionUpdateToOneWithWhereWithoutTimelineInput = {
 
 export type WeeklySessionUpdateWithoutTimelineInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   weekStarting?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  weekEnding?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.EnumSessionStatusFieldUpdateOperationsInput | $Enums.SessionStatus
-  snapshotJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  confidenceScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   accountDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   reviewDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   commitDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  snapshotJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  weekEnding?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confidenceScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  wig?: Prisma.WIGUpdateOneWithoutWeeklySessionsNestedInput
-  user?: Prisma.UserUpdateOneWithoutWeeklySessionsNestedInput
-  team?: Prisma.TeamUpdateOneWithoutWeeklySessionsNestedInput
-  facilitator?: Prisma.UserUpdateOneWithoutFacilitatedSessionsNestedInput
   commitments?: Prisma.CommitmentUpdateManyWithoutWeeklySessionNestedInput
   blockers?: Prisma.SessionBlockerUpdateManyWithoutWeeklySessionNestedInput
+  facilitator?: Prisma.UserUpdateOneWithoutFacilitatedSessionsNestedInput
+  team?: Prisma.TeamUpdateOneWithoutWeeklySessionsNestedInput
+  user?: Prisma.UserUpdateOneWithoutWeeklySessionsNestedInput
+  wig?: Prisma.WIGUpdateOneWithoutWeeklySessionsNestedInput
 }
 
 export type WeeklySessionUncheckedUpdateWithoutTimelineInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   weekStarting?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  weekEnding?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.EnumSessionStatusFieldUpdateOperationsInput | $Enums.SessionStatus
-  snapshotJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  confidenceScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   accountDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   reviewDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   commitDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   wigId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   userId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  snapshotJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  weekEnding?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confidenceScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   teamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   facilitatorUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   commitments?: Prisma.CommitmentUncheckedUpdateManyWithoutWeeklySessionNestedInput
   blockers?: Prisma.SessionBlockerUncheckedUpdateManyWithoutWeeklySessionNestedInput
 }
 
-export type WeeklySessionCreateManyUserInput = {
+export type WeeklySessionCreateManyFacilitatorInput = {
   id?: string
-  title?: string | null
   weekStarting: Date | string
-  weekEnding?: Date | string | null
   status?: $Enums.SessionStatus
-  snapshotJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  notes?: string | null
-  confidenceScore?: number | null
   accountDoneAt?: Date | string | null
   reviewDoneAt?: Date | string | null
   commitDoneAt?: Date | string | null
-  startedAt?: Date | string | null
-  completedAt?: Date | string | null
   createdAt?: Date | string
   wigId?: string | null
+  userId?: string | null
+  snapshotJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  title?: string | null
+  weekEnding?: Date | string | null
+  notes?: string | null
+  confidenceScore?: number | null
+  startedAt?: Date | string | null
+  completedAt?: Date | string | null
+  teamId?: string | null
+}
+
+export type WeeklySessionCreateManyUserInput = {
+  id?: string
+  weekStarting: Date | string
+  status?: $Enums.SessionStatus
+  accountDoneAt?: Date | string | null
+  reviewDoneAt?: Date | string | null
+  commitDoneAt?: Date | string | null
+  createdAt?: Date | string
+  wigId?: string | null
+  snapshotJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  title?: string | null
+  weekEnding?: Date | string | null
+  notes?: string | null
+  confidenceScore?: number | null
+  startedAt?: Date | string | null
+  completedAt?: Date | string | null
   teamId?: string | null
   facilitatorUserId?: string | null
 }
 
-export type WeeklySessionCreateManyFacilitatorInput = {
-  id?: string
-  title?: string | null
-  weekStarting: Date | string
-  weekEnding?: Date | string | null
-  status?: $Enums.SessionStatus
+export type WeeklySessionUpdateWithoutFacilitatorInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  weekStarting?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  status?: Prisma.EnumSessionStatusFieldUpdateOperationsInput | $Enums.SessionStatus
+  accountDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reviewDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  commitDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   snapshotJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  notes?: string | null
-  confidenceScore?: number | null
-  accountDoneAt?: Date | string | null
-  reviewDoneAt?: Date | string | null
-  commitDoneAt?: Date | string | null
-  startedAt?: Date | string | null
-  completedAt?: Date | string | null
-  createdAt?: Date | string
-  wigId?: string | null
-  userId?: string | null
-  teamId?: string | null
+  title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  weekEnding?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confidenceScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  commitments?: Prisma.CommitmentUpdateManyWithoutWeeklySessionNestedInput
+  blockers?: Prisma.SessionBlockerUpdateManyWithoutWeeklySessionNestedInput
+  timeline?: Prisma.SessionTimelineEventUpdateManyWithoutWeeklySessionNestedInput
+  team?: Prisma.TeamUpdateOneWithoutWeeklySessionsNestedInput
+  user?: Prisma.UserUpdateOneWithoutWeeklySessionsNestedInput
+  wig?: Prisma.WIGUpdateOneWithoutWeeklySessionsNestedInput
+}
+
+export type WeeklySessionUncheckedUpdateWithoutFacilitatorInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  weekStarting?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  status?: Prisma.EnumSessionStatusFieldUpdateOperationsInput | $Enums.SessionStatus
+  accountDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reviewDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  commitDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  wigId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  userId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  snapshotJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  weekEnding?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confidenceScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  teamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  commitments?: Prisma.CommitmentUncheckedUpdateManyWithoutWeeklySessionNestedInput
+  blockers?: Prisma.SessionBlockerUncheckedUpdateManyWithoutWeeklySessionNestedInput
+  timeline?: Prisma.SessionTimelineEventUncheckedUpdateManyWithoutWeeklySessionNestedInput
+}
+
+export type WeeklySessionUncheckedUpdateManyWithoutFacilitatorInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  weekStarting?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  status?: Prisma.EnumSessionStatusFieldUpdateOperationsInput | $Enums.SessionStatus
+  accountDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reviewDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  commitDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  wigId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  userId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  snapshotJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  weekEnding?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confidenceScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  teamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type WeeklySessionUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   weekStarting?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  weekEnding?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.EnumSessionStatusFieldUpdateOperationsInput | $Enums.SessionStatus
-  snapshotJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  confidenceScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   accountDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   reviewDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   commitDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  snapshotJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  weekEnding?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confidenceScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  wig?: Prisma.WIGUpdateOneWithoutWeeklySessionsNestedInput
-  team?: Prisma.TeamUpdateOneWithoutWeeklySessionsNestedInput
-  facilitator?: Prisma.UserUpdateOneWithoutFacilitatedSessionsNestedInput
   commitments?: Prisma.CommitmentUpdateManyWithoutWeeklySessionNestedInput
   blockers?: Prisma.SessionBlockerUpdateManyWithoutWeeklySessionNestedInput
   timeline?: Prisma.SessionTimelineEventUpdateManyWithoutWeeklySessionNestedInput
+  facilitator?: Prisma.UserUpdateOneWithoutFacilitatedSessionsNestedInput
+  team?: Prisma.TeamUpdateOneWithoutWeeklySessionsNestedInput
+  wig?: Prisma.WIGUpdateOneWithoutWeeklySessionsNestedInput
 }
 
 export type WeeklySessionUncheckedUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   weekStarting?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  weekEnding?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.EnumSessionStatusFieldUpdateOperationsInput | $Enums.SessionStatus
-  snapshotJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  confidenceScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   accountDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   reviewDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   commitDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   wigId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  snapshotJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  weekEnding?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confidenceScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   teamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   facilitatorUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   commitments?: Prisma.CommitmentUncheckedUpdateManyWithoutWeeklySessionNestedInput
@@ -1619,150 +1685,84 @@ export type WeeklySessionUncheckedUpdateWithoutUserInput = {
 
 export type WeeklySessionUncheckedUpdateManyWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   weekStarting?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  weekEnding?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.EnumSessionStatusFieldUpdateOperationsInput | $Enums.SessionStatus
-  snapshotJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  confidenceScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   accountDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   reviewDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   commitDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   wigId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  snapshotJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  weekEnding?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confidenceScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   teamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   facilitatorUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
-export type WeeklySessionUpdateWithoutFacilitatorInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  weekStarting?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  weekEnding?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  status?: Prisma.EnumSessionStatusFieldUpdateOperationsInput | $Enums.SessionStatus
-  snapshotJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  confidenceScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  accountDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  reviewDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  commitDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  wig?: Prisma.WIGUpdateOneWithoutWeeklySessionsNestedInput
-  user?: Prisma.UserUpdateOneWithoutWeeklySessionsNestedInput
-  team?: Prisma.TeamUpdateOneWithoutWeeklySessionsNestedInput
-  commitments?: Prisma.CommitmentUpdateManyWithoutWeeklySessionNestedInput
-  blockers?: Prisma.SessionBlockerUpdateManyWithoutWeeklySessionNestedInput
-  timeline?: Prisma.SessionTimelineEventUpdateManyWithoutWeeklySessionNestedInput
-}
-
-export type WeeklySessionUncheckedUpdateWithoutFacilitatorInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  weekStarting?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  weekEnding?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  status?: Prisma.EnumSessionStatusFieldUpdateOperationsInput | $Enums.SessionStatus
-  snapshotJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  confidenceScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  accountDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  reviewDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  commitDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  wigId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  userId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  teamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  commitments?: Prisma.CommitmentUncheckedUpdateManyWithoutWeeklySessionNestedInput
-  blockers?: Prisma.SessionBlockerUncheckedUpdateManyWithoutWeeklySessionNestedInput
-  timeline?: Prisma.SessionTimelineEventUncheckedUpdateManyWithoutWeeklySessionNestedInput
-}
-
-export type WeeklySessionUncheckedUpdateManyWithoutFacilitatorInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  weekStarting?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  weekEnding?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  status?: Prisma.EnumSessionStatusFieldUpdateOperationsInput | $Enums.SessionStatus
-  snapshotJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  confidenceScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  accountDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  reviewDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  commitDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  wigId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  userId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  teamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-}
-
 export type WeeklySessionCreateManyTeamInput = {
   id?: string
-  title?: string | null
   weekStarting: Date | string
-  weekEnding?: Date | string | null
   status?: $Enums.SessionStatus
-  snapshotJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  notes?: string | null
-  confidenceScore?: number | null
   accountDoneAt?: Date | string | null
   reviewDoneAt?: Date | string | null
   commitDoneAt?: Date | string | null
-  startedAt?: Date | string | null
-  completedAt?: Date | string | null
   createdAt?: Date | string
   wigId?: string | null
   userId?: string | null
+  snapshotJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  title?: string | null
+  weekEnding?: Date | string | null
+  notes?: string | null
+  confidenceScore?: number | null
+  startedAt?: Date | string | null
+  completedAt?: Date | string | null
   facilitatorUserId?: string | null
 }
 
 export type WeeklySessionUpdateWithoutTeamInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   weekStarting?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  weekEnding?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.EnumSessionStatusFieldUpdateOperationsInput | $Enums.SessionStatus
-  snapshotJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  confidenceScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   accountDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   reviewDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   commitDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  snapshotJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  weekEnding?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confidenceScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  wig?: Prisma.WIGUpdateOneWithoutWeeklySessionsNestedInput
-  user?: Prisma.UserUpdateOneWithoutWeeklySessionsNestedInput
-  facilitator?: Prisma.UserUpdateOneWithoutFacilitatedSessionsNestedInput
   commitments?: Prisma.CommitmentUpdateManyWithoutWeeklySessionNestedInput
   blockers?: Prisma.SessionBlockerUpdateManyWithoutWeeklySessionNestedInput
   timeline?: Prisma.SessionTimelineEventUpdateManyWithoutWeeklySessionNestedInput
+  facilitator?: Prisma.UserUpdateOneWithoutFacilitatedSessionsNestedInput
+  user?: Prisma.UserUpdateOneWithoutWeeklySessionsNestedInput
+  wig?: Prisma.WIGUpdateOneWithoutWeeklySessionsNestedInput
 }
 
 export type WeeklySessionUncheckedUpdateWithoutTeamInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   weekStarting?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  weekEnding?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.EnumSessionStatusFieldUpdateOperationsInput | $Enums.SessionStatus
-  snapshotJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  confidenceScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   accountDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   reviewDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   commitDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   wigId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   userId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  snapshotJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  weekEnding?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confidenceScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   facilitatorUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   commitments?: Prisma.CommitmentUncheckedUpdateManyWithoutWeeklySessionNestedInput
   blockers?: Prisma.SessionBlockerUncheckedUpdateManyWithoutWeeklySessionNestedInput
@@ -1771,83 +1771,83 @@ export type WeeklySessionUncheckedUpdateWithoutTeamInput = {
 
 export type WeeklySessionUncheckedUpdateManyWithoutTeamInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   weekStarting?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  weekEnding?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.EnumSessionStatusFieldUpdateOperationsInput | $Enums.SessionStatus
-  snapshotJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  confidenceScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   accountDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   reviewDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   commitDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   wigId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   userId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  snapshotJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  weekEnding?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confidenceScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   facilitatorUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type WeeklySessionCreateManyWigInput = {
   id?: string
-  title?: string | null
   weekStarting: Date | string
-  weekEnding?: Date | string | null
   status?: $Enums.SessionStatus
-  snapshotJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  notes?: string | null
-  confidenceScore?: number | null
   accountDoneAt?: Date | string | null
   reviewDoneAt?: Date | string | null
   commitDoneAt?: Date | string | null
-  startedAt?: Date | string | null
-  completedAt?: Date | string | null
   createdAt?: Date | string
   userId?: string | null
+  snapshotJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  title?: string | null
+  weekEnding?: Date | string | null
+  notes?: string | null
+  confidenceScore?: number | null
+  startedAt?: Date | string | null
+  completedAt?: Date | string | null
   teamId?: string | null
   facilitatorUserId?: string | null
 }
 
 export type WeeklySessionUpdateWithoutWigInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   weekStarting?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  weekEnding?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.EnumSessionStatusFieldUpdateOperationsInput | $Enums.SessionStatus
-  snapshotJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  confidenceScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   accountDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   reviewDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   commitDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  snapshotJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  weekEnding?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confidenceScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  user?: Prisma.UserUpdateOneWithoutWeeklySessionsNestedInput
-  team?: Prisma.TeamUpdateOneWithoutWeeklySessionsNestedInput
-  facilitator?: Prisma.UserUpdateOneWithoutFacilitatedSessionsNestedInput
   commitments?: Prisma.CommitmentUpdateManyWithoutWeeklySessionNestedInput
   blockers?: Prisma.SessionBlockerUpdateManyWithoutWeeklySessionNestedInput
   timeline?: Prisma.SessionTimelineEventUpdateManyWithoutWeeklySessionNestedInput
+  facilitator?: Prisma.UserUpdateOneWithoutFacilitatedSessionsNestedInput
+  team?: Prisma.TeamUpdateOneWithoutWeeklySessionsNestedInput
+  user?: Prisma.UserUpdateOneWithoutWeeklySessionsNestedInput
 }
 
 export type WeeklySessionUncheckedUpdateWithoutWigInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   weekStarting?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  weekEnding?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.EnumSessionStatusFieldUpdateOperationsInput | $Enums.SessionStatus
-  snapshotJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  confidenceScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   accountDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   reviewDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   commitDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   userId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  snapshotJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  weekEnding?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confidenceScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   teamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   facilitatorUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   commitments?: Prisma.CommitmentUncheckedUpdateManyWithoutWeeklySessionNestedInput
@@ -1857,20 +1857,20 @@ export type WeeklySessionUncheckedUpdateWithoutWigInput = {
 
 export type WeeklySessionUncheckedUpdateManyWithoutWigInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   weekStarting?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  weekEnding?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.EnumSessionStatusFieldUpdateOperationsInput | $Enums.SessionStatus
-  snapshotJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  confidenceScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   accountDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   reviewDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   commitDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   userId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  snapshotJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  weekEnding?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confidenceScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   teamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   facilitatorUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
@@ -1926,156 +1926,156 @@ export type WeeklySessionCountOutputTypeCountTimelineArgs<ExtArgs extends runtim
 
 export type WeeklySessionSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
-  title?: boolean
   weekStarting?: boolean
-  weekEnding?: boolean
   status?: boolean
-  snapshotJson?: boolean
-  notes?: boolean
-  confidenceScore?: boolean
   accountDoneAt?: boolean
   reviewDoneAt?: boolean
   commitDoneAt?: boolean
-  startedAt?: boolean
-  completedAt?: boolean
   createdAt?: boolean
   wigId?: boolean
   userId?: boolean
+  snapshotJson?: boolean
+  title?: boolean
+  weekEnding?: boolean
+  notes?: boolean
+  confidenceScore?: boolean
+  startedAt?: boolean
+  completedAt?: boolean
   teamId?: boolean
   facilitatorUserId?: boolean
-  wig?: boolean | Prisma.WeeklySession$wigArgs<ExtArgs>
-  user?: boolean | Prisma.WeeklySession$userArgs<ExtArgs>
-  team?: boolean | Prisma.WeeklySession$teamArgs<ExtArgs>
-  facilitator?: boolean | Prisma.WeeklySession$facilitatorArgs<ExtArgs>
   commitments?: boolean | Prisma.WeeklySession$commitmentsArgs<ExtArgs>
   blockers?: boolean | Prisma.WeeklySession$blockersArgs<ExtArgs>
   timeline?: boolean | Prisma.WeeklySession$timelineArgs<ExtArgs>
+  facilitator?: boolean | Prisma.WeeklySession$facilitatorArgs<ExtArgs>
+  team?: boolean | Prisma.WeeklySession$teamArgs<ExtArgs>
+  user?: boolean | Prisma.WeeklySession$userArgs<ExtArgs>
+  wig?: boolean | Prisma.WeeklySession$wigArgs<ExtArgs>
   _count?: boolean | Prisma.WeeklySessionCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["weeklySession"]>
 
 export type WeeklySessionSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
-  title?: boolean
   weekStarting?: boolean
-  weekEnding?: boolean
   status?: boolean
-  snapshotJson?: boolean
-  notes?: boolean
-  confidenceScore?: boolean
   accountDoneAt?: boolean
   reviewDoneAt?: boolean
   commitDoneAt?: boolean
-  startedAt?: boolean
-  completedAt?: boolean
   createdAt?: boolean
   wigId?: boolean
   userId?: boolean
+  snapshotJson?: boolean
+  title?: boolean
+  weekEnding?: boolean
+  notes?: boolean
+  confidenceScore?: boolean
+  startedAt?: boolean
+  completedAt?: boolean
   teamId?: boolean
   facilitatorUserId?: boolean
-  wig?: boolean | Prisma.WeeklySession$wigArgs<ExtArgs>
-  user?: boolean | Prisma.WeeklySession$userArgs<ExtArgs>
-  team?: boolean | Prisma.WeeklySession$teamArgs<ExtArgs>
   facilitator?: boolean | Prisma.WeeklySession$facilitatorArgs<ExtArgs>
+  team?: boolean | Prisma.WeeklySession$teamArgs<ExtArgs>
+  user?: boolean | Prisma.WeeklySession$userArgs<ExtArgs>
+  wig?: boolean | Prisma.WeeklySession$wigArgs<ExtArgs>
 }, ExtArgs["result"]["weeklySession"]>
 
 export type WeeklySessionSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
-  title?: boolean
   weekStarting?: boolean
-  weekEnding?: boolean
   status?: boolean
-  snapshotJson?: boolean
-  notes?: boolean
-  confidenceScore?: boolean
   accountDoneAt?: boolean
   reviewDoneAt?: boolean
   commitDoneAt?: boolean
-  startedAt?: boolean
-  completedAt?: boolean
   createdAt?: boolean
   wigId?: boolean
   userId?: boolean
+  snapshotJson?: boolean
+  title?: boolean
+  weekEnding?: boolean
+  notes?: boolean
+  confidenceScore?: boolean
+  startedAt?: boolean
+  completedAt?: boolean
   teamId?: boolean
   facilitatorUserId?: boolean
-  wig?: boolean | Prisma.WeeklySession$wigArgs<ExtArgs>
-  user?: boolean | Prisma.WeeklySession$userArgs<ExtArgs>
-  team?: boolean | Prisma.WeeklySession$teamArgs<ExtArgs>
   facilitator?: boolean | Prisma.WeeklySession$facilitatorArgs<ExtArgs>
+  team?: boolean | Prisma.WeeklySession$teamArgs<ExtArgs>
+  user?: boolean | Prisma.WeeklySession$userArgs<ExtArgs>
+  wig?: boolean | Prisma.WeeklySession$wigArgs<ExtArgs>
 }, ExtArgs["result"]["weeklySession"]>
 
 export type WeeklySessionSelectScalar = {
   id?: boolean
-  title?: boolean
   weekStarting?: boolean
-  weekEnding?: boolean
   status?: boolean
-  snapshotJson?: boolean
-  notes?: boolean
-  confidenceScore?: boolean
   accountDoneAt?: boolean
   reviewDoneAt?: boolean
   commitDoneAt?: boolean
-  startedAt?: boolean
-  completedAt?: boolean
   createdAt?: boolean
   wigId?: boolean
   userId?: boolean
+  snapshotJson?: boolean
+  title?: boolean
+  weekEnding?: boolean
+  notes?: boolean
+  confidenceScore?: boolean
+  startedAt?: boolean
+  completedAt?: boolean
   teamId?: boolean
   facilitatorUserId?: boolean
 }
 
-export type WeeklySessionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "weekStarting" | "weekEnding" | "status" | "snapshotJson" | "notes" | "confidenceScore" | "accountDoneAt" | "reviewDoneAt" | "commitDoneAt" | "startedAt" | "completedAt" | "createdAt" | "wigId" | "userId" | "teamId" | "facilitatorUserId", ExtArgs["result"]["weeklySession"]>
+export type WeeklySessionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "weekStarting" | "status" | "accountDoneAt" | "reviewDoneAt" | "commitDoneAt" | "createdAt" | "wigId" | "userId" | "snapshotJson" | "title" | "weekEnding" | "notes" | "confidenceScore" | "startedAt" | "completedAt" | "teamId" | "facilitatorUserId", ExtArgs["result"]["weeklySession"]>
 export type WeeklySessionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  wig?: boolean | Prisma.WeeklySession$wigArgs<ExtArgs>
-  user?: boolean | Prisma.WeeklySession$userArgs<ExtArgs>
-  team?: boolean | Prisma.WeeklySession$teamArgs<ExtArgs>
-  facilitator?: boolean | Prisma.WeeklySession$facilitatorArgs<ExtArgs>
   commitments?: boolean | Prisma.WeeklySession$commitmentsArgs<ExtArgs>
   blockers?: boolean | Prisma.WeeklySession$blockersArgs<ExtArgs>
   timeline?: boolean | Prisma.WeeklySession$timelineArgs<ExtArgs>
+  facilitator?: boolean | Prisma.WeeklySession$facilitatorArgs<ExtArgs>
+  team?: boolean | Prisma.WeeklySession$teamArgs<ExtArgs>
+  user?: boolean | Prisma.WeeklySession$userArgs<ExtArgs>
+  wig?: boolean | Prisma.WeeklySession$wigArgs<ExtArgs>
   _count?: boolean | Prisma.WeeklySessionCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type WeeklySessionIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  wig?: boolean | Prisma.WeeklySession$wigArgs<ExtArgs>
-  user?: boolean | Prisma.WeeklySession$userArgs<ExtArgs>
-  team?: boolean | Prisma.WeeklySession$teamArgs<ExtArgs>
   facilitator?: boolean | Prisma.WeeklySession$facilitatorArgs<ExtArgs>
+  team?: boolean | Prisma.WeeklySession$teamArgs<ExtArgs>
+  user?: boolean | Prisma.WeeklySession$userArgs<ExtArgs>
+  wig?: boolean | Prisma.WeeklySession$wigArgs<ExtArgs>
 }
 export type WeeklySessionIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  wig?: boolean | Prisma.WeeklySession$wigArgs<ExtArgs>
-  user?: boolean | Prisma.WeeklySession$userArgs<ExtArgs>
-  team?: boolean | Prisma.WeeklySession$teamArgs<ExtArgs>
   facilitator?: boolean | Prisma.WeeklySession$facilitatorArgs<ExtArgs>
+  team?: boolean | Prisma.WeeklySession$teamArgs<ExtArgs>
+  user?: boolean | Prisma.WeeklySession$userArgs<ExtArgs>
+  wig?: boolean | Prisma.WeeklySession$wigArgs<ExtArgs>
 }
 
 export type $WeeklySessionPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "WeeklySession"
   objects: {
-    wig: Prisma.$WIGPayload<ExtArgs> | null
-    user: Prisma.$UserPayload<ExtArgs> | null
-    team: Prisma.$TeamPayload<ExtArgs> | null
-    facilitator: Prisma.$UserPayload<ExtArgs> | null
     commitments: Prisma.$CommitmentPayload<ExtArgs>[]
     blockers: Prisma.$SessionBlockerPayload<ExtArgs>[]
     timeline: Prisma.$SessionTimelineEventPayload<ExtArgs>[]
+    facilitator: Prisma.$UserPayload<ExtArgs> | null
+    team: Prisma.$TeamPayload<ExtArgs> | null
+    user: Prisma.$UserPayload<ExtArgs> | null
+    wig: Prisma.$WIGPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
-    title: string | null
     weekStarting: Date
-    weekEnding: Date | null
     status: $Enums.SessionStatus
-    snapshotJson: runtime.JsonValue | null
-    notes: string | null
-    confidenceScore: number | null
     accountDoneAt: Date | null
     reviewDoneAt: Date | null
     commitDoneAt: Date | null
-    startedAt: Date | null
-    completedAt: Date | null
     createdAt: Date
     wigId: string | null
     userId: string | null
+    snapshotJson: runtime.JsonValue | null
+    title: string | null
+    weekEnding: Date | null
+    notes: string | null
+    confidenceScore: number | null
+    startedAt: Date | null
+    completedAt: Date | null
     teamId: string | null
     facilitatorUserId: string | null
   }, ExtArgs["result"]["weeklySession"]>
@@ -2472,13 +2472,13 @@ readonly fields: WeeklySessionFieldRefs;
  */
 export interface Prisma__WeeklySessionClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  wig<T extends Prisma.WeeklySession$wigArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.WeeklySession$wigArgs<ExtArgs>>): Prisma.Prisma__WIGClient<runtime.Types.Result.GetResult<Prisma.$WIGPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-  user<T extends Prisma.WeeklySession$userArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.WeeklySession$userArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-  team<T extends Prisma.WeeklySession$teamArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.WeeklySession$teamArgs<ExtArgs>>): Prisma.Prisma__TeamClient<runtime.Types.Result.GetResult<Prisma.$TeamPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-  facilitator<T extends Prisma.WeeklySession$facilitatorArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.WeeklySession$facilitatorArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   commitments<T extends Prisma.WeeklySession$commitmentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.WeeklySession$commitmentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CommitmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   blockers<T extends Prisma.WeeklySession$blockersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.WeeklySession$blockersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SessionBlockerPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   timeline<T extends Prisma.WeeklySession$timelineArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.WeeklySession$timelineArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SessionTimelineEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  facilitator<T extends Prisma.WeeklySession$facilitatorArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.WeeklySession$facilitatorArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  team<T extends Prisma.WeeklySession$teamArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.WeeklySession$teamArgs<ExtArgs>>): Prisma.Prisma__TeamClient<runtime.Types.Result.GetResult<Prisma.$TeamPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  user<T extends Prisma.WeeklySession$userArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.WeeklySession$userArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  wig<T extends Prisma.WeeklySession$wigArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.WeeklySession$wigArgs<ExtArgs>>): Prisma.Prisma__WIGClient<runtime.Types.Result.GetResult<Prisma.$WIGPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2509,21 +2509,21 @@ export interface Prisma__WeeklySessionClient<T, Null = never, ExtArgs extends ru
  */
 export interface WeeklySessionFieldRefs {
   readonly id: Prisma.FieldRef<"WeeklySession", 'String'>
-  readonly title: Prisma.FieldRef<"WeeklySession", 'String'>
   readonly weekStarting: Prisma.FieldRef<"WeeklySession", 'DateTime'>
-  readonly weekEnding: Prisma.FieldRef<"WeeklySession", 'DateTime'>
   readonly status: Prisma.FieldRef<"WeeklySession", 'SessionStatus'>
-  readonly snapshotJson: Prisma.FieldRef<"WeeklySession", 'Json'>
-  readonly notes: Prisma.FieldRef<"WeeklySession", 'String'>
-  readonly confidenceScore: Prisma.FieldRef<"WeeklySession", 'Int'>
   readonly accountDoneAt: Prisma.FieldRef<"WeeklySession", 'DateTime'>
   readonly reviewDoneAt: Prisma.FieldRef<"WeeklySession", 'DateTime'>
   readonly commitDoneAt: Prisma.FieldRef<"WeeklySession", 'DateTime'>
-  readonly startedAt: Prisma.FieldRef<"WeeklySession", 'DateTime'>
-  readonly completedAt: Prisma.FieldRef<"WeeklySession", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"WeeklySession", 'DateTime'>
   readonly wigId: Prisma.FieldRef<"WeeklySession", 'String'>
   readonly userId: Prisma.FieldRef<"WeeklySession", 'String'>
+  readonly snapshotJson: Prisma.FieldRef<"WeeklySession", 'Json'>
+  readonly title: Prisma.FieldRef<"WeeklySession", 'String'>
+  readonly weekEnding: Prisma.FieldRef<"WeeklySession", 'DateTime'>
+  readonly notes: Prisma.FieldRef<"WeeklySession", 'String'>
+  readonly confidenceScore: Prisma.FieldRef<"WeeklySession", 'Int'>
+  readonly startedAt: Prisma.FieldRef<"WeeklySession", 'DateTime'>
+  readonly completedAt: Prisma.FieldRef<"WeeklySession", 'DateTime'>
   readonly teamId: Prisma.FieldRef<"WeeklySession", 'String'>
   readonly facilitatorUserId: Prisma.FieldRef<"WeeklySession", 'String'>
 }
@@ -2927,82 +2927,6 @@ export type WeeklySessionDeleteManyArgs<ExtArgs extends runtime.Types.Extensions
 }
 
 /**
- * WeeklySession.wig
- */
-export type WeeklySession$wigArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the WIG
-   */
-  select?: Prisma.WIGSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the WIG
-   */
-  omit?: Prisma.WIGOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.WIGInclude<ExtArgs> | null
-  where?: Prisma.WIGWhereInput
-}
-
-/**
- * WeeklySession.user
- */
-export type WeeklySession$userArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the User
-   */
-  select?: Prisma.UserSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the User
-   */
-  omit?: Prisma.UserOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.UserInclude<ExtArgs> | null
-  where?: Prisma.UserWhereInput
-}
-
-/**
- * WeeklySession.team
- */
-export type WeeklySession$teamArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the Team
-   */
-  select?: Prisma.TeamSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the Team
-   */
-  omit?: Prisma.TeamOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.TeamInclude<ExtArgs> | null
-  where?: Prisma.TeamWhereInput
-}
-
-/**
- * WeeklySession.facilitator
- */
-export type WeeklySession$facilitatorArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the User
-   */
-  select?: Prisma.UserSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the User
-   */
-  omit?: Prisma.UserOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.UserInclude<ExtArgs> | null
-  where?: Prisma.UserWhereInput
-}
-
-/**
  * WeeklySession.commitments
  */
 export type WeeklySession$commitmentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -3072,6 +2996,82 @@ export type WeeklySession$timelineArgs<ExtArgs extends runtime.Types.Extensions.
   take?: number
   skip?: number
   distinct?: Prisma.SessionTimelineEventScalarFieldEnum | Prisma.SessionTimelineEventScalarFieldEnum[]
+}
+
+/**
+ * WeeklySession.facilitator
+ */
+export type WeeklySession$facilitatorArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the User
+   */
+  select?: Prisma.UserSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the User
+   */
+  omit?: Prisma.UserOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserInclude<ExtArgs> | null
+  where?: Prisma.UserWhereInput
+}
+
+/**
+ * WeeklySession.team
+ */
+export type WeeklySession$teamArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Team
+   */
+  select?: Prisma.TeamSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Team
+   */
+  omit?: Prisma.TeamOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TeamInclude<ExtArgs> | null
+  where?: Prisma.TeamWhereInput
+}
+
+/**
+ * WeeklySession.user
+ */
+export type WeeklySession$userArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the User
+   */
+  select?: Prisma.UserSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the User
+   */
+  omit?: Prisma.UserOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserInclude<ExtArgs> | null
+  where?: Prisma.UserWhereInput
+}
+
+/**
+ * WeeklySession.wig
+ */
+export type WeeklySession$wigArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the WIG
+   */
+  select?: Prisma.WIGSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the WIG
+   */
+  omit?: Prisma.WIGOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.WIGInclude<ExtArgs> | null
+  where?: Prisma.WIGWhereInput
 }
 
 /**

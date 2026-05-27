@@ -42,7 +42,6 @@ export type WIGMinAggregateOutputType = {
   id: string | null
   title: string | null
   description: string | null
-  trackingType: $Enums.TrackingType | null
   fromValue: number | null
   toValue: number | null
   currentValue: number | null
@@ -53,13 +52,13 @@ export type WIGMinAggregateOutputType = {
   closedAt: Date | null
   teamId: string | null
   createdByUserId: string | null
+  trackingType: $Enums.TrackingType | null
 }
 
 export type WIGMaxAggregateOutputType = {
   id: string | null
   title: string | null
   description: string | null
-  trackingType: $Enums.TrackingType | null
   fromValue: number | null
   toValue: number | null
   currentValue: number | null
@@ -70,13 +69,13 @@ export type WIGMaxAggregateOutputType = {
   closedAt: Date | null
   teamId: string | null
   createdByUserId: string | null
+  trackingType: $Enums.TrackingType | null
 }
 
 export type WIGCountAggregateOutputType = {
   id: number
   title: number
   description: number
-  trackingType: number
   fromValue: number
   toValue: number
   currentValue: number
@@ -87,6 +86,7 @@ export type WIGCountAggregateOutputType = {
   closedAt: number
   teamId: number
   createdByUserId: number
+  trackingType: number
   _all: number
 }
 
@@ -107,7 +107,6 @@ export type WIGMinAggregateInputType = {
   id?: true
   title?: true
   description?: true
-  trackingType?: true
   fromValue?: true
   toValue?: true
   currentValue?: true
@@ -118,13 +117,13 @@ export type WIGMinAggregateInputType = {
   closedAt?: true
   teamId?: true
   createdByUserId?: true
+  trackingType?: true
 }
 
 export type WIGMaxAggregateInputType = {
   id?: true
   title?: true
   description?: true
-  trackingType?: true
   fromValue?: true
   toValue?: true
   currentValue?: true
@@ -135,13 +134,13 @@ export type WIGMaxAggregateInputType = {
   closedAt?: true
   teamId?: true
   createdByUserId?: true
+  trackingType?: true
 }
 
 export type WIGCountAggregateInputType = {
   id?: true
   title?: true
   description?: true
-  trackingType?: true
   fromValue?: true
   toValue?: true
   currentValue?: true
@@ -152,6 +151,7 @@ export type WIGCountAggregateInputType = {
   closedAt?: true
   teamId?: true
   createdByUserId?: true
+  trackingType?: true
   _all?: true
 }
 
@@ -245,7 +245,6 @@ export type WIGGroupByOutputType = {
   id: string
   title: string
   description: string | null
-  trackingType: $Enums.TrackingType
   fromValue: number | null
   toValue: number | null
   currentValue: number | null
@@ -256,6 +255,7 @@ export type WIGGroupByOutputType = {
   closedAt: Date | null
   teamId: string
   createdByUserId: string
+  trackingType: $Enums.TrackingType
   _count: WIGCountAggregateOutputType | null
   _avg: WIGAvgAggregateOutputType | null
   _sum: WIGSumAggregateOutputType | null
@@ -285,7 +285,6 @@ export type WIGWhereInput = {
   id?: Prisma.StringFilter<"WIG"> | string
   title?: Prisma.StringFilter<"WIG"> | string
   description?: Prisma.StringNullableFilter<"WIG"> | string | null
-  trackingType?: Prisma.EnumTrackingTypeFilter<"WIG"> | $Enums.TrackingType
   fromValue?: Prisma.FloatNullableFilter<"WIG"> | number | null
   toValue?: Prisma.FloatNullableFilter<"WIG"> | number | null
   currentValue?: Prisma.FloatNullableFilter<"WIG"> | number | null
@@ -296,8 +295,9 @@ export type WIGWhereInput = {
   closedAt?: Prisma.DateTimeNullableFilter<"WIG"> | Date | string | null
   teamId?: Prisma.StringFilter<"WIG"> | string
   createdByUserId?: Prisma.StringFilter<"WIG"> | string
-  team?: Prisma.XOR<Prisma.TeamScalarRelationFilter, Prisma.TeamWhereInput>
+  trackingType?: Prisma.EnumTrackingTypeFilter<"WIG"> | $Enums.TrackingType
   leadMeasures?: Prisma.LeadMeasureListRelationFilter
+  team?: Prisma.XOR<Prisma.TeamScalarRelationFilter, Prisma.TeamWhereInput>
   weeklySessions?: Prisma.WeeklySessionListRelationFilter
 }
 
@@ -305,7 +305,6 @@ export type WIGOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   title?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
-  trackingType?: Prisma.SortOrder
   fromValue?: Prisma.SortOrderInput | Prisma.SortOrder
   toValue?: Prisma.SortOrderInput | Prisma.SortOrder
   currentValue?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -316,8 +315,9 @@ export type WIGOrderByWithRelationInput = {
   closedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   teamId?: Prisma.SortOrder
   createdByUserId?: Prisma.SortOrder
-  team?: Prisma.TeamOrderByWithRelationInput
+  trackingType?: Prisma.SortOrder
   leadMeasures?: Prisma.LeadMeasureOrderByRelationAggregateInput
+  team?: Prisma.TeamOrderByWithRelationInput
   weeklySessions?: Prisma.WeeklySessionOrderByRelationAggregateInput
 }
 
@@ -328,7 +328,6 @@ export type WIGWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.WIGWhereInput | Prisma.WIGWhereInput[]
   title?: Prisma.StringFilter<"WIG"> | string
   description?: Prisma.StringNullableFilter<"WIG"> | string | null
-  trackingType?: Prisma.EnumTrackingTypeFilter<"WIG"> | $Enums.TrackingType
   fromValue?: Prisma.FloatNullableFilter<"WIG"> | number | null
   toValue?: Prisma.FloatNullableFilter<"WIG"> | number | null
   currentValue?: Prisma.FloatNullableFilter<"WIG"> | number | null
@@ -339,8 +338,9 @@ export type WIGWhereUniqueInput = Prisma.AtLeast<{
   closedAt?: Prisma.DateTimeNullableFilter<"WIG"> | Date | string | null
   teamId?: Prisma.StringFilter<"WIG"> | string
   createdByUserId?: Prisma.StringFilter<"WIG"> | string
-  team?: Prisma.XOR<Prisma.TeamScalarRelationFilter, Prisma.TeamWhereInput>
+  trackingType?: Prisma.EnumTrackingTypeFilter<"WIG"> | $Enums.TrackingType
   leadMeasures?: Prisma.LeadMeasureListRelationFilter
+  team?: Prisma.XOR<Prisma.TeamScalarRelationFilter, Prisma.TeamWhereInput>
   weeklySessions?: Prisma.WeeklySessionListRelationFilter
 }, "id">
 
@@ -348,7 +348,6 @@ export type WIGOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   title?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
-  trackingType?: Prisma.SortOrder
   fromValue?: Prisma.SortOrderInput | Prisma.SortOrder
   toValue?: Prisma.SortOrderInput | Prisma.SortOrder
   currentValue?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -359,6 +358,7 @@ export type WIGOrderByWithAggregationInput = {
   closedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   teamId?: Prisma.SortOrder
   createdByUserId?: Prisma.SortOrder
+  trackingType?: Prisma.SortOrder
   _count?: Prisma.WIGCountOrderByAggregateInput
   _avg?: Prisma.WIGAvgOrderByAggregateInput
   _max?: Prisma.WIGMaxOrderByAggregateInput
@@ -373,7 +373,6 @@ export type WIGScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"WIG"> | string
   title?: Prisma.StringWithAggregatesFilter<"WIG"> | string
   description?: Prisma.StringNullableWithAggregatesFilter<"WIG"> | string | null
-  trackingType?: Prisma.EnumTrackingTypeWithAggregatesFilter<"WIG"> | $Enums.TrackingType
   fromValue?: Prisma.FloatNullableWithAggregatesFilter<"WIG"> | number | null
   toValue?: Prisma.FloatNullableWithAggregatesFilter<"WIG"> | number | null
   currentValue?: Prisma.FloatNullableWithAggregatesFilter<"WIG"> | number | null
@@ -384,13 +383,13 @@ export type WIGScalarWhereWithAggregatesInput = {
   closedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"WIG"> | Date | string | null
   teamId?: Prisma.StringWithAggregatesFilter<"WIG"> | string
   createdByUserId?: Prisma.StringWithAggregatesFilter<"WIG"> | string
+  trackingType?: Prisma.EnumTrackingTypeWithAggregatesFilter<"WIG"> | $Enums.TrackingType
 }
 
 export type WIGCreateInput = {
   id?: string
   title: string
   description?: string | null
-  trackingType?: $Enums.TrackingType
   fromValue?: number | null
   toValue?: number | null
   currentValue?: number | null
@@ -400,8 +399,9 @@ export type WIGCreateInput = {
   createdAt?: Date | string
   closedAt?: Date | string | null
   createdByUserId: string
-  team: Prisma.TeamCreateNestedOneWithoutWigsInput
+  trackingType?: $Enums.TrackingType
   leadMeasures?: Prisma.LeadMeasureCreateNestedManyWithoutWigInput
+  team: Prisma.TeamCreateNestedOneWithoutWigsInput
   weeklySessions?: Prisma.WeeklySessionCreateNestedManyWithoutWigInput
 }
 
@@ -409,7 +409,6 @@ export type WIGUncheckedCreateInput = {
   id?: string
   title: string
   description?: string | null
-  trackingType?: $Enums.TrackingType
   fromValue?: number | null
   toValue?: number | null
   currentValue?: number | null
@@ -420,6 +419,7 @@ export type WIGUncheckedCreateInput = {
   closedAt?: Date | string | null
   teamId: string
   createdByUserId: string
+  trackingType?: $Enums.TrackingType
   leadMeasures?: Prisma.LeadMeasureUncheckedCreateNestedManyWithoutWigInput
   weeklySessions?: Prisma.WeeklySessionUncheckedCreateNestedManyWithoutWigInput
 }
@@ -428,7 +428,6 @@ export type WIGUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  trackingType?: Prisma.EnumTrackingTypeFieldUpdateOperationsInput | $Enums.TrackingType
   fromValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   toValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   currentValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
@@ -438,8 +437,9 @@ export type WIGUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdByUserId?: Prisma.StringFieldUpdateOperationsInput | string
-  team?: Prisma.TeamUpdateOneRequiredWithoutWigsNestedInput
+  trackingType?: Prisma.EnumTrackingTypeFieldUpdateOperationsInput | $Enums.TrackingType
   leadMeasures?: Prisma.LeadMeasureUpdateManyWithoutWigNestedInput
+  team?: Prisma.TeamUpdateOneRequiredWithoutWigsNestedInput
   weeklySessions?: Prisma.WeeklySessionUpdateManyWithoutWigNestedInput
 }
 
@@ -447,7 +447,6 @@ export type WIGUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  trackingType?: Prisma.EnumTrackingTypeFieldUpdateOperationsInput | $Enums.TrackingType
   fromValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   toValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   currentValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
@@ -458,6 +457,7 @@ export type WIGUncheckedUpdateInput = {
   closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   teamId?: Prisma.StringFieldUpdateOperationsInput | string
   createdByUserId?: Prisma.StringFieldUpdateOperationsInput | string
+  trackingType?: Prisma.EnumTrackingTypeFieldUpdateOperationsInput | $Enums.TrackingType
   leadMeasures?: Prisma.LeadMeasureUncheckedUpdateManyWithoutWigNestedInput
   weeklySessions?: Prisma.WeeklySessionUncheckedUpdateManyWithoutWigNestedInput
 }
@@ -466,7 +466,6 @@ export type WIGCreateManyInput = {
   id?: string
   title: string
   description?: string | null
-  trackingType?: $Enums.TrackingType
   fromValue?: number | null
   toValue?: number | null
   currentValue?: number | null
@@ -477,13 +476,13 @@ export type WIGCreateManyInput = {
   closedAt?: Date | string | null
   teamId: string
   createdByUserId: string
+  trackingType?: $Enums.TrackingType
 }
 
 export type WIGUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  trackingType?: Prisma.EnumTrackingTypeFieldUpdateOperationsInput | $Enums.TrackingType
   fromValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   toValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   currentValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
@@ -493,13 +492,13 @@ export type WIGUpdateManyMutationInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdByUserId?: Prisma.StringFieldUpdateOperationsInput | string
+  trackingType?: Prisma.EnumTrackingTypeFieldUpdateOperationsInput | $Enums.TrackingType
 }
 
 export type WIGUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  trackingType?: Prisma.EnumTrackingTypeFieldUpdateOperationsInput | $Enums.TrackingType
   fromValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   toValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   currentValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
@@ -510,6 +509,7 @@ export type WIGUncheckedUpdateManyInput = {
   closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   teamId?: Prisma.StringFieldUpdateOperationsInput | string
   createdByUserId?: Prisma.StringFieldUpdateOperationsInput | string
+  trackingType?: Prisma.EnumTrackingTypeFieldUpdateOperationsInput | $Enums.TrackingType
 }
 
 export type WIGListRelationFilter = {
@@ -526,7 +526,6 @@ export type WIGCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   title?: Prisma.SortOrder
   description?: Prisma.SortOrder
-  trackingType?: Prisma.SortOrder
   fromValue?: Prisma.SortOrder
   toValue?: Prisma.SortOrder
   currentValue?: Prisma.SortOrder
@@ -537,6 +536,7 @@ export type WIGCountOrderByAggregateInput = {
   closedAt?: Prisma.SortOrder
   teamId?: Prisma.SortOrder
   createdByUserId?: Prisma.SortOrder
+  trackingType?: Prisma.SortOrder
 }
 
 export type WIGAvgOrderByAggregateInput = {
@@ -549,7 +549,6 @@ export type WIGMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   title?: Prisma.SortOrder
   description?: Prisma.SortOrder
-  trackingType?: Prisma.SortOrder
   fromValue?: Prisma.SortOrder
   toValue?: Prisma.SortOrder
   currentValue?: Prisma.SortOrder
@@ -560,13 +559,13 @@ export type WIGMaxOrderByAggregateInput = {
   closedAt?: Prisma.SortOrder
   teamId?: Prisma.SortOrder
   createdByUserId?: Prisma.SortOrder
+  trackingType?: Prisma.SortOrder
 }
 
 export type WIGMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   title?: Prisma.SortOrder
   description?: Prisma.SortOrder
-  trackingType?: Prisma.SortOrder
   fromValue?: Prisma.SortOrder
   toValue?: Prisma.SortOrder
   currentValue?: Prisma.SortOrder
@@ -577,6 +576,7 @@ export type WIGMinOrderByAggregateInput = {
   closedAt?: Prisma.SortOrder
   teamId?: Prisma.SortOrder
   createdByUserId?: Prisma.SortOrder
+  trackingType?: Prisma.SortOrder
 }
 
 export type WIGSumOrderByAggregateInput = {
@@ -637,10 +637,6 @@ export type WIGUncheckedUpdateManyWithoutTeamNestedInput = {
   deleteMany?: Prisma.WIGScalarWhereInput | Prisma.WIGScalarWhereInput[]
 }
 
-export type EnumTrackingTypeFieldUpdateOperationsInput = {
-  set?: $Enums.TrackingType
-}
-
 export type NullableFloatFieldUpdateOperationsInput = {
   set?: number | null
   increment?: number
@@ -651,6 +647,10 @@ export type NullableFloatFieldUpdateOperationsInput = {
 
 export type EnumWIGStatusFieldUpdateOperationsInput = {
   set?: $Enums.WIGStatus
+}
+
+export type EnumTrackingTypeFieldUpdateOperationsInput = {
+  set?: $Enums.TrackingType
 }
 
 export type WIGCreateNestedOneWithoutLeadMeasuresInput = {
@@ -687,7 +687,6 @@ export type WIGCreateWithoutTeamInput = {
   id?: string
   title: string
   description?: string | null
-  trackingType?: $Enums.TrackingType
   fromValue?: number | null
   toValue?: number | null
   currentValue?: number | null
@@ -697,6 +696,7 @@ export type WIGCreateWithoutTeamInput = {
   createdAt?: Date | string
   closedAt?: Date | string | null
   createdByUserId: string
+  trackingType?: $Enums.TrackingType
   leadMeasures?: Prisma.LeadMeasureCreateNestedManyWithoutWigInput
   weeklySessions?: Prisma.WeeklySessionCreateNestedManyWithoutWigInput
 }
@@ -705,7 +705,6 @@ export type WIGUncheckedCreateWithoutTeamInput = {
   id?: string
   title: string
   description?: string | null
-  trackingType?: $Enums.TrackingType
   fromValue?: number | null
   toValue?: number | null
   currentValue?: number | null
@@ -715,6 +714,7 @@ export type WIGUncheckedCreateWithoutTeamInput = {
   createdAt?: Date | string
   closedAt?: Date | string | null
   createdByUserId: string
+  trackingType?: $Enums.TrackingType
   leadMeasures?: Prisma.LeadMeasureUncheckedCreateNestedManyWithoutWigInput
   weeklySessions?: Prisma.WeeklySessionUncheckedCreateNestedManyWithoutWigInput
 }
@@ -752,7 +752,6 @@ export type WIGScalarWhereInput = {
   id?: Prisma.StringFilter<"WIG"> | string
   title?: Prisma.StringFilter<"WIG"> | string
   description?: Prisma.StringNullableFilter<"WIG"> | string | null
-  trackingType?: Prisma.EnumTrackingTypeFilter<"WIG"> | $Enums.TrackingType
   fromValue?: Prisma.FloatNullableFilter<"WIG"> | number | null
   toValue?: Prisma.FloatNullableFilter<"WIG"> | number | null
   currentValue?: Prisma.FloatNullableFilter<"WIG"> | number | null
@@ -763,13 +762,13 @@ export type WIGScalarWhereInput = {
   closedAt?: Prisma.DateTimeNullableFilter<"WIG"> | Date | string | null
   teamId?: Prisma.StringFilter<"WIG"> | string
   createdByUserId?: Prisma.StringFilter<"WIG"> | string
+  trackingType?: Prisma.EnumTrackingTypeFilter<"WIG"> | $Enums.TrackingType
 }
 
 export type WIGCreateWithoutLeadMeasuresInput = {
   id?: string
   title: string
   description?: string | null
-  trackingType?: $Enums.TrackingType
   fromValue?: number | null
   toValue?: number | null
   currentValue?: number | null
@@ -779,6 +778,7 @@ export type WIGCreateWithoutLeadMeasuresInput = {
   createdAt?: Date | string
   closedAt?: Date | string | null
   createdByUserId: string
+  trackingType?: $Enums.TrackingType
   team: Prisma.TeamCreateNestedOneWithoutWigsInput
   weeklySessions?: Prisma.WeeklySessionCreateNestedManyWithoutWigInput
 }
@@ -787,7 +787,6 @@ export type WIGUncheckedCreateWithoutLeadMeasuresInput = {
   id?: string
   title: string
   description?: string | null
-  trackingType?: $Enums.TrackingType
   fromValue?: number | null
   toValue?: number | null
   currentValue?: number | null
@@ -798,6 +797,7 @@ export type WIGUncheckedCreateWithoutLeadMeasuresInput = {
   closedAt?: Date | string | null
   teamId: string
   createdByUserId: string
+  trackingType?: $Enums.TrackingType
   weeklySessions?: Prisma.WeeklySessionUncheckedCreateNestedManyWithoutWigInput
 }
 
@@ -821,7 +821,6 @@ export type WIGUpdateWithoutLeadMeasuresInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  trackingType?: Prisma.EnumTrackingTypeFieldUpdateOperationsInput | $Enums.TrackingType
   fromValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   toValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   currentValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
@@ -831,6 +830,7 @@ export type WIGUpdateWithoutLeadMeasuresInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdByUserId?: Prisma.StringFieldUpdateOperationsInput | string
+  trackingType?: Prisma.EnumTrackingTypeFieldUpdateOperationsInput | $Enums.TrackingType
   team?: Prisma.TeamUpdateOneRequiredWithoutWigsNestedInput
   weeklySessions?: Prisma.WeeklySessionUpdateManyWithoutWigNestedInput
 }
@@ -839,7 +839,6 @@ export type WIGUncheckedUpdateWithoutLeadMeasuresInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  trackingType?: Prisma.EnumTrackingTypeFieldUpdateOperationsInput | $Enums.TrackingType
   fromValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   toValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   currentValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
@@ -850,6 +849,7 @@ export type WIGUncheckedUpdateWithoutLeadMeasuresInput = {
   closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   teamId?: Prisma.StringFieldUpdateOperationsInput | string
   createdByUserId?: Prisma.StringFieldUpdateOperationsInput | string
+  trackingType?: Prisma.EnumTrackingTypeFieldUpdateOperationsInput | $Enums.TrackingType
   weeklySessions?: Prisma.WeeklySessionUncheckedUpdateManyWithoutWigNestedInput
 }
 
@@ -857,7 +857,6 @@ export type WIGCreateWithoutWeeklySessionsInput = {
   id?: string
   title: string
   description?: string | null
-  trackingType?: $Enums.TrackingType
   fromValue?: number | null
   toValue?: number | null
   currentValue?: number | null
@@ -867,15 +866,15 @@ export type WIGCreateWithoutWeeklySessionsInput = {
   createdAt?: Date | string
   closedAt?: Date | string | null
   createdByUserId: string
-  team: Prisma.TeamCreateNestedOneWithoutWigsInput
+  trackingType?: $Enums.TrackingType
   leadMeasures?: Prisma.LeadMeasureCreateNestedManyWithoutWigInput
+  team: Prisma.TeamCreateNestedOneWithoutWigsInput
 }
 
 export type WIGUncheckedCreateWithoutWeeklySessionsInput = {
   id?: string
   title: string
   description?: string | null
-  trackingType?: $Enums.TrackingType
   fromValue?: number | null
   toValue?: number | null
   currentValue?: number | null
@@ -886,6 +885,7 @@ export type WIGUncheckedCreateWithoutWeeklySessionsInput = {
   closedAt?: Date | string | null
   teamId: string
   createdByUserId: string
+  trackingType?: $Enums.TrackingType
   leadMeasures?: Prisma.LeadMeasureUncheckedCreateNestedManyWithoutWigInput
 }
 
@@ -909,7 +909,6 @@ export type WIGUpdateWithoutWeeklySessionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  trackingType?: Prisma.EnumTrackingTypeFieldUpdateOperationsInput | $Enums.TrackingType
   fromValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   toValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   currentValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
@@ -919,15 +918,15 @@ export type WIGUpdateWithoutWeeklySessionsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdByUserId?: Prisma.StringFieldUpdateOperationsInput | string
-  team?: Prisma.TeamUpdateOneRequiredWithoutWigsNestedInput
+  trackingType?: Prisma.EnumTrackingTypeFieldUpdateOperationsInput | $Enums.TrackingType
   leadMeasures?: Prisma.LeadMeasureUpdateManyWithoutWigNestedInput
+  team?: Prisma.TeamUpdateOneRequiredWithoutWigsNestedInput
 }
 
 export type WIGUncheckedUpdateWithoutWeeklySessionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  trackingType?: Prisma.EnumTrackingTypeFieldUpdateOperationsInput | $Enums.TrackingType
   fromValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   toValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   currentValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
@@ -938,6 +937,7 @@ export type WIGUncheckedUpdateWithoutWeeklySessionsInput = {
   closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   teamId?: Prisma.StringFieldUpdateOperationsInput | string
   createdByUserId?: Prisma.StringFieldUpdateOperationsInput | string
+  trackingType?: Prisma.EnumTrackingTypeFieldUpdateOperationsInput | $Enums.TrackingType
   leadMeasures?: Prisma.LeadMeasureUncheckedUpdateManyWithoutWigNestedInput
 }
 
@@ -945,7 +945,6 @@ export type WIGCreateManyTeamInput = {
   id?: string
   title: string
   description?: string | null
-  trackingType?: $Enums.TrackingType
   fromValue?: number | null
   toValue?: number | null
   currentValue?: number | null
@@ -955,13 +954,13 @@ export type WIGCreateManyTeamInput = {
   createdAt?: Date | string
   closedAt?: Date | string | null
   createdByUserId: string
+  trackingType?: $Enums.TrackingType
 }
 
 export type WIGUpdateWithoutTeamInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  trackingType?: Prisma.EnumTrackingTypeFieldUpdateOperationsInput | $Enums.TrackingType
   fromValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   toValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   currentValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
@@ -971,6 +970,7 @@ export type WIGUpdateWithoutTeamInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdByUserId?: Prisma.StringFieldUpdateOperationsInput | string
+  trackingType?: Prisma.EnumTrackingTypeFieldUpdateOperationsInput | $Enums.TrackingType
   leadMeasures?: Prisma.LeadMeasureUpdateManyWithoutWigNestedInput
   weeklySessions?: Prisma.WeeklySessionUpdateManyWithoutWigNestedInput
 }
@@ -979,7 +979,6 @@ export type WIGUncheckedUpdateWithoutTeamInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  trackingType?: Prisma.EnumTrackingTypeFieldUpdateOperationsInput | $Enums.TrackingType
   fromValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   toValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   currentValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
@@ -989,6 +988,7 @@ export type WIGUncheckedUpdateWithoutTeamInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdByUserId?: Prisma.StringFieldUpdateOperationsInput | string
+  trackingType?: Prisma.EnumTrackingTypeFieldUpdateOperationsInput | $Enums.TrackingType
   leadMeasures?: Prisma.LeadMeasureUncheckedUpdateManyWithoutWigNestedInput
   weeklySessions?: Prisma.WeeklySessionUncheckedUpdateManyWithoutWigNestedInput
 }
@@ -997,7 +997,6 @@ export type WIGUncheckedUpdateManyWithoutTeamInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  trackingType?: Prisma.EnumTrackingTypeFieldUpdateOperationsInput | $Enums.TrackingType
   fromValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   toValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   currentValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
@@ -1007,6 +1006,7 @@ export type WIGUncheckedUpdateManyWithoutTeamInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdByUserId?: Prisma.StringFieldUpdateOperationsInput | string
+  trackingType?: Prisma.EnumTrackingTypeFieldUpdateOperationsInput | $Enums.TrackingType
 }
 
 
@@ -1053,7 +1053,6 @@ export type WIGSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = ru
   id?: boolean
   title?: boolean
   description?: boolean
-  trackingType?: boolean
   fromValue?: boolean
   toValue?: boolean
   currentValue?: boolean
@@ -1064,8 +1063,9 @@ export type WIGSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = ru
   closedAt?: boolean
   teamId?: boolean
   createdByUserId?: boolean
-  team?: boolean | Prisma.TeamDefaultArgs<ExtArgs>
+  trackingType?: boolean
   leadMeasures?: boolean | Prisma.WIG$leadMeasuresArgs<ExtArgs>
+  team?: boolean | Prisma.TeamDefaultArgs<ExtArgs>
   weeklySessions?: boolean | Prisma.WIG$weeklySessionsArgs<ExtArgs>
   _count?: boolean | Prisma.WIGCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["wIG"]>
@@ -1074,7 +1074,6 @@ export type WIGSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extension
   id?: boolean
   title?: boolean
   description?: boolean
-  trackingType?: boolean
   fromValue?: boolean
   toValue?: boolean
   currentValue?: boolean
@@ -1085,6 +1084,7 @@ export type WIGSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extension
   closedAt?: boolean
   teamId?: boolean
   createdByUserId?: boolean
+  trackingType?: boolean
   team?: boolean | Prisma.TeamDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["wIG"]>
 
@@ -1092,7 +1092,6 @@ export type WIGSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extension
   id?: boolean
   title?: boolean
   description?: boolean
-  trackingType?: boolean
   fromValue?: boolean
   toValue?: boolean
   currentValue?: boolean
@@ -1103,6 +1102,7 @@ export type WIGSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extension
   closedAt?: boolean
   teamId?: boolean
   createdByUserId?: boolean
+  trackingType?: boolean
   team?: boolean | Prisma.TeamDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["wIG"]>
 
@@ -1110,7 +1110,6 @@ export type WIGSelectScalar = {
   id?: boolean
   title?: boolean
   description?: boolean
-  trackingType?: boolean
   fromValue?: boolean
   toValue?: boolean
   currentValue?: boolean
@@ -1121,12 +1120,13 @@ export type WIGSelectScalar = {
   closedAt?: boolean
   teamId?: boolean
   createdByUserId?: boolean
+  trackingType?: boolean
 }
 
-export type WIGOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "description" | "trackingType" | "fromValue" | "toValue" | "currentValue" | "unit" | "deadline" | "status" | "createdAt" | "closedAt" | "teamId" | "createdByUserId", ExtArgs["result"]["wIG"]>
+export type WIGOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "description" | "fromValue" | "toValue" | "currentValue" | "unit" | "deadline" | "status" | "createdAt" | "closedAt" | "teamId" | "createdByUserId" | "trackingType", ExtArgs["result"]["wIG"]>
 export type WIGInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  team?: boolean | Prisma.TeamDefaultArgs<ExtArgs>
   leadMeasures?: boolean | Prisma.WIG$leadMeasuresArgs<ExtArgs>
+  team?: boolean | Prisma.TeamDefaultArgs<ExtArgs>
   weeklySessions?: boolean | Prisma.WIG$weeklySessionsArgs<ExtArgs>
   _count?: boolean | Prisma.WIGCountOutputTypeDefaultArgs<ExtArgs>
 }
@@ -1140,15 +1140,14 @@ export type WIGIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
 export type $WIGPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "WIG"
   objects: {
-    team: Prisma.$TeamPayload<ExtArgs>
     leadMeasures: Prisma.$LeadMeasurePayload<ExtArgs>[]
+    team: Prisma.$TeamPayload<ExtArgs>
     weeklySessions: Prisma.$WeeklySessionPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     title: string
     description: string | null
-    trackingType: $Enums.TrackingType
     fromValue: number | null
     toValue: number | null
     currentValue: number | null
@@ -1159,6 +1158,7 @@ export type $WIGPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
     closedAt: Date | null
     teamId: string
     createdByUserId: string
+    trackingType: $Enums.TrackingType
   }, ExtArgs["result"]["wIG"]>
   composites: {}
 }
@@ -1553,8 +1553,8 @@ readonly fields: WIGFieldRefs;
  */
 export interface Prisma__WIGClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  team<T extends Prisma.TeamDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TeamDefaultArgs<ExtArgs>>): Prisma.Prisma__TeamClient<runtime.Types.Result.GetResult<Prisma.$TeamPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   leadMeasures<T extends Prisma.WIG$leadMeasuresArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.WIG$leadMeasuresArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LeadMeasurePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  team<T extends Prisma.TeamDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TeamDefaultArgs<ExtArgs>>): Prisma.Prisma__TeamClient<runtime.Types.Result.GetResult<Prisma.$TeamPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   weeklySessions<T extends Prisma.WIG$weeklySessionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.WIG$weeklySessionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$WeeklySessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -1588,7 +1588,6 @@ export interface WIGFieldRefs {
   readonly id: Prisma.FieldRef<"WIG", 'String'>
   readonly title: Prisma.FieldRef<"WIG", 'String'>
   readonly description: Prisma.FieldRef<"WIG", 'String'>
-  readonly trackingType: Prisma.FieldRef<"WIG", 'TrackingType'>
   readonly fromValue: Prisma.FieldRef<"WIG", 'Float'>
   readonly toValue: Prisma.FieldRef<"WIG", 'Float'>
   readonly currentValue: Prisma.FieldRef<"WIG", 'Float'>
@@ -1599,6 +1598,7 @@ export interface WIGFieldRefs {
   readonly closedAt: Prisma.FieldRef<"WIG", 'DateTime'>
   readonly teamId: Prisma.FieldRef<"WIG", 'String'>
   readonly createdByUserId: Prisma.FieldRef<"WIG", 'String'>
+  readonly trackingType: Prisma.FieldRef<"WIG", 'TrackingType'>
 }
     
 

@@ -1,0 +1,12 @@
+@url = http://localhost:3001/api/signup
+@contentType = application/json
+
+### Test Signup
+POST @url
+Content-Type: @contentType
+
+{
+  "name": "Health Check",
+  "email": "healthcheck@test.com",
+  "password": "password123"
+}

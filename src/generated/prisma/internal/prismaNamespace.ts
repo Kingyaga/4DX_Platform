@@ -1944,7 +1944,6 @@ export const WIGScalarFieldEnum = {
   id: 'id',
   title: 'title',
   description: 'description',
-  trackingType: 'trackingType',
   fromValue: 'fromValue',
   toValue: 'toValue',
   currentValue: 'currentValue',
@@ -1954,7 +1953,8 @@ export const WIGScalarFieldEnum = {
   createdAt: 'createdAt',
   closedAt: 'closedAt',
   teamId: 'teamId',
-  createdByUserId: 'createdByUserId'
+  createdByUserId: 'createdByUserId',
+  trackingType: 'trackingType'
 } as const
 
 export type WIGScalarFieldEnum = (typeof WIGScalarFieldEnum)[keyof typeof WIGScalarFieldEnum]
@@ -1964,13 +1964,13 @@ export const LeadMeasureScalarFieldEnum = {
   id: 'id',
   name: 'name',
   description: 'description',
-  trackingType: 'trackingType',
   cadence: 'cadence',
   targetValue: 'targetValue',
   unit: 'unit',
   createdAt: 'createdAt',
   archivedAt: 'archivedAt',
-  wigId: 'wigId'
+  wigId: 'wigId',
+  trackingType: 'trackingType'
 } as const
 
 export type LeadMeasureScalarFieldEnum = (typeof LeadMeasureScalarFieldEnum)[keyof typeof LeadMeasureScalarFieldEnum]
@@ -1987,17 +1987,18 @@ export type LeadMeasureOwnerScalarFieldEnum = (typeof LeadMeasureOwnerScalarFiel
 
 export const ActivityLogScalarFieldEnum = {
   id: 'id',
-  trackingType: 'trackingType',
   value: 'value',
-  valueJson: 'valueJson',
-  progressStatus: 'progressStatus',
   loggedForDate: 'loggedForDate',
   note: 'note',
-  status: 'status',
   createdAt: 'createdAt',
   editedAt: 'editedAt',
   leadMeasureId: 'leadMeasureId',
-  userId: 'userId'
+  userId: 'userId',
+  status: 'status',
+  progressStatus: 'progressStatus',
+  payloadJson: 'payloadJson',
+  trackingType: 'trackingType',
+  valueJson: 'valueJson'
 } as const
 
 export type ActivityLogScalarFieldEnum = (typeof ActivityLogScalarFieldEnum)[keyof typeof ActivityLogScalarFieldEnum]
@@ -2005,21 +2006,21 @@ export type ActivityLogScalarFieldEnum = (typeof ActivityLogScalarFieldEnum)[key
 
 export const WeeklySessionScalarFieldEnum = {
   id: 'id',
-  title: 'title',
   weekStarting: 'weekStarting',
-  weekEnding: 'weekEnding',
   status: 'status',
-  snapshotJson: 'snapshotJson',
-  notes: 'notes',
-  confidenceScore: 'confidenceScore',
   accountDoneAt: 'accountDoneAt',
   reviewDoneAt: 'reviewDoneAt',
   commitDoneAt: 'commitDoneAt',
-  startedAt: 'startedAt',
-  completedAt: 'completedAt',
   createdAt: 'createdAt',
   wigId: 'wigId',
   userId: 'userId',
+  snapshotJson: 'snapshotJson',
+  title: 'title',
+  weekEnding: 'weekEnding',
+  notes: 'notes',
+  confidenceScore: 'confidenceScore',
+  startedAt: 'startedAt',
+  completedAt: 'completedAt',
   teamId: 'teamId',
   facilitatorUserId: 'facilitatorUserId'
 } as const
@@ -2034,9 +2035,9 @@ export const CommitmentScalarFieldEnum = {
   notDoneReason: 'notDoneReason',
   reflection: 'reflection',
   resolvedAt: 'resolvedAt',
-  createdAt: 'createdAt',
   weeklySessionId: 'weeklySessionId',
-  linkedLeadMeasureId: 'linkedLeadMeasureId'
+  linkedLeadMeasureId: 'linkedLeadMeasureId',
+  createdAt: 'createdAt'
 } as const
 
 export type CommitmentScalarFieldEnum = (typeof CommitmentScalarFieldEnum)[keyof typeof CommitmentScalarFieldEnum]
@@ -2088,7 +2089,8 @@ export const AuditLogScalarFieldEnum = {
   beforeJson: 'beforeJson',
   afterJson: 'afterJson',
   createdAt: 'createdAt',
-  actorUserId: 'actorUserId'
+  actorUserId: 'actorUserId',
+  orgId: 'orgId'
 } as const
 
 export type AuditLogScalarFieldEnum = (typeof AuditLogScalarFieldEnum)[keyof typeof AuditLogScalarFieldEnum]
@@ -2254,20 +2256,6 @@ export type ListEnumTeamRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$Pri
 
 
 /**
- * Reference to a field of type 'TrackingType'
- */
-export type EnumTrackingTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TrackingType'>
-    
-
-
-/**
- * Reference to a field of type 'TrackingType[]'
- */
-export type ListEnumTrackingTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TrackingType[]'>
-    
-
-
-/**
  * Reference to a field of type 'Float'
  */
 export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
@@ -2296,6 +2284,20 @@ export type ListEnumWIGStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$Pr
 
 
 /**
+ * Reference to a field of type 'TrackingType'
+ */
+export type EnumTrackingTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TrackingType'>
+    
+
+
+/**
+ * Reference to a field of type 'TrackingType[]'
+ */
+export type ListEnumTrackingTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TrackingType[]'>
+    
+
+
+/**
  * Reference to a field of type 'Cadence'
  */
 export type EnumCadenceFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Cadence'>
@@ -2310,16 +2312,16 @@ export type ListEnumCadenceFieldRefInput<$PrismaModel> = FieldRefInputType<$Pris
 
 
 /**
- * Reference to a field of type 'Json'
+ * Reference to a field of type 'ActivityLogStatus'
  */
-export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
+export type EnumActivityLogStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ActivityLogStatus'>
     
 
 
 /**
- * Reference to a field of type 'QueryMode'
+ * Reference to a field of type 'ActivityLogStatus[]'
  */
-export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
+export type ListEnumActivityLogStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ActivityLogStatus[]'>
     
 
 
@@ -2338,16 +2340,16 @@ export type ListEnumActivityProgressStatusFieldRefInput<$PrismaModel> = FieldRef
 
 
 /**
- * Reference to a field of type 'ActivityLogStatus'
+ * Reference to a field of type 'Json'
  */
-export type EnumActivityLogStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ActivityLogStatus'>
+export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
     
 
 
 /**
- * Reference to a field of type 'ActivityLogStatus[]'
+ * Reference to a field of type 'QueryMode'
  */
-export type ListEnumActivityLogStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ActivityLogStatus[]'>
+export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
     
 
 

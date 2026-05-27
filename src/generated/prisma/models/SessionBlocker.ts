@@ -206,8 +206,8 @@ export type SessionBlockerWhereInput = {
   resolvedAt?: Prisma.DateTimeNullableFilter<"SessionBlocker"> | Date | string | null
   weeklySessionId?: Prisma.StringFilter<"SessionBlocker"> | string
   createdByUserId?: Prisma.StringFilter<"SessionBlocker"> | string
-  weeklySession?: Prisma.XOR<Prisma.WeeklySessionScalarRelationFilter, Prisma.WeeklySessionWhereInput>
   createdBy?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  weeklySession?: Prisma.XOR<Prisma.WeeklySessionScalarRelationFilter, Prisma.WeeklySessionWhereInput>
 }
 
 export type SessionBlockerOrderByWithRelationInput = {
@@ -219,8 +219,8 @@ export type SessionBlockerOrderByWithRelationInput = {
   resolvedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   weeklySessionId?: Prisma.SortOrder
   createdByUserId?: Prisma.SortOrder
-  weeklySession?: Prisma.WeeklySessionOrderByWithRelationInput
   createdBy?: Prisma.UserOrderByWithRelationInput
+  weeklySession?: Prisma.WeeklySessionOrderByWithRelationInput
 }
 
 export type SessionBlockerWhereUniqueInput = Prisma.AtLeast<{
@@ -235,8 +235,8 @@ export type SessionBlockerWhereUniqueInput = Prisma.AtLeast<{
   resolvedAt?: Prisma.DateTimeNullableFilter<"SessionBlocker"> | Date | string | null
   weeklySessionId?: Prisma.StringFilter<"SessionBlocker"> | string
   createdByUserId?: Prisma.StringFilter<"SessionBlocker"> | string
-  weeklySession?: Prisma.XOR<Prisma.WeeklySessionScalarRelationFilter, Prisma.WeeklySessionWhereInput>
   createdBy?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  weeklySession?: Prisma.XOR<Prisma.WeeklySessionScalarRelationFilter, Prisma.WeeklySessionWhereInput>
 }, "id">
 
 export type SessionBlockerOrderByWithAggregationInput = {
@@ -274,8 +274,8 @@ export type SessionBlockerCreateInput = {
   status?: $Enums.BlockerStatus
   createdAt?: Date | string
   resolvedAt?: Date | string | null
-  weeklySession: Prisma.WeeklySessionCreateNestedOneWithoutBlockersInput
   createdBy: Prisma.UserCreateNestedOneWithoutSessionBlockersInput
+  weeklySession: Prisma.WeeklySessionCreateNestedOneWithoutBlockersInput
 }
 
 export type SessionBlockerUncheckedCreateInput = {
@@ -296,8 +296,8 @@ export type SessionBlockerUpdateInput = {
   status?: Prisma.EnumBlockerStatusFieldUpdateOperationsInput | $Enums.BlockerStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   resolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  weeklySession?: Prisma.WeeklySessionUpdateOneRequiredWithoutBlockersNestedInput
   createdBy?: Prisma.UserUpdateOneRequiredWithoutSessionBlockersNestedInput
+  weeklySession?: Prisma.WeeklySessionUpdateOneRequiredWithoutBlockersNestedInput
 }
 
 export type SessionBlockerUncheckedUpdateInput = {
@@ -670,8 +670,8 @@ export type SessionBlockerSelect<ExtArgs extends runtime.Types.Extensions.Intern
   resolvedAt?: boolean
   weeklySessionId?: boolean
   createdByUserId?: boolean
-  weeklySession?: boolean | Prisma.WeeklySessionDefaultArgs<ExtArgs>
   createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  weeklySession?: boolean | Prisma.WeeklySessionDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["sessionBlocker"]>
 
 export type SessionBlockerSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -683,8 +683,8 @@ export type SessionBlockerSelectCreateManyAndReturn<ExtArgs extends runtime.Type
   resolvedAt?: boolean
   weeklySessionId?: boolean
   createdByUserId?: boolean
-  weeklySession?: boolean | Prisma.WeeklySessionDefaultArgs<ExtArgs>
   createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  weeklySession?: boolean | Prisma.WeeklySessionDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["sessionBlocker"]>
 
 export type SessionBlockerSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -696,8 +696,8 @@ export type SessionBlockerSelectUpdateManyAndReturn<ExtArgs extends runtime.Type
   resolvedAt?: boolean
   weeklySessionId?: boolean
   createdByUserId?: boolean
-  weeklySession?: boolean | Prisma.WeeklySessionDefaultArgs<ExtArgs>
   createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  weeklySession?: boolean | Prisma.WeeklySessionDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["sessionBlocker"]>
 
 export type SessionBlockerSelectScalar = {
@@ -713,23 +713,23 @@ export type SessionBlockerSelectScalar = {
 
 export type SessionBlockerOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "details" | "status" | "createdAt" | "resolvedAt" | "weeklySessionId" | "createdByUserId", ExtArgs["result"]["sessionBlocker"]>
 export type SessionBlockerInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  weeklySession?: boolean | Prisma.WeeklySessionDefaultArgs<ExtArgs>
   createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  weeklySession?: boolean | Prisma.WeeklySessionDefaultArgs<ExtArgs>
 }
 export type SessionBlockerIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  weeklySession?: boolean | Prisma.WeeklySessionDefaultArgs<ExtArgs>
   createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  weeklySession?: boolean | Prisma.WeeklySessionDefaultArgs<ExtArgs>
 }
 export type SessionBlockerIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  weeklySession?: boolean | Prisma.WeeklySessionDefaultArgs<ExtArgs>
   createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  weeklySession?: boolean | Prisma.WeeklySessionDefaultArgs<ExtArgs>
 }
 
 export type $SessionBlockerPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "SessionBlocker"
   objects: {
-    weeklySession: Prisma.$WeeklySessionPayload<ExtArgs>
     createdBy: Prisma.$UserPayload<ExtArgs>
+    weeklySession: Prisma.$WeeklySessionPayload<ExtArgs>
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1134,8 +1134,8 @@ readonly fields: SessionBlockerFieldRefs;
  */
 export interface Prisma__SessionBlockerClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  weeklySession<T extends Prisma.WeeklySessionDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.WeeklySessionDefaultArgs<ExtArgs>>): Prisma.Prisma__WeeklySessionClient<runtime.Types.Result.GetResult<Prisma.$WeeklySessionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   createdBy<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  weeklySession<T extends Prisma.WeeklySessionDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.WeeklySessionDefaultArgs<ExtArgs>>): Prisma.Prisma__WeeklySessionClient<runtime.Types.Result.GetResult<Prisma.$WeeklySessionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.

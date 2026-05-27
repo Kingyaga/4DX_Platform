@@ -1,8 +1,8 @@
 import "dotenv/config";
-import { PrismaClient } from "@prisma/client";
+import { createPrismaClient } from "../server/prisma-client";
 import { Resend } from "resend";
 
-const db = new PrismaClient();
+const db = createPrismaClient();
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 const emailFrom = process.env.EMAIL_FROM || "4DX Platform <onboarding@resend.dev>";
 

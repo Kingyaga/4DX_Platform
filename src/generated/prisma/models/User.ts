@@ -198,19 +198,19 @@ export type UserWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   defaultTeamId?: Prisma.StringNullableFilter<"User"> | string | null
   mustChangePassword?: Prisma.BoolFilter<"User"> | boolean
-  orgMemberships?: Prisma.OrgMembershipListRelationFilter
-  teamMemberships?: Prisma.TeamMembershipListRelationFilter
   activityLogs?: Prisma.ActivityLogListRelationFilter
-  weeklySessions?: Prisma.WeeklySessionListRelationFilter
-  facilitatedSessions?: Prisma.WeeklySessionListRelationFilter
+  auditLogs?: Prisma.AuditLogListRelationFilter
+  invites?: Prisma.InviteListRelationFilter
+  createdInvites?: Prisma.InviteTokenListRelationFilter
+  leadMeasures?: Prisma.LeadMeasureOwnerListRelationFilter
+  notifications?: Prisma.NotificationListRelationFilter
+  orgMemberships?: Prisma.OrgMembershipListRelationFilter
+  passwordResetTokens?: Prisma.PasswordResetTokenListRelationFilter
   sessionBlockers?: Prisma.SessionBlockerListRelationFilter
   sessionTimeline?: Prisma.SessionTimelineEventListRelationFilter
-  notifications?: Prisma.NotificationListRelationFilter
-  auditLogs?: Prisma.AuditLogListRelationFilter
-  leadMeasures?: Prisma.LeadMeasureOwnerListRelationFilter
-  createdInvites?: Prisma.InviteTokenListRelationFilter
-  invites?: Prisma.InviteListRelationFilter
-  passwordResetTokens?: Prisma.PasswordResetTokenListRelationFilter
+  teamMemberships?: Prisma.TeamMembershipListRelationFilter
+  facilitatedSessions?: Prisma.WeeklySessionListRelationFilter
+  weeklySessions?: Prisma.WeeklySessionListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -221,19 +221,19 @@ export type UserOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   defaultTeamId?: Prisma.SortOrderInput | Prisma.SortOrder
   mustChangePassword?: Prisma.SortOrder
-  orgMemberships?: Prisma.OrgMembershipOrderByRelationAggregateInput
-  teamMemberships?: Prisma.TeamMembershipOrderByRelationAggregateInput
   activityLogs?: Prisma.ActivityLogOrderByRelationAggregateInput
-  weeklySessions?: Prisma.WeeklySessionOrderByRelationAggregateInput
-  facilitatedSessions?: Prisma.WeeklySessionOrderByRelationAggregateInput
+  auditLogs?: Prisma.AuditLogOrderByRelationAggregateInput
+  invites?: Prisma.InviteOrderByRelationAggregateInput
+  createdInvites?: Prisma.InviteTokenOrderByRelationAggregateInput
+  leadMeasures?: Prisma.LeadMeasureOwnerOrderByRelationAggregateInput
+  notifications?: Prisma.NotificationOrderByRelationAggregateInput
+  orgMemberships?: Prisma.OrgMembershipOrderByRelationAggregateInput
+  passwordResetTokens?: Prisma.PasswordResetTokenOrderByRelationAggregateInput
   sessionBlockers?: Prisma.SessionBlockerOrderByRelationAggregateInput
   sessionTimeline?: Prisma.SessionTimelineEventOrderByRelationAggregateInput
-  notifications?: Prisma.NotificationOrderByRelationAggregateInput
-  auditLogs?: Prisma.AuditLogOrderByRelationAggregateInput
-  leadMeasures?: Prisma.LeadMeasureOwnerOrderByRelationAggregateInput
-  createdInvites?: Prisma.InviteTokenOrderByRelationAggregateInput
-  invites?: Prisma.InviteOrderByRelationAggregateInput
-  passwordResetTokens?: Prisma.PasswordResetTokenOrderByRelationAggregateInput
+  teamMemberships?: Prisma.TeamMembershipOrderByRelationAggregateInput
+  facilitatedSessions?: Prisma.WeeklySessionOrderByRelationAggregateInput
+  weeklySessions?: Prisma.WeeklySessionOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -247,19 +247,19 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   defaultTeamId?: Prisma.StringNullableFilter<"User"> | string | null
   mustChangePassword?: Prisma.BoolFilter<"User"> | boolean
-  orgMemberships?: Prisma.OrgMembershipListRelationFilter
-  teamMemberships?: Prisma.TeamMembershipListRelationFilter
   activityLogs?: Prisma.ActivityLogListRelationFilter
-  weeklySessions?: Prisma.WeeklySessionListRelationFilter
-  facilitatedSessions?: Prisma.WeeklySessionListRelationFilter
+  auditLogs?: Prisma.AuditLogListRelationFilter
+  invites?: Prisma.InviteListRelationFilter
+  createdInvites?: Prisma.InviteTokenListRelationFilter
+  leadMeasures?: Prisma.LeadMeasureOwnerListRelationFilter
+  notifications?: Prisma.NotificationListRelationFilter
+  orgMemberships?: Prisma.OrgMembershipListRelationFilter
+  passwordResetTokens?: Prisma.PasswordResetTokenListRelationFilter
   sessionBlockers?: Prisma.SessionBlockerListRelationFilter
   sessionTimeline?: Prisma.SessionTimelineEventListRelationFilter
-  notifications?: Prisma.NotificationListRelationFilter
-  auditLogs?: Prisma.AuditLogListRelationFilter
-  leadMeasures?: Prisma.LeadMeasureOwnerListRelationFilter
-  createdInvites?: Prisma.InviteTokenListRelationFilter
-  invites?: Prisma.InviteListRelationFilter
-  passwordResetTokens?: Prisma.PasswordResetTokenListRelationFilter
+  teamMemberships?: Prisma.TeamMembershipListRelationFilter
+  facilitatedSessions?: Prisma.WeeklySessionListRelationFilter
+  weeklySessions?: Prisma.WeeklySessionListRelationFilter
 }, "id" | "email">
 
 export type UserOrderByWithAggregationInput = {
@@ -296,19 +296,19 @@ export type UserCreateInput = {
   createdAt?: Date | string
   defaultTeamId?: string | null
   mustChangePassword?: boolean
-  orgMemberships?: Prisma.OrgMembershipCreateNestedManyWithoutUserInput
-  teamMemberships?: Prisma.TeamMembershipCreateNestedManyWithoutUserInput
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutUserInput
-  weeklySessions?: Prisma.WeeklySessionCreateNestedManyWithoutUserInput
-  facilitatedSessions?: Prisma.WeeklySessionCreateNestedManyWithoutFacilitatorInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
+  invites?: Prisma.InviteCreateNestedManyWithoutInvitedByInput
+  createdInvites?: Prisma.InviteTokenCreateNestedManyWithoutCreatedByInput
+  leadMeasures?: Prisma.LeadMeasureOwnerCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  orgMemberships?: Prisma.OrgMembershipCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   sessionBlockers?: Prisma.SessionBlockerCreateNestedManyWithoutCreatedByInput
   sessionTimeline?: Prisma.SessionTimelineEventCreateNestedManyWithoutActorInput
-  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
-  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
-  leadMeasures?: Prisma.LeadMeasureOwnerCreateNestedManyWithoutUserInput
-  createdInvites?: Prisma.InviteTokenCreateNestedManyWithoutCreatedByInput
-  invites?: Prisma.InviteCreateNestedManyWithoutInvitedByInput
-  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
+  teamMemberships?: Prisma.TeamMembershipCreateNestedManyWithoutUserInput
+  facilitatedSessions?: Prisma.WeeklySessionCreateNestedManyWithoutFacilitatorInput
+  weeklySessions?: Prisma.WeeklySessionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -319,19 +319,19 @@ export type UserUncheckedCreateInput = {
   createdAt?: Date | string
   defaultTeamId?: string | null
   mustChangePassword?: boolean
-  orgMemberships?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutUserInput
-  teamMemberships?: Prisma.TeamMembershipUncheckedCreateNestedManyWithoutUserInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutUserInput
-  weeklySessions?: Prisma.WeeklySessionUncheckedCreateNestedManyWithoutUserInput
-  facilitatedSessions?: Prisma.WeeklySessionUncheckedCreateNestedManyWithoutFacilitatorInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
+  invites?: Prisma.InviteUncheckedCreateNestedManyWithoutInvitedByInput
+  createdInvites?: Prisma.InviteTokenUncheckedCreateNestedManyWithoutCreatedByInput
+  leadMeasures?: Prisma.LeadMeasureOwnerUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  orgMemberships?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   sessionBlockers?: Prisma.SessionBlockerUncheckedCreateNestedManyWithoutCreatedByInput
   sessionTimeline?: Prisma.SessionTimelineEventUncheckedCreateNestedManyWithoutActorInput
-  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
-  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
-  leadMeasures?: Prisma.LeadMeasureOwnerUncheckedCreateNestedManyWithoutUserInput
-  createdInvites?: Prisma.InviteTokenUncheckedCreateNestedManyWithoutCreatedByInput
-  invites?: Prisma.InviteUncheckedCreateNestedManyWithoutInvitedByInput
-  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+  teamMemberships?: Prisma.TeamMembershipUncheckedCreateNestedManyWithoutUserInput
+  facilitatedSessions?: Prisma.WeeklySessionUncheckedCreateNestedManyWithoutFacilitatorInput
+  weeklySessions?: Prisma.WeeklySessionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserUpdateInput = {
@@ -342,19 +342,19 @@ export type UserUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   defaultTeamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  orgMemberships?: Prisma.OrgMembershipUpdateManyWithoutUserNestedInput
-  teamMemberships?: Prisma.TeamMembershipUpdateManyWithoutUserNestedInput
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutUserNestedInput
-  weeklySessions?: Prisma.WeeklySessionUpdateManyWithoutUserNestedInput
-  facilitatedSessions?: Prisma.WeeklySessionUpdateManyWithoutFacilitatorNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
+  invites?: Prisma.InviteUpdateManyWithoutInvitedByNestedInput
+  createdInvites?: Prisma.InviteTokenUpdateManyWithoutCreatedByNestedInput
+  leadMeasures?: Prisma.LeadMeasureOwnerUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  orgMemberships?: Prisma.OrgMembershipUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   sessionBlockers?: Prisma.SessionBlockerUpdateManyWithoutCreatedByNestedInput
   sessionTimeline?: Prisma.SessionTimelineEventUpdateManyWithoutActorNestedInput
-  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
-  auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
-  leadMeasures?: Prisma.LeadMeasureOwnerUpdateManyWithoutUserNestedInput
-  createdInvites?: Prisma.InviteTokenUpdateManyWithoutCreatedByNestedInput
-  invites?: Prisma.InviteUpdateManyWithoutInvitedByNestedInput
-  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
+  teamMemberships?: Prisma.TeamMembershipUpdateManyWithoutUserNestedInput
+  facilitatedSessions?: Prisma.WeeklySessionUpdateManyWithoutFacilitatorNestedInput
+  weeklySessions?: Prisma.WeeklySessionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -365,19 +365,19 @@ export type UserUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   defaultTeamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  orgMemberships?: Prisma.OrgMembershipUncheckedUpdateManyWithoutUserNestedInput
-  teamMemberships?: Prisma.TeamMembershipUncheckedUpdateManyWithoutUserNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutUserNestedInput
-  weeklySessions?: Prisma.WeeklySessionUncheckedUpdateManyWithoutUserNestedInput
-  facilitatedSessions?: Prisma.WeeklySessionUncheckedUpdateManyWithoutFacilitatorNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
+  invites?: Prisma.InviteUncheckedUpdateManyWithoutInvitedByNestedInput
+  createdInvites?: Prisma.InviteTokenUncheckedUpdateManyWithoutCreatedByNestedInput
+  leadMeasures?: Prisma.LeadMeasureOwnerUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  orgMemberships?: Prisma.OrgMembershipUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   sessionBlockers?: Prisma.SessionBlockerUncheckedUpdateManyWithoutCreatedByNestedInput
   sessionTimeline?: Prisma.SessionTimelineEventUncheckedUpdateManyWithoutActorNestedInput
-  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
-  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
-  leadMeasures?: Prisma.LeadMeasureOwnerUncheckedUpdateManyWithoutUserNestedInput
-  createdInvites?: Prisma.InviteTokenUncheckedUpdateManyWithoutCreatedByNestedInput
-  invites?: Prisma.InviteUncheckedUpdateManyWithoutInvitedByNestedInput
-  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+  teamMemberships?: Prisma.TeamMembershipUncheckedUpdateManyWithoutUserNestedInput
+  facilitatedSessions?: Prisma.WeeklySessionUncheckedUpdateManyWithoutFacilitatorNestedInput
+  weeklySessions?: Prisma.WeeklySessionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -528,26 +528,16 @@ export type UserUpdateOneRequiredWithoutActivityLogsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutActivityLogsInput, Prisma.UserUpdateWithoutActivityLogsInput>, Prisma.UserUncheckedUpdateWithoutActivityLogsInput>
 }
 
-export type UserCreateNestedOneWithoutWeeklySessionsInput = {
-  create?: Prisma.XOR<Prisma.UserCreateWithoutWeeklySessionsInput, Prisma.UserUncheckedCreateWithoutWeeklySessionsInput>
-  connectOrCreate?: Prisma.UserCreateOrConnectWithoutWeeklySessionsInput
-  connect?: Prisma.UserWhereUniqueInput
-}
-
 export type UserCreateNestedOneWithoutFacilitatedSessionsInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutFacilitatedSessionsInput, Prisma.UserUncheckedCreateWithoutFacilitatedSessionsInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutFacilitatedSessionsInput
   connect?: Prisma.UserWhereUniqueInput
 }
 
-export type UserUpdateOneWithoutWeeklySessionsNestedInput = {
+export type UserCreateNestedOneWithoutWeeklySessionsInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutWeeklySessionsInput, Prisma.UserUncheckedCreateWithoutWeeklySessionsInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutWeeklySessionsInput
-  upsert?: Prisma.UserUpsertWithoutWeeklySessionsInput
-  disconnect?: Prisma.UserWhereInput | boolean
-  delete?: Prisma.UserWhereInput | boolean
   connect?: Prisma.UserWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutWeeklySessionsInput, Prisma.UserUpdateWithoutWeeklySessionsInput>, Prisma.UserUncheckedUpdateWithoutWeeklySessionsInput>
 }
 
 export type UserUpdateOneWithoutFacilitatedSessionsNestedInput = {
@@ -558,6 +548,16 @@ export type UserUpdateOneWithoutFacilitatedSessionsNestedInput = {
   delete?: Prisma.UserWhereInput | boolean
   connect?: Prisma.UserWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutFacilitatedSessionsInput, Prisma.UserUpdateWithoutFacilitatedSessionsInput>, Prisma.UserUncheckedUpdateWithoutFacilitatedSessionsInput>
+}
+
+export type UserUpdateOneWithoutWeeklySessionsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutWeeklySessionsInput, Prisma.UserUncheckedCreateWithoutWeeklySessionsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutWeeklySessionsInput
+  upsert?: Prisma.UserUpsertWithoutWeeklySessionsInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutWeeklySessionsInput, Prisma.UserUpdateWithoutWeeklySessionsInput>, Prisma.UserUncheckedUpdateWithoutWeeklySessionsInput>
 }
 
 export type UserCreateNestedOneWithoutSessionBlockersInput = {
@@ -652,18 +652,18 @@ export type UserCreateWithoutOrgMembershipsInput = {
   createdAt?: Date | string
   defaultTeamId?: string | null
   mustChangePassword?: boolean
-  teamMemberships?: Prisma.TeamMembershipCreateNestedManyWithoutUserInput
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutUserInput
-  weeklySessions?: Prisma.WeeklySessionCreateNestedManyWithoutUserInput
-  facilitatedSessions?: Prisma.WeeklySessionCreateNestedManyWithoutFacilitatorInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
+  invites?: Prisma.InviteCreateNestedManyWithoutInvitedByInput
+  createdInvites?: Prisma.InviteTokenCreateNestedManyWithoutCreatedByInput
+  leadMeasures?: Prisma.LeadMeasureOwnerCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   sessionBlockers?: Prisma.SessionBlockerCreateNestedManyWithoutCreatedByInput
   sessionTimeline?: Prisma.SessionTimelineEventCreateNestedManyWithoutActorInput
-  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
-  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
-  leadMeasures?: Prisma.LeadMeasureOwnerCreateNestedManyWithoutUserInput
-  createdInvites?: Prisma.InviteTokenCreateNestedManyWithoutCreatedByInput
-  invites?: Prisma.InviteCreateNestedManyWithoutInvitedByInput
-  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
+  teamMemberships?: Prisma.TeamMembershipCreateNestedManyWithoutUserInput
+  facilitatedSessions?: Prisma.WeeklySessionCreateNestedManyWithoutFacilitatorInput
+  weeklySessions?: Prisma.WeeklySessionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutOrgMembershipsInput = {
@@ -674,18 +674,18 @@ export type UserUncheckedCreateWithoutOrgMembershipsInput = {
   createdAt?: Date | string
   defaultTeamId?: string | null
   mustChangePassword?: boolean
-  teamMemberships?: Prisma.TeamMembershipUncheckedCreateNestedManyWithoutUserInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutUserInput
-  weeklySessions?: Prisma.WeeklySessionUncheckedCreateNestedManyWithoutUserInput
-  facilitatedSessions?: Prisma.WeeklySessionUncheckedCreateNestedManyWithoutFacilitatorInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
+  invites?: Prisma.InviteUncheckedCreateNestedManyWithoutInvitedByInput
+  createdInvites?: Prisma.InviteTokenUncheckedCreateNestedManyWithoutCreatedByInput
+  leadMeasures?: Prisma.LeadMeasureOwnerUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   sessionBlockers?: Prisma.SessionBlockerUncheckedCreateNestedManyWithoutCreatedByInput
   sessionTimeline?: Prisma.SessionTimelineEventUncheckedCreateNestedManyWithoutActorInput
-  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
-  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
-  leadMeasures?: Prisma.LeadMeasureOwnerUncheckedCreateNestedManyWithoutUserInput
-  createdInvites?: Prisma.InviteTokenUncheckedCreateNestedManyWithoutCreatedByInput
-  invites?: Prisma.InviteUncheckedCreateNestedManyWithoutInvitedByInput
-  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+  teamMemberships?: Prisma.TeamMembershipUncheckedCreateNestedManyWithoutUserInput
+  facilitatedSessions?: Prisma.WeeklySessionUncheckedCreateNestedManyWithoutFacilitatorInput
+  weeklySessions?: Prisma.WeeklySessionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutOrgMembershipsInput = {
@@ -712,18 +712,18 @@ export type UserUpdateWithoutOrgMembershipsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   defaultTeamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  teamMemberships?: Prisma.TeamMembershipUpdateManyWithoutUserNestedInput
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutUserNestedInput
-  weeklySessions?: Prisma.WeeklySessionUpdateManyWithoutUserNestedInput
-  facilitatedSessions?: Prisma.WeeklySessionUpdateManyWithoutFacilitatorNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
+  invites?: Prisma.InviteUpdateManyWithoutInvitedByNestedInput
+  createdInvites?: Prisma.InviteTokenUpdateManyWithoutCreatedByNestedInput
+  leadMeasures?: Prisma.LeadMeasureOwnerUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   sessionBlockers?: Prisma.SessionBlockerUpdateManyWithoutCreatedByNestedInput
   sessionTimeline?: Prisma.SessionTimelineEventUpdateManyWithoutActorNestedInput
-  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
-  auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
-  leadMeasures?: Prisma.LeadMeasureOwnerUpdateManyWithoutUserNestedInput
-  createdInvites?: Prisma.InviteTokenUpdateManyWithoutCreatedByNestedInput
-  invites?: Prisma.InviteUpdateManyWithoutInvitedByNestedInput
-  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
+  teamMemberships?: Prisma.TeamMembershipUpdateManyWithoutUserNestedInput
+  facilitatedSessions?: Prisma.WeeklySessionUpdateManyWithoutFacilitatorNestedInput
+  weeklySessions?: Prisma.WeeklySessionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutOrgMembershipsInput = {
@@ -734,18 +734,18 @@ export type UserUncheckedUpdateWithoutOrgMembershipsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   defaultTeamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  teamMemberships?: Prisma.TeamMembershipUncheckedUpdateManyWithoutUserNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutUserNestedInput
-  weeklySessions?: Prisma.WeeklySessionUncheckedUpdateManyWithoutUserNestedInput
-  facilitatedSessions?: Prisma.WeeklySessionUncheckedUpdateManyWithoutFacilitatorNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
+  invites?: Prisma.InviteUncheckedUpdateManyWithoutInvitedByNestedInput
+  createdInvites?: Prisma.InviteTokenUncheckedUpdateManyWithoutCreatedByNestedInput
+  leadMeasures?: Prisma.LeadMeasureOwnerUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   sessionBlockers?: Prisma.SessionBlockerUncheckedUpdateManyWithoutCreatedByNestedInput
   sessionTimeline?: Prisma.SessionTimelineEventUncheckedUpdateManyWithoutActorNestedInput
-  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
-  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
-  leadMeasures?: Prisma.LeadMeasureOwnerUncheckedUpdateManyWithoutUserNestedInput
-  createdInvites?: Prisma.InviteTokenUncheckedUpdateManyWithoutCreatedByNestedInput
-  invites?: Prisma.InviteUncheckedUpdateManyWithoutInvitedByNestedInput
-  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+  teamMemberships?: Prisma.TeamMembershipUncheckedUpdateManyWithoutUserNestedInput
+  facilitatedSessions?: Prisma.WeeklySessionUncheckedUpdateManyWithoutFacilitatorNestedInput
+  weeklySessions?: Prisma.WeeklySessionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutInvitesInput = {
@@ -756,18 +756,18 @@ export type UserCreateWithoutInvitesInput = {
   createdAt?: Date | string
   defaultTeamId?: string | null
   mustChangePassword?: boolean
-  orgMemberships?: Prisma.OrgMembershipCreateNestedManyWithoutUserInput
-  teamMemberships?: Prisma.TeamMembershipCreateNestedManyWithoutUserInput
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutUserInput
-  weeklySessions?: Prisma.WeeklySessionCreateNestedManyWithoutUserInput
-  facilitatedSessions?: Prisma.WeeklySessionCreateNestedManyWithoutFacilitatorInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
+  createdInvites?: Prisma.InviteTokenCreateNestedManyWithoutCreatedByInput
+  leadMeasures?: Prisma.LeadMeasureOwnerCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  orgMemberships?: Prisma.OrgMembershipCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   sessionBlockers?: Prisma.SessionBlockerCreateNestedManyWithoutCreatedByInput
   sessionTimeline?: Prisma.SessionTimelineEventCreateNestedManyWithoutActorInput
-  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
-  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
-  leadMeasures?: Prisma.LeadMeasureOwnerCreateNestedManyWithoutUserInput
-  createdInvites?: Prisma.InviteTokenCreateNestedManyWithoutCreatedByInput
-  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
+  teamMemberships?: Prisma.TeamMembershipCreateNestedManyWithoutUserInput
+  facilitatedSessions?: Prisma.WeeklySessionCreateNestedManyWithoutFacilitatorInput
+  weeklySessions?: Prisma.WeeklySessionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutInvitesInput = {
@@ -778,18 +778,18 @@ export type UserUncheckedCreateWithoutInvitesInput = {
   createdAt?: Date | string
   defaultTeamId?: string | null
   mustChangePassword?: boolean
-  orgMemberships?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutUserInput
-  teamMemberships?: Prisma.TeamMembershipUncheckedCreateNestedManyWithoutUserInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutUserInput
-  weeklySessions?: Prisma.WeeklySessionUncheckedCreateNestedManyWithoutUserInput
-  facilitatedSessions?: Prisma.WeeklySessionUncheckedCreateNestedManyWithoutFacilitatorInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
+  createdInvites?: Prisma.InviteTokenUncheckedCreateNestedManyWithoutCreatedByInput
+  leadMeasures?: Prisma.LeadMeasureOwnerUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  orgMemberships?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   sessionBlockers?: Prisma.SessionBlockerUncheckedCreateNestedManyWithoutCreatedByInput
   sessionTimeline?: Prisma.SessionTimelineEventUncheckedCreateNestedManyWithoutActorInput
-  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
-  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
-  leadMeasures?: Prisma.LeadMeasureOwnerUncheckedCreateNestedManyWithoutUserInput
-  createdInvites?: Prisma.InviteTokenUncheckedCreateNestedManyWithoutCreatedByInput
-  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+  teamMemberships?: Prisma.TeamMembershipUncheckedCreateNestedManyWithoutUserInput
+  facilitatedSessions?: Prisma.WeeklySessionUncheckedCreateNestedManyWithoutFacilitatorInput
+  weeklySessions?: Prisma.WeeklySessionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutInvitesInput = {
@@ -816,18 +816,18 @@ export type UserUpdateWithoutInvitesInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   defaultTeamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  orgMemberships?: Prisma.OrgMembershipUpdateManyWithoutUserNestedInput
-  teamMemberships?: Prisma.TeamMembershipUpdateManyWithoutUserNestedInput
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutUserNestedInput
-  weeklySessions?: Prisma.WeeklySessionUpdateManyWithoutUserNestedInput
-  facilitatedSessions?: Prisma.WeeklySessionUpdateManyWithoutFacilitatorNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
+  createdInvites?: Prisma.InviteTokenUpdateManyWithoutCreatedByNestedInput
+  leadMeasures?: Prisma.LeadMeasureOwnerUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  orgMemberships?: Prisma.OrgMembershipUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   sessionBlockers?: Prisma.SessionBlockerUpdateManyWithoutCreatedByNestedInput
   sessionTimeline?: Prisma.SessionTimelineEventUpdateManyWithoutActorNestedInput
-  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
-  auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
-  leadMeasures?: Prisma.LeadMeasureOwnerUpdateManyWithoutUserNestedInput
-  createdInvites?: Prisma.InviteTokenUpdateManyWithoutCreatedByNestedInput
-  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
+  teamMemberships?: Prisma.TeamMembershipUpdateManyWithoutUserNestedInput
+  facilitatedSessions?: Prisma.WeeklySessionUpdateManyWithoutFacilitatorNestedInput
+  weeklySessions?: Prisma.WeeklySessionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutInvitesInput = {
@@ -838,18 +838,18 @@ export type UserUncheckedUpdateWithoutInvitesInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   defaultTeamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  orgMemberships?: Prisma.OrgMembershipUncheckedUpdateManyWithoutUserNestedInput
-  teamMemberships?: Prisma.TeamMembershipUncheckedUpdateManyWithoutUserNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutUserNestedInput
-  weeklySessions?: Prisma.WeeklySessionUncheckedUpdateManyWithoutUserNestedInput
-  facilitatedSessions?: Prisma.WeeklySessionUncheckedUpdateManyWithoutFacilitatorNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
+  createdInvites?: Prisma.InviteTokenUncheckedUpdateManyWithoutCreatedByNestedInput
+  leadMeasures?: Prisma.LeadMeasureOwnerUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  orgMemberships?: Prisma.OrgMembershipUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   sessionBlockers?: Prisma.SessionBlockerUncheckedUpdateManyWithoutCreatedByNestedInput
   sessionTimeline?: Prisma.SessionTimelineEventUncheckedUpdateManyWithoutActorNestedInput
-  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
-  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
-  leadMeasures?: Prisma.LeadMeasureOwnerUncheckedUpdateManyWithoutUserNestedInput
-  createdInvites?: Prisma.InviteTokenUncheckedUpdateManyWithoutCreatedByNestedInput
-  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+  teamMemberships?: Prisma.TeamMembershipUncheckedUpdateManyWithoutUserNestedInput
+  facilitatedSessions?: Prisma.WeeklySessionUncheckedUpdateManyWithoutFacilitatorNestedInput
+  weeklySessions?: Prisma.WeeklySessionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutTeamMembershipsInput = {
@@ -860,18 +860,18 @@ export type UserCreateWithoutTeamMembershipsInput = {
   createdAt?: Date | string
   defaultTeamId?: string | null
   mustChangePassword?: boolean
-  orgMemberships?: Prisma.OrgMembershipCreateNestedManyWithoutUserInput
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutUserInput
-  weeklySessions?: Prisma.WeeklySessionCreateNestedManyWithoutUserInput
-  facilitatedSessions?: Prisma.WeeklySessionCreateNestedManyWithoutFacilitatorInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
+  invites?: Prisma.InviteCreateNestedManyWithoutInvitedByInput
+  createdInvites?: Prisma.InviteTokenCreateNestedManyWithoutCreatedByInput
+  leadMeasures?: Prisma.LeadMeasureOwnerCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  orgMemberships?: Prisma.OrgMembershipCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   sessionBlockers?: Prisma.SessionBlockerCreateNestedManyWithoutCreatedByInput
   sessionTimeline?: Prisma.SessionTimelineEventCreateNestedManyWithoutActorInput
-  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
-  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
-  leadMeasures?: Prisma.LeadMeasureOwnerCreateNestedManyWithoutUserInput
-  createdInvites?: Prisma.InviteTokenCreateNestedManyWithoutCreatedByInput
-  invites?: Prisma.InviteCreateNestedManyWithoutInvitedByInput
-  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
+  facilitatedSessions?: Prisma.WeeklySessionCreateNestedManyWithoutFacilitatorInput
+  weeklySessions?: Prisma.WeeklySessionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutTeamMembershipsInput = {
@@ -882,18 +882,18 @@ export type UserUncheckedCreateWithoutTeamMembershipsInput = {
   createdAt?: Date | string
   defaultTeamId?: string | null
   mustChangePassword?: boolean
-  orgMemberships?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutUserInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutUserInput
-  weeklySessions?: Prisma.WeeklySessionUncheckedCreateNestedManyWithoutUserInput
-  facilitatedSessions?: Prisma.WeeklySessionUncheckedCreateNestedManyWithoutFacilitatorInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
+  invites?: Prisma.InviteUncheckedCreateNestedManyWithoutInvitedByInput
+  createdInvites?: Prisma.InviteTokenUncheckedCreateNestedManyWithoutCreatedByInput
+  leadMeasures?: Prisma.LeadMeasureOwnerUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  orgMemberships?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   sessionBlockers?: Prisma.SessionBlockerUncheckedCreateNestedManyWithoutCreatedByInput
   sessionTimeline?: Prisma.SessionTimelineEventUncheckedCreateNestedManyWithoutActorInput
-  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
-  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
-  leadMeasures?: Prisma.LeadMeasureOwnerUncheckedCreateNestedManyWithoutUserInput
-  createdInvites?: Prisma.InviteTokenUncheckedCreateNestedManyWithoutCreatedByInput
-  invites?: Prisma.InviteUncheckedCreateNestedManyWithoutInvitedByInput
-  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+  facilitatedSessions?: Prisma.WeeklySessionUncheckedCreateNestedManyWithoutFacilitatorInput
+  weeklySessions?: Prisma.WeeklySessionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutTeamMembershipsInput = {
@@ -920,18 +920,18 @@ export type UserUpdateWithoutTeamMembershipsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   defaultTeamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  orgMemberships?: Prisma.OrgMembershipUpdateManyWithoutUserNestedInput
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutUserNestedInput
-  weeklySessions?: Prisma.WeeklySessionUpdateManyWithoutUserNestedInput
-  facilitatedSessions?: Prisma.WeeklySessionUpdateManyWithoutFacilitatorNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
+  invites?: Prisma.InviteUpdateManyWithoutInvitedByNestedInput
+  createdInvites?: Prisma.InviteTokenUpdateManyWithoutCreatedByNestedInput
+  leadMeasures?: Prisma.LeadMeasureOwnerUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  orgMemberships?: Prisma.OrgMembershipUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   sessionBlockers?: Prisma.SessionBlockerUpdateManyWithoutCreatedByNestedInput
   sessionTimeline?: Prisma.SessionTimelineEventUpdateManyWithoutActorNestedInput
-  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
-  auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
-  leadMeasures?: Prisma.LeadMeasureOwnerUpdateManyWithoutUserNestedInput
-  createdInvites?: Prisma.InviteTokenUpdateManyWithoutCreatedByNestedInput
-  invites?: Prisma.InviteUpdateManyWithoutInvitedByNestedInput
-  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
+  facilitatedSessions?: Prisma.WeeklySessionUpdateManyWithoutFacilitatorNestedInput
+  weeklySessions?: Prisma.WeeklySessionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutTeamMembershipsInput = {
@@ -942,18 +942,18 @@ export type UserUncheckedUpdateWithoutTeamMembershipsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   defaultTeamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  orgMemberships?: Prisma.OrgMembershipUncheckedUpdateManyWithoutUserNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutUserNestedInput
-  weeklySessions?: Prisma.WeeklySessionUncheckedUpdateManyWithoutUserNestedInput
-  facilitatedSessions?: Prisma.WeeklySessionUncheckedUpdateManyWithoutFacilitatorNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
+  invites?: Prisma.InviteUncheckedUpdateManyWithoutInvitedByNestedInput
+  createdInvites?: Prisma.InviteTokenUncheckedUpdateManyWithoutCreatedByNestedInput
+  leadMeasures?: Prisma.LeadMeasureOwnerUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  orgMemberships?: Prisma.OrgMembershipUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   sessionBlockers?: Prisma.SessionBlockerUncheckedUpdateManyWithoutCreatedByNestedInput
   sessionTimeline?: Prisma.SessionTimelineEventUncheckedUpdateManyWithoutActorNestedInput
-  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
-  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
-  leadMeasures?: Prisma.LeadMeasureOwnerUncheckedUpdateManyWithoutUserNestedInput
-  createdInvites?: Prisma.InviteTokenUncheckedUpdateManyWithoutCreatedByNestedInput
-  invites?: Prisma.InviteUncheckedUpdateManyWithoutInvitedByNestedInput
-  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+  facilitatedSessions?: Prisma.WeeklySessionUncheckedUpdateManyWithoutFacilitatorNestedInput
+  weeklySessions?: Prisma.WeeklySessionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutLeadMeasuresInput = {
@@ -964,18 +964,18 @@ export type UserCreateWithoutLeadMeasuresInput = {
   createdAt?: Date | string
   defaultTeamId?: string | null
   mustChangePassword?: boolean
-  orgMemberships?: Prisma.OrgMembershipCreateNestedManyWithoutUserInput
-  teamMemberships?: Prisma.TeamMembershipCreateNestedManyWithoutUserInput
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutUserInput
-  weeklySessions?: Prisma.WeeklySessionCreateNestedManyWithoutUserInput
-  facilitatedSessions?: Prisma.WeeklySessionCreateNestedManyWithoutFacilitatorInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
+  invites?: Prisma.InviteCreateNestedManyWithoutInvitedByInput
+  createdInvites?: Prisma.InviteTokenCreateNestedManyWithoutCreatedByInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  orgMemberships?: Prisma.OrgMembershipCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   sessionBlockers?: Prisma.SessionBlockerCreateNestedManyWithoutCreatedByInput
   sessionTimeline?: Prisma.SessionTimelineEventCreateNestedManyWithoutActorInput
-  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
-  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
-  createdInvites?: Prisma.InviteTokenCreateNestedManyWithoutCreatedByInput
-  invites?: Prisma.InviteCreateNestedManyWithoutInvitedByInput
-  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
+  teamMemberships?: Prisma.TeamMembershipCreateNestedManyWithoutUserInput
+  facilitatedSessions?: Prisma.WeeklySessionCreateNestedManyWithoutFacilitatorInput
+  weeklySessions?: Prisma.WeeklySessionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutLeadMeasuresInput = {
@@ -986,18 +986,18 @@ export type UserUncheckedCreateWithoutLeadMeasuresInput = {
   createdAt?: Date | string
   defaultTeamId?: string | null
   mustChangePassword?: boolean
-  orgMemberships?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutUserInput
-  teamMemberships?: Prisma.TeamMembershipUncheckedCreateNestedManyWithoutUserInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutUserInput
-  weeklySessions?: Prisma.WeeklySessionUncheckedCreateNestedManyWithoutUserInput
-  facilitatedSessions?: Prisma.WeeklySessionUncheckedCreateNestedManyWithoutFacilitatorInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
+  invites?: Prisma.InviteUncheckedCreateNestedManyWithoutInvitedByInput
+  createdInvites?: Prisma.InviteTokenUncheckedCreateNestedManyWithoutCreatedByInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  orgMemberships?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   sessionBlockers?: Prisma.SessionBlockerUncheckedCreateNestedManyWithoutCreatedByInput
   sessionTimeline?: Prisma.SessionTimelineEventUncheckedCreateNestedManyWithoutActorInput
-  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
-  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
-  createdInvites?: Prisma.InviteTokenUncheckedCreateNestedManyWithoutCreatedByInput
-  invites?: Prisma.InviteUncheckedCreateNestedManyWithoutInvitedByInput
-  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+  teamMemberships?: Prisma.TeamMembershipUncheckedCreateNestedManyWithoutUserInput
+  facilitatedSessions?: Prisma.WeeklySessionUncheckedCreateNestedManyWithoutFacilitatorInput
+  weeklySessions?: Prisma.WeeklySessionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutLeadMeasuresInput = {
@@ -1024,18 +1024,18 @@ export type UserUpdateWithoutLeadMeasuresInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   defaultTeamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  orgMemberships?: Prisma.OrgMembershipUpdateManyWithoutUserNestedInput
-  teamMemberships?: Prisma.TeamMembershipUpdateManyWithoutUserNestedInput
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutUserNestedInput
-  weeklySessions?: Prisma.WeeklySessionUpdateManyWithoutUserNestedInput
-  facilitatedSessions?: Prisma.WeeklySessionUpdateManyWithoutFacilitatorNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
+  invites?: Prisma.InviteUpdateManyWithoutInvitedByNestedInput
+  createdInvites?: Prisma.InviteTokenUpdateManyWithoutCreatedByNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  orgMemberships?: Prisma.OrgMembershipUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   sessionBlockers?: Prisma.SessionBlockerUpdateManyWithoutCreatedByNestedInput
   sessionTimeline?: Prisma.SessionTimelineEventUpdateManyWithoutActorNestedInput
-  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
-  auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
-  createdInvites?: Prisma.InviteTokenUpdateManyWithoutCreatedByNestedInput
-  invites?: Prisma.InviteUpdateManyWithoutInvitedByNestedInput
-  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
+  teamMemberships?: Prisma.TeamMembershipUpdateManyWithoutUserNestedInput
+  facilitatedSessions?: Prisma.WeeklySessionUpdateManyWithoutFacilitatorNestedInput
+  weeklySessions?: Prisma.WeeklySessionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutLeadMeasuresInput = {
@@ -1046,18 +1046,18 @@ export type UserUncheckedUpdateWithoutLeadMeasuresInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   defaultTeamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  orgMemberships?: Prisma.OrgMembershipUncheckedUpdateManyWithoutUserNestedInput
-  teamMemberships?: Prisma.TeamMembershipUncheckedUpdateManyWithoutUserNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutUserNestedInput
-  weeklySessions?: Prisma.WeeklySessionUncheckedUpdateManyWithoutUserNestedInput
-  facilitatedSessions?: Prisma.WeeklySessionUncheckedUpdateManyWithoutFacilitatorNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
+  invites?: Prisma.InviteUncheckedUpdateManyWithoutInvitedByNestedInput
+  createdInvites?: Prisma.InviteTokenUncheckedUpdateManyWithoutCreatedByNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  orgMemberships?: Prisma.OrgMembershipUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   sessionBlockers?: Prisma.SessionBlockerUncheckedUpdateManyWithoutCreatedByNestedInput
   sessionTimeline?: Prisma.SessionTimelineEventUncheckedUpdateManyWithoutActorNestedInput
-  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
-  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
-  createdInvites?: Prisma.InviteTokenUncheckedUpdateManyWithoutCreatedByNestedInput
-  invites?: Prisma.InviteUncheckedUpdateManyWithoutInvitedByNestedInput
-  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+  teamMemberships?: Prisma.TeamMembershipUncheckedUpdateManyWithoutUserNestedInput
+  facilitatedSessions?: Prisma.WeeklySessionUncheckedUpdateManyWithoutFacilitatorNestedInput
+  weeklySessions?: Prisma.WeeklySessionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutActivityLogsInput = {
@@ -1068,18 +1068,18 @@ export type UserCreateWithoutActivityLogsInput = {
   createdAt?: Date | string
   defaultTeamId?: string | null
   mustChangePassword?: boolean
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
+  invites?: Prisma.InviteCreateNestedManyWithoutInvitedByInput
+  createdInvites?: Prisma.InviteTokenCreateNestedManyWithoutCreatedByInput
+  leadMeasures?: Prisma.LeadMeasureOwnerCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   orgMemberships?: Prisma.OrgMembershipCreateNestedManyWithoutUserInput
-  teamMemberships?: Prisma.TeamMembershipCreateNestedManyWithoutUserInput
-  weeklySessions?: Prisma.WeeklySessionCreateNestedManyWithoutUserInput
-  facilitatedSessions?: Prisma.WeeklySessionCreateNestedManyWithoutFacilitatorInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   sessionBlockers?: Prisma.SessionBlockerCreateNestedManyWithoutCreatedByInput
   sessionTimeline?: Prisma.SessionTimelineEventCreateNestedManyWithoutActorInput
-  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
-  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
-  leadMeasures?: Prisma.LeadMeasureOwnerCreateNestedManyWithoutUserInput
-  createdInvites?: Prisma.InviteTokenCreateNestedManyWithoutCreatedByInput
-  invites?: Prisma.InviteCreateNestedManyWithoutInvitedByInput
-  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
+  teamMemberships?: Prisma.TeamMembershipCreateNestedManyWithoutUserInput
+  facilitatedSessions?: Prisma.WeeklySessionCreateNestedManyWithoutFacilitatorInput
+  weeklySessions?: Prisma.WeeklySessionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutActivityLogsInput = {
@@ -1090,18 +1090,18 @@ export type UserUncheckedCreateWithoutActivityLogsInput = {
   createdAt?: Date | string
   defaultTeamId?: string | null
   mustChangePassword?: boolean
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
+  invites?: Prisma.InviteUncheckedCreateNestedManyWithoutInvitedByInput
+  createdInvites?: Prisma.InviteTokenUncheckedCreateNestedManyWithoutCreatedByInput
+  leadMeasures?: Prisma.LeadMeasureOwnerUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   orgMemberships?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutUserInput
-  teamMemberships?: Prisma.TeamMembershipUncheckedCreateNestedManyWithoutUserInput
-  weeklySessions?: Prisma.WeeklySessionUncheckedCreateNestedManyWithoutUserInput
-  facilitatedSessions?: Prisma.WeeklySessionUncheckedCreateNestedManyWithoutFacilitatorInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   sessionBlockers?: Prisma.SessionBlockerUncheckedCreateNestedManyWithoutCreatedByInput
   sessionTimeline?: Prisma.SessionTimelineEventUncheckedCreateNestedManyWithoutActorInput
-  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
-  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
-  leadMeasures?: Prisma.LeadMeasureOwnerUncheckedCreateNestedManyWithoutUserInput
-  createdInvites?: Prisma.InviteTokenUncheckedCreateNestedManyWithoutCreatedByInput
-  invites?: Prisma.InviteUncheckedCreateNestedManyWithoutInvitedByInput
-  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+  teamMemberships?: Prisma.TeamMembershipUncheckedCreateNestedManyWithoutUserInput
+  facilitatedSessions?: Prisma.WeeklySessionUncheckedCreateNestedManyWithoutFacilitatorInput
+  weeklySessions?: Prisma.WeeklySessionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutActivityLogsInput = {
@@ -1128,18 +1128,18 @@ export type UserUpdateWithoutActivityLogsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   defaultTeamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
+  invites?: Prisma.InviteUpdateManyWithoutInvitedByNestedInput
+  createdInvites?: Prisma.InviteTokenUpdateManyWithoutCreatedByNestedInput
+  leadMeasures?: Prisma.LeadMeasureOwnerUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   orgMemberships?: Prisma.OrgMembershipUpdateManyWithoutUserNestedInput
-  teamMemberships?: Prisma.TeamMembershipUpdateManyWithoutUserNestedInput
-  weeklySessions?: Prisma.WeeklySessionUpdateManyWithoutUserNestedInput
-  facilitatedSessions?: Prisma.WeeklySessionUpdateManyWithoutFacilitatorNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   sessionBlockers?: Prisma.SessionBlockerUpdateManyWithoutCreatedByNestedInput
   sessionTimeline?: Prisma.SessionTimelineEventUpdateManyWithoutActorNestedInput
-  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
-  auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
-  leadMeasures?: Prisma.LeadMeasureOwnerUpdateManyWithoutUserNestedInput
-  createdInvites?: Prisma.InviteTokenUpdateManyWithoutCreatedByNestedInput
-  invites?: Prisma.InviteUpdateManyWithoutInvitedByNestedInput
-  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
+  teamMemberships?: Prisma.TeamMembershipUpdateManyWithoutUserNestedInput
+  facilitatedSessions?: Prisma.WeeklySessionUpdateManyWithoutFacilitatorNestedInput
+  weeklySessions?: Prisma.WeeklySessionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutActivityLogsInput = {
@@ -1150,67 +1150,18 @@ export type UserUncheckedUpdateWithoutActivityLogsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   defaultTeamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
+  invites?: Prisma.InviteUncheckedUpdateManyWithoutInvitedByNestedInput
+  createdInvites?: Prisma.InviteTokenUncheckedUpdateManyWithoutCreatedByNestedInput
+  leadMeasures?: Prisma.LeadMeasureOwnerUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   orgMemberships?: Prisma.OrgMembershipUncheckedUpdateManyWithoutUserNestedInput
-  teamMemberships?: Prisma.TeamMembershipUncheckedUpdateManyWithoutUserNestedInput
-  weeklySessions?: Prisma.WeeklySessionUncheckedUpdateManyWithoutUserNestedInput
-  facilitatedSessions?: Prisma.WeeklySessionUncheckedUpdateManyWithoutFacilitatorNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   sessionBlockers?: Prisma.SessionBlockerUncheckedUpdateManyWithoutCreatedByNestedInput
   sessionTimeline?: Prisma.SessionTimelineEventUncheckedUpdateManyWithoutActorNestedInput
-  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
-  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
-  leadMeasures?: Prisma.LeadMeasureOwnerUncheckedUpdateManyWithoutUserNestedInput
-  createdInvites?: Prisma.InviteTokenUncheckedUpdateManyWithoutCreatedByNestedInput
-  invites?: Prisma.InviteUncheckedUpdateManyWithoutInvitedByNestedInput
-  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
-}
-
-export type UserCreateWithoutWeeklySessionsInput = {
-  id?: string
-  email: string
-  name: string
-  passwordHash?: string | null
-  createdAt?: Date | string
-  defaultTeamId?: string | null
-  mustChangePassword?: boolean
-  orgMemberships?: Prisma.OrgMembershipCreateNestedManyWithoutUserInput
-  teamMemberships?: Prisma.TeamMembershipCreateNestedManyWithoutUserInput
-  activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutUserInput
-  facilitatedSessions?: Prisma.WeeklySessionCreateNestedManyWithoutFacilitatorInput
-  sessionBlockers?: Prisma.SessionBlockerCreateNestedManyWithoutCreatedByInput
-  sessionTimeline?: Prisma.SessionTimelineEventCreateNestedManyWithoutActorInput
-  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
-  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
-  leadMeasures?: Prisma.LeadMeasureOwnerCreateNestedManyWithoutUserInput
-  createdInvites?: Prisma.InviteTokenCreateNestedManyWithoutCreatedByInput
-  invites?: Prisma.InviteCreateNestedManyWithoutInvitedByInput
-  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
-}
-
-export type UserUncheckedCreateWithoutWeeklySessionsInput = {
-  id?: string
-  email: string
-  name: string
-  passwordHash?: string | null
-  createdAt?: Date | string
-  defaultTeamId?: string | null
-  mustChangePassword?: boolean
-  orgMemberships?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutUserInput
-  teamMemberships?: Prisma.TeamMembershipUncheckedCreateNestedManyWithoutUserInput
-  activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutUserInput
-  facilitatedSessions?: Prisma.WeeklySessionUncheckedCreateNestedManyWithoutFacilitatorInput
-  sessionBlockers?: Prisma.SessionBlockerUncheckedCreateNestedManyWithoutCreatedByInput
-  sessionTimeline?: Prisma.SessionTimelineEventUncheckedCreateNestedManyWithoutActorInput
-  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
-  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
-  leadMeasures?: Prisma.LeadMeasureOwnerUncheckedCreateNestedManyWithoutUserInput
-  createdInvites?: Prisma.InviteTokenUncheckedCreateNestedManyWithoutCreatedByInput
-  invites?: Prisma.InviteUncheckedCreateNestedManyWithoutInvitedByInput
-  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
-}
-
-export type UserCreateOrConnectWithoutWeeklySessionsInput = {
-  where: Prisma.UserWhereUniqueInput
-  create: Prisma.XOR<Prisma.UserCreateWithoutWeeklySessionsInput, Prisma.UserUncheckedCreateWithoutWeeklySessionsInput>
+  teamMemberships?: Prisma.TeamMembershipUncheckedUpdateManyWithoutUserNestedInput
+  facilitatedSessions?: Prisma.WeeklySessionUncheckedUpdateManyWithoutFacilitatorNestedInput
+  weeklySessions?: Prisma.WeeklySessionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutFacilitatedSessionsInput = {
@@ -1221,18 +1172,18 @@ export type UserCreateWithoutFacilitatedSessionsInput = {
   createdAt?: Date | string
   defaultTeamId?: string | null
   mustChangePassword?: boolean
-  orgMemberships?: Prisma.OrgMembershipCreateNestedManyWithoutUserInput
-  teamMemberships?: Prisma.TeamMembershipCreateNestedManyWithoutUserInput
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutUserInput
-  weeklySessions?: Prisma.WeeklySessionCreateNestedManyWithoutUserInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
+  invites?: Prisma.InviteCreateNestedManyWithoutInvitedByInput
+  createdInvites?: Prisma.InviteTokenCreateNestedManyWithoutCreatedByInput
+  leadMeasures?: Prisma.LeadMeasureOwnerCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  orgMemberships?: Prisma.OrgMembershipCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   sessionBlockers?: Prisma.SessionBlockerCreateNestedManyWithoutCreatedByInput
   sessionTimeline?: Prisma.SessionTimelineEventCreateNestedManyWithoutActorInput
-  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
-  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
-  leadMeasures?: Prisma.LeadMeasureOwnerCreateNestedManyWithoutUserInput
-  createdInvites?: Prisma.InviteTokenCreateNestedManyWithoutCreatedByInput
-  invites?: Prisma.InviteCreateNestedManyWithoutInvitedByInput
-  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
+  teamMemberships?: Prisma.TeamMembershipCreateNestedManyWithoutUserInput
+  weeklySessions?: Prisma.WeeklySessionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutFacilitatedSessionsInput = {
@@ -1243,18 +1194,18 @@ export type UserUncheckedCreateWithoutFacilitatedSessionsInput = {
   createdAt?: Date | string
   defaultTeamId?: string | null
   mustChangePassword?: boolean
-  orgMemberships?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutUserInput
-  teamMemberships?: Prisma.TeamMembershipUncheckedCreateNestedManyWithoutUserInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutUserInput
-  weeklySessions?: Prisma.WeeklySessionUncheckedCreateNestedManyWithoutUserInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
+  invites?: Prisma.InviteUncheckedCreateNestedManyWithoutInvitedByInput
+  createdInvites?: Prisma.InviteTokenUncheckedCreateNestedManyWithoutCreatedByInput
+  leadMeasures?: Prisma.LeadMeasureOwnerUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  orgMemberships?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   sessionBlockers?: Prisma.SessionBlockerUncheckedCreateNestedManyWithoutCreatedByInput
   sessionTimeline?: Prisma.SessionTimelineEventUncheckedCreateNestedManyWithoutActorInput
-  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
-  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
-  leadMeasures?: Prisma.LeadMeasureOwnerUncheckedCreateNestedManyWithoutUserInput
-  createdInvites?: Prisma.InviteTokenUncheckedCreateNestedManyWithoutCreatedByInput
-  invites?: Prisma.InviteUncheckedCreateNestedManyWithoutInvitedByInput
-  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+  teamMemberships?: Prisma.TeamMembershipUncheckedCreateNestedManyWithoutUserInput
+  weeklySessions?: Prisma.WeeklySessionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutFacilitatedSessionsInput = {
@@ -1262,59 +1213,53 @@ export type UserCreateOrConnectWithoutFacilitatedSessionsInput = {
   create: Prisma.XOR<Prisma.UserCreateWithoutFacilitatedSessionsInput, Prisma.UserUncheckedCreateWithoutFacilitatedSessionsInput>
 }
 
-export type UserUpsertWithoutWeeklySessionsInput = {
-  update: Prisma.XOR<Prisma.UserUpdateWithoutWeeklySessionsInput, Prisma.UserUncheckedUpdateWithoutWeeklySessionsInput>
+export type UserCreateWithoutWeeklySessionsInput = {
+  id?: string
+  email: string
+  name: string
+  passwordHash?: string | null
+  createdAt?: Date | string
+  defaultTeamId?: string | null
+  mustChangePassword?: boolean
+  activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutUserInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
+  invites?: Prisma.InviteCreateNestedManyWithoutInvitedByInput
+  createdInvites?: Prisma.InviteTokenCreateNestedManyWithoutCreatedByInput
+  leadMeasures?: Prisma.LeadMeasureOwnerCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  orgMemberships?: Prisma.OrgMembershipCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
+  sessionBlockers?: Prisma.SessionBlockerCreateNestedManyWithoutCreatedByInput
+  sessionTimeline?: Prisma.SessionTimelineEventCreateNestedManyWithoutActorInput
+  teamMemberships?: Prisma.TeamMembershipCreateNestedManyWithoutUserInput
+  facilitatedSessions?: Prisma.WeeklySessionCreateNestedManyWithoutFacilitatorInput
+}
+
+export type UserUncheckedCreateWithoutWeeklySessionsInput = {
+  id?: string
+  email: string
+  name: string
+  passwordHash?: string | null
+  createdAt?: Date | string
+  defaultTeamId?: string | null
+  mustChangePassword?: boolean
+  activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutUserInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
+  invites?: Prisma.InviteUncheckedCreateNestedManyWithoutInvitedByInput
+  createdInvites?: Prisma.InviteTokenUncheckedCreateNestedManyWithoutCreatedByInput
+  leadMeasures?: Prisma.LeadMeasureOwnerUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  orgMemberships?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+  sessionBlockers?: Prisma.SessionBlockerUncheckedCreateNestedManyWithoutCreatedByInput
+  sessionTimeline?: Prisma.SessionTimelineEventUncheckedCreateNestedManyWithoutActorInput
+  teamMemberships?: Prisma.TeamMembershipUncheckedCreateNestedManyWithoutUserInput
+  facilitatedSessions?: Prisma.WeeklySessionUncheckedCreateNestedManyWithoutFacilitatorInput
+}
+
+export type UserCreateOrConnectWithoutWeeklySessionsInput = {
+  where: Prisma.UserWhereUniqueInput
   create: Prisma.XOR<Prisma.UserCreateWithoutWeeklySessionsInput, Prisma.UserUncheckedCreateWithoutWeeklySessionsInput>
-  where?: Prisma.UserWhereInput
-}
-
-export type UserUpdateToOneWithWhereWithoutWeeklySessionsInput = {
-  where?: Prisma.UserWhereInput
-  data: Prisma.XOR<Prisma.UserUpdateWithoutWeeklySessionsInput, Prisma.UserUncheckedUpdateWithoutWeeklySessionsInput>
-}
-
-export type UserUpdateWithoutWeeklySessionsInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
-  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  defaultTeamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  orgMemberships?: Prisma.OrgMembershipUpdateManyWithoutUserNestedInput
-  teamMemberships?: Prisma.TeamMembershipUpdateManyWithoutUserNestedInput
-  activityLogs?: Prisma.ActivityLogUpdateManyWithoutUserNestedInput
-  facilitatedSessions?: Prisma.WeeklySessionUpdateManyWithoutFacilitatorNestedInput
-  sessionBlockers?: Prisma.SessionBlockerUpdateManyWithoutCreatedByNestedInput
-  sessionTimeline?: Prisma.SessionTimelineEventUpdateManyWithoutActorNestedInput
-  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
-  auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
-  leadMeasures?: Prisma.LeadMeasureOwnerUpdateManyWithoutUserNestedInput
-  createdInvites?: Prisma.InviteTokenUpdateManyWithoutCreatedByNestedInput
-  invites?: Prisma.InviteUpdateManyWithoutInvitedByNestedInput
-  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
-}
-
-export type UserUncheckedUpdateWithoutWeeklySessionsInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
-  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  defaultTeamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  orgMemberships?: Prisma.OrgMembershipUncheckedUpdateManyWithoutUserNestedInput
-  teamMemberships?: Prisma.TeamMembershipUncheckedUpdateManyWithoutUserNestedInput
-  activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutUserNestedInput
-  facilitatedSessions?: Prisma.WeeklySessionUncheckedUpdateManyWithoutFacilitatorNestedInput
-  sessionBlockers?: Prisma.SessionBlockerUncheckedUpdateManyWithoutCreatedByNestedInput
-  sessionTimeline?: Prisma.SessionTimelineEventUncheckedUpdateManyWithoutActorNestedInput
-  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
-  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
-  leadMeasures?: Prisma.LeadMeasureOwnerUncheckedUpdateManyWithoutUserNestedInput
-  createdInvites?: Prisma.InviteTokenUncheckedUpdateManyWithoutCreatedByNestedInput
-  invites?: Prisma.InviteUncheckedUpdateManyWithoutInvitedByNestedInput
-  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserUpsertWithoutFacilitatedSessionsInput = {
@@ -1336,18 +1281,18 @@ export type UserUpdateWithoutFacilitatedSessionsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   defaultTeamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  orgMemberships?: Prisma.OrgMembershipUpdateManyWithoutUserNestedInput
-  teamMemberships?: Prisma.TeamMembershipUpdateManyWithoutUserNestedInput
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutUserNestedInput
-  weeklySessions?: Prisma.WeeklySessionUpdateManyWithoutUserNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
+  invites?: Prisma.InviteUpdateManyWithoutInvitedByNestedInput
+  createdInvites?: Prisma.InviteTokenUpdateManyWithoutCreatedByNestedInput
+  leadMeasures?: Prisma.LeadMeasureOwnerUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  orgMemberships?: Prisma.OrgMembershipUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   sessionBlockers?: Prisma.SessionBlockerUpdateManyWithoutCreatedByNestedInput
   sessionTimeline?: Prisma.SessionTimelineEventUpdateManyWithoutActorNestedInput
-  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
-  auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
-  leadMeasures?: Prisma.LeadMeasureOwnerUpdateManyWithoutUserNestedInput
-  createdInvites?: Prisma.InviteTokenUpdateManyWithoutCreatedByNestedInput
-  invites?: Prisma.InviteUpdateManyWithoutInvitedByNestedInput
-  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
+  teamMemberships?: Prisma.TeamMembershipUpdateManyWithoutUserNestedInput
+  weeklySessions?: Prisma.WeeklySessionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutFacilitatedSessionsInput = {
@@ -1358,18 +1303,73 @@ export type UserUncheckedUpdateWithoutFacilitatedSessionsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   defaultTeamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  orgMemberships?: Prisma.OrgMembershipUncheckedUpdateManyWithoutUserNestedInput
-  teamMemberships?: Prisma.TeamMembershipUncheckedUpdateManyWithoutUserNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutUserNestedInput
-  weeklySessions?: Prisma.WeeklySessionUncheckedUpdateManyWithoutUserNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
+  invites?: Prisma.InviteUncheckedUpdateManyWithoutInvitedByNestedInput
+  createdInvites?: Prisma.InviteTokenUncheckedUpdateManyWithoutCreatedByNestedInput
+  leadMeasures?: Prisma.LeadMeasureOwnerUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  orgMemberships?: Prisma.OrgMembershipUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   sessionBlockers?: Prisma.SessionBlockerUncheckedUpdateManyWithoutCreatedByNestedInput
   sessionTimeline?: Prisma.SessionTimelineEventUncheckedUpdateManyWithoutActorNestedInput
-  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  teamMemberships?: Prisma.TeamMembershipUncheckedUpdateManyWithoutUserNestedInput
+  weeklySessions?: Prisma.WeeklySessionUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserUpsertWithoutWeeklySessionsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutWeeklySessionsInput, Prisma.UserUncheckedUpdateWithoutWeeklySessionsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutWeeklySessionsInput, Prisma.UserUncheckedCreateWithoutWeeklySessionsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutWeeklySessionsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutWeeklySessionsInput, Prisma.UserUncheckedUpdateWithoutWeeklySessionsInput>
+}
+
+export type UserUpdateWithoutWeeklySessionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  defaultTeamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  activityLogs?: Prisma.ActivityLogUpdateManyWithoutUserNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
+  invites?: Prisma.InviteUpdateManyWithoutInvitedByNestedInput
+  createdInvites?: Prisma.InviteTokenUpdateManyWithoutCreatedByNestedInput
+  leadMeasures?: Prisma.LeadMeasureOwnerUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  orgMemberships?: Prisma.OrgMembershipUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
+  sessionBlockers?: Prisma.SessionBlockerUpdateManyWithoutCreatedByNestedInput
+  sessionTimeline?: Prisma.SessionTimelineEventUpdateManyWithoutActorNestedInput
+  teamMemberships?: Prisma.TeamMembershipUpdateManyWithoutUserNestedInput
+  facilitatedSessions?: Prisma.WeeklySessionUpdateManyWithoutFacilitatorNestedInput
+}
+
+export type UserUncheckedUpdateWithoutWeeklySessionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  defaultTeamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
-  leadMeasures?: Prisma.LeadMeasureOwnerUncheckedUpdateManyWithoutUserNestedInput
-  createdInvites?: Prisma.InviteTokenUncheckedUpdateManyWithoutCreatedByNestedInput
   invites?: Prisma.InviteUncheckedUpdateManyWithoutInvitedByNestedInput
+  createdInvites?: Prisma.InviteTokenUncheckedUpdateManyWithoutCreatedByNestedInput
+  leadMeasures?: Prisma.LeadMeasureOwnerUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  orgMemberships?: Prisma.OrgMembershipUncheckedUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+  sessionBlockers?: Prisma.SessionBlockerUncheckedUpdateManyWithoutCreatedByNestedInput
+  sessionTimeline?: Prisma.SessionTimelineEventUncheckedUpdateManyWithoutActorNestedInput
+  teamMemberships?: Prisma.TeamMembershipUncheckedUpdateManyWithoutUserNestedInput
+  facilitatedSessions?: Prisma.WeeklySessionUncheckedUpdateManyWithoutFacilitatorNestedInput
 }
 
 export type UserCreateWithoutSessionBlockersInput = {
@@ -1380,18 +1380,18 @@ export type UserCreateWithoutSessionBlockersInput = {
   createdAt?: Date | string
   defaultTeamId?: string | null
   mustChangePassword?: boolean
-  orgMemberships?: Prisma.OrgMembershipCreateNestedManyWithoutUserInput
-  teamMemberships?: Prisma.TeamMembershipCreateNestedManyWithoutUserInput
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutUserInput
-  weeklySessions?: Prisma.WeeklySessionCreateNestedManyWithoutUserInput
-  facilitatedSessions?: Prisma.WeeklySessionCreateNestedManyWithoutFacilitatorInput
-  sessionTimeline?: Prisma.SessionTimelineEventCreateNestedManyWithoutActorInput
-  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
-  leadMeasures?: Prisma.LeadMeasureOwnerCreateNestedManyWithoutUserInput
-  createdInvites?: Prisma.InviteTokenCreateNestedManyWithoutCreatedByInput
   invites?: Prisma.InviteCreateNestedManyWithoutInvitedByInput
+  createdInvites?: Prisma.InviteTokenCreateNestedManyWithoutCreatedByInput
+  leadMeasures?: Prisma.LeadMeasureOwnerCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  orgMemberships?: Prisma.OrgMembershipCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
+  sessionTimeline?: Prisma.SessionTimelineEventCreateNestedManyWithoutActorInput
+  teamMemberships?: Prisma.TeamMembershipCreateNestedManyWithoutUserInput
+  facilitatedSessions?: Prisma.WeeklySessionCreateNestedManyWithoutFacilitatorInput
+  weeklySessions?: Prisma.WeeklySessionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutSessionBlockersInput = {
@@ -1402,18 +1402,18 @@ export type UserUncheckedCreateWithoutSessionBlockersInput = {
   createdAt?: Date | string
   defaultTeamId?: string | null
   mustChangePassword?: boolean
-  orgMemberships?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutUserInput
-  teamMemberships?: Prisma.TeamMembershipUncheckedCreateNestedManyWithoutUserInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutUserInput
-  weeklySessions?: Prisma.WeeklySessionUncheckedCreateNestedManyWithoutUserInput
-  facilitatedSessions?: Prisma.WeeklySessionUncheckedCreateNestedManyWithoutFacilitatorInput
-  sessionTimeline?: Prisma.SessionTimelineEventUncheckedCreateNestedManyWithoutActorInput
-  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
-  leadMeasures?: Prisma.LeadMeasureOwnerUncheckedCreateNestedManyWithoutUserInput
-  createdInvites?: Prisma.InviteTokenUncheckedCreateNestedManyWithoutCreatedByInput
   invites?: Prisma.InviteUncheckedCreateNestedManyWithoutInvitedByInput
+  createdInvites?: Prisma.InviteTokenUncheckedCreateNestedManyWithoutCreatedByInput
+  leadMeasures?: Prisma.LeadMeasureOwnerUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  orgMemberships?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+  sessionTimeline?: Prisma.SessionTimelineEventUncheckedCreateNestedManyWithoutActorInput
+  teamMemberships?: Prisma.TeamMembershipUncheckedCreateNestedManyWithoutUserInput
+  facilitatedSessions?: Prisma.WeeklySessionUncheckedCreateNestedManyWithoutFacilitatorInput
+  weeklySessions?: Prisma.WeeklySessionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutSessionBlockersInput = {
@@ -1440,18 +1440,18 @@ export type UserUpdateWithoutSessionBlockersInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   defaultTeamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  orgMemberships?: Prisma.OrgMembershipUpdateManyWithoutUserNestedInput
-  teamMemberships?: Prisma.TeamMembershipUpdateManyWithoutUserNestedInput
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutUserNestedInput
-  weeklySessions?: Prisma.WeeklySessionUpdateManyWithoutUserNestedInput
-  facilitatedSessions?: Prisma.WeeklySessionUpdateManyWithoutFacilitatorNestedInput
-  sessionTimeline?: Prisma.SessionTimelineEventUpdateManyWithoutActorNestedInput
-  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
-  leadMeasures?: Prisma.LeadMeasureOwnerUpdateManyWithoutUserNestedInput
-  createdInvites?: Prisma.InviteTokenUpdateManyWithoutCreatedByNestedInput
   invites?: Prisma.InviteUpdateManyWithoutInvitedByNestedInput
+  createdInvites?: Prisma.InviteTokenUpdateManyWithoutCreatedByNestedInput
+  leadMeasures?: Prisma.LeadMeasureOwnerUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  orgMemberships?: Prisma.OrgMembershipUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
+  sessionTimeline?: Prisma.SessionTimelineEventUpdateManyWithoutActorNestedInput
+  teamMemberships?: Prisma.TeamMembershipUpdateManyWithoutUserNestedInput
+  facilitatedSessions?: Prisma.WeeklySessionUpdateManyWithoutFacilitatorNestedInput
+  weeklySessions?: Prisma.WeeklySessionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSessionBlockersInput = {
@@ -1462,18 +1462,18 @@ export type UserUncheckedUpdateWithoutSessionBlockersInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   defaultTeamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  orgMemberships?: Prisma.OrgMembershipUncheckedUpdateManyWithoutUserNestedInput
-  teamMemberships?: Prisma.TeamMembershipUncheckedUpdateManyWithoutUserNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutUserNestedInput
-  weeklySessions?: Prisma.WeeklySessionUncheckedUpdateManyWithoutUserNestedInput
-  facilitatedSessions?: Prisma.WeeklySessionUncheckedUpdateManyWithoutFacilitatorNestedInput
-  sessionTimeline?: Prisma.SessionTimelineEventUncheckedUpdateManyWithoutActorNestedInput
-  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
-  leadMeasures?: Prisma.LeadMeasureOwnerUncheckedUpdateManyWithoutUserNestedInput
-  createdInvites?: Prisma.InviteTokenUncheckedUpdateManyWithoutCreatedByNestedInput
   invites?: Prisma.InviteUncheckedUpdateManyWithoutInvitedByNestedInput
+  createdInvites?: Prisma.InviteTokenUncheckedUpdateManyWithoutCreatedByNestedInput
+  leadMeasures?: Prisma.LeadMeasureOwnerUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  orgMemberships?: Prisma.OrgMembershipUncheckedUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+  sessionTimeline?: Prisma.SessionTimelineEventUncheckedUpdateManyWithoutActorNestedInput
+  teamMemberships?: Prisma.TeamMembershipUncheckedUpdateManyWithoutUserNestedInput
+  facilitatedSessions?: Prisma.WeeklySessionUncheckedUpdateManyWithoutFacilitatorNestedInput
+  weeklySessions?: Prisma.WeeklySessionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutSessionTimelineInput = {
@@ -1484,18 +1484,18 @@ export type UserCreateWithoutSessionTimelineInput = {
   createdAt?: Date | string
   defaultTeamId?: string | null
   mustChangePassword?: boolean
-  orgMemberships?: Prisma.OrgMembershipCreateNestedManyWithoutUserInput
-  teamMemberships?: Prisma.TeamMembershipCreateNestedManyWithoutUserInput
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutUserInput
-  weeklySessions?: Prisma.WeeklySessionCreateNestedManyWithoutUserInput
-  facilitatedSessions?: Prisma.WeeklySessionCreateNestedManyWithoutFacilitatorInput
-  sessionBlockers?: Prisma.SessionBlockerCreateNestedManyWithoutCreatedByInput
-  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
-  leadMeasures?: Prisma.LeadMeasureOwnerCreateNestedManyWithoutUserInput
-  createdInvites?: Prisma.InviteTokenCreateNestedManyWithoutCreatedByInput
   invites?: Prisma.InviteCreateNestedManyWithoutInvitedByInput
+  createdInvites?: Prisma.InviteTokenCreateNestedManyWithoutCreatedByInput
+  leadMeasures?: Prisma.LeadMeasureOwnerCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  orgMemberships?: Prisma.OrgMembershipCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
+  sessionBlockers?: Prisma.SessionBlockerCreateNestedManyWithoutCreatedByInput
+  teamMemberships?: Prisma.TeamMembershipCreateNestedManyWithoutUserInput
+  facilitatedSessions?: Prisma.WeeklySessionCreateNestedManyWithoutFacilitatorInput
+  weeklySessions?: Prisma.WeeklySessionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutSessionTimelineInput = {
@@ -1506,18 +1506,18 @@ export type UserUncheckedCreateWithoutSessionTimelineInput = {
   createdAt?: Date | string
   defaultTeamId?: string | null
   mustChangePassword?: boolean
-  orgMemberships?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutUserInput
-  teamMemberships?: Prisma.TeamMembershipUncheckedCreateNestedManyWithoutUserInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutUserInput
-  weeklySessions?: Prisma.WeeklySessionUncheckedCreateNestedManyWithoutUserInput
-  facilitatedSessions?: Prisma.WeeklySessionUncheckedCreateNestedManyWithoutFacilitatorInput
-  sessionBlockers?: Prisma.SessionBlockerUncheckedCreateNestedManyWithoutCreatedByInput
-  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
-  leadMeasures?: Prisma.LeadMeasureOwnerUncheckedCreateNestedManyWithoutUserInput
-  createdInvites?: Prisma.InviteTokenUncheckedCreateNestedManyWithoutCreatedByInput
   invites?: Prisma.InviteUncheckedCreateNestedManyWithoutInvitedByInput
+  createdInvites?: Prisma.InviteTokenUncheckedCreateNestedManyWithoutCreatedByInput
+  leadMeasures?: Prisma.LeadMeasureOwnerUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  orgMemberships?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+  sessionBlockers?: Prisma.SessionBlockerUncheckedCreateNestedManyWithoutCreatedByInput
+  teamMemberships?: Prisma.TeamMembershipUncheckedCreateNestedManyWithoutUserInput
+  facilitatedSessions?: Prisma.WeeklySessionUncheckedCreateNestedManyWithoutFacilitatorInput
+  weeklySessions?: Prisma.WeeklySessionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutSessionTimelineInput = {
@@ -1544,18 +1544,18 @@ export type UserUpdateWithoutSessionTimelineInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   defaultTeamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  orgMemberships?: Prisma.OrgMembershipUpdateManyWithoutUserNestedInput
-  teamMemberships?: Prisma.TeamMembershipUpdateManyWithoutUserNestedInput
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutUserNestedInput
-  weeklySessions?: Prisma.WeeklySessionUpdateManyWithoutUserNestedInput
-  facilitatedSessions?: Prisma.WeeklySessionUpdateManyWithoutFacilitatorNestedInput
-  sessionBlockers?: Prisma.SessionBlockerUpdateManyWithoutCreatedByNestedInput
-  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
-  leadMeasures?: Prisma.LeadMeasureOwnerUpdateManyWithoutUserNestedInput
-  createdInvites?: Prisma.InviteTokenUpdateManyWithoutCreatedByNestedInput
   invites?: Prisma.InviteUpdateManyWithoutInvitedByNestedInput
+  createdInvites?: Prisma.InviteTokenUpdateManyWithoutCreatedByNestedInput
+  leadMeasures?: Prisma.LeadMeasureOwnerUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  orgMemberships?: Prisma.OrgMembershipUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
+  sessionBlockers?: Prisma.SessionBlockerUpdateManyWithoutCreatedByNestedInput
+  teamMemberships?: Prisma.TeamMembershipUpdateManyWithoutUserNestedInput
+  facilitatedSessions?: Prisma.WeeklySessionUpdateManyWithoutFacilitatorNestedInput
+  weeklySessions?: Prisma.WeeklySessionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSessionTimelineInput = {
@@ -1566,18 +1566,18 @@ export type UserUncheckedUpdateWithoutSessionTimelineInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   defaultTeamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  orgMemberships?: Prisma.OrgMembershipUncheckedUpdateManyWithoutUserNestedInput
-  teamMemberships?: Prisma.TeamMembershipUncheckedUpdateManyWithoutUserNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutUserNestedInput
-  weeklySessions?: Prisma.WeeklySessionUncheckedUpdateManyWithoutUserNestedInput
-  facilitatedSessions?: Prisma.WeeklySessionUncheckedUpdateManyWithoutFacilitatorNestedInput
-  sessionBlockers?: Prisma.SessionBlockerUncheckedUpdateManyWithoutCreatedByNestedInput
-  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
-  leadMeasures?: Prisma.LeadMeasureOwnerUncheckedUpdateManyWithoutUserNestedInput
-  createdInvites?: Prisma.InviteTokenUncheckedUpdateManyWithoutCreatedByNestedInput
   invites?: Prisma.InviteUncheckedUpdateManyWithoutInvitedByNestedInput
+  createdInvites?: Prisma.InviteTokenUncheckedUpdateManyWithoutCreatedByNestedInput
+  leadMeasures?: Prisma.LeadMeasureOwnerUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  orgMemberships?: Prisma.OrgMembershipUncheckedUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+  sessionBlockers?: Prisma.SessionBlockerUncheckedUpdateManyWithoutCreatedByNestedInput
+  teamMemberships?: Prisma.TeamMembershipUncheckedUpdateManyWithoutUserNestedInput
+  facilitatedSessions?: Prisma.WeeklySessionUncheckedUpdateManyWithoutFacilitatorNestedInput
+  weeklySessions?: Prisma.WeeklySessionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutNotificationsInput = {
@@ -1588,18 +1588,18 @@ export type UserCreateWithoutNotificationsInput = {
   createdAt?: Date | string
   defaultTeamId?: string | null
   mustChangePassword?: boolean
-  orgMemberships?: Prisma.OrgMembershipCreateNestedManyWithoutUserInput
-  teamMemberships?: Prisma.TeamMembershipCreateNestedManyWithoutUserInput
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutUserInput
-  weeklySessions?: Prisma.WeeklySessionCreateNestedManyWithoutUserInput
-  facilitatedSessions?: Prisma.WeeklySessionCreateNestedManyWithoutFacilitatorInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
+  invites?: Prisma.InviteCreateNestedManyWithoutInvitedByInput
+  createdInvites?: Prisma.InviteTokenCreateNestedManyWithoutCreatedByInput
+  leadMeasures?: Prisma.LeadMeasureOwnerCreateNestedManyWithoutUserInput
+  orgMemberships?: Prisma.OrgMembershipCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   sessionBlockers?: Prisma.SessionBlockerCreateNestedManyWithoutCreatedByInput
   sessionTimeline?: Prisma.SessionTimelineEventCreateNestedManyWithoutActorInput
-  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
-  leadMeasures?: Prisma.LeadMeasureOwnerCreateNestedManyWithoutUserInput
-  createdInvites?: Prisma.InviteTokenCreateNestedManyWithoutCreatedByInput
-  invites?: Prisma.InviteCreateNestedManyWithoutInvitedByInput
-  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
+  teamMemberships?: Prisma.TeamMembershipCreateNestedManyWithoutUserInput
+  facilitatedSessions?: Prisma.WeeklySessionCreateNestedManyWithoutFacilitatorInput
+  weeklySessions?: Prisma.WeeklySessionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutNotificationsInput = {
@@ -1610,18 +1610,18 @@ export type UserUncheckedCreateWithoutNotificationsInput = {
   createdAt?: Date | string
   defaultTeamId?: string | null
   mustChangePassword?: boolean
-  orgMemberships?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutUserInput
-  teamMemberships?: Prisma.TeamMembershipUncheckedCreateNestedManyWithoutUserInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutUserInput
-  weeklySessions?: Prisma.WeeklySessionUncheckedCreateNestedManyWithoutUserInput
-  facilitatedSessions?: Prisma.WeeklySessionUncheckedCreateNestedManyWithoutFacilitatorInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
+  invites?: Prisma.InviteUncheckedCreateNestedManyWithoutInvitedByInput
+  createdInvites?: Prisma.InviteTokenUncheckedCreateNestedManyWithoutCreatedByInput
+  leadMeasures?: Prisma.LeadMeasureOwnerUncheckedCreateNestedManyWithoutUserInput
+  orgMemberships?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   sessionBlockers?: Prisma.SessionBlockerUncheckedCreateNestedManyWithoutCreatedByInput
   sessionTimeline?: Prisma.SessionTimelineEventUncheckedCreateNestedManyWithoutActorInput
-  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
-  leadMeasures?: Prisma.LeadMeasureOwnerUncheckedCreateNestedManyWithoutUserInput
-  createdInvites?: Prisma.InviteTokenUncheckedCreateNestedManyWithoutCreatedByInput
-  invites?: Prisma.InviteUncheckedCreateNestedManyWithoutInvitedByInput
-  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+  teamMemberships?: Prisma.TeamMembershipUncheckedCreateNestedManyWithoutUserInput
+  facilitatedSessions?: Prisma.WeeklySessionUncheckedCreateNestedManyWithoutFacilitatorInput
+  weeklySessions?: Prisma.WeeklySessionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutNotificationsInput = {
@@ -1648,18 +1648,18 @@ export type UserUpdateWithoutNotificationsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   defaultTeamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  orgMemberships?: Prisma.OrgMembershipUpdateManyWithoutUserNestedInput
-  teamMemberships?: Prisma.TeamMembershipUpdateManyWithoutUserNestedInput
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutUserNestedInput
-  weeklySessions?: Prisma.WeeklySessionUpdateManyWithoutUserNestedInput
-  facilitatedSessions?: Prisma.WeeklySessionUpdateManyWithoutFacilitatorNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
+  invites?: Prisma.InviteUpdateManyWithoutInvitedByNestedInput
+  createdInvites?: Prisma.InviteTokenUpdateManyWithoutCreatedByNestedInput
+  leadMeasures?: Prisma.LeadMeasureOwnerUpdateManyWithoutUserNestedInput
+  orgMemberships?: Prisma.OrgMembershipUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   sessionBlockers?: Prisma.SessionBlockerUpdateManyWithoutCreatedByNestedInput
   sessionTimeline?: Prisma.SessionTimelineEventUpdateManyWithoutActorNestedInput
-  auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
-  leadMeasures?: Prisma.LeadMeasureOwnerUpdateManyWithoutUserNestedInput
-  createdInvites?: Prisma.InviteTokenUpdateManyWithoutCreatedByNestedInput
-  invites?: Prisma.InviteUpdateManyWithoutInvitedByNestedInput
-  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
+  teamMemberships?: Prisma.TeamMembershipUpdateManyWithoutUserNestedInput
+  facilitatedSessions?: Prisma.WeeklySessionUpdateManyWithoutFacilitatorNestedInput
+  weeklySessions?: Prisma.WeeklySessionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutNotificationsInput = {
@@ -1670,18 +1670,18 @@ export type UserUncheckedUpdateWithoutNotificationsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   defaultTeamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  orgMemberships?: Prisma.OrgMembershipUncheckedUpdateManyWithoutUserNestedInput
-  teamMemberships?: Prisma.TeamMembershipUncheckedUpdateManyWithoutUserNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutUserNestedInput
-  weeklySessions?: Prisma.WeeklySessionUncheckedUpdateManyWithoutUserNestedInput
-  facilitatedSessions?: Prisma.WeeklySessionUncheckedUpdateManyWithoutFacilitatorNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
+  invites?: Prisma.InviteUncheckedUpdateManyWithoutInvitedByNestedInput
+  createdInvites?: Prisma.InviteTokenUncheckedUpdateManyWithoutCreatedByNestedInput
+  leadMeasures?: Prisma.LeadMeasureOwnerUncheckedUpdateManyWithoutUserNestedInput
+  orgMemberships?: Prisma.OrgMembershipUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   sessionBlockers?: Prisma.SessionBlockerUncheckedUpdateManyWithoutCreatedByNestedInput
   sessionTimeline?: Prisma.SessionTimelineEventUncheckedUpdateManyWithoutActorNestedInput
-  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
-  leadMeasures?: Prisma.LeadMeasureOwnerUncheckedUpdateManyWithoutUserNestedInput
-  createdInvites?: Prisma.InviteTokenUncheckedUpdateManyWithoutCreatedByNestedInput
-  invites?: Prisma.InviteUncheckedUpdateManyWithoutInvitedByNestedInput
-  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+  teamMemberships?: Prisma.TeamMembershipUncheckedUpdateManyWithoutUserNestedInput
+  facilitatedSessions?: Prisma.WeeklySessionUncheckedUpdateManyWithoutFacilitatorNestedInput
+  weeklySessions?: Prisma.WeeklySessionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutAuditLogsInput = {
@@ -1692,18 +1692,18 @@ export type UserCreateWithoutAuditLogsInput = {
   createdAt?: Date | string
   defaultTeamId?: string | null
   mustChangePassword?: boolean
-  orgMemberships?: Prisma.OrgMembershipCreateNestedManyWithoutUserInput
-  teamMemberships?: Prisma.TeamMembershipCreateNestedManyWithoutUserInput
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutUserInput
-  weeklySessions?: Prisma.WeeklySessionCreateNestedManyWithoutUserInput
-  facilitatedSessions?: Prisma.WeeklySessionCreateNestedManyWithoutFacilitatorInput
+  invites?: Prisma.InviteCreateNestedManyWithoutInvitedByInput
+  createdInvites?: Prisma.InviteTokenCreateNestedManyWithoutCreatedByInput
+  leadMeasures?: Prisma.LeadMeasureOwnerCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  orgMemberships?: Prisma.OrgMembershipCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   sessionBlockers?: Prisma.SessionBlockerCreateNestedManyWithoutCreatedByInput
   sessionTimeline?: Prisma.SessionTimelineEventCreateNestedManyWithoutActorInput
-  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
-  leadMeasures?: Prisma.LeadMeasureOwnerCreateNestedManyWithoutUserInput
-  createdInvites?: Prisma.InviteTokenCreateNestedManyWithoutCreatedByInput
-  invites?: Prisma.InviteCreateNestedManyWithoutInvitedByInput
-  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
+  teamMemberships?: Prisma.TeamMembershipCreateNestedManyWithoutUserInput
+  facilitatedSessions?: Prisma.WeeklySessionCreateNestedManyWithoutFacilitatorInput
+  weeklySessions?: Prisma.WeeklySessionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutAuditLogsInput = {
@@ -1714,18 +1714,18 @@ export type UserUncheckedCreateWithoutAuditLogsInput = {
   createdAt?: Date | string
   defaultTeamId?: string | null
   mustChangePassword?: boolean
-  orgMemberships?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutUserInput
-  teamMemberships?: Prisma.TeamMembershipUncheckedCreateNestedManyWithoutUserInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutUserInput
-  weeklySessions?: Prisma.WeeklySessionUncheckedCreateNestedManyWithoutUserInput
-  facilitatedSessions?: Prisma.WeeklySessionUncheckedCreateNestedManyWithoutFacilitatorInput
+  invites?: Prisma.InviteUncheckedCreateNestedManyWithoutInvitedByInput
+  createdInvites?: Prisma.InviteTokenUncheckedCreateNestedManyWithoutCreatedByInput
+  leadMeasures?: Prisma.LeadMeasureOwnerUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  orgMemberships?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   sessionBlockers?: Prisma.SessionBlockerUncheckedCreateNestedManyWithoutCreatedByInput
   sessionTimeline?: Prisma.SessionTimelineEventUncheckedCreateNestedManyWithoutActorInput
-  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
-  leadMeasures?: Prisma.LeadMeasureOwnerUncheckedCreateNestedManyWithoutUserInput
-  createdInvites?: Prisma.InviteTokenUncheckedCreateNestedManyWithoutCreatedByInput
-  invites?: Prisma.InviteUncheckedCreateNestedManyWithoutInvitedByInput
-  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+  teamMemberships?: Prisma.TeamMembershipUncheckedCreateNestedManyWithoutUserInput
+  facilitatedSessions?: Prisma.WeeklySessionUncheckedCreateNestedManyWithoutFacilitatorInput
+  weeklySessions?: Prisma.WeeklySessionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutAuditLogsInput = {
@@ -1752,18 +1752,18 @@ export type UserUpdateWithoutAuditLogsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   defaultTeamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  orgMemberships?: Prisma.OrgMembershipUpdateManyWithoutUserNestedInput
-  teamMemberships?: Prisma.TeamMembershipUpdateManyWithoutUserNestedInput
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutUserNestedInput
-  weeklySessions?: Prisma.WeeklySessionUpdateManyWithoutUserNestedInput
-  facilitatedSessions?: Prisma.WeeklySessionUpdateManyWithoutFacilitatorNestedInput
+  invites?: Prisma.InviteUpdateManyWithoutInvitedByNestedInput
+  createdInvites?: Prisma.InviteTokenUpdateManyWithoutCreatedByNestedInput
+  leadMeasures?: Prisma.LeadMeasureOwnerUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  orgMemberships?: Prisma.OrgMembershipUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   sessionBlockers?: Prisma.SessionBlockerUpdateManyWithoutCreatedByNestedInput
   sessionTimeline?: Prisma.SessionTimelineEventUpdateManyWithoutActorNestedInput
-  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
-  leadMeasures?: Prisma.LeadMeasureOwnerUpdateManyWithoutUserNestedInput
-  createdInvites?: Prisma.InviteTokenUpdateManyWithoutCreatedByNestedInput
-  invites?: Prisma.InviteUpdateManyWithoutInvitedByNestedInput
-  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
+  teamMemberships?: Prisma.TeamMembershipUpdateManyWithoutUserNestedInput
+  facilitatedSessions?: Prisma.WeeklySessionUpdateManyWithoutFacilitatorNestedInput
+  weeklySessions?: Prisma.WeeklySessionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAuditLogsInput = {
@@ -1774,18 +1774,18 @@ export type UserUncheckedUpdateWithoutAuditLogsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   defaultTeamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  orgMemberships?: Prisma.OrgMembershipUncheckedUpdateManyWithoutUserNestedInput
-  teamMemberships?: Prisma.TeamMembershipUncheckedUpdateManyWithoutUserNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutUserNestedInput
-  weeklySessions?: Prisma.WeeklySessionUncheckedUpdateManyWithoutUserNestedInput
-  facilitatedSessions?: Prisma.WeeklySessionUncheckedUpdateManyWithoutFacilitatorNestedInput
+  invites?: Prisma.InviteUncheckedUpdateManyWithoutInvitedByNestedInput
+  createdInvites?: Prisma.InviteTokenUncheckedUpdateManyWithoutCreatedByNestedInput
+  leadMeasures?: Prisma.LeadMeasureOwnerUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  orgMemberships?: Prisma.OrgMembershipUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   sessionBlockers?: Prisma.SessionBlockerUncheckedUpdateManyWithoutCreatedByNestedInput
   sessionTimeline?: Prisma.SessionTimelineEventUncheckedUpdateManyWithoutActorNestedInput
-  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
-  leadMeasures?: Prisma.LeadMeasureOwnerUncheckedUpdateManyWithoutUserNestedInput
-  createdInvites?: Prisma.InviteTokenUncheckedUpdateManyWithoutCreatedByNestedInput
-  invites?: Prisma.InviteUncheckedUpdateManyWithoutInvitedByNestedInput
-  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+  teamMemberships?: Prisma.TeamMembershipUncheckedUpdateManyWithoutUserNestedInput
+  facilitatedSessions?: Prisma.WeeklySessionUncheckedUpdateManyWithoutFacilitatorNestedInput
+  weeklySessions?: Prisma.WeeklySessionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutCreatedInvitesInput = {
@@ -1796,18 +1796,18 @@ export type UserCreateWithoutCreatedInvitesInput = {
   createdAt?: Date | string
   defaultTeamId?: string | null
   mustChangePassword?: boolean
-  orgMemberships?: Prisma.OrgMembershipCreateNestedManyWithoutUserInput
-  teamMemberships?: Prisma.TeamMembershipCreateNestedManyWithoutUserInput
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutUserInput
-  weeklySessions?: Prisma.WeeklySessionCreateNestedManyWithoutUserInput
-  facilitatedSessions?: Prisma.WeeklySessionCreateNestedManyWithoutFacilitatorInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
+  invites?: Prisma.InviteCreateNestedManyWithoutInvitedByInput
+  leadMeasures?: Prisma.LeadMeasureOwnerCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  orgMemberships?: Prisma.OrgMembershipCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   sessionBlockers?: Prisma.SessionBlockerCreateNestedManyWithoutCreatedByInput
   sessionTimeline?: Prisma.SessionTimelineEventCreateNestedManyWithoutActorInput
-  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
-  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
-  leadMeasures?: Prisma.LeadMeasureOwnerCreateNestedManyWithoutUserInput
-  invites?: Prisma.InviteCreateNestedManyWithoutInvitedByInput
-  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
+  teamMemberships?: Prisma.TeamMembershipCreateNestedManyWithoutUserInput
+  facilitatedSessions?: Prisma.WeeklySessionCreateNestedManyWithoutFacilitatorInput
+  weeklySessions?: Prisma.WeeklySessionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutCreatedInvitesInput = {
@@ -1818,18 +1818,18 @@ export type UserUncheckedCreateWithoutCreatedInvitesInput = {
   createdAt?: Date | string
   defaultTeamId?: string | null
   mustChangePassword?: boolean
-  orgMemberships?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutUserInput
-  teamMemberships?: Prisma.TeamMembershipUncheckedCreateNestedManyWithoutUserInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutUserInput
-  weeklySessions?: Prisma.WeeklySessionUncheckedCreateNestedManyWithoutUserInput
-  facilitatedSessions?: Prisma.WeeklySessionUncheckedCreateNestedManyWithoutFacilitatorInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
+  invites?: Prisma.InviteUncheckedCreateNestedManyWithoutInvitedByInput
+  leadMeasures?: Prisma.LeadMeasureOwnerUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  orgMemberships?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   sessionBlockers?: Prisma.SessionBlockerUncheckedCreateNestedManyWithoutCreatedByInput
   sessionTimeline?: Prisma.SessionTimelineEventUncheckedCreateNestedManyWithoutActorInput
-  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
-  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
-  leadMeasures?: Prisma.LeadMeasureOwnerUncheckedCreateNestedManyWithoutUserInput
-  invites?: Prisma.InviteUncheckedCreateNestedManyWithoutInvitedByInput
-  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+  teamMemberships?: Prisma.TeamMembershipUncheckedCreateNestedManyWithoutUserInput
+  facilitatedSessions?: Prisma.WeeklySessionUncheckedCreateNestedManyWithoutFacilitatorInput
+  weeklySessions?: Prisma.WeeklySessionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutCreatedInvitesInput = {
@@ -1856,18 +1856,18 @@ export type UserUpdateWithoutCreatedInvitesInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   defaultTeamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  orgMemberships?: Prisma.OrgMembershipUpdateManyWithoutUserNestedInput
-  teamMemberships?: Prisma.TeamMembershipUpdateManyWithoutUserNestedInput
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutUserNestedInput
-  weeklySessions?: Prisma.WeeklySessionUpdateManyWithoutUserNestedInput
-  facilitatedSessions?: Prisma.WeeklySessionUpdateManyWithoutFacilitatorNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
+  invites?: Prisma.InviteUpdateManyWithoutInvitedByNestedInput
+  leadMeasures?: Prisma.LeadMeasureOwnerUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  orgMemberships?: Prisma.OrgMembershipUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   sessionBlockers?: Prisma.SessionBlockerUpdateManyWithoutCreatedByNestedInput
   sessionTimeline?: Prisma.SessionTimelineEventUpdateManyWithoutActorNestedInput
-  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
-  auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
-  leadMeasures?: Prisma.LeadMeasureOwnerUpdateManyWithoutUserNestedInput
-  invites?: Prisma.InviteUpdateManyWithoutInvitedByNestedInput
-  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
+  teamMemberships?: Prisma.TeamMembershipUpdateManyWithoutUserNestedInput
+  facilitatedSessions?: Prisma.WeeklySessionUpdateManyWithoutFacilitatorNestedInput
+  weeklySessions?: Prisma.WeeklySessionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCreatedInvitesInput = {
@@ -1878,18 +1878,18 @@ export type UserUncheckedUpdateWithoutCreatedInvitesInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   defaultTeamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  orgMemberships?: Prisma.OrgMembershipUncheckedUpdateManyWithoutUserNestedInput
-  teamMemberships?: Prisma.TeamMembershipUncheckedUpdateManyWithoutUserNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutUserNestedInput
-  weeklySessions?: Prisma.WeeklySessionUncheckedUpdateManyWithoutUserNestedInput
-  facilitatedSessions?: Prisma.WeeklySessionUncheckedUpdateManyWithoutFacilitatorNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
+  invites?: Prisma.InviteUncheckedUpdateManyWithoutInvitedByNestedInput
+  leadMeasures?: Prisma.LeadMeasureOwnerUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  orgMemberships?: Prisma.OrgMembershipUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   sessionBlockers?: Prisma.SessionBlockerUncheckedUpdateManyWithoutCreatedByNestedInput
   sessionTimeline?: Prisma.SessionTimelineEventUncheckedUpdateManyWithoutActorNestedInput
-  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
-  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
-  leadMeasures?: Prisma.LeadMeasureOwnerUncheckedUpdateManyWithoutUserNestedInput
-  invites?: Prisma.InviteUncheckedUpdateManyWithoutInvitedByNestedInput
-  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+  teamMemberships?: Prisma.TeamMembershipUncheckedUpdateManyWithoutUserNestedInput
+  facilitatedSessions?: Prisma.WeeklySessionUncheckedUpdateManyWithoutFacilitatorNestedInput
+  weeklySessions?: Prisma.WeeklySessionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutPasswordResetTokensInput = {
@@ -1900,18 +1900,18 @@ export type UserCreateWithoutPasswordResetTokensInput = {
   createdAt?: Date | string
   defaultTeamId?: string | null
   mustChangePassword?: boolean
-  orgMemberships?: Prisma.OrgMembershipCreateNestedManyWithoutUserInput
-  teamMemberships?: Prisma.TeamMembershipCreateNestedManyWithoutUserInput
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutUserInput
-  weeklySessions?: Prisma.WeeklySessionCreateNestedManyWithoutUserInput
-  facilitatedSessions?: Prisma.WeeklySessionCreateNestedManyWithoutFacilitatorInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
+  invites?: Prisma.InviteCreateNestedManyWithoutInvitedByInput
+  createdInvites?: Prisma.InviteTokenCreateNestedManyWithoutCreatedByInput
+  leadMeasures?: Prisma.LeadMeasureOwnerCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  orgMemberships?: Prisma.OrgMembershipCreateNestedManyWithoutUserInput
   sessionBlockers?: Prisma.SessionBlockerCreateNestedManyWithoutCreatedByInput
   sessionTimeline?: Prisma.SessionTimelineEventCreateNestedManyWithoutActorInput
-  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
-  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
-  leadMeasures?: Prisma.LeadMeasureOwnerCreateNestedManyWithoutUserInput
-  createdInvites?: Prisma.InviteTokenCreateNestedManyWithoutCreatedByInput
-  invites?: Prisma.InviteCreateNestedManyWithoutInvitedByInput
+  teamMemberships?: Prisma.TeamMembershipCreateNestedManyWithoutUserInput
+  facilitatedSessions?: Prisma.WeeklySessionCreateNestedManyWithoutFacilitatorInput
+  weeklySessions?: Prisma.WeeklySessionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutPasswordResetTokensInput = {
@@ -1922,18 +1922,18 @@ export type UserUncheckedCreateWithoutPasswordResetTokensInput = {
   createdAt?: Date | string
   defaultTeamId?: string | null
   mustChangePassword?: boolean
-  orgMemberships?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutUserInput
-  teamMemberships?: Prisma.TeamMembershipUncheckedCreateNestedManyWithoutUserInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutUserInput
-  weeklySessions?: Prisma.WeeklySessionUncheckedCreateNestedManyWithoutUserInput
-  facilitatedSessions?: Prisma.WeeklySessionUncheckedCreateNestedManyWithoutFacilitatorInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
+  invites?: Prisma.InviteUncheckedCreateNestedManyWithoutInvitedByInput
+  createdInvites?: Prisma.InviteTokenUncheckedCreateNestedManyWithoutCreatedByInput
+  leadMeasures?: Prisma.LeadMeasureOwnerUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  orgMemberships?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutUserInput
   sessionBlockers?: Prisma.SessionBlockerUncheckedCreateNestedManyWithoutCreatedByInput
   sessionTimeline?: Prisma.SessionTimelineEventUncheckedCreateNestedManyWithoutActorInput
-  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
-  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
-  leadMeasures?: Prisma.LeadMeasureOwnerUncheckedCreateNestedManyWithoutUserInput
-  createdInvites?: Prisma.InviteTokenUncheckedCreateNestedManyWithoutCreatedByInput
-  invites?: Prisma.InviteUncheckedCreateNestedManyWithoutInvitedByInput
+  teamMemberships?: Prisma.TeamMembershipUncheckedCreateNestedManyWithoutUserInput
+  facilitatedSessions?: Prisma.WeeklySessionUncheckedCreateNestedManyWithoutFacilitatorInput
+  weeklySessions?: Prisma.WeeklySessionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutPasswordResetTokensInput = {
@@ -1960,18 +1960,18 @@ export type UserUpdateWithoutPasswordResetTokensInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   defaultTeamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  orgMemberships?: Prisma.OrgMembershipUpdateManyWithoutUserNestedInput
-  teamMemberships?: Prisma.TeamMembershipUpdateManyWithoutUserNestedInput
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutUserNestedInput
-  weeklySessions?: Prisma.WeeklySessionUpdateManyWithoutUserNestedInput
-  facilitatedSessions?: Prisma.WeeklySessionUpdateManyWithoutFacilitatorNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
+  invites?: Prisma.InviteUpdateManyWithoutInvitedByNestedInput
+  createdInvites?: Prisma.InviteTokenUpdateManyWithoutCreatedByNestedInput
+  leadMeasures?: Prisma.LeadMeasureOwnerUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  orgMemberships?: Prisma.OrgMembershipUpdateManyWithoutUserNestedInput
   sessionBlockers?: Prisma.SessionBlockerUpdateManyWithoutCreatedByNestedInput
   sessionTimeline?: Prisma.SessionTimelineEventUpdateManyWithoutActorNestedInput
-  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
-  auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
-  leadMeasures?: Prisma.LeadMeasureOwnerUpdateManyWithoutUserNestedInput
-  createdInvites?: Prisma.InviteTokenUpdateManyWithoutCreatedByNestedInput
-  invites?: Prisma.InviteUpdateManyWithoutInvitedByNestedInput
+  teamMemberships?: Prisma.TeamMembershipUpdateManyWithoutUserNestedInput
+  facilitatedSessions?: Prisma.WeeklySessionUpdateManyWithoutFacilitatorNestedInput
+  weeklySessions?: Prisma.WeeklySessionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutPasswordResetTokensInput = {
@@ -1982,18 +1982,18 @@ export type UserUncheckedUpdateWithoutPasswordResetTokensInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   defaultTeamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  orgMemberships?: Prisma.OrgMembershipUncheckedUpdateManyWithoutUserNestedInput
-  teamMemberships?: Prisma.TeamMembershipUncheckedUpdateManyWithoutUserNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutUserNestedInput
-  weeklySessions?: Prisma.WeeklySessionUncheckedUpdateManyWithoutUserNestedInput
-  facilitatedSessions?: Prisma.WeeklySessionUncheckedUpdateManyWithoutFacilitatorNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
+  invites?: Prisma.InviteUncheckedUpdateManyWithoutInvitedByNestedInput
+  createdInvites?: Prisma.InviteTokenUncheckedUpdateManyWithoutCreatedByNestedInput
+  leadMeasures?: Prisma.LeadMeasureOwnerUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  orgMemberships?: Prisma.OrgMembershipUncheckedUpdateManyWithoutUserNestedInput
   sessionBlockers?: Prisma.SessionBlockerUncheckedUpdateManyWithoutCreatedByNestedInput
   sessionTimeline?: Prisma.SessionTimelineEventUncheckedUpdateManyWithoutActorNestedInput
-  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
-  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
-  leadMeasures?: Prisma.LeadMeasureOwnerUncheckedUpdateManyWithoutUserNestedInput
-  createdInvites?: Prisma.InviteTokenUncheckedUpdateManyWithoutCreatedByNestedInput
-  invites?: Prisma.InviteUncheckedUpdateManyWithoutInvitedByNestedInput
+  teamMemberships?: Prisma.TeamMembershipUncheckedUpdateManyWithoutUserNestedInput
+  facilitatedSessions?: Prisma.WeeklySessionUncheckedUpdateManyWithoutFacilitatorNestedInput
+  weeklySessions?: Prisma.WeeklySessionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 
@@ -2002,35 +2002,35 @@ export type UserUncheckedUpdateWithoutPasswordResetTokensInput = {
  */
 
 export type UserCountOutputType = {
-  orgMemberships: number
-  teamMemberships: number
   activityLogs: number
-  weeklySessions: number
-  facilitatedSessions: number
+  auditLogs: number
+  invites: number
+  createdInvites: number
+  leadMeasures: number
+  notifications: number
+  orgMemberships: number
+  passwordResetTokens: number
   sessionBlockers: number
   sessionTimeline: number
-  notifications: number
-  auditLogs: number
-  leadMeasures: number
-  createdInvites: number
-  invites: number
-  passwordResetTokens: number
+  teamMemberships: number
+  facilitatedSessions: number
+  weeklySessions: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  orgMemberships?: boolean | UserCountOutputTypeCountOrgMembershipsArgs
-  teamMemberships?: boolean | UserCountOutputTypeCountTeamMembershipsArgs
   activityLogs?: boolean | UserCountOutputTypeCountActivityLogsArgs
-  weeklySessions?: boolean | UserCountOutputTypeCountWeeklySessionsArgs
-  facilitatedSessions?: boolean | UserCountOutputTypeCountFacilitatedSessionsArgs
+  auditLogs?: boolean | UserCountOutputTypeCountAuditLogsArgs
+  invites?: boolean | UserCountOutputTypeCountInvitesArgs
+  createdInvites?: boolean | UserCountOutputTypeCountCreatedInvitesArgs
+  leadMeasures?: boolean | UserCountOutputTypeCountLeadMeasuresArgs
+  notifications?: boolean | UserCountOutputTypeCountNotificationsArgs
+  orgMemberships?: boolean | UserCountOutputTypeCountOrgMembershipsArgs
+  passwordResetTokens?: boolean | UserCountOutputTypeCountPasswordResetTokensArgs
   sessionBlockers?: boolean | UserCountOutputTypeCountSessionBlockersArgs
   sessionTimeline?: boolean | UserCountOutputTypeCountSessionTimelineArgs
-  notifications?: boolean | UserCountOutputTypeCountNotificationsArgs
-  auditLogs?: boolean | UserCountOutputTypeCountAuditLogsArgs
-  leadMeasures?: boolean | UserCountOutputTypeCountLeadMeasuresArgs
-  createdInvites?: boolean | UserCountOutputTypeCountCreatedInvitesArgs
-  invites?: boolean | UserCountOutputTypeCountInvitesArgs
-  passwordResetTokens?: boolean | UserCountOutputTypeCountPasswordResetTokensArgs
+  teamMemberships?: boolean | UserCountOutputTypeCountTeamMembershipsArgs
+  facilitatedSessions?: boolean | UserCountOutputTypeCountFacilitatedSessionsArgs
+  weeklySessions?: boolean | UserCountOutputTypeCountWeeklySessionsArgs
 }
 
 /**
@@ -2046,20 +2046,6 @@ export type UserCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensi
 /**
  * UserCountOutputType without action
  */
-export type UserCountOutputTypeCountOrgMembershipsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.OrgMembershipWhereInput
-}
-
-/**
- * UserCountOutputType without action
- */
-export type UserCountOutputTypeCountTeamMembershipsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.TeamMembershipWhereInput
-}
-
-/**
- * UserCountOutputType without action
- */
 export type UserCountOutputTypeCountActivityLogsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.ActivityLogWhereInput
 }
@@ -2067,15 +2053,50 @@ export type UserCountOutputTypeCountActivityLogsArgs<ExtArgs extends runtime.Typ
 /**
  * UserCountOutputType without action
  */
-export type UserCountOutputTypeCountWeeklySessionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.WeeklySessionWhereInput
+export type UserCountOutputTypeCountAuditLogsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AuditLogWhereInput
 }
 
 /**
  * UserCountOutputType without action
  */
-export type UserCountOutputTypeCountFacilitatedSessionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.WeeklySessionWhereInput
+export type UserCountOutputTypeCountInvitesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.InviteWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountCreatedInvitesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.InviteTokenWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountLeadMeasuresArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.LeadMeasureOwnerWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountNotificationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.NotificationWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountOrgMembershipsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.OrgMembershipWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountPasswordResetTokensArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PasswordResetTokenWhereInput
 }
 
 /**
@@ -2095,43 +2116,22 @@ export type UserCountOutputTypeCountSessionTimelineArgs<ExtArgs extends runtime.
 /**
  * UserCountOutputType without action
  */
-export type UserCountOutputTypeCountNotificationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.NotificationWhereInput
+export type UserCountOutputTypeCountTeamMembershipsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.TeamMembershipWhereInput
 }
 
 /**
  * UserCountOutputType without action
  */
-export type UserCountOutputTypeCountAuditLogsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.AuditLogWhereInput
+export type UserCountOutputTypeCountFacilitatedSessionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.WeeklySessionWhereInput
 }
 
 /**
  * UserCountOutputType without action
  */
-export type UserCountOutputTypeCountLeadMeasuresArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.LeadMeasureOwnerWhereInput
-}
-
-/**
- * UserCountOutputType without action
- */
-export type UserCountOutputTypeCountCreatedInvitesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.InviteTokenWhereInput
-}
-
-/**
- * UserCountOutputType without action
- */
-export type UserCountOutputTypeCountInvitesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.InviteWhereInput
-}
-
-/**
- * UserCountOutputType without action
- */
-export type UserCountOutputTypeCountPasswordResetTokensArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.PasswordResetTokenWhereInput
+export type UserCountOutputTypeCountWeeklySessionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.WeeklySessionWhereInput
 }
 
 
@@ -2143,19 +2143,19 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   createdAt?: boolean
   defaultTeamId?: boolean
   mustChangePassword?: boolean
-  orgMemberships?: boolean | Prisma.User$orgMembershipsArgs<ExtArgs>
-  teamMemberships?: boolean | Prisma.User$teamMembershipsArgs<ExtArgs>
   activityLogs?: boolean | Prisma.User$activityLogsArgs<ExtArgs>
-  weeklySessions?: boolean | Prisma.User$weeklySessionsArgs<ExtArgs>
-  facilitatedSessions?: boolean | Prisma.User$facilitatedSessionsArgs<ExtArgs>
+  auditLogs?: boolean | Prisma.User$auditLogsArgs<ExtArgs>
+  invites?: boolean | Prisma.User$invitesArgs<ExtArgs>
+  createdInvites?: boolean | Prisma.User$createdInvitesArgs<ExtArgs>
+  leadMeasures?: boolean | Prisma.User$leadMeasuresArgs<ExtArgs>
+  notifications?: boolean | Prisma.User$notificationsArgs<ExtArgs>
+  orgMemberships?: boolean | Prisma.User$orgMembershipsArgs<ExtArgs>
+  passwordResetTokens?: boolean | Prisma.User$passwordResetTokensArgs<ExtArgs>
   sessionBlockers?: boolean | Prisma.User$sessionBlockersArgs<ExtArgs>
   sessionTimeline?: boolean | Prisma.User$sessionTimelineArgs<ExtArgs>
-  notifications?: boolean | Prisma.User$notificationsArgs<ExtArgs>
-  auditLogs?: boolean | Prisma.User$auditLogsArgs<ExtArgs>
-  leadMeasures?: boolean | Prisma.User$leadMeasuresArgs<ExtArgs>
-  createdInvites?: boolean | Prisma.User$createdInvitesArgs<ExtArgs>
-  invites?: boolean | Prisma.User$invitesArgs<ExtArgs>
-  passwordResetTokens?: boolean | Prisma.User$passwordResetTokensArgs<ExtArgs>
+  teamMemberships?: boolean | Prisma.User$teamMembershipsArgs<ExtArgs>
+  facilitatedSessions?: boolean | Prisma.User$facilitatedSessionsArgs<ExtArgs>
+  weeklySessions?: boolean | Prisma.User$weeklySessionsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -2191,19 +2191,19 @@ export type UserSelectScalar = {
 
 export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "name" | "passwordHash" | "createdAt" | "defaultTeamId" | "mustChangePassword", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  orgMemberships?: boolean | Prisma.User$orgMembershipsArgs<ExtArgs>
-  teamMemberships?: boolean | Prisma.User$teamMembershipsArgs<ExtArgs>
   activityLogs?: boolean | Prisma.User$activityLogsArgs<ExtArgs>
-  weeklySessions?: boolean | Prisma.User$weeklySessionsArgs<ExtArgs>
-  facilitatedSessions?: boolean | Prisma.User$facilitatedSessionsArgs<ExtArgs>
+  auditLogs?: boolean | Prisma.User$auditLogsArgs<ExtArgs>
+  invites?: boolean | Prisma.User$invitesArgs<ExtArgs>
+  createdInvites?: boolean | Prisma.User$createdInvitesArgs<ExtArgs>
+  leadMeasures?: boolean | Prisma.User$leadMeasuresArgs<ExtArgs>
+  notifications?: boolean | Prisma.User$notificationsArgs<ExtArgs>
+  orgMemberships?: boolean | Prisma.User$orgMembershipsArgs<ExtArgs>
+  passwordResetTokens?: boolean | Prisma.User$passwordResetTokensArgs<ExtArgs>
   sessionBlockers?: boolean | Prisma.User$sessionBlockersArgs<ExtArgs>
   sessionTimeline?: boolean | Prisma.User$sessionTimelineArgs<ExtArgs>
-  notifications?: boolean | Prisma.User$notificationsArgs<ExtArgs>
-  auditLogs?: boolean | Prisma.User$auditLogsArgs<ExtArgs>
-  leadMeasures?: boolean | Prisma.User$leadMeasuresArgs<ExtArgs>
-  createdInvites?: boolean | Prisma.User$createdInvitesArgs<ExtArgs>
-  invites?: boolean | Prisma.User$invitesArgs<ExtArgs>
-  passwordResetTokens?: boolean | Prisma.User$passwordResetTokensArgs<ExtArgs>
+  teamMemberships?: boolean | Prisma.User$teamMembershipsArgs<ExtArgs>
+  facilitatedSessions?: boolean | Prisma.User$facilitatedSessionsArgs<ExtArgs>
+  weeklySessions?: boolean | Prisma.User$weeklySessionsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -2212,19 +2212,19 @@ export type UserIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
 export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "User"
   objects: {
-    orgMemberships: Prisma.$OrgMembershipPayload<ExtArgs>[]
-    teamMemberships: Prisma.$TeamMembershipPayload<ExtArgs>[]
     activityLogs: Prisma.$ActivityLogPayload<ExtArgs>[]
-    weeklySessions: Prisma.$WeeklySessionPayload<ExtArgs>[]
-    facilitatedSessions: Prisma.$WeeklySessionPayload<ExtArgs>[]
+    auditLogs: Prisma.$AuditLogPayload<ExtArgs>[]
+    invites: Prisma.$InvitePayload<ExtArgs>[]
+    createdInvites: Prisma.$InviteTokenPayload<ExtArgs>[]
+    leadMeasures: Prisma.$LeadMeasureOwnerPayload<ExtArgs>[]
+    notifications: Prisma.$NotificationPayload<ExtArgs>[]
+    orgMemberships: Prisma.$OrgMembershipPayload<ExtArgs>[]
+    passwordResetTokens: Prisma.$PasswordResetTokenPayload<ExtArgs>[]
     sessionBlockers: Prisma.$SessionBlockerPayload<ExtArgs>[]
     sessionTimeline: Prisma.$SessionTimelineEventPayload<ExtArgs>[]
-    notifications: Prisma.$NotificationPayload<ExtArgs>[]
-    auditLogs: Prisma.$AuditLogPayload<ExtArgs>[]
-    leadMeasures: Prisma.$LeadMeasureOwnerPayload<ExtArgs>[]
-    createdInvites: Prisma.$InviteTokenPayload<ExtArgs>[]
-    invites: Prisma.$InvitePayload<ExtArgs>[]
-    passwordResetTokens: Prisma.$PasswordResetTokenPayload<ExtArgs>[]
+    teamMemberships: Prisma.$TeamMembershipPayload<ExtArgs>[]
+    facilitatedSessions: Prisma.$WeeklySessionPayload<ExtArgs>[]
+    weeklySessions: Prisma.$WeeklySessionPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -2628,19 +2628,19 @@ readonly fields: UserFieldRefs;
  */
 export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  orgMemberships<T extends Prisma.User$orgMembershipsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$orgMembershipsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrgMembershipPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  teamMemberships<T extends Prisma.User$teamMembershipsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$teamMembershipsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TeamMembershipPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   activityLogs<T extends Prisma.User$activityLogsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$activityLogsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ActivityLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  weeklySessions<T extends Prisma.User$weeklySessionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$weeklySessionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$WeeklySessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  facilitatedSessions<T extends Prisma.User$facilitatedSessionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$facilitatedSessionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$WeeklySessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  auditLogs<T extends Prisma.User$auditLogsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$auditLogsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AuditLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  invites<T extends Prisma.User$invitesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$invitesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$InvitePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  createdInvites<T extends Prisma.User$createdInvitesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$createdInvitesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$InviteTokenPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  leadMeasures<T extends Prisma.User$leadMeasuresArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$leadMeasuresArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LeadMeasureOwnerPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  notifications<T extends Prisma.User$notificationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$notificationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  orgMemberships<T extends Prisma.User$orgMembershipsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$orgMembershipsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrgMembershipPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  passwordResetTokens<T extends Prisma.User$passwordResetTokensArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$passwordResetTokensArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PasswordResetTokenPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   sessionBlockers<T extends Prisma.User$sessionBlockersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$sessionBlockersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SessionBlockerPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   sessionTimeline<T extends Prisma.User$sessionTimelineArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$sessionTimelineArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SessionTimelineEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  notifications<T extends Prisma.User$notificationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$notificationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  auditLogs<T extends Prisma.User$auditLogsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$auditLogsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AuditLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  leadMeasures<T extends Prisma.User$leadMeasuresArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$leadMeasuresArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LeadMeasureOwnerPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  createdInvites<T extends Prisma.User$createdInvitesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$createdInvitesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$InviteTokenPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  invites<T extends Prisma.User$invitesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$invitesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$InvitePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  passwordResetTokens<T extends Prisma.User$passwordResetTokensArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$passwordResetTokensArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PasswordResetTokenPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  teamMemberships<T extends Prisma.User$teamMembershipsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$teamMembershipsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TeamMembershipPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  facilitatedSessions<T extends Prisma.User$facilitatedSessionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$facilitatedSessionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$WeeklySessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  weeklySessions<T extends Prisma.User$weeklySessionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$weeklySessionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$WeeklySessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -3070,54 +3070,6 @@ export type UserDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Internal
 }
 
 /**
- * User.orgMemberships
- */
-export type User$orgMembershipsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the OrgMembership
-   */
-  select?: Prisma.OrgMembershipSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the OrgMembership
-   */
-  omit?: Prisma.OrgMembershipOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.OrgMembershipInclude<ExtArgs> | null
-  where?: Prisma.OrgMembershipWhereInput
-  orderBy?: Prisma.OrgMembershipOrderByWithRelationInput | Prisma.OrgMembershipOrderByWithRelationInput[]
-  cursor?: Prisma.OrgMembershipWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.OrgMembershipScalarFieldEnum | Prisma.OrgMembershipScalarFieldEnum[]
-}
-
-/**
- * User.teamMemberships
- */
-export type User$teamMembershipsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the TeamMembership
-   */
-  select?: Prisma.TeamMembershipSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the TeamMembership
-   */
-  omit?: Prisma.TeamMembershipOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.TeamMembershipInclude<ExtArgs> | null
-  where?: Prisma.TeamMembershipWhereInput
-  orderBy?: Prisma.TeamMembershipOrderByWithRelationInput | Prisma.TeamMembershipOrderByWithRelationInput[]
-  cursor?: Prisma.TeamMembershipWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.TeamMembershipScalarFieldEnum | Prisma.TeamMembershipScalarFieldEnum[]
-}
-
-/**
  * User.activityLogs
  */
 export type User$activityLogsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -3142,51 +3094,171 @@ export type User$activityLogsArgs<ExtArgs extends runtime.Types.Extensions.Inter
 }
 
 /**
- * User.weeklySessions
+ * User.auditLogs
  */
-export type User$weeklySessionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+export type User$auditLogsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   /**
-   * Select specific fields to fetch from the WeeklySession
+   * Select specific fields to fetch from the AuditLog
    */
-  select?: Prisma.WeeklySessionSelect<ExtArgs> | null
+  select?: Prisma.AuditLogSelect<ExtArgs> | null
   /**
-   * Omit specific fields from the WeeklySession
+   * Omit specific fields from the AuditLog
    */
-  omit?: Prisma.WeeklySessionOmit<ExtArgs> | null
+  omit?: Prisma.AuditLogOmit<ExtArgs> | null
   /**
    * Choose, which related nodes to fetch as well
    */
-  include?: Prisma.WeeklySessionInclude<ExtArgs> | null
-  where?: Prisma.WeeklySessionWhereInput
-  orderBy?: Prisma.WeeklySessionOrderByWithRelationInput | Prisma.WeeklySessionOrderByWithRelationInput[]
-  cursor?: Prisma.WeeklySessionWhereUniqueInput
+  include?: Prisma.AuditLogInclude<ExtArgs> | null
+  where?: Prisma.AuditLogWhereInput
+  orderBy?: Prisma.AuditLogOrderByWithRelationInput | Prisma.AuditLogOrderByWithRelationInput[]
+  cursor?: Prisma.AuditLogWhereUniqueInput
   take?: number
   skip?: number
-  distinct?: Prisma.WeeklySessionScalarFieldEnum | Prisma.WeeklySessionScalarFieldEnum[]
+  distinct?: Prisma.AuditLogScalarFieldEnum | Prisma.AuditLogScalarFieldEnum[]
 }
 
 /**
- * User.facilitatedSessions
+ * User.invites
  */
-export type User$facilitatedSessionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+export type User$invitesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   /**
-   * Select specific fields to fetch from the WeeklySession
+   * Select specific fields to fetch from the Invite
    */
-  select?: Prisma.WeeklySessionSelect<ExtArgs> | null
+  select?: Prisma.InviteSelect<ExtArgs> | null
   /**
-   * Omit specific fields from the WeeklySession
+   * Omit specific fields from the Invite
    */
-  omit?: Prisma.WeeklySessionOmit<ExtArgs> | null
+  omit?: Prisma.InviteOmit<ExtArgs> | null
   /**
    * Choose, which related nodes to fetch as well
    */
-  include?: Prisma.WeeklySessionInclude<ExtArgs> | null
-  where?: Prisma.WeeklySessionWhereInput
-  orderBy?: Prisma.WeeklySessionOrderByWithRelationInput | Prisma.WeeklySessionOrderByWithRelationInput[]
-  cursor?: Prisma.WeeklySessionWhereUniqueInput
+  include?: Prisma.InviteInclude<ExtArgs> | null
+  where?: Prisma.InviteWhereInput
+  orderBy?: Prisma.InviteOrderByWithRelationInput | Prisma.InviteOrderByWithRelationInput[]
+  cursor?: Prisma.InviteWhereUniqueInput
   take?: number
   skip?: number
-  distinct?: Prisma.WeeklySessionScalarFieldEnum | Prisma.WeeklySessionScalarFieldEnum[]
+  distinct?: Prisma.InviteScalarFieldEnum | Prisma.InviteScalarFieldEnum[]
+}
+
+/**
+ * User.createdInvites
+ */
+export type User$createdInvitesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the InviteToken
+   */
+  select?: Prisma.InviteTokenSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the InviteToken
+   */
+  omit?: Prisma.InviteTokenOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.InviteTokenInclude<ExtArgs> | null
+  where?: Prisma.InviteTokenWhereInput
+  orderBy?: Prisma.InviteTokenOrderByWithRelationInput | Prisma.InviteTokenOrderByWithRelationInput[]
+  cursor?: Prisma.InviteTokenWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.InviteTokenScalarFieldEnum | Prisma.InviteTokenScalarFieldEnum[]
+}
+
+/**
+ * User.leadMeasures
+ */
+export type User$leadMeasuresArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the LeadMeasureOwner
+   */
+  select?: Prisma.LeadMeasureOwnerSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the LeadMeasureOwner
+   */
+  omit?: Prisma.LeadMeasureOwnerOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LeadMeasureOwnerInclude<ExtArgs> | null
+  where?: Prisma.LeadMeasureOwnerWhereInput
+  orderBy?: Prisma.LeadMeasureOwnerOrderByWithRelationInput | Prisma.LeadMeasureOwnerOrderByWithRelationInput[]
+  cursor?: Prisma.LeadMeasureOwnerWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.LeadMeasureOwnerScalarFieldEnum | Prisma.LeadMeasureOwnerScalarFieldEnum[]
+}
+
+/**
+ * User.notifications
+ */
+export type User$notificationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Notification
+   */
+  select?: Prisma.NotificationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Notification
+   */
+  omit?: Prisma.NotificationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.NotificationInclude<ExtArgs> | null
+  where?: Prisma.NotificationWhereInput
+  orderBy?: Prisma.NotificationOrderByWithRelationInput | Prisma.NotificationOrderByWithRelationInput[]
+  cursor?: Prisma.NotificationWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.NotificationScalarFieldEnum | Prisma.NotificationScalarFieldEnum[]
+}
+
+/**
+ * User.orgMemberships
+ */
+export type User$orgMembershipsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the OrgMembership
+   */
+  select?: Prisma.OrgMembershipSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the OrgMembership
+   */
+  omit?: Prisma.OrgMembershipOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.OrgMembershipInclude<ExtArgs> | null
+  where?: Prisma.OrgMembershipWhereInput
+  orderBy?: Prisma.OrgMembershipOrderByWithRelationInput | Prisma.OrgMembershipOrderByWithRelationInput[]
+  cursor?: Prisma.OrgMembershipWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.OrgMembershipScalarFieldEnum | Prisma.OrgMembershipScalarFieldEnum[]
+}
+
+/**
+ * User.passwordResetTokens
+ */
+export type User$passwordResetTokensArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PasswordResetToken
+   */
+  select?: Prisma.PasswordResetTokenSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the PasswordResetToken
+   */
+  omit?: Prisma.PasswordResetTokenOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PasswordResetTokenInclude<ExtArgs> | null
+  where?: Prisma.PasswordResetTokenWhereInput
+  orderBy?: Prisma.PasswordResetTokenOrderByWithRelationInput | Prisma.PasswordResetTokenOrderByWithRelationInput[]
+  cursor?: Prisma.PasswordResetTokenWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PasswordResetTokenScalarFieldEnum | Prisma.PasswordResetTokenScalarFieldEnum[]
 }
 
 /**
@@ -3238,147 +3310,75 @@ export type User$sessionTimelineArgs<ExtArgs extends runtime.Types.Extensions.In
 }
 
 /**
- * User.notifications
+ * User.teamMemberships
  */
-export type User$notificationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+export type User$teamMembershipsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   /**
-   * Select specific fields to fetch from the Notification
+   * Select specific fields to fetch from the TeamMembership
    */
-  select?: Prisma.NotificationSelect<ExtArgs> | null
+  select?: Prisma.TeamMembershipSelect<ExtArgs> | null
   /**
-   * Omit specific fields from the Notification
+   * Omit specific fields from the TeamMembership
    */
-  omit?: Prisma.NotificationOmit<ExtArgs> | null
+  omit?: Prisma.TeamMembershipOmit<ExtArgs> | null
   /**
    * Choose, which related nodes to fetch as well
    */
-  include?: Prisma.NotificationInclude<ExtArgs> | null
-  where?: Prisma.NotificationWhereInput
-  orderBy?: Prisma.NotificationOrderByWithRelationInput | Prisma.NotificationOrderByWithRelationInput[]
-  cursor?: Prisma.NotificationWhereUniqueInput
+  include?: Prisma.TeamMembershipInclude<ExtArgs> | null
+  where?: Prisma.TeamMembershipWhereInput
+  orderBy?: Prisma.TeamMembershipOrderByWithRelationInput | Prisma.TeamMembershipOrderByWithRelationInput[]
+  cursor?: Prisma.TeamMembershipWhereUniqueInput
   take?: number
   skip?: number
-  distinct?: Prisma.NotificationScalarFieldEnum | Prisma.NotificationScalarFieldEnum[]
+  distinct?: Prisma.TeamMembershipScalarFieldEnum | Prisma.TeamMembershipScalarFieldEnum[]
 }
 
 /**
- * User.auditLogs
+ * User.facilitatedSessions
  */
-export type User$auditLogsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+export type User$facilitatedSessionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   /**
-   * Select specific fields to fetch from the AuditLog
+   * Select specific fields to fetch from the WeeklySession
    */
-  select?: Prisma.AuditLogSelect<ExtArgs> | null
+  select?: Prisma.WeeklySessionSelect<ExtArgs> | null
   /**
-   * Omit specific fields from the AuditLog
+   * Omit specific fields from the WeeklySession
    */
-  omit?: Prisma.AuditLogOmit<ExtArgs> | null
+  omit?: Prisma.WeeklySessionOmit<ExtArgs> | null
   /**
    * Choose, which related nodes to fetch as well
    */
-  include?: Prisma.AuditLogInclude<ExtArgs> | null
-  where?: Prisma.AuditLogWhereInput
-  orderBy?: Prisma.AuditLogOrderByWithRelationInput | Prisma.AuditLogOrderByWithRelationInput[]
-  cursor?: Prisma.AuditLogWhereUniqueInput
+  include?: Prisma.WeeklySessionInclude<ExtArgs> | null
+  where?: Prisma.WeeklySessionWhereInput
+  orderBy?: Prisma.WeeklySessionOrderByWithRelationInput | Prisma.WeeklySessionOrderByWithRelationInput[]
+  cursor?: Prisma.WeeklySessionWhereUniqueInput
   take?: number
   skip?: number
-  distinct?: Prisma.AuditLogScalarFieldEnum | Prisma.AuditLogScalarFieldEnum[]
+  distinct?: Prisma.WeeklySessionScalarFieldEnum | Prisma.WeeklySessionScalarFieldEnum[]
 }
 
 /**
- * User.leadMeasures
+ * User.weeklySessions
  */
-export type User$leadMeasuresArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+export type User$weeklySessionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   /**
-   * Select specific fields to fetch from the LeadMeasureOwner
+   * Select specific fields to fetch from the WeeklySession
    */
-  select?: Prisma.LeadMeasureOwnerSelect<ExtArgs> | null
+  select?: Prisma.WeeklySessionSelect<ExtArgs> | null
   /**
-   * Omit specific fields from the LeadMeasureOwner
+   * Omit specific fields from the WeeklySession
    */
-  omit?: Prisma.LeadMeasureOwnerOmit<ExtArgs> | null
+  omit?: Prisma.WeeklySessionOmit<ExtArgs> | null
   /**
    * Choose, which related nodes to fetch as well
    */
-  include?: Prisma.LeadMeasureOwnerInclude<ExtArgs> | null
-  where?: Prisma.LeadMeasureOwnerWhereInput
-  orderBy?: Prisma.LeadMeasureOwnerOrderByWithRelationInput | Prisma.LeadMeasureOwnerOrderByWithRelationInput[]
-  cursor?: Prisma.LeadMeasureOwnerWhereUniqueInput
+  include?: Prisma.WeeklySessionInclude<ExtArgs> | null
+  where?: Prisma.WeeklySessionWhereInput
+  orderBy?: Prisma.WeeklySessionOrderByWithRelationInput | Prisma.WeeklySessionOrderByWithRelationInput[]
+  cursor?: Prisma.WeeklySessionWhereUniqueInput
   take?: number
   skip?: number
-  distinct?: Prisma.LeadMeasureOwnerScalarFieldEnum | Prisma.LeadMeasureOwnerScalarFieldEnum[]
-}
-
-/**
- * User.createdInvites
- */
-export type User$createdInvitesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the InviteToken
-   */
-  select?: Prisma.InviteTokenSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the InviteToken
-   */
-  omit?: Prisma.InviteTokenOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.InviteTokenInclude<ExtArgs> | null
-  where?: Prisma.InviteTokenWhereInput
-  orderBy?: Prisma.InviteTokenOrderByWithRelationInput | Prisma.InviteTokenOrderByWithRelationInput[]
-  cursor?: Prisma.InviteTokenWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.InviteTokenScalarFieldEnum | Prisma.InviteTokenScalarFieldEnum[]
-}
-
-/**
- * User.invites
- */
-export type User$invitesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the Invite
-   */
-  select?: Prisma.InviteSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the Invite
-   */
-  omit?: Prisma.InviteOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.InviteInclude<ExtArgs> | null
-  where?: Prisma.InviteWhereInput
-  orderBy?: Prisma.InviteOrderByWithRelationInput | Prisma.InviteOrderByWithRelationInput[]
-  cursor?: Prisma.InviteWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.InviteScalarFieldEnum | Prisma.InviteScalarFieldEnum[]
-}
-
-/**
- * User.passwordResetTokens
- */
-export type User$passwordResetTokensArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the PasswordResetToken
-   */
-  select?: Prisma.PasswordResetTokenSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the PasswordResetToken
-   */
-  omit?: Prisma.PasswordResetTokenOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.PasswordResetTokenInclude<ExtArgs> | null
-  where?: Prisma.PasswordResetTokenWhereInput
-  orderBy?: Prisma.PasswordResetTokenOrderByWithRelationInput | Prisma.PasswordResetTokenOrderByWithRelationInput[]
-  cursor?: Prisma.PasswordResetTokenWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.PasswordResetTokenScalarFieldEnum | Prisma.PasswordResetTokenScalarFieldEnum[]
+  distinct?: Prisma.WeeklySessionScalarFieldEnum | Prisma.WeeklySessionScalarFieldEnum[]
 }
 
 /**

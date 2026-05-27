@@ -38,39 +38,39 @@ export type LeadMeasureMinAggregateOutputType = {
   id: string | null
   name: string | null
   description: string | null
-  trackingType: $Enums.TrackingType | null
   cadence: $Enums.Cadence | null
   targetValue: number | null
   unit: string | null
   createdAt: Date | null
   archivedAt: Date | null
   wigId: string | null
+  trackingType: $Enums.TrackingType | null
 }
 
 export type LeadMeasureMaxAggregateOutputType = {
   id: string | null
   name: string | null
   description: string | null
-  trackingType: $Enums.TrackingType | null
   cadence: $Enums.Cadence | null
   targetValue: number | null
   unit: string | null
   createdAt: Date | null
   archivedAt: Date | null
   wigId: string | null
+  trackingType: $Enums.TrackingType | null
 }
 
 export type LeadMeasureCountAggregateOutputType = {
   id: number
   name: number
   description: number
-  trackingType: number
   cadence: number
   targetValue: number
   unit: number
   createdAt: number
   archivedAt: number
   wigId: number
+  trackingType: number
   _all: number
 }
 
@@ -87,39 +87,39 @@ export type LeadMeasureMinAggregateInputType = {
   id?: true
   name?: true
   description?: true
-  trackingType?: true
   cadence?: true
   targetValue?: true
   unit?: true
   createdAt?: true
   archivedAt?: true
   wigId?: true
+  trackingType?: true
 }
 
 export type LeadMeasureMaxAggregateInputType = {
   id?: true
   name?: true
   description?: true
-  trackingType?: true
   cadence?: true
   targetValue?: true
   unit?: true
   createdAt?: true
   archivedAt?: true
   wigId?: true
+  trackingType?: true
 }
 
 export type LeadMeasureCountAggregateInputType = {
   id?: true
   name?: true
   description?: true
-  trackingType?: true
   cadence?: true
   targetValue?: true
   unit?: true
   createdAt?: true
   archivedAt?: true
   wigId?: true
+  trackingType?: true
   _all?: true
 }
 
@@ -213,13 +213,13 @@ export type LeadMeasureGroupByOutputType = {
   id: string
   name: string
   description: string | null
-  trackingType: $Enums.TrackingType
   cadence: $Enums.Cadence
   targetValue: number | null
   unit: string | null
   createdAt: Date
   archivedAt: Date | null
   wigId: string
+  trackingType: $Enums.TrackingType
   _count: LeadMeasureCountAggregateOutputType | null
   _avg: LeadMeasureAvgAggregateOutputType | null
   _sum: LeadMeasureSumAggregateOutputType | null
@@ -249,34 +249,34 @@ export type LeadMeasureWhereInput = {
   id?: Prisma.StringFilter<"LeadMeasure"> | string
   name?: Prisma.StringFilter<"LeadMeasure"> | string
   description?: Prisma.StringNullableFilter<"LeadMeasure"> | string | null
-  trackingType?: Prisma.EnumTrackingTypeFilter<"LeadMeasure"> | $Enums.TrackingType
   cadence?: Prisma.EnumCadenceFilter<"LeadMeasure"> | $Enums.Cadence
   targetValue?: Prisma.FloatNullableFilter<"LeadMeasure"> | number | null
   unit?: Prisma.StringNullableFilter<"LeadMeasure"> | string | null
   createdAt?: Prisma.DateTimeFilter<"LeadMeasure"> | Date | string
   archivedAt?: Prisma.DateTimeNullableFilter<"LeadMeasure"> | Date | string | null
   wigId?: Prisma.StringFilter<"LeadMeasure"> | string
-  wig?: Prisma.XOR<Prisma.WIGScalarRelationFilter, Prisma.WIGWhereInput>
-  owners?: Prisma.LeadMeasureOwnerListRelationFilter
+  trackingType?: Prisma.EnumTrackingTypeFilter<"LeadMeasure"> | $Enums.TrackingType
   activityLogs?: Prisma.ActivityLogListRelationFilter
   commitments?: Prisma.CommitmentListRelationFilter
+  wig?: Prisma.XOR<Prisma.WIGScalarRelationFilter, Prisma.WIGWhereInput>
+  owners?: Prisma.LeadMeasureOwnerListRelationFilter
 }
 
 export type LeadMeasureOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
-  trackingType?: Prisma.SortOrder
   cadence?: Prisma.SortOrder
   targetValue?: Prisma.SortOrderInput | Prisma.SortOrder
   unit?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   archivedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   wigId?: Prisma.SortOrder
-  wig?: Prisma.WIGOrderByWithRelationInput
-  owners?: Prisma.LeadMeasureOwnerOrderByRelationAggregateInput
+  trackingType?: Prisma.SortOrder
   activityLogs?: Prisma.ActivityLogOrderByRelationAggregateInput
   commitments?: Prisma.CommitmentOrderByRelationAggregateInput
+  wig?: Prisma.WIGOrderByWithRelationInput
+  owners?: Prisma.LeadMeasureOwnerOrderByRelationAggregateInput
 }
 
 export type LeadMeasureWhereUniqueInput = Prisma.AtLeast<{
@@ -286,30 +286,30 @@ export type LeadMeasureWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.LeadMeasureWhereInput | Prisma.LeadMeasureWhereInput[]
   name?: Prisma.StringFilter<"LeadMeasure"> | string
   description?: Prisma.StringNullableFilter<"LeadMeasure"> | string | null
-  trackingType?: Prisma.EnumTrackingTypeFilter<"LeadMeasure"> | $Enums.TrackingType
   cadence?: Prisma.EnumCadenceFilter<"LeadMeasure"> | $Enums.Cadence
   targetValue?: Prisma.FloatNullableFilter<"LeadMeasure"> | number | null
   unit?: Prisma.StringNullableFilter<"LeadMeasure"> | string | null
   createdAt?: Prisma.DateTimeFilter<"LeadMeasure"> | Date | string
   archivedAt?: Prisma.DateTimeNullableFilter<"LeadMeasure"> | Date | string | null
   wigId?: Prisma.StringFilter<"LeadMeasure"> | string
-  wig?: Prisma.XOR<Prisma.WIGScalarRelationFilter, Prisma.WIGWhereInput>
-  owners?: Prisma.LeadMeasureOwnerListRelationFilter
+  trackingType?: Prisma.EnumTrackingTypeFilter<"LeadMeasure"> | $Enums.TrackingType
   activityLogs?: Prisma.ActivityLogListRelationFilter
   commitments?: Prisma.CommitmentListRelationFilter
+  wig?: Prisma.XOR<Prisma.WIGScalarRelationFilter, Prisma.WIGWhereInput>
+  owners?: Prisma.LeadMeasureOwnerListRelationFilter
 }, "id">
 
 export type LeadMeasureOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
-  trackingType?: Prisma.SortOrder
   cadence?: Prisma.SortOrder
   targetValue?: Prisma.SortOrderInput | Prisma.SortOrder
   unit?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   archivedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   wigId?: Prisma.SortOrder
+  trackingType?: Prisma.SortOrder
   _count?: Prisma.LeadMeasureCountOrderByAggregateInput
   _avg?: Prisma.LeadMeasureAvgOrderByAggregateInput
   _max?: Prisma.LeadMeasureMaxOrderByAggregateInput
@@ -324,115 +324,115 @@ export type LeadMeasureScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"LeadMeasure"> | string
   name?: Prisma.StringWithAggregatesFilter<"LeadMeasure"> | string
   description?: Prisma.StringNullableWithAggregatesFilter<"LeadMeasure"> | string | null
-  trackingType?: Prisma.EnumTrackingTypeWithAggregatesFilter<"LeadMeasure"> | $Enums.TrackingType
   cadence?: Prisma.EnumCadenceWithAggregatesFilter<"LeadMeasure"> | $Enums.Cadence
   targetValue?: Prisma.FloatNullableWithAggregatesFilter<"LeadMeasure"> | number | null
   unit?: Prisma.StringNullableWithAggregatesFilter<"LeadMeasure"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"LeadMeasure"> | Date | string
   archivedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"LeadMeasure"> | Date | string | null
   wigId?: Prisma.StringWithAggregatesFilter<"LeadMeasure"> | string
+  trackingType?: Prisma.EnumTrackingTypeWithAggregatesFilter<"LeadMeasure"> | $Enums.TrackingType
 }
 
 export type LeadMeasureCreateInput = {
   id?: string
   name: string
   description?: string | null
-  trackingType?: $Enums.TrackingType
   cadence: $Enums.Cadence
   targetValue?: number | null
   unit?: string | null
   createdAt?: Date | string
   archivedAt?: Date | string | null
-  wig: Prisma.WIGCreateNestedOneWithoutLeadMeasuresInput
-  owners?: Prisma.LeadMeasureOwnerCreateNestedManyWithoutLeadMeasureInput
+  trackingType?: $Enums.TrackingType
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutLeadMeasureInput
   commitments?: Prisma.CommitmentCreateNestedManyWithoutLinkedLeadMeasureInput
+  wig: Prisma.WIGCreateNestedOneWithoutLeadMeasuresInput
+  owners?: Prisma.LeadMeasureOwnerCreateNestedManyWithoutLeadMeasureInput
 }
 
 export type LeadMeasureUncheckedCreateInput = {
   id?: string
   name: string
   description?: string | null
-  trackingType?: $Enums.TrackingType
   cadence: $Enums.Cadence
   targetValue?: number | null
   unit?: string | null
   createdAt?: Date | string
   archivedAt?: Date | string | null
   wigId: string
-  owners?: Prisma.LeadMeasureOwnerUncheckedCreateNestedManyWithoutLeadMeasureInput
+  trackingType?: $Enums.TrackingType
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutLeadMeasureInput
   commitments?: Prisma.CommitmentUncheckedCreateNestedManyWithoutLinkedLeadMeasureInput
+  owners?: Prisma.LeadMeasureOwnerUncheckedCreateNestedManyWithoutLeadMeasureInput
 }
 
 export type LeadMeasureUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  trackingType?: Prisma.EnumTrackingTypeFieldUpdateOperationsInput | $Enums.TrackingType
   cadence?: Prisma.EnumCadenceFieldUpdateOperationsInput | $Enums.Cadence
   targetValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   unit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  wig?: Prisma.WIGUpdateOneRequiredWithoutLeadMeasuresNestedInput
-  owners?: Prisma.LeadMeasureOwnerUpdateManyWithoutLeadMeasureNestedInput
+  trackingType?: Prisma.EnumTrackingTypeFieldUpdateOperationsInput | $Enums.TrackingType
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutLeadMeasureNestedInput
   commitments?: Prisma.CommitmentUpdateManyWithoutLinkedLeadMeasureNestedInput
+  wig?: Prisma.WIGUpdateOneRequiredWithoutLeadMeasuresNestedInput
+  owners?: Prisma.LeadMeasureOwnerUpdateManyWithoutLeadMeasureNestedInput
 }
 
 export type LeadMeasureUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  trackingType?: Prisma.EnumTrackingTypeFieldUpdateOperationsInput | $Enums.TrackingType
   cadence?: Prisma.EnumCadenceFieldUpdateOperationsInput | $Enums.Cadence
   targetValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   unit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   wigId?: Prisma.StringFieldUpdateOperationsInput | string
-  owners?: Prisma.LeadMeasureOwnerUncheckedUpdateManyWithoutLeadMeasureNestedInput
+  trackingType?: Prisma.EnumTrackingTypeFieldUpdateOperationsInput | $Enums.TrackingType
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutLeadMeasureNestedInput
   commitments?: Prisma.CommitmentUncheckedUpdateManyWithoutLinkedLeadMeasureNestedInput
+  owners?: Prisma.LeadMeasureOwnerUncheckedUpdateManyWithoutLeadMeasureNestedInput
 }
 
 export type LeadMeasureCreateManyInput = {
   id?: string
   name: string
   description?: string | null
-  trackingType?: $Enums.TrackingType
   cadence: $Enums.Cadence
   targetValue?: number | null
   unit?: string | null
   createdAt?: Date | string
   archivedAt?: Date | string | null
   wigId: string
+  trackingType?: $Enums.TrackingType
 }
 
 export type LeadMeasureUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  trackingType?: Prisma.EnumTrackingTypeFieldUpdateOperationsInput | $Enums.TrackingType
   cadence?: Prisma.EnumCadenceFieldUpdateOperationsInput | $Enums.Cadence
   targetValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   unit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  trackingType?: Prisma.EnumTrackingTypeFieldUpdateOperationsInput | $Enums.TrackingType
 }
 
 export type LeadMeasureUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  trackingType?: Prisma.EnumTrackingTypeFieldUpdateOperationsInput | $Enums.TrackingType
   cadence?: Prisma.EnumCadenceFieldUpdateOperationsInput | $Enums.Cadence
   targetValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   unit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   wigId?: Prisma.StringFieldUpdateOperationsInput | string
+  trackingType?: Prisma.EnumTrackingTypeFieldUpdateOperationsInput | $Enums.TrackingType
 }
 
 export type LeadMeasureListRelationFilter = {
@@ -449,13 +449,13 @@ export type LeadMeasureCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   description?: Prisma.SortOrder
-  trackingType?: Prisma.SortOrder
   cadence?: Prisma.SortOrder
   targetValue?: Prisma.SortOrder
   unit?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   archivedAt?: Prisma.SortOrder
   wigId?: Prisma.SortOrder
+  trackingType?: Prisma.SortOrder
 }
 
 export type LeadMeasureAvgOrderByAggregateInput = {
@@ -466,26 +466,26 @@ export type LeadMeasureMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   description?: Prisma.SortOrder
-  trackingType?: Prisma.SortOrder
   cadence?: Prisma.SortOrder
   targetValue?: Prisma.SortOrder
   unit?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   archivedAt?: Prisma.SortOrder
   wigId?: Prisma.SortOrder
+  trackingType?: Prisma.SortOrder
 }
 
 export type LeadMeasureMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   description?: Prisma.SortOrder
-  trackingType?: Prisma.SortOrder
   cadence?: Prisma.SortOrder
   targetValue?: Prisma.SortOrder
   unit?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   archivedAt?: Prisma.SortOrder
   wigId?: Prisma.SortOrder
+  trackingType?: Prisma.SortOrder
 }
 
 export type LeadMeasureSumOrderByAggregateInput = {
@@ -596,30 +596,30 @@ export type LeadMeasureCreateWithoutWigInput = {
   id?: string
   name: string
   description?: string | null
-  trackingType?: $Enums.TrackingType
   cadence: $Enums.Cadence
   targetValue?: number | null
   unit?: string | null
   createdAt?: Date | string
   archivedAt?: Date | string | null
-  owners?: Prisma.LeadMeasureOwnerCreateNestedManyWithoutLeadMeasureInput
+  trackingType?: $Enums.TrackingType
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutLeadMeasureInput
   commitments?: Prisma.CommitmentCreateNestedManyWithoutLinkedLeadMeasureInput
+  owners?: Prisma.LeadMeasureOwnerCreateNestedManyWithoutLeadMeasureInput
 }
 
 export type LeadMeasureUncheckedCreateWithoutWigInput = {
   id?: string
   name: string
   description?: string | null
-  trackingType?: $Enums.TrackingType
   cadence: $Enums.Cadence
   targetValue?: number | null
   unit?: string | null
   createdAt?: Date | string
   archivedAt?: Date | string | null
-  owners?: Prisma.LeadMeasureOwnerUncheckedCreateNestedManyWithoutLeadMeasureInput
+  trackingType?: $Enums.TrackingType
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutLeadMeasureInput
   commitments?: Prisma.CommitmentUncheckedCreateNestedManyWithoutLinkedLeadMeasureInput
+  owners?: Prisma.LeadMeasureOwnerUncheckedCreateNestedManyWithoutLeadMeasureInput
 }
 
 export type LeadMeasureCreateOrConnectWithoutWigInput = {
@@ -655,41 +655,41 @@ export type LeadMeasureScalarWhereInput = {
   id?: Prisma.StringFilter<"LeadMeasure"> | string
   name?: Prisma.StringFilter<"LeadMeasure"> | string
   description?: Prisma.StringNullableFilter<"LeadMeasure"> | string | null
-  trackingType?: Prisma.EnumTrackingTypeFilter<"LeadMeasure"> | $Enums.TrackingType
   cadence?: Prisma.EnumCadenceFilter<"LeadMeasure"> | $Enums.Cadence
   targetValue?: Prisma.FloatNullableFilter<"LeadMeasure"> | number | null
   unit?: Prisma.StringNullableFilter<"LeadMeasure"> | string | null
   createdAt?: Prisma.DateTimeFilter<"LeadMeasure"> | Date | string
   archivedAt?: Prisma.DateTimeNullableFilter<"LeadMeasure"> | Date | string | null
   wigId?: Prisma.StringFilter<"LeadMeasure"> | string
+  trackingType?: Prisma.EnumTrackingTypeFilter<"LeadMeasure"> | $Enums.TrackingType
 }
 
 export type LeadMeasureCreateWithoutOwnersInput = {
   id?: string
   name: string
   description?: string | null
-  trackingType?: $Enums.TrackingType
   cadence: $Enums.Cadence
   targetValue?: number | null
   unit?: string | null
   createdAt?: Date | string
   archivedAt?: Date | string | null
-  wig: Prisma.WIGCreateNestedOneWithoutLeadMeasuresInput
+  trackingType?: $Enums.TrackingType
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutLeadMeasureInput
   commitments?: Prisma.CommitmentCreateNestedManyWithoutLinkedLeadMeasureInput
+  wig: Prisma.WIGCreateNestedOneWithoutLeadMeasuresInput
 }
 
 export type LeadMeasureUncheckedCreateWithoutOwnersInput = {
   id?: string
   name: string
   description?: string | null
-  trackingType?: $Enums.TrackingType
   cadence: $Enums.Cadence
   targetValue?: number | null
   unit?: string | null
   createdAt?: Date | string
   archivedAt?: Date | string | null
   wigId: string
+  trackingType?: $Enums.TrackingType
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutLeadMeasureInput
   commitments?: Prisma.CommitmentUncheckedCreateNestedManyWithoutLinkedLeadMeasureInput
 }
@@ -714,28 +714,28 @@ export type LeadMeasureUpdateWithoutOwnersInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  trackingType?: Prisma.EnumTrackingTypeFieldUpdateOperationsInput | $Enums.TrackingType
   cadence?: Prisma.EnumCadenceFieldUpdateOperationsInput | $Enums.Cadence
   targetValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   unit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  wig?: Prisma.WIGUpdateOneRequiredWithoutLeadMeasuresNestedInput
+  trackingType?: Prisma.EnumTrackingTypeFieldUpdateOperationsInput | $Enums.TrackingType
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutLeadMeasureNestedInput
   commitments?: Prisma.CommitmentUpdateManyWithoutLinkedLeadMeasureNestedInput
+  wig?: Prisma.WIGUpdateOneRequiredWithoutLeadMeasuresNestedInput
 }
 
 export type LeadMeasureUncheckedUpdateWithoutOwnersInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  trackingType?: Prisma.EnumTrackingTypeFieldUpdateOperationsInput | $Enums.TrackingType
   cadence?: Prisma.EnumCadenceFieldUpdateOperationsInput | $Enums.Cadence
   targetValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   unit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   wigId?: Prisma.StringFieldUpdateOperationsInput | string
+  trackingType?: Prisma.EnumTrackingTypeFieldUpdateOperationsInput | $Enums.TrackingType
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutLeadMeasureNestedInput
   commitments?: Prisma.CommitmentUncheckedUpdateManyWithoutLinkedLeadMeasureNestedInput
 }
@@ -744,30 +744,30 @@ export type LeadMeasureCreateWithoutActivityLogsInput = {
   id?: string
   name: string
   description?: string | null
-  trackingType?: $Enums.TrackingType
   cadence: $Enums.Cadence
   targetValue?: number | null
   unit?: string | null
   createdAt?: Date | string
   archivedAt?: Date | string | null
+  trackingType?: $Enums.TrackingType
+  commitments?: Prisma.CommitmentCreateNestedManyWithoutLinkedLeadMeasureInput
   wig: Prisma.WIGCreateNestedOneWithoutLeadMeasuresInput
   owners?: Prisma.LeadMeasureOwnerCreateNestedManyWithoutLeadMeasureInput
-  commitments?: Prisma.CommitmentCreateNestedManyWithoutLinkedLeadMeasureInput
 }
 
 export type LeadMeasureUncheckedCreateWithoutActivityLogsInput = {
   id?: string
   name: string
   description?: string | null
-  trackingType?: $Enums.TrackingType
   cadence: $Enums.Cadence
   targetValue?: number | null
   unit?: string | null
   createdAt?: Date | string
   archivedAt?: Date | string | null
   wigId: string
-  owners?: Prisma.LeadMeasureOwnerUncheckedCreateNestedManyWithoutLeadMeasureInput
+  trackingType?: $Enums.TrackingType
   commitments?: Prisma.CommitmentUncheckedCreateNestedManyWithoutLinkedLeadMeasureInput
+  owners?: Prisma.LeadMeasureOwnerUncheckedCreateNestedManyWithoutLeadMeasureInput
 }
 
 export type LeadMeasureCreateOrConnectWithoutActivityLogsInput = {
@@ -790,60 +790,60 @@ export type LeadMeasureUpdateWithoutActivityLogsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  trackingType?: Prisma.EnumTrackingTypeFieldUpdateOperationsInput | $Enums.TrackingType
   cadence?: Prisma.EnumCadenceFieldUpdateOperationsInput | $Enums.Cadence
   targetValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   unit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  trackingType?: Prisma.EnumTrackingTypeFieldUpdateOperationsInput | $Enums.TrackingType
+  commitments?: Prisma.CommitmentUpdateManyWithoutLinkedLeadMeasureNestedInput
   wig?: Prisma.WIGUpdateOneRequiredWithoutLeadMeasuresNestedInput
   owners?: Prisma.LeadMeasureOwnerUpdateManyWithoutLeadMeasureNestedInput
-  commitments?: Prisma.CommitmentUpdateManyWithoutLinkedLeadMeasureNestedInput
 }
 
 export type LeadMeasureUncheckedUpdateWithoutActivityLogsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  trackingType?: Prisma.EnumTrackingTypeFieldUpdateOperationsInput | $Enums.TrackingType
   cadence?: Prisma.EnumCadenceFieldUpdateOperationsInput | $Enums.Cadence
   targetValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   unit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   wigId?: Prisma.StringFieldUpdateOperationsInput | string
-  owners?: Prisma.LeadMeasureOwnerUncheckedUpdateManyWithoutLeadMeasureNestedInput
+  trackingType?: Prisma.EnumTrackingTypeFieldUpdateOperationsInput | $Enums.TrackingType
   commitments?: Prisma.CommitmentUncheckedUpdateManyWithoutLinkedLeadMeasureNestedInput
+  owners?: Prisma.LeadMeasureOwnerUncheckedUpdateManyWithoutLeadMeasureNestedInput
 }
 
 export type LeadMeasureCreateWithoutCommitmentsInput = {
   id?: string
   name: string
   description?: string | null
-  trackingType?: $Enums.TrackingType
   cadence: $Enums.Cadence
   targetValue?: number | null
   unit?: string | null
   createdAt?: Date | string
   archivedAt?: Date | string | null
+  trackingType?: $Enums.TrackingType
+  activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutLeadMeasureInput
   wig: Prisma.WIGCreateNestedOneWithoutLeadMeasuresInput
   owners?: Prisma.LeadMeasureOwnerCreateNestedManyWithoutLeadMeasureInput
-  activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutLeadMeasureInput
 }
 
 export type LeadMeasureUncheckedCreateWithoutCommitmentsInput = {
   id?: string
   name: string
   description?: string | null
-  trackingType?: $Enums.TrackingType
   cadence: $Enums.Cadence
   targetValue?: number | null
   unit?: string | null
   createdAt?: Date | string
   archivedAt?: Date | string | null
   wigId: string
-  owners?: Prisma.LeadMeasureOwnerUncheckedCreateNestedManyWithoutLeadMeasureInput
+  trackingType?: $Enums.TrackingType
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutLeadMeasureInput
+  owners?: Prisma.LeadMeasureOwnerUncheckedCreateNestedManyWithoutLeadMeasureInput
 }
 
 export type LeadMeasureCreateOrConnectWithoutCommitmentsInput = {
@@ -866,84 +866,84 @@ export type LeadMeasureUpdateWithoutCommitmentsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  trackingType?: Prisma.EnumTrackingTypeFieldUpdateOperationsInput | $Enums.TrackingType
   cadence?: Prisma.EnumCadenceFieldUpdateOperationsInput | $Enums.Cadence
   targetValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   unit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  trackingType?: Prisma.EnumTrackingTypeFieldUpdateOperationsInput | $Enums.TrackingType
+  activityLogs?: Prisma.ActivityLogUpdateManyWithoutLeadMeasureNestedInput
   wig?: Prisma.WIGUpdateOneRequiredWithoutLeadMeasuresNestedInput
   owners?: Prisma.LeadMeasureOwnerUpdateManyWithoutLeadMeasureNestedInput
-  activityLogs?: Prisma.ActivityLogUpdateManyWithoutLeadMeasureNestedInput
 }
 
 export type LeadMeasureUncheckedUpdateWithoutCommitmentsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  trackingType?: Prisma.EnumTrackingTypeFieldUpdateOperationsInput | $Enums.TrackingType
   cadence?: Prisma.EnumCadenceFieldUpdateOperationsInput | $Enums.Cadence
   targetValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   unit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   wigId?: Prisma.StringFieldUpdateOperationsInput | string
-  owners?: Prisma.LeadMeasureOwnerUncheckedUpdateManyWithoutLeadMeasureNestedInput
+  trackingType?: Prisma.EnumTrackingTypeFieldUpdateOperationsInput | $Enums.TrackingType
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutLeadMeasureNestedInput
+  owners?: Prisma.LeadMeasureOwnerUncheckedUpdateManyWithoutLeadMeasureNestedInput
 }
 
 export type LeadMeasureCreateManyWigInput = {
   id?: string
   name: string
   description?: string | null
-  trackingType?: $Enums.TrackingType
   cadence: $Enums.Cadence
   targetValue?: number | null
   unit?: string | null
   createdAt?: Date | string
   archivedAt?: Date | string | null
+  trackingType?: $Enums.TrackingType
 }
 
 export type LeadMeasureUpdateWithoutWigInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  trackingType?: Prisma.EnumTrackingTypeFieldUpdateOperationsInput | $Enums.TrackingType
   cadence?: Prisma.EnumCadenceFieldUpdateOperationsInput | $Enums.Cadence
   targetValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   unit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  owners?: Prisma.LeadMeasureOwnerUpdateManyWithoutLeadMeasureNestedInput
+  trackingType?: Prisma.EnumTrackingTypeFieldUpdateOperationsInput | $Enums.TrackingType
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutLeadMeasureNestedInput
   commitments?: Prisma.CommitmentUpdateManyWithoutLinkedLeadMeasureNestedInput
+  owners?: Prisma.LeadMeasureOwnerUpdateManyWithoutLeadMeasureNestedInput
 }
 
 export type LeadMeasureUncheckedUpdateWithoutWigInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  trackingType?: Prisma.EnumTrackingTypeFieldUpdateOperationsInput | $Enums.TrackingType
   cadence?: Prisma.EnumCadenceFieldUpdateOperationsInput | $Enums.Cadence
   targetValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   unit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  owners?: Prisma.LeadMeasureOwnerUncheckedUpdateManyWithoutLeadMeasureNestedInput
+  trackingType?: Prisma.EnumTrackingTypeFieldUpdateOperationsInput | $Enums.TrackingType
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutLeadMeasureNestedInput
   commitments?: Prisma.CommitmentUncheckedUpdateManyWithoutLinkedLeadMeasureNestedInput
+  owners?: Prisma.LeadMeasureOwnerUncheckedUpdateManyWithoutLeadMeasureNestedInput
 }
 
 export type LeadMeasureUncheckedUpdateManyWithoutWigInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  trackingType?: Prisma.EnumTrackingTypeFieldUpdateOperationsInput | $Enums.TrackingType
   cadence?: Prisma.EnumCadenceFieldUpdateOperationsInput | $Enums.Cadence
   targetValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   unit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  trackingType?: Prisma.EnumTrackingTypeFieldUpdateOperationsInput | $Enums.TrackingType
 }
 
 
@@ -952,15 +952,15 @@ export type LeadMeasureUncheckedUpdateManyWithoutWigInput = {
  */
 
 export type LeadMeasureCountOutputType = {
-  owners: number
   activityLogs: number
   commitments: number
+  owners: number
 }
 
 export type LeadMeasureCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  owners?: boolean | LeadMeasureCountOutputTypeCountOwnersArgs
   activityLogs?: boolean | LeadMeasureCountOutputTypeCountActivityLogsArgs
   commitments?: boolean | LeadMeasureCountOutputTypeCountCommitmentsArgs
+  owners?: boolean | LeadMeasureCountOutputTypeCountOwnersArgs
 }
 
 /**
@@ -971,13 +971,6 @@ export type LeadMeasureCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.
    * Select specific fields to fetch from the LeadMeasureCountOutputType
    */
   select?: Prisma.LeadMeasureCountOutputTypeSelect<ExtArgs> | null
-}
-
-/**
- * LeadMeasureCountOutputType without action
- */
-export type LeadMeasureCountOutputTypeCountOwnersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.LeadMeasureOwnerWhereInput
 }
 
 /**
@@ -994,22 +987,29 @@ export type LeadMeasureCountOutputTypeCountCommitmentsArgs<ExtArgs extends runti
   where?: Prisma.CommitmentWhereInput
 }
 
+/**
+ * LeadMeasureCountOutputType without action
+ */
+export type LeadMeasureCountOutputTypeCountOwnersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.LeadMeasureOwnerWhereInput
+}
+
 
 export type LeadMeasureSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   name?: boolean
   description?: boolean
-  trackingType?: boolean
   cadence?: boolean
   targetValue?: boolean
   unit?: boolean
   createdAt?: boolean
   archivedAt?: boolean
   wigId?: boolean
-  wig?: boolean | Prisma.WIGDefaultArgs<ExtArgs>
-  owners?: boolean | Prisma.LeadMeasure$ownersArgs<ExtArgs>
+  trackingType?: boolean
   activityLogs?: boolean | Prisma.LeadMeasure$activityLogsArgs<ExtArgs>
   commitments?: boolean | Prisma.LeadMeasure$commitmentsArgs<ExtArgs>
+  wig?: boolean | Prisma.WIGDefaultArgs<ExtArgs>
+  owners?: boolean | Prisma.LeadMeasure$ownersArgs<ExtArgs>
   _count?: boolean | Prisma.LeadMeasureCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["leadMeasure"]>
 
@@ -1017,13 +1017,13 @@ export type LeadMeasureSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   id?: boolean
   name?: boolean
   description?: boolean
-  trackingType?: boolean
   cadence?: boolean
   targetValue?: boolean
   unit?: boolean
   createdAt?: boolean
   archivedAt?: boolean
   wigId?: boolean
+  trackingType?: boolean
   wig?: boolean | Prisma.WIGDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["leadMeasure"]>
 
@@ -1031,13 +1031,13 @@ export type LeadMeasureSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   id?: boolean
   name?: boolean
   description?: boolean
-  trackingType?: boolean
   cadence?: boolean
   targetValue?: boolean
   unit?: boolean
   createdAt?: boolean
   archivedAt?: boolean
   wigId?: boolean
+  trackingType?: boolean
   wig?: boolean | Prisma.WIGDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["leadMeasure"]>
 
@@ -1045,21 +1045,21 @@ export type LeadMeasureSelectScalar = {
   id?: boolean
   name?: boolean
   description?: boolean
-  trackingType?: boolean
   cadence?: boolean
   targetValue?: boolean
   unit?: boolean
   createdAt?: boolean
   archivedAt?: boolean
   wigId?: boolean
+  trackingType?: boolean
 }
 
-export type LeadMeasureOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "description" | "trackingType" | "cadence" | "targetValue" | "unit" | "createdAt" | "archivedAt" | "wigId", ExtArgs["result"]["leadMeasure"]>
+export type LeadMeasureOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "description" | "cadence" | "targetValue" | "unit" | "createdAt" | "archivedAt" | "wigId" | "trackingType", ExtArgs["result"]["leadMeasure"]>
 export type LeadMeasureInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  wig?: boolean | Prisma.WIGDefaultArgs<ExtArgs>
-  owners?: boolean | Prisma.LeadMeasure$ownersArgs<ExtArgs>
   activityLogs?: boolean | Prisma.LeadMeasure$activityLogsArgs<ExtArgs>
   commitments?: boolean | Prisma.LeadMeasure$commitmentsArgs<ExtArgs>
+  wig?: boolean | Prisma.WIGDefaultArgs<ExtArgs>
+  owners?: boolean | Prisma.LeadMeasure$ownersArgs<ExtArgs>
   _count?: boolean | Prisma.LeadMeasureCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type LeadMeasureIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1072,22 +1072,22 @@ export type LeadMeasureIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.
 export type $LeadMeasurePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "LeadMeasure"
   objects: {
-    wig: Prisma.$WIGPayload<ExtArgs>
-    owners: Prisma.$LeadMeasureOwnerPayload<ExtArgs>[]
     activityLogs: Prisma.$ActivityLogPayload<ExtArgs>[]
     commitments: Prisma.$CommitmentPayload<ExtArgs>[]
+    wig: Prisma.$WIGPayload<ExtArgs>
+    owners: Prisma.$LeadMeasureOwnerPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     name: string
     description: string | null
-    trackingType: $Enums.TrackingType
     cadence: $Enums.Cadence
     targetValue: number | null
     unit: string | null
     createdAt: Date
     archivedAt: Date | null
     wigId: string
+    trackingType: $Enums.TrackingType
   }, ExtArgs["result"]["leadMeasure"]>
   composites: {}
 }
@@ -1482,10 +1482,10 @@ readonly fields: LeadMeasureFieldRefs;
  */
 export interface Prisma__LeadMeasureClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  wig<T extends Prisma.WIGDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.WIGDefaultArgs<ExtArgs>>): Prisma.Prisma__WIGClient<runtime.Types.Result.GetResult<Prisma.$WIGPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-  owners<T extends Prisma.LeadMeasure$ownersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.LeadMeasure$ownersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LeadMeasureOwnerPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   activityLogs<T extends Prisma.LeadMeasure$activityLogsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.LeadMeasure$activityLogsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ActivityLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   commitments<T extends Prisma.LeadMeasure$commitmentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.LeadMeasure$commitmentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CommitmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  wig<T extends Prisma.WIGDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.WIGDefaultArgs<ExtArgs>>): Prisma.Prisma__WIGClient<runtime.Types.Result.GetResult<Prisma.$WIGPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  owners<T extends Prisma.LeadMeasure$ownersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.LeadMeasure$ownersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LeadMeasureOwnerPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1518,13 +1518,13 @@ export interface LeadMeasureFieldRefs {
   readonly id: Prisma.FieldRef<"LeadMeasure", 'String'>
   readonly name: Prisma.FieldRef<"LeadMeasure", 'String'>
   readonly description: Prisma.FieldRef<"LeadMeasure", 'String'>
-  readonly trackingType: Prisma.FieldRef<"LeadMeasure", 'TrackingType'>
   readonly cadence: Prisma.FieldRef<"LeadMeasure", 'Cadence'>
   readonly targetValue: Prisma.FieldRef<"LeadMeasure", 'Float'>
   readonly unit: Prisma.FieldRef<"LeadMeasure", 'String'>
   readonly createdAt: Prisma.FieldRef<"LeadMeasure", 'DateTime'>
   readonly archivedAt: Prisma.FieldRef<"LeadMeasure", 'DateTime'>
   readonly wigId: Prisma.FieldRef<"LeadMeasure", 'String'>
+  readonly trackingType: Prisma.FieldRef<"LeadMeasure", 'TrackingType'>
 }
     
 
@@ -1926,30 +1926,6 @@ export type LeadMeasureDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.I
 }
 
 /**
- * LeadMeasure.owners
- */
-export type LeadMeasure$ownersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the LeadMeasureOwner
-   */
-  select?: Prisma.LeadMeasureOwnerSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the LeadMeasureOwner
-   */
-  omit?: Prisma.LeadMeasureOwnerOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.LeadMeasureOwnerInclude<ExtArgs> | null
-  where?: Prisma.LeadMeasureOwnerWhereInput
-  orderBy?: Prisma.LeadMeasureOwnerOrderByWithRelationInput | Prisma.LeadMeasureOwnerOrderByWithRelationInput[]
-  cursor?: Prisma.LeadMeasureOwnerWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.LeadMeasureOwnerScalarFieldEnum | Prisma.LeadMeasureOwnerScalarFieldEnum[]
-}
-
-/**
  * LeadMeasure.activityLogs
  */
 export type LeadMeasure$activityLogsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1995,6 +1971,30 @@ export type LeadMeasure$commitmentsArgs<ExtArgs extends runtime.Types.Extensions
   take?: number
   skip?: number
   distinct?: Prisma.CommitmentScalarFieldEnum | Prisma.CommitmentScalarFieldEnum[]
+}
+
+/**
+ * LeadMeasure.owners
+ */
+export type LeadMeasure$ownersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the LeadMeasureOwner
+   */
+  select?: Prisma.LeadMeasureOwnerSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the LeadMeasureOwner
+   */
+  omit?: Prisma.LeadMeasureOwnerOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LeadMeasureOwnerInclude<ExtArgs> | null
+  where?: Prisma.LeadMeasureOwnerWhereInput
+  orderBy?: Prisma.LeadMeasureOwnerOrderByWithRelationInput | Prisma.LeadMeasureOwnerOrderByWithRelationInput[]
+  cursor?: Prisma.LeadMeasureOwnerWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.LeadMeasureOwnerScalarFieldEnum | Prisma.LeadMeasureOwnerScalarFieldEnum[]
 }
 
 /**

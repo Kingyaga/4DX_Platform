@@ -70,7 +70,7 @@ async function assertCanUseTeamReports(ctx: any, teamSlug: string) {
 
   if (!team) throw new TRPCError({ code: "NOT_FOUND", message: "Team not found." });
 
-  const currentUserId = (ctx.session.user as any).id;
+  const currentUserId = ctx.session.user.id;
   const isTeamLead = team.leadUserId === currentUserId;
   const isOrgAdmin = await ctx.db.orgMembership.findFirst({
     where: { orgId: team.orgId, userId: currentUserId, role: "ADMIN" },
@@ -188,7 +188,7 @@ export const reportsRouter = router({
     .mutation(async ({ ctx, input }) => {
       const report = await buildReport(ctx, input.teamSlug, input.reportType);
       const currentUser = await ctx.db.user.findUnique({
-        where: { id: (ctx.session.user as any).id },
+        where: { id: ctx.session.user.id },
         select: { name: true, email: true },
       });
 

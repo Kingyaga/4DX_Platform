@@ -8,7 +8,7 @@ import { useMemo } from "react";
 
 interface ActivityLog {
   id: string;
-  value: number;
+  value: number | null;
   loggedForDate: Date;
   user?: {
     email?: string;
@@ -18,7 +18,7 @@ interface ActivityLog {
 interface LeadMeasure {
   id: string;
   name: string;
-  targetValue: number;
+  targetValue: number | null;
   activityLogs?: ActivityLog[];
 }
 
@@ -60,17 +60,17 @@ export default function AdminActivityPage() {
       user: string;
     }> = [];
 
-    org.teams.forEach((team: Team) => {
-      team.wigs?.forEach((wig: Wig) => {
-        wig.leadMeasures?.forEach((lm: LeadMeasure) => {
-          lm.activityLogs?.forEach((log: ActivityLog) => {
+    org.teams.forEach((team) => {
+      team.wigs?.forEach((wig) => {
+        wig.leadMeasures?.forEach((lm) => {
+          lm.activityLogs?.forEach((log) => {
             logs.push({
               id: log.id,
               team: team.name,
               wig: wig.title,
               leadMeasure: lm.name || "Measure",
-              value: log.value,
-              target: lm.targetValue,
+              value: log.value ?? 0,
+              target: lm.targetValue ?? 0,
               date: log.loggedForDate ? new Date(log.loggedForDate).toLocaleDateString() : "N/A",
               user: log.user?.email?.split("@")[0] || "Unknown",
             });
@@ -118,7 +118,7 @@ export default function AdminActivityPage() {
           <div style={{ border: "1px solid #e4e4e7", borderRadius: "8px", padding: "16px", backgroundColor: "white" }}>
             <p style={{ margin: "0 0 8px 0", fontSize: "12px", fontWeight: "500", color: "#71717a" }}>Active WIGs</p>
             <div style={{ fontSize: "32px", fontWeight: "700", color: "#18181b" }}>
-              {org.teams?.reduce((sum: number, t: Team) => sum + (t.wigs?.length || 0), 0) || 0}
+              {org.teams?.reduce((sum, t) => sum + (t.wigs?.length || 0), 0) || 0}
             </div>
           </div>
           <div style={{ border: "1px solid #e4e4e7", borderRadius: "8px", padding: "16px", backgroundColor: "white" }}>
@@ -187,14 +187,14 @@ export default function AdminActivityPage() {
         <div style={{ border: "1px solid #e4e4e7", borderRadius: "8px", padding: "20px", backgroundColor: "white" }}>
           <h2 style={{ margin: "0 0 16px 0", fontSize: "16px", fontWeight: "600" }}>Activity by Team</h2>
           <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-            {org.teams?.map((team: Team) => {
+            {org.teams?.map((team) => {
               const teamLogs = allActivityLogs.filter((log) => log.team === team.name);
               return (
                 <div key={team.id} style={{ padding: "12px", backgroundColor: "#f9fafb", borderRadius: "6px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                   <div>
                     <p style={{ margin: 0, fontWeight: "500", fontSize: "14px" }}>{team.name}</p>
                     <p style={{ margin: "4px 0 0 0", fontSize: "12px", color: "#71717a" }}>
-                      {team.wigs?.length || 0} WIGs • {team.members?.length || 0} members
+                      {team.wigs?.length || 0} WIGs
                     </p>
                   </div>
                   <div style={{ textAlign: "right" }}>

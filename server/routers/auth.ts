@@ -38,8 +38,8 @@ function getAppLoginUrl() {
 
 export const authRouter = router({
   me: protectedProcedure.query(async ({ ctx }) => {
-    const lookup = (ctx.session.user as any).id
-      ? { id: (ctx.session.user as any).id }
+    const lookup = ctx.session.user.id
+      ? { id: ctx.session.user.id }
       : (ctx.session.user as any).email
       ? { email: (ctx.session.user as any).email }
       : null;
@@ -220,7 +220,7 @@ export const authRouter = router({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const userId = (ctx.session.user as any).id;
+      const userId = ctx.session.user.id;
       const user = await ctx.db.user.findUnique({ where: { id: userId } });
 
       if (!user) {
@@ -364,7 +364,7 @@ export const authRouter = router({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const actorUserId = (ctx.session.user as any).id;
+      const actorUserId = ctx.session.user.id;
 
       const org = await ctx.db.organization.findUnique({
         where: { slug: input.orgSlug },
@@ -478,7 +478,7 @@ export const authRouter = router({
       const membership = await ctx.db.orgMembership.findUnique({
         where: {
           userId_orgId: {
-            userId: (ctx.session.user as any).id,
+            userId: ctx.session.user.id,
             orgId: org.id,
           },
         },
@@ -563,7 +563,7 @@ export const authRouter = router({
       const requesterMembership = await ctx.db.orgMembership.findUnique({
         where: {
           userId_orgId: {
-            userId: (ctx.session.user as any).id,
+            userId: ctx.session.user.id,
             orgId: org.id,
           },
         },
@@ -576,7 +576,7 @@ export const authRouter = router({
         });
       }
 
-      if (input.userId === (ctx.session.user as any).id) {
+      if (input.userId === ctx.session.user.id) {
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: "Admins cannot delete their own account from this panel.",

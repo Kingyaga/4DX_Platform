@@ -51,7 +51,7 @@ export const wigsRouter = router({
 
       if (!team) throw new TRPCError({ code: "NOT_FOUND" });
 
-      if (team.leadUserId !== (ctx.session.user as any).id) {
+      if (team.leadUserId !== ctx.session.user.id) {
         throw new TRPCError({
           code: "FORBIDDEN",
           message: "Only the team lead can create WIGs.",
@@ -62,13 +62,13 @@ export const wigsRouter = router({
       // Org admins cannot create WIGs — management only
       const isOrgAdmin = await ctx.db.orgMembership.findFirst({
         where: {
-          userId: (ctx.session.user as any).id,
+          userId: ctx.session.user.id,
           orgId: team.orgId,
           role: "ADMIN",
         },
       });
 
-      if (isOrgAdmin && team.leadUserId !== (ctx.session.user as any).id) {
+      if (isOrgAdmin && team.leadUserId !== ctx.session.user.id) {
         throw new TRPCError({
           code: "FORBIDDEN",
           message: "Org admins cannot create WIGs. This is a team lead action.",
@@ -87,13 +87,13 @@ export const wigsRouter = router({
           description: input.description,
           status: "DRAFT",
           teamId: team.id,
-          createdByUserId: (ctx.session.user as any).id,
+          createdByUserId: ctx.session.user.id,
         },
       });
 
       await auditLog({
         db: ctx.db,
-        actorUserId: (ctx.session.user as any).id,
+        actorUserId: ctx.session.user.id,
         entityType: "WIG",
         entityId: createdWIG.id,
         action: "WIG_CREATED",
@@ -119,7 +119,7 @@ export const wigsRouter = router({
             title: createdWIG.title,
             teamId: team.id,
             teamName: team.name,
-            createdByUserId: (ctx.session.user as any).id,
+            createdByUserId: ctx.session.user.id,
           },
         });
       }
@@ -189,7 +189,7 @@ export const wigsRouter = router({
 
       if (!wig) throw new TRPCError({ code: "NOT_FOUND" });
 
-      const actorUserId = (ctx.session.user as any).id;
+      const actorUserId = ctx.session.user.id;
       const isOrgAdmin = await ctx.db.orgMembership.findFirst({
         where: {
           userId: actorUserId,
@@ -283,7 +283,7 @@ export const wigsRouter = router({
         });
       }
 
-      if (wig.team.leadUserId !== (ctx.session.user as any).id) {
+      if (wig.team.leadUserId !== ctx.session.user.id) {
         throw new TRPCError({
           code: "FORBIDDEN",
           message: "Only the team lead can activate WIGs.",
@@ -323,7 +323,7 @@ export const wigsRouter = router({
 
       await auditLog({
         db: ctx.db,
-        actorUserId: (ctx.session.user as any).id,
+        actorUserId: ctx.session.user.id,
         entityType: "WIG",
         entityId: input.wigId,
         action: "WIG_ACTIVATED",
@@ -383,7 +383,7 @@ export const wigsRouter = router({
 
       if (!wig) throw new TRPCError({ code: "NOT_FOUND" });
 
-      if (wig.team.leadUserId !== (ctx.session.user as any).id) {
+      if (wig.team.leadUserId !== ctx.session.user.id) {
         throw new TRPCError({
           code: "FORBIDDEN",
           message: "Only the team lead can update WIGs.",
@@ -400,7 +400,7 @@ export const wigsRouter = router({
     .mutation(async ({ ctx }) => {
       // Only org admins or system (called from cron) can trigger this
       const isAdmin = await ctx.db.orgMembership.findFirst({
-        where: { userId: (ctx.session.user as any).id, role: "ADMIN" },
+        where: { userId: ctx.session.user.id, role: "ADMIN" },
       });
       if (!isAdmin) throw new TRPCError({ code: "FORBIDDEN" });
 

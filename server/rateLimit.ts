@@ -5,6 +5,8 @@ type Bucket = {
   resetAt: number;
 };
 
+// ⚠️ TODO: REPLACE WITH REDIS BEFORE PRODUCTION — current in-memory rate limiter resets on every deploy.
+// This only protects a single process and does not coordinate across app instances.
 const buckets = new Map<string, Bucket>();
 
 export function checkRateLimit({

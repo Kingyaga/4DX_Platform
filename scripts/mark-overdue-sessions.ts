@@ -7,10 +7,10 @@
  * Invoked by render.yaml cron or directly: npx ts-node scripts/mark-overdue-sessions.ts
  */
 
-import { PrismaClient } from "../generated/prisma/client";
+import { createPrismaClient } from "../server/prisma-client";
 import { sendSessionOverdueEmail } from "../server/email";
 
-const db = new PrismaClient();
+const db = createPrismaClient();
 
 function getThisMonday(): Date {
   const now = new Date();

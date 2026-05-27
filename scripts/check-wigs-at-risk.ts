@@ -1,9 +1,9 @@
 import "dotenv/config";
-import { PrismaClient, type WIG } from "@prisma/client";
-import { Prisma } from "@prisma/client";
-import { sendWigAtRiskEmail } from "../src/server/email";
+import { createPrismaClient } from "../server/prisma-client";
+import { Prisma, type WIG } from "../src/generated/prisma/client";
+import { sendWigAtRiskEmail } from "../server/email";
 
-const db = new PrismaClient();
+const db = createPrismaClient();
 
 const DEFAULT_PROGRESS_TOLERANCE = 0.15;
 const DEFAULT_DEADLINE_WARNING_DAYS = 14;

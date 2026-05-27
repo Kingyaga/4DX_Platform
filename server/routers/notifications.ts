@@ -6,7 +6,7 @@ export const notificationsRouter = router({
   getUnread: protectedProcedure.query(async ({ ctx }) => {
     return ctx.db.notification.findMany({
       where: {
-        userId: (ctx.session.user as any).id,
+        userId: ctx.session.user.id,
         readAt: null,
       },
       orderBy: { createdAt: "desc" },
@@ -27,7 +27,7 @@ export const notificationsRouter = router({
   markAllRead: protectedProcedure.mutation(async ({ ctx }) => {
     return ctx.db.notification.updateMany({
       where: {
-        userId: (ctx.session.user as any).id,
+        userId: ctx.session.user.id,
         readAt: null,
       },
       data: { readAt: new Date() },
@@ -38,7 +38,7 @@ export const notificationsRouter = router({
   getUnreadCount: protectedProcedure.query(async ({ ctx }) => {
     const count = await ctx.db.notification.count({
       where: {
-        userId: (ctx.session.user as any).id,
+        userId: ctx.session.user.id,
         readAt: null,
       },
     });

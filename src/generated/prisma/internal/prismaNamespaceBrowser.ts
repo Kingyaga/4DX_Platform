@@ -165,7 +165,6 @@ export const WIGScalarFieldEnum = {
   id: 'id',
   title: 'title',
   description: 'description',
-  trackingType: 'trackingType',
   fromValue: 'fromValue',
   toValue: 'toValue',
   currentValue: 'currentValue',
@@ -175,7 +174,8 @@ export const WIGScalarFieldEnum = {
   createdAt: 'createdAt',
   closedAt: 'closedAt',
   teamId: 'teamId',
-  createdByUserId: 'createdByUserId'
+  createdByUserId: 'createdByUserId',
+  trackingType: 'trackingType'
 } as const
 
 export type WIGScalarFieldEnum = (typeof WIGScalarFieldEnum)[keyof typeof WIGScalarFieldEnum]
@@ -185,13 +185,13 @@ export const LeadMeasureScalarFieldEnum = {
   id: 'id',
   name: 'name',
   description: 'description',
-  trackingType: 'trackingType',
   cadence: 'cadence',
   targetValue: 'targetValue',
   unit: 'unit',
   createdAt: 'createdAt',
   archivedAt: 'archivedAt',
-  wigId: 'wigId'
+  wigId: 'wigId',
+  trackingType: 'trackingType'
 } as const
 
 export type LeadMeasureScalarFieldEnum = (typeof LeadMeasureScalarFieldEnum)[keyof typeof LeadMeasureScalarFieldEnum]
@@ -208,17 +208,18 @@ export type LeadMeasureOwnerScalarFieldEnum = (typeof LeadMeasureOwnerScalarFiel
 
 export const ActivityLogScalarFieldEnum = {
   id: 'id',
-  trackingType: 'trackingType',
   value: 'value',
-  valueJson: 'valueJson',
-  progressStatus: 'progressStatus',
   loggedForDate: 'loggedForDate',
   note: 'note',
-  status: 'status',
   createdAt: 'createdAt',
   editedAt: 'editedAt',
   leadMeasureId: 'leadMeasureId',
-  userId: 'userId'
+  userId: 'userId',
+  status: 'status',
+  progressStatus: 'progressStatus',
+  payloadJson: 'payloadJson',
+  trackingType: 'trackingType',
+  valueJson: 'valueJson'
 } as const
 
 export type ActivityLogScalarFieldEnum = (typeof ActivityLogScalarFieldEnum)[keyof typeof ActivityLogScalarFieldEnum]
@@ -226,21 +227,21 @@ export type ActivityLogScalarFieldEnum = (typeof ActivityLogScalarFieldEnum)[key
 
 export const WeeklySessionScalarFieldEnum = {
   id: 'id',
-  title: 'title',
   weekStarting: 'weekStarting',
-  weekEnding: 'weekEnding',
   status: 'status',
-  snapshotJson: 'snapshotJson',
-  notes: 'notes',
-  confidenceScore: 'confidenceScore',
   accountDoneAt: 'accountDoneAt',
   reviewDoneAt: 'reviewDoneAt',
   commitDoneAt: 'commitDoneAt',
-  startedAt: 'startedAt',
-  completedAt: 'completedAt',
   createdAt: 'createdAt',
   wigId: 'wigId',
   userId: 'userId',
+  snapshotJson: 'snapshotJson',
+  title: 'title',
+  weekEnding: 'weekEnding',
+  notes: 'notes',
+  confidenceScore: 'confidenceScore',
+  startedAt: 'startedAt',
+  completedAt: 'completedAt',
   teamId: 'teamId',
   facilitatorUserId: 'facilitatorUserId'
 } as const
@@ -255,9 +256,9 @@ export const CommitmentScalarFieldEnum = {
   notDoneReason: 'notDoneReason',
   reflection: 'reflection',
   resolvedAt: 'resolvedAt',
-  createdAt: 'createdAt',
   weeklySessionId: 'weeklySessionId',
-  linkedLeadMeasureId: 'linkedLeadMeasureId'
+  linkedLeadMeasureId: 'linkedLeadMeasureId',
+  createdAt: 'createdAt'
 } as const
 
 export type CommitmentScalarFieldEnum = (typeof CommitmentScalarFieldEnum)[keyof typeof CommitmentScalarFieldEnum]
@@ -309,7 +310,8 @@ export const AuditLogScalarFieldEnum = {
   beforeJson: 'beforeJson',
   afterJson: 'afterJson',
   createdAt: 'createdAt',
-  actorUserId: 'actorUserId'
+  actorUserId: 'actorUserId',
+  orgId: 'orgId'
 } as const
 
 export type AuditLogScalarFieldEnum = (typeof AuditLogScalarFieldEnum)[keyof typeof AuditLogScalarFieldEnum]

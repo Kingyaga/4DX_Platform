@@ -186,8 +186,8 @@ export type SessionTimelineEventWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"SessionTimelineEvent"> | Date | string
   weeklySessionId?: Prisma.StringFilter<"SessionTimelineEvent"> | string
   actorUserId?: Prisma.StringFilter<"SessionTimelineEvent"> | string
-  weeklySession?: Prisma.XOR<Prisma.WeeklySessionScalarRelationFilter, Prisma.WeeklySessionWhereInput>
   actor?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  weeklySession?: Prisma.XOR<Prisma.WeeklySessionScalarRelationFilter, Prisma.WeeklySessionWhereInput>
 }
 
 export type SessionTimelineEventOrderByWithRelationInput = {
@@ -197,8 +197,8 @@ export type SessionTimelineEventOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   weeklySessionId?: Prisma.SortOrder
   actorUserId?: Prisma.SortOrder
-  weeklySession?: Prisma.WeeklySessionOrderByWithRelationInput
   actor?: Prisma.UserOrderByWithRelationInput
+  weeklySession?: Prisma.WeeklySessionOrderByWithRelationInput
 }
 
 export type SessionTimelineEventWhereUniqueInput = Prisma.AtLeast<{
@@ -211,8 +211,8 @@ export type SessionTimelineEventWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"SessionTimelineEvent"> | Date | string
   weeklySessionId?: Prisma.StringFilter<"SessionTimelineEvent"> | string
   actorUserId?: Prisma.StringFilter<"SessionTimelineEvent"> | string
-  weeklySession?: Prisma.XOR<Prisma.WeeklySessionScalarRelationFilter, Prisma.WeeklySessionWhereInput>
   actor?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  weeklySession?: Prisma.XOR<Prisma.WeeklySessionScalarRelationFilter, Prisma.WeeklySessionWhereInput>
 }, "id">
 
 export type SessionTimelineEventOrderByWithAggregationInput = {
@@ -244,8 +244,8 @@ export type SessionTimelineEventCreateInput = {
   type: string
   payloadJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
-  weeklySession: Prisma.WeeklySessionCreateNestedOneWithoutTimelineInput
   actor: Prisma.UserCreateNestedOneWithoutSessionTimelineInput
+  weeklySession: Prisma.WeeklySessionCreateNestedOneWithoutTimelineInput
 }
 
 export type SessionTimelineEventUncheckedCreateInput = {
@@ -262,8 +262,8 @@ export type SessionTimelineEventUpdateInput = {
   type?: Prisma.StringFieldUpdateOperationsInput | string
   payloadJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  weeklySession?: Prisma.WeeklySessionUpdateOneRequiredWithoutTimelineNestedInput
   actor?: Prisma.UserUpdateOneRequiredWithoutSessionTimelineNestedInput
+  weeklySession?: Prisma.WeeklySessionUpdateOneRequiredWithoutTimelineNestedInput
 }
 
 export type SessionTimelineEventUncheckedUpdateInput = {
@@ -588,8 +588,8 @@ export type SessionTimelineEventSelect<ExtArgs extends runtime.Types.Extensions.
   createdAt?: boolean
   weeklySessionId?: boolean
   actorUserId?: boolean
-  weeklySession?: boolean | Prisma.WeeklySessionDefaultArgs<ExtArgs>
   actor?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  weeklySession?: boolean | Prisma.WeeklySessionDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["sessionTimelineEvent"]>
 
 export type SessionTimelineEventSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -599,8 +599,8 @@ export type SessionTimelineEventSelectCreateManyAndReturn<ExtArgs extends runtim
   createdAt?: boolean
   weeklySessionId?: boolean
   actorUserId?: boolean
-  weeklySession?: boolean | Prisma.WeeklySessionDefaultArgs<ExtArgs>
   actor?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  weeklySession?: boolean | Prisma.WeeklySessionDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["sessionTimelineEvent"]>
 
 export type SessionTimelineEventSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -610,8 +610,8 @@ export type SessionTimelineEventSelectUpdateManyAndReturn<ExtArgs extends runtim
   createdAt?: boolean
   weeklySessionId?: boolean
   actorUserId?: boolean
-  weeklySession?: boolean | Prisma.WeeklySessionDefaultArgs<ExtArgs>
   actor?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  weeklySession?: boolean | Prisma.WeeklySessionDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["sessionTimelineEvent"]>
 
 export type SessionTimelineEventSelectScalar = {
@@ -625,23 +625,23 @@ export type SessionTimelineEventSelectScalar = {
 
 export type SessionTimelineEventOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "type" | "payloadJson" | "createdAt" | "weeklySessionId" | "actorUserId", ExtArgs["result"]["sessionTimelineEvent"]>
 export type SessionTimelineEventInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  weeklySession?: boolean | Prisma.WeeklySessionDefaultArgs<ExtArgs>
   actor?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  weeklySession?: boolean | Prisma.WeeklySessionDefaultArgs<ExtArgs>
 }
 export type SessionTimelineEventIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  weeklySession?: boolean | Prisma.WeeklySessionDefaultArgs<ExtArgs>
   actor?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  weeklySession?: boolean | Prisma.WeeklySessionDefaultArgs<ExtArgs>
 }
 export type SessionTimelineEventIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  weeklySession?: boolean | Prisma.WeeklySessionDefaultArgs<ExtArgs>
   actor?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  weeklySession?: boolean | Prisma.WeeklySessionDefaultArgs<ExtArgs>
 }
 
 export type $SessionTimelineEventPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "SessionTimelineEvent"
   objects: {
-    weeklySession: Prisma.$WeeklySessionPayload<ExtArgs>
     actor: Prisma.$UserPayload<ExtArgs>
+    weeklySession: Prisma.$WeeklySessionPayload<ExtArgs>
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1044,8 +1044,8 @@ readonly fields: SessionTimelineEventFieldRefs;
  */
 export interface Prisma__SessionTimelineEventClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  weeklySession<T extends Prisma.WeeklySessionDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.WeeklySessionDefaultArgs<ExtArgs>>): Prisma.Prisma__WeeklySessionClient<runtime.Types.Result.GetResult<Prisma.$WeeklySessionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   actor<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  weeklySession<T extends Prisma.WeeklySessionDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.WeeklySessionDefaultArgs<ExtArgs>>): Prisma.Prisma__WeeklySessionClient<runtime.Types.Result.GetResult<Prisma.$WeeklySessionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.

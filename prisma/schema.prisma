@@ -7,85 +7,68 @@ datasource db {
   provider = "postgresql"
 }
 
-// ─── ORGANIZATION ───────────────────────────────────────────────────────────
-
 model Organization {
-  id        String   @id @default(cuid())
-  name      String
-  slug      String   @unique
-  timezone  String   @default("UTC")
-  createdAt DateTime @default(now())
-
+  id           String          @id @default(cuid())
+  name         String
+  slug         String          @unique
+  timezone     String          @default("UTC")
+  createdAt    DateTime        @default(now())
+  apiKeys      ApiKey[]
+  invites      Invite[]
+  inviteTokens InviteToken[]
+  auditLogs    AuditLog[]
   memberships  OrgMembership[]
   teams        Team[]
-  invites      Invite[]
-  apiKeys      ApiKey[]
-  inviteTokens InviteToken[]
 }
-
-// ─── USER ───────────────────────────────────────────────────────────────────
 
 model User {
-  id                  String   @id @default(cuid())
-  email               String   @unique
+  id                  String                 @id @default(cuid())
+  email               String                 @unique
   name                String
   passwordHash        String?
-  createdAt           DateTime @default(now())
+  createdAt           DateTime               @default(now())
   defaultTeamId       String?
-  mustChangePassword  Boolean  @default(false)
-
-  orgMemberships      OrgMembership[]
-  teamMemberships     TeamMembership[]
+  mustChangePassword  Boolean                @default(false)
   activityLogs        ActivityLog[]
-  weeklySessions      WeeklySession[] @relation("WeeklySessionUser")
-  facilitatedSessions WeeklySession[] @relation("WeeklySessionFacilitator")
+  auditLogs           AuditLog[]
+  invites             Invite[]
+  createdInvites      InviteToken[]
+  leadMeasures        LeadMeasureOwner[]
+  notifications       Notification[]
+  orgMemberships      OrgMembership[]
+  passwordResetTokens PasswordResetToken[]
   sessionBlockers     SessionBlocker[]
   sessionTimeline     SessionTimelineEvent[]
-  notifications       Notification[]
-  auditLogs           AuditLog[]
-  leadMeasures        LeadMeasureOwner[]
-  createdInvites      InviteToken[]
-  invites             Invite[]
-  passwordResetTokens PasswordResetToken[]
+  teamMemberships     TeamMembership[]
+  facilitatedSessions WeeklySession[]        @relation("WeeklySessionFacilitator")
+  weeklySessions      WeeklySession[]        @relation("WeeklySessionUser")
 }
 
-// ─── ORG MEMBERSHIP ─────────────────────────────────────────────────────────
-
 model OrgMembership {
-  id   String  @id @default(cuid())
-  role OrgRole
-
+  id     String       @id @default(cuid())
+  role   OrgRole
   userId String
-  user   User   @relation(fields: [userId], references: [id])
-
-  orgId String
-  org   Organization @relation(fields: [orgId], references: [id])
+  orgId  String
+  org    Organization @relation(fields: [orgId], references: [id])
+  user   User         @relation(fields: [userId], references: [id])
 
   @@unique([userId, orgId])
   @@index([orgId])
 }
 
-enum OrgRole {
-  ADMIN
-  MEMBER
-}
-
 model Invite {
-  id        String    @id @default(cuid())
-  token     String    @unique
-  email     String?
-  expiresAt DateTime
-  createdAt DateTime  @default(now())
-  usedAt    DateTime?
-
-  orgId String
-  org   Organization @relation(fields: [orgId], references: [id])
-
-  teamId String?
-  team   Team?   @relation(fields: [teamId], references: [id])
-
+  id              String       @id @default(cuid())
+  token           String       @unique
+  email           String?
+  expiresAt       DateTime
+  createdAt       DateTime     @default(now())
+  usedAt          DateTime?
+  orgId           String
+  teamId          String?
   invitedByUserId String
-  invitedBy       User   @relation(fields: [invitedByUserId], references: [id])
+  invitedBy       User         @relation(fields: [invitedByUserId], references: [id])
+  org             Organization @relation(fields: [orgId], references: [id])
+  team            Team?        @relation(fields: [teamId], references: [id])
 
   @@index([orgId])
   @@index([teamId])
@@ -93,24 +76,20 @@ model Invite {
   @@index([expiresAt])
 }
 
-// ─── TEAM ───────────────────────────────────────────────────────────────────
-
 model Team {
-  id         String    @id @default(cuid())
-  name       String
-  slug       String    @unique
-  createdAt  DateTime  @default(now())
-  archivedAt DateTime?
-
-  orgId String
-  org   Organization @relation(fields: [orgId], references: [id])
-
-  leadUserId String
-  members    TeamMembership[]
-  wigs       WIG[]
+  id             String           @id @default(cuid())
+  name           String
+  slug           String           @unique
+  createdAt      DateTime         @default(now())
+  archivedAt     DateTime?
+  orgId          String
+  leadUserId     String
+  invites        Invite[]
+  inviteTokens   InviteToken[]
+  org            Organization     @relation(fields: [orgId], references: [id])
+  members        TeamMembership[]
+  wigs           WIG[]
   weeklySessions WeeklySession[]
-  invites    Invite[]
-  inviteTokens InviteToken[]
 
   @@index([orgId])
   @@index([leadUserId])
@@ -120,50 +99,263 @@ model TeamMembership {
   id       String   @id @default(cuid())
   role     TeamRole
   joinedAt DateTime @default(now())
-
-  userId String
-  user   User   @relation(fields: [userId], references: [id])
-
-  teamId String
-  team   Team   @relation(fields: [teamId], references: [id])
+  userId   String
+  teamId   String
+  team     Team     @relation(fields: [teamId], references: [id])
+  user     User     @relation(fields: [userId], references: [id])
 
   @@unique([userId, teamId])
   @@index([teamId])
+}
+
+model WIG {
+  id              String          @id @default(cuid())
+  title           String
+  description     String?
+  fromValue       Float?
+  toValue         Float?
+  currentValue    Float?          @default(0)
+  unit            String?
+  deadline        DateTime
+  status          WIGStatus       @default(DRAFT)
+  createdAt       DateTime        @default(now())
+  closedAt        DateTime?
+  teamId          String
+  createdByUserId String
+  trackingType    TrackingType    @default(NUMERIC)
+  leadMeasures    LeadMeasure[]
+  team            Team            @relation(fields: [teamId], references: [id])
+  weeklySessions  WeeklySession[]
+
+  @@index([teamId])
+  @@index([createdByUserId])
+  @@index([status])
+}
+
+model LeadMeasure {
+  id           String             @id @default(cuid())
+  name         String
+  description  String?
+  cadence      Cadence
+  targetValue  Float?
+  unit         String?
+  createdAt    DateTime           @default(now())
+  archivedAt   DateTime?
+  wigId        String
+  trackingType TrackingType       @default(NUMERIC)
+  activityLogs ActivityLog[]
+  commitments  Commitment[]
+  wig          WIG                @relation(fields: [wigId], references: [id])
+  owners       LeadMeasureOwner[]
+
+  @@index([wigId])
+}
+
+model LeadMeasureOwner {
+  id            String      @id @default(cuid())
+  leadMeasureId String
+  userId        String
+  leadMeasure   LeadMeasure @relation(fields: [leadMeasureId], references: [id])
+  user          User        @relation(fields: [userId], references: [id])
+
+  @@unique([leadMeasureId, userId])
+  @@index([userId])
+}
+
+model ActivityLog {
+  id             String                  @id @default(cuid())
+  value          Float?
+  loggedForDate  DateTime
+  note           String?
+  createdAt      DateTime                @default(now())
+  editedAt       DateTime?
+  leadMeasureId  String
+  userId         String
+  status         ActivityLogStatus       @default(PENDING)
+  progressStatus ActivityProgressStatus?
+  payloadJson    Json?
+  trackingType   TrackingType            @default(NUMERIC)
+  valueJson      Json?
+  leadMeasure    LeadMeasure             @relation(fields: [leadMeasureId], references: [id])
+  user           User                    @relation(fields: [userId], references: [id])
+
+  @@index([leadMeasureId])
+  @@index([userId])
+  @@index([loggedForDate])
+  @@index([payloadJson], type: Gin)
+}
+
+model WeeklySession {
+  id                String                 @id @default(cuid())
+  weekStarting      DateTime
+  status            SessionStatus          @default(PENDING)
+  accountDoneAt     DateTime?
+  reviewDoneAt      DateTime?
+  commitDoneAt      DateTime?
+  createdAt         DateTime               @default(now())
+  wigId             String?
+  userId            String?
+  snapshotJson      Json?
+  title             String?
+  weekEnding        DateTime?
+  notes             String?
+  confidenceScore   Int?
+  startedAt         DateTime?
+  completedAt       DateTime?
+  teamId            String?
+  facilitatorUserId String?
+  commitments       Commitment[]
+  blockers          SessionBlocker[]
+  timeline          SessionTimelineEvent[]
+  facilitator       User?                  @relation("WeeklySessionFacilitator", fields: [facilitatorUserId], references: [id])
+  team              Team?                  @relation(fields: [teamId], references: [id])
+  user              User?                  @relation("WeeklySessionUser", fields: [userId], references: [id], onDelete: Restrict)
+  wig               WIG?                   @relation(fields: [wigId], references: [id], onDelete: Restrict)
+
+  @@index([wigId])
+  @@index([userId])
+  @@index([teamId])
+  @@index([facilitatorUserId])
+  @@index([wigId, userId, weekStarting])
+  @@index([teamId, weekStarting])
+  @@index([snapshotJson], type: Gin)
+}
+
+model Commitment {
+  id                  String           @id @default(cuid())
+  text                String
+  status              CommitmentStatus @default(PENDING)
+  notDoneReason       NotDoneReason?
+  reflection          String?
+  resolvedAt          DateTime?
+  weeklySessionId     String
+  linkedLeadMeasureId String?
+  createdAt           DateTime         @default(now())
+  linkedLeadMeasure   LeadMeasure?     @relation(fields: [linkedLeadMeasureId], references: [id])
+  weeklySession       WeeklySession    @relation(fields: [weeklySessionId], references: [id])
+
+  @@index([weeklySessionId])
+  @@index([linkedLeadMeasureId])
+}
+
+model SessionBlocker {
+  id              String        @id @default(cuid())
+  title           String
+  details         String?
+  status          BlockerStatus @default(OPEN)
+  createdAt       DateTime      @default(now())
+  resolvedAt      DateTime?
+  weeklySessionId String
+  createdByUserId String
+  createdBy       User          @relation(fields: [createdByUserId], references: [id])
+  weeklySession   WeeklySession @relation(fields: [weeklySessionId], references: [id], onDelete: Cascade)
+
+  @@index([weeklySessionId])
+  @@index([createdByUserId])
+}
+
+model SessionTimelineEvent {
+  id              String        @id @default(cuid())
+  type            String
+  payloadJson     Json?
+  createdAt       DateTime      @default(now())
+  weeklySessionId String
+  actorUserId     String
+  actor           User          @relation(fields: [actorUserId], references: [id])
+  weeklySession   WeeklySession @relation(fields: [weeklySessionId], references: [id], onDelete: Cascade)
+
+  @@index([weeklySessionId])
+  @@index([actorUserId])
+}
+
+model Notification {
+  id          String    @id @default(cuid())
+  type        String
+  payloadJson Json
+  readAt      DateTime?
+  createdAt   DateTime  @default(now())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([readAt])
+}
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  entityType  String
+  entityId    String
+  action      String
+  beforeJson  Json?
+  afterJson   Json?
+  createdAt   DateTime @default(now())
+  actorUserId String
+  orgId       String
+  actor       User     @relation(fields: [actorUserId], references: [id])
+  org         Organization @relation(fields: [orgId], references: [id])
+
+  @@index([actorUserId])
+  @@index([orgId])
+  @@index([entityType, entityId])
+}
+
+model ApiKey {
+  id         String       @id @default(cuid())
+  key        String       @unique
+  name       String?
+  createdAt  DateTime     @default(now())
+  expiresAt  DateTime?
+  lastUsedAt DateTime?
+  revokedAt  DateTime?
+  orgId      String
+  org        Organization @relation(fields: [orgId], references: [id])
+
+  @@index([orgId])
+}
+
+model InviteToken {
+  id              String       @id @default(cuid())
+  token           String       @unique
+  email           String?
+  orgId           String
+  teamId          String?
+  role            OrgRole      @default(MEMBER)
+  usedAt          DateTime?
+  expiresAt       DateTime
+  createdAt       DateTime     @default(now())
+  createdByUserId String
+  createdBy       User         @relation(fields: [createdByUserId], references: [id])
+  org             Organization @relation(fields: [orgId], references: [id])
+  team            Team?        @relation(fields: [teamId], references: [id])
+
+  @@index([orgId])
+  @@index([teamId])
+  @@index([createdByUserId])
+  @@index([expiresAt])
+}
+
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+enum OrgRole {
+  ADMIN
+  MEMBER
 }
 
 enum TeamRole {
   LEAD
   MEMBER
   OBSERVER
-}
-
-// ─── WIG ────────────────────────────────────────────────────────────────────
-
-model WIG {
-  id           String    @id @default(cuid())
-  title        String
-  description  String?
-  trackingType TrackingType @default(NUMERIC)
-  fromValue    Float?
-  toValue      Float?
-  currentValue Float?
-  unit         String?
-  deadline     DateTime
-  status       WIGStatus @default(DRAFT)
-  createdAt    DateTime  @default(now())
-  closedAt     DateTime?
-
-  teamId String
-  team   Team   @relation(fields: [teamId], references: [id])
-
-  createdByUserId String
-
-  leadMeasures   LeadMeasure[]
-  weeklySessions WeeklySession[]
-
-  @@index([teamId])
-  @@index([createdByUserId])
-  @@index([status])
 }
 
 enum WIGStatus {
@@ -174,70 +366,9 @@ enum WIGStatus {
   ABANDONED
 }
 
-// ─── LEAD MEASURE ───────────────────────────────────────────────────────────
-
-model LeadMeasure {
-  id          String    @id @default(cuid())
-  name        String
-  description String?
-  trackingType TrackingType @default(NUMERIC)
-  cadence     Cadence
-  targetValue Float?
-  unit        String?
-  createdAt   DateTime  @default(now())
-  archivedAt  DateTime?
-
-  wigId String
-  wig   WIG    @relation(fields: [wigId], references: [id])
-
-  owners       LeadMeasureOwner[]
-  activityLogs ActivityLog[]
-  commitments  Commitment[]
-
-  @@index([wigId])
-}
-
 enum Cadence {
   WEEKLY
   BIWEEKLY
-}
-
-model LeadMeasureOwner {
-  id String @id @default(cuid())
-
-  leadMeasureId String
-  leadMeasure   LeadMeasure @relation(fields: [leadMeasureId], references: [id])
-
-  userId String
-  user   User   @relation(fields: [userId], references: [id])
-
-  @@unique([leadMeasureId, userId])
-  @@index([userId])
-}
-
-// ─── ACTIVITY LOG ───────────────────────────────────────────────────────────
-
-model ActivityLog {
-  id            String            @id @default(cuid())
-  trackingType  TrackingType      @default(NUMERIC)
-  value         Float?
-  valueJson     Json?
-  progressStatus ActivityProgressStatus?
-  loggedForDate DateTime
-  note          String?
-  status        ActivityLogStatus @default(PENDING)
-  createdAt     DateTime          @default(now())
-  editedAt      DateTime?
-
-  leadMeasureId String
-  leadMeasure   LeadMeasure @relation(fields: [leadMeasureId], references: [id])
-
-  userId String
-  user   User   @relation(fields: [userId], references: [id])
-
-  @@index([leadMeasureId])
-  @@index([userId])
-  @@index([loggedForDate])
 }
 
 enum ActivityLogStatus {
@@ -267,74 +398,11 @@ enum ActivityProgressStatus {
   DONE
 }
 
-// ─── WEEKLY SESSION ──────────────────────────────────────────────────────────
-
-model WeeklySession {
-  id            String        @id @default(cuid())
-  title         String?
-  weekStarting  DateTime
-  weekEnding    DateTime?
-  status        SessionStatus @default(PENDING)
-  snapshotJson  Json?
-  notes         String?
-  confidenceScore Int?
-  accountDoneAt DateTime?
-  reviewDoneAt  DateTime?
-  commitDoneAt  DateTime?
-  startedAt     DateTime?
-  completedAt   DateTime?
-  createdAt     DateTime      @default(now())
-
-  wigId String?
-  wig   WIG?   @relation(fields: [wigId], references: [id])
-
-  userId String?
-  user   User?  @relation("WeeklySessionUser", fields: [userId], references: [id])
-
-  teamId String?
-  team   Team?  @relation(fields: [teamId], references: [id])
-
-  facilitatorUserId String?
-  facilitator       User? @relation("WeeklySessionFacilitator", fields: [facilitatorUserId], references: [id])
-
-  commitments Commitment[]
-  blockers    SessionBlocker[]
-  timeline    SessionTimelineEvent[]
-
-  @@index([wigId])
-  @@index([userId])
-  @@index([teamId])
-  @@index([facilitatorUserId])
-  @@index([wigId, userId, weekStarting])
-  @@index([teamId, weekStarting])
-}
-
 enum SessionStatus {
   PENDING
   IN_PROGRESS
   COMPLETE
   OVERDUE
-}
-
-// ─── COMMITMENT ──────────────────────────────────────────────────────────────
-
-model Commitment {
-  id            String           @id @default(cuid())
-  text          String
-  status        CommitmentStatus @default(PENDING)
-  notDoneReason NotDoneReason?
-  reflection    String?
-  resolvedAt    DateTime?
-  createdAt     DateTime         @default(now())
-
-  weeklySessionId String
-  weeklySession   WeeklySession @relation(fields: [weeklySessionId], references: [id])
-
-  linkedLeadMeasureId String?
-  linkedLeadMeasure   LeadMeasure? @relation(fields: [linkedLeadMeasureId], references: [id])
-
-  @@index([weeklySessionId])
-  @@index([linkedLeadMeasureId])
 }
 
 enum CommitmentStatus {
@@ -351,128 +419,7 @@ enum NotDoneReason {
   OTHER
 }
 
-model SessionBlocker {
-  id        String   @id @default(cuid())
-  title     String
-  details   String?
-  status    BlockerStatus @default(OPEN)
-  createdAt DateTime @default(now())
-  resolvedAt DateTime?
-
-  weeklySessionId String
-  weeklySession   WeeklySession @relation(fields: [weeklySessionId], references: [id])
-
-  createdByUserId String
-  createdBy       User @relation(fields: [createdByUserId], references: [id])
-
-  @@index([weeklySessionId])
-  @@index([createdByUserId])
-}
-
 enum BlockerStatus {
   OPEN
   RESOLVED
-}
-
-model SessionTimelineEvent {
-  id          String   @id @default(cuid())
-  type        String
-  payloadJson Json?
-  createdAt   DateTime @default(now())
-
-  weeklySessionId String
-  weeklySession   WeeklySession @relation(fields: [weeklySessionId], references: [id])
-
-  actorUserId String
-  actor       User @relation(fields: [actorUserId], references: [id])
-
-  @@index([weeklySessionId])
-  @@index([actorUserId])
-}
-
-// ─── NOTIFICATION ────────────────────────────────────────────────────────────
-
-model Notification {
-  id          String    @id @default(cuid())
-  type        String
-  payloadJson Json
-  readAt      DateTime?
-  createdAt   DateTime  @default(now())
-
-  userId String
-  user   User   @relation(fields: [userId], references: [id])
-
-  @@index([userId])
-  @@index([readAt])
-}
-
-// ─── AUDIT LOG ───────────────────────────────────────────────────────────────
-
-model AuditLog {
-  id         String   @id @default(cuid())
-  entityType String
-  entityId   String
-  action     String
-  beforeJson Json?
-  afterJson  Json?
-  createdAt  DateTime @default(now())
-
-  actorUserId String
-  actor       User   @relation(fields: [actorUserId], references: [id])
-
-  @@index([actorUserId])
-  @@index([entityType, entityId])
-}
-
-// ─── API KEY ─────────────────────────────────────────────────────────────────
-
-model ApiKey {
-  id         String    @id @default(cuid())
-  key        String    @unique
-  name       String?
-  createdAt  DateTime  @default(now())
-  expiresAt  DateTime?
-  lastUsedAt DateTime?
-  revokedAt  DateTime?
-
-  orgId String
-  org   Organization @relation(fields: [orgId], references: [id])
-
-  @@index([orgId])
-}
-
-model InviteToken {
-  id              String    @id @default(cuid())
-  token           String    @unique
-  email           String? // optional — pre-fill signup form
-  orgId           String
-  teamId          String? // optional — auto add to team on signup
-  role            OrgRole   @default(MEMBER)
-  usedAt          DateTime?
-  expiresAt       DateTime
-  createdAt       DateTime  @default(now())
-  createdByUserId String
-
-  org       Organization @relation(fields: [orgId], references: [id])
-  team      Team?        @relation(fields: [teamId], references: [id])
-  createdBy User         @relation(fields: [createdByUserId], references: [id])
-
-  @@index([orgId])
-  @@index([teamId])
-  @@index([createdByUserId])
-  @@index([expiresAt])
-}
-
-model PasswordResetToken {
-  id        String    @id @default(cuid())
-  tokenHash String    @unique
-  expiresAt DateTime
-  usedAt    DateTime?
-  createdAt DateTime  @default(now())
-
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-  @@index([expiresAt])
 }
