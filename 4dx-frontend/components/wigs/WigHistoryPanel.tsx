@@ -1,0 +1,1 @@
+export { WigHistoryPanel } from "./WigTable";

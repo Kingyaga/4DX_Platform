@@ -21,7 +21,7 @@ export default function CreateUserPage() {
     { enabled: !!orgSlug }
   );
 
-  const orgTeams = (orgData?.teams || []) as Team[];
+  const orgTeams = (orgData?.teams || []) as unknown as Team[];
 
   const [newUserName, setNewUserName] = useState("");
   const [newUserEmail, setNewUserEmail] = useState("");

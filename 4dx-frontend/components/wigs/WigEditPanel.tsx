@@ -1,0 +1,1 @@
+export { WigEditPanel } from "./WigTable";

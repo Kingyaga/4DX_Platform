@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import {
   useAddSessionBlocker,
   useAddTeamCommitment,
@@ -28,6 +28,14 @@ function formatDate(value?: string | Date | null) {
   return new Date(value).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 }
 
+function getResumeStep(session: { accountDoneAt?: unknown; reviewDoneAt?: unknown; commitDoneAt?: unknown } | null | undefined) {
+  if (!session) return 0;
+  if (session.commitDoneAt) return 3;
+  if (session.reviewDoneAt) return 2;
+  if (session.accountDoneAt) return 1;
+  return 0;
+}
+
 export default function WeeklySessionPage() {
   const { currentTeamSlug } = useTeamStore();
   const { canCreateWIG, canArchiveWIG } = useRoleCheck();
@@ -44,13 +52,20 @@ export default function WeeklySessionPage() {
   const [commitmentText, setCommitmentText] = useState("");
   const [blockerTitle, setBlockerTitle] = useState("");
   const [blockerDetails, setBlockerDetails] = useState("");
+  const [currentStep, setCurrentStep] = useState(0);
 
   const snapshot = session?.snapshotJson as any;
   const totals = snapshot?.totals || {};
   const canManageSession = canCreateWIG || canArchiveWIG;
+  const resumeStep = getResumeStep(session);
+  const hasPartialProgress = !!session && session.status !== "COMPLETE" && resumeStep > 0 && resumeStep < 3;
 
   const statusLabel = session?.status === "COMPLETE" ? "Completed" : session?.status === "IN_PROGRESS" ? "In Progress" : "Not Started";
   const timeline = useMemo(() => session?.timeline || [], [session]);
+
+  useEffect(() => {
+    setCurrentStep(getResumeStep(session));
+  }, [session?.id, session?.accountDoneAt, session?.reviewDoneAt, session?.commitDoneAt]);
 
   const handleCreateSession = async () => {
     if (!currentTeamSlug) return;
@@ -218,6 +233,18 @@ export default function WeeklySessionPage() {
           </section>
         ) : (
           <>
+            {hasPartialProgress && (
+              <section style={{ background: "#ecfdf5", border: "1px solid #86efac", padding: "16px 18px", color: "#14532d", display: "flex", justifyContent: "space-between", gap: "16px", alignItems: "center" }}>
+                <div>
+                  <strong style={{ display: "block", fontSize: "14px" }}>Resume from where you left off</strong>
+                  <span style={{ fontSize: "13px" }}>
+                    {currentStep === 1 ? "Account step completed. Continue with scoreboard review." : "Account and review steps completed. Continue with commitments."}
+                  </span>
+                </div>
+                <span style={{ fontSize: "12px", fontWeight: 800, textTransform: "uppercase" }}>Step {currentStep + 1} of 4</span>
+              </section>
+            )}
+
             <section style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: "14px" }}>
               {[
                 ["Active WIGs", totals.activeWigs ?? 0],

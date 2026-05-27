@@ -764,9 +764,7 @@ export function useChangePassword() {
  * Fetch unread notifications for the current user
  */
 export function useNotifications() {
-  const query = (trpc.notifications as any).getUnread.useQuery(undefined, {
-    refetchInterval: 30_000,
-  });
+  const query = (trpc.notifications as any).getUnread.useQuery();
 
   return {
     notifications: (query.data || []) as Array<{
@@ -783,12 +781,10 @@ export function useNotifications() {
 }
 
 /**
- * Get unread notification count (lightweight — polls every 30s)
+ * Get unread notification count
  */
 export function useNotificationCount() {
-  const query = (trpc.notifications as any).getUnreadCount.useQuery(undefined, {
-    refetchInterval: 30_000,
-  });
+  const query = (trpc.notifications as any).getUnreadCount.useQuery();
 
   return {
     count: (query.data?.count as number) ?? 0,

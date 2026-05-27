@@ -145,6 +145,7 @@ export default function ActivityLogPage() {
     const updateCurrentTime = () => setCurrentTimeMs(Date.now());
 
     updateCurrentTime();
+    // Local date helper only; this interval does not refetch server data.
     const intervalId = window.setInterval(updateCurrentTime, 60 * 1000);
 
     return () => window.clearInterval(intervalId);

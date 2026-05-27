@@ -24,18 +24,18 @@ function getLeadMeasureProgress(leadMeasure: LeadMeasure) {
 
 export default function ScoreboardPage() {
   const { currentTeamSlug } = useTeamStore();
-  const { wigs, isLoading, error, refetch } = useWIGs(currentTeamSlug);
+  const { wigs, isLoading, error } = useWIGs(currentTeamSlug);
   const [selectedWigId, setSelectedWigId] = useState<string>("");
   const [displayMode, setDisplayMode] = useState(false);
   const [currentTime, setCurrentTime] = useState(() => Date.now());
 
   useEffect(() => {
+    // Local countdown clock only; data refetch polling is intentionally disabled.
     const interval = setInterval(() => {
       setCurrentTime(Date.now());
-      refetch();
     }, 60_000);
     return () => clearInterval(interval);
-  }, [refetch]);
+  }, []);
 
   // Enter/exit display mode with Escape key
   useEffect(() => {
