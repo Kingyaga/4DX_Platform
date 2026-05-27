@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useUserStore } from "@/lib/stores/user-store";
 import { useAllTeams, useCreateInvite, useOrgInvites, useRevokeInvite } from "@/lib/hooks";
 import { ErrorState } from "@/lib/components/states";
-import { LoadingSpinner } from "@/lib/components/loading-spinner";
+import { PageLoader } from "@/lib/components/loading-spinner";
 
 export default function InvitesPage() {
   const { orgSlug } = useUserStore();
@@ -63,7 +63,7 @@ export default function InvitesPage() {
   const activeInvites = invites.filter((inv) => !inv.usedAt && new Date(inv.expiresAt) > new Date());
   const usedInvites = invites.filter((inv) => inv.usedAt || new Date(inv.expiresAt) <= new Date());
 
-  if (isLoading) return <LoadingSpinner size="large" text="Loading invites..." className="min-h-[400px] flex items-center justify-center" />;
+  if (isLoading) return <PageLoader text="Loading invites..." />;
   if (error) return <ErrorState error={error} title="Unable to load invites" />;
 
   return (

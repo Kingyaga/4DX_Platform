@@ -17,7 +17,7 @@ import {
 } from "@/lib/hooks";
 import { useUserStore } from "@/lib/stores/user-store";
 import { useTeamStore } from "@/lib/stores/team-store";
-import { LoadingSpinner } from "@/lib/components/loading-spinner";
+import { PageLoader } from "@/lib/components/loading-spinner";
 import { getDefaultRouteForRole, getTeamRole, isRouteAllowedForRole } from "@/lib/team-routing";
 import type { MyTeamsResponse } from "@/lib/types";
 
@@ -213,8 +213,11 @@ export default function DashboardLayout({
   }, [pathname, userRole, router]);
 
   // Show loading spinner while session or user data is loading
-  if (status === "loading" || userLoading || (status === "authenticated" && !userRole) || (userRole && teamsLoading)) {
-    return <LoadingSpinner size="large" text="Loading dashboard..." className="min-h-screen flex items-center justify-center" />;
+  const hasNoTeamAssignment = userRole !== "ADMIN" && !teamsLoading && teams.length === 0;
+  const canRenderUnassignedUser = status === "authenticated" && Boolean(userRole) && hasNoTeamAssignment;
+
+  if (status === "loading" || userLoading || (status === "authenticated" && !userRole) || (userRole && teamsLoading && !canRenderUnassignedUser)) {
+    return <PageLoader text="Loading dashboard..." />;
   }
 
   // Filter nav items based on user role
@@ -241,7 +244,7 @@ export default function DashboardLayout({
     return pathname === href || activeHref === href;
   };
 
-  const hasNoTeamAssignment = userRole !== "ADMIN" && !teamsLoading && teams.length === 0;
+  const shouldShowNoTeamAssignment = hasNoTeamAssignment && pathname !== "/dashboard/settings";
 
   return (
     <div
@@ -705,7 +708,7 @@ export default function DashboardLayout({
             </span>
           </Link>
         )}
-        {hasNoTeamAssignment ? (
+        {shouldShowNoTeamAssignment ? (
           <main style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "32px" }}>
             <section style={{ width: "100%", maxWidth: "720px", backgroundColor: "#ffffff", border: "1px solid #e4e4e7", padding: "40px", boxShadow: "0 18px 48px rgba(15, 23, 42, 0.08)" }}>
               <span className="material-symbols-outlined" style={{ fontSize: "40px", color: "#71717a", marginBottom: "16px" }}>groups</span>

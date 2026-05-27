@@ -6,6 +6,7 @@ import { useOrgDashboard, useOrgUsers, useDeleteUser } from "@/lib/hooks";
 import { useTimedMessage } from "@/lib/useTimedMessage";
 import { useUserStore } from "@/lib/stores/user-store";
 import { ErrorState, EmptyState } from "@/lib/components/states";
+import { PageLoader } from "@/lib/components/loading-spinner";
 import { trpc } from "@/lib/trpc";
 import type { WIG, LeadMeasure, User } from "@/lib/types";
 
@@ -141,11 +142,7 @@ export default function AdminPage() {
 
   if (error) return <ErrorState error={error} />;
   if (isLoading) {
-    return (
-      <main style={{ flex: 1, overflowY: "auto", padding: "32px" }}>
-        <div style={{ textAlign: "center", color: "#71717a" }}>Loading dashboard...</div>
-      </main>
-    );
+    return <PageLoader text="Loading dashboard..." />;
   }
 
   if (!org || !org.teams) {

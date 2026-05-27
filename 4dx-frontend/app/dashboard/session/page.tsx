@@ -124,7 +124,7 @@ export default function WeeklySessionPage() {
         )}
 
         {isLoading ? (
-          <LoadingSpinner size="large" text="Loading weekly session..." className="min-h-[360px] flex items-center justify-center" />
+          <LoadingSpinner size="xlarge" text="Loading weekly session..." className="min-h-[520px] flex items-center justify-center" />
         ) : !session ? (
           <section style={{ background: "#ffffff", border: "1px solid #dbe3ef", padding: "28px", display: "grid", gap: "18px" }}>
             <div>

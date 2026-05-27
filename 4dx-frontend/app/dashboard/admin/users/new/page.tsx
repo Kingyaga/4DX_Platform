@@ -6,6 +6,7 @@ import { useOrgUsers } from "@/lib/hooks";
 import { useTimedMessage } from "@/lib/useTimedMessage";
 import { useUserStore } from "@/lib/stores/user-store";
 import { ErrorState } from "@/lib/components/states";
+import { LoadingSpinner } from "@/lib/components/loading-spinner";
 import { parseTRPCError } from "@/lib/api-client";
 import { trpc } from "@/lib/trpc";
 import type { Team } from "@/lib/types";
@@ -158,7 +159,7 @@ export default function CreateUserPage() {
                 >
                   <option value="">No team</option>
                   {isOrgLoading ? (
-                    <option disabled>Loading teams...</option>
+                    <option disabled>Teams are loading</option>
                   ) : (
                     orgTeams.map((team) => (
                       <option key={team.id} value={team.slug}>
@@ -167,6 +168,11 @@ export default function CreateUserPage() {
                     ))
                   )}
                 </select>
+                {isOrgLoading && (
+                  <div style={{ marginTop: "10px", display: "flex", justifyContent: "center" }}>
+                    <LoadingSpinner size="small" text="" />
+                  </div>
+                )}
               </label>
             </div>
 

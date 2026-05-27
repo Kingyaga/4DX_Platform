@@ -5,6 +5,7 @@ import { useTimedMessage } from "@/lib/useTimedMessage";
 import { useAssignTeamLead, useAddTeamMember, useAllTeams, useCreateTeam, useDeleteTeam, useOrgUsers, useRemoveTeamMember } from "@/lib/hooks";
 import { useUserStore } from "@/lib/stores/user-store";
 import { ErrorState, EmptyState } from "@/lib/components/states";
+import { LoadingSpinner, PageLoader } from "@/lib/components/loading-spinner";
 import { RoleBadge } from "@/lib/components/role-badge";
 import { AssignLeadModal } from "@/lib/components/assign-lead-modal";
 import { CreateTeamModal } from "@/lib/components/create-team-modal";
@@ -67,11 +68,7 @@ export default function AdminTeamsPage() {
 
   if (error) return <ErrorState error={error} />;
   if (isLoading) {
-    return (
-      <main style={{ flex: 1, overflowY: "auto", padding: "32px" }}>
-        <div style={{ textAlign: "center", color: "#71717a" }}>Loading teams...</div>
-      </main>
-    );
+    return <PageLoader text="Loading teams..." />;
   }
 
   if (!teams || teams.length === 0) {
@@ -371,7 +368,9 @@ export default function AdminTeamsPage() {
                       </p>
 
                       {isOrgUsersLoading ? (
-                        <p style={{ margin: 0, color: "#6b7280", fontSize: "13px" }}>Loading organization users...</p>
+                        <div style={{ minHeight: "160px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                          <LoadingSpinner size="medium" text="Loading organization users..." />
+                        </div>
                       ) : availableUsers.length === 0 ? (
                         <p style={{ margin: 0, color: "#6b7280", fontSize: "13px" }}>
                           All organization users are already members of this team.

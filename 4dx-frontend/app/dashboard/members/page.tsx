@@ -6,6 +6,7 @@ import { useTimedMessage } from "@/lib/useTimedMessage";
 import { useAddTeamMember, useRemoveTeamMember, useRoleCheck, useTeam, useFindUserByEmail } from "@/lib/hooks";
 import { useTeamStore } from "@/lib/stores/team-store";
 import { ErrorState, EmptyState } from "@/lib/components/states";
+import { PageLoader } from "@/lib/components/loading-spinner";
 
 export default function MembersPage() {
   const router = useRouter();
@@ -87,11 +88,7 @@ export default function MembersPage() {
   const members = team?.members || [];
 
   if (!isHydrated || isLoading) {
-    return (
-      <main style={{ flex: 1, padding: "32px", fontFamily: "'Inter', sans-serif" }}>
-        <div style={{ textAlign: "center", color: "#71717a" }}>Loading team members...</div>
-      </main>
-    );
+    return <PageLoader text="Loading team members..." />;
   }
 
   if (error) {

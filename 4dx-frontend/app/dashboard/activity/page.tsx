@@ -548,8 +548,8 @@ export default function ActivityLogPage() {
           </h2>
 
           {isLoading ? (
-            <div style={{ padding: "48px", textAlign: "center" }}>
-              <LoadingSpinner size="medium" text="Loading activity history..." />
+            <div style={{ minHeight: "420px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <LoadingSpinner size="large" text="Loading activity history..." />
             </div>
           ) : sortedLogs.length === 0 ? (
             <EmptyState title="No activity logs yet" description="Start logging lead measure values to build your activity history." />

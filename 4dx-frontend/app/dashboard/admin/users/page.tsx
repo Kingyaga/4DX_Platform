@@ -5,6 +5,7 @@ import { useOrgUsers, useDeleteUser } from "@/lib/hooks";
 import { useTimedMessage } from "@/lib/useTimedMessage";
 import { useUserStore } from "@/lib/stores/user-store";
 import { ErrorState, EmptyState } from "@/lib/components/states";
+import { LoadingSpinner } from "@/lib/components/loading-spinner";
 import Link from "next/link";
 
 export default function AdminUsersPage() {
@@ -141,7 +142,9 @@ export default function AdminUsersPage() {
 
         {/* Users Table */}
         {isLoading ? (
-          <div style={{ textAlign: "center", color: "#71717a", padding: "32px" }}>Loading users...</div>
+          <div style={{ minHeight: "420px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <LoadingSpinner size="large" text="Loading users..." />
+          </div>
         ) : filteredUsers.length === 0 ? (
           <EmptyState title="No users found" description="Try updating your search or filter criteria to see matching users." />
         ) : (

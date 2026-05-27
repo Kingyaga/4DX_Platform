@@ -5,6 +5,7 @@ import { useTeamStore } from "@/lib/stores/team-store";
 import { trpc } from "@/lib/api-client";
 import { usePendingActivityRequests, useApproveActivityRequest, useApproveAllActivityRequests, useDeclineActivityRequest } from "@/lib/hooks";
 import { ErrorState, EmptyState } from "@/lib/components/states";
+import { LoadingSpinner } from "@/lib/components/loading-spinner";
 
 export default function TeamLeadRequestsPage() {
   const { currentTeamSlug } = useTeamStore();
@@ -161,8 +162,8 @@ export default function TeamLeadRequestsPage() {
         )}
 
         {isLoading ? (
-          <div style={{ padding: "48px", textAlign: "center", color: "#71717a" }}>
-            Loading pending requests...
+          <div style={{ minHeight: "420px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <LoadingSpinner size="large" text="Loading pending requests..." />
           </div>
         ) : !hasRequests ? (
           <EmptyState
