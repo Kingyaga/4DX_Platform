@@ -5,6 +5,7 @@ import { useTeamStore } from "@/lib/stores/team-store";
 import { useUserStore } from "@/lib/stores/user-store";
 import { useWIGs, useTeamSessions, useMyTeams } from "@/lib/hooks";
 import { ErrorState, EmptyState } from "@/lib/components/states";
+import { PageLoader } from "@/lib/components/loading-spinner";
 import Link from "next/link";
 
 function getLeadMeasureScore(leadMeasure: any) {
@@ -55,20 +56,12 @@ export default function TeamLeadPage() {
 
   if (error) return <ErrorState error={error} />;
   if (isLoading) {
-    return (
-      <main style={{ flex: 1, overflowY: "auto", padding: "32px" }}>
-        <div style={{ textAlign: "center", color: "#71717a" }}>Loading team dashboard...</div>
-      </main>
-    );
+    return <PageLoader text="Loading team dashboard..." />;
   }
 
   if (!currentTeamSlug) {
     if (teamsLoading) {
-      return (
-        <main style={{ flex: 1, overflowY: "auto", padding: "32px" }}>
-          <div style={{ textAlign: "center", color: "#71717a" }}>Loading teams...</div>
-        </main>
-      );
+      return <PageLoader text="Loading teams..." />;
     }
 
     if (teamsError) {

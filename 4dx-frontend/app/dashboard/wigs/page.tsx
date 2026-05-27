@@ -6,6 +6,7 @@ import { useTeamStore } from "@/lib/stores/team-store";
 import { useUserStore } from "@/lib/stores/user-store";
 import { WIGListSkeleton } from "@/lib/components/skeletons";
 import { ErrorState, EmptyState } from "@/lib/components/states";
+import { PageLoader } from "@/lib/components/loading-spinner";
 import type { WIG, LeadMeasure, TeamMember, TrackingType } from "@/lib/types";
 
 type CreateWigTrackingType = "NUMERIC" | "MILESTONE" | "COMPLETION" | "HYBRID" | "CUSTOM";
@@ -73,11 +74,7 @@ export default function WIGsPage() {
 
   if (!currentTeamSlug) {
     if (teamsLoading) {
-      return (
-        <main style={{ flex: 1, padding: "32px", fontFamily: "'Inter', sans-serif" }}>
-          <div style={{ textAlign: "center", color: "#71717a" }}>Loading teams...</div>
-        </main>
-      );
+      return <PageLoader text="Loading teams..." />;
     }
 
     if (teamsError) {

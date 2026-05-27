@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useTeamStore } from "@/lib/stores/team-store";
 import { useTeam, useActivityLogsByUser, useRoleCheck } from "@/lib/hooks";
 import { ErrorState, EmptyState } from "@/lib/components/states";
+import { LoadingSpinner, PageLoader } from "@/lib/components/loading-spinner";
 
 export default function MemberActivityLogsPage() {
   const params = useParams();
@@ -32,11 +33,7 @@ export default function MemberActivityLogsPage() {
   }
 
   if (teamLoading) {
-    return (
-      <main style={{ flex: 1, padding: "32px", fontFamily: "'Inter', sans-serif" }}>
-        <div style={{ textAlign: "center", color: "#71717a" }}>Loading member activity...</div>
-      </main>
-    );
+    return <PageLoader text="Loading member activity..." />;
   }
 
   if (teamError) {
@@ -91,7 +88,11 @@ export default function MemberActivityLogsPage() {
           <tbody>
             {logsLoading ? (
               <tr>
-                <td colSpan={5} style={{ padding: "32px", textAlign: "center", color: "#71717a" }}>Loading activity history...</td>
+                <td colSpan={5} style={{ padding: 0 }}>
+                  <div style={{ minHeight: "320px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <LoadingSpinner size="large" text="Loading activity history..." />
+                  </div>
+                </td>
               </tr>
             ) : activityLogs.length === 0 ? (
               <tr>

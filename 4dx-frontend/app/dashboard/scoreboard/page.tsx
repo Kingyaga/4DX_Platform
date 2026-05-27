@@ -365,7 +365,7 @@ export default function ScoreboardPage() {
 
       {/* Loading State */}
       {isLoading && (
-        <LoadingSpinner size="large" text="" className="min-h-[420px] flex items-center justify-center" />
+        <LoadingSpinner size="xlarge" text="" className="min-h-[520px] flex items-center justify-center" />
       )}
 
       {/* Empty State */}

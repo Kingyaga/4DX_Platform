@@ -124,7 +124,7 @@ export default function WeeklySessionPage() {
         )}
 
         {isLoading ? (
-          <LoadingSpinner size="large" text="Loading weekly session..." className="min-h-[360px] flex items-center justify-center" />
+          <LoadingSpinner size="xlarge" text="Loading weekly session..." className="min-h-[520px] flex items-center justify-center" />
         ) : !session ? (
           <section style={{ background: "#ffffff", border: "1px solid #dbe3ef", padding: "28px", display: "grid", gap: "18px" }}>
             <div>
@@ -152,6 +152,69 @@ export default function WeeklySessionPage() {
             ) : (
               <div style={{ color: "#64748b", fontSize: "14px" }}>Ask your team lead or admin to start this week's session.</div>
             )}
+          </section>
+        ) : session.status === "COMPLETE" ? (
+          <section style={{ background: "#ffffff", border: "1px solid #dbe3ef", padding: "28px", display: "grid", gap: "22px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", gap: "20px", alignItems: "flex-start", flexWrap: "wrap" }}>
+              <div>
+                <p style={{ margin: "0 0 8px 0", fontSize: "12px", fontWeight: 800, color: "#166534", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                  Session completed
+                </p>
+                <h2 style={{ margin: "0 0 8px 0", fontSize: "24px", color: "#111827" }}>{session.title}</h2>
+                <p style={{ margin: 0, color: "#64748b", fontSize: "14px" }}>
+                  Week of {formatDate(session.weekStarting)} to {formatDate(session.weekEnding)}.
+                  {session.completedAt ? ` Completed on ${formatDate(session.completedAt)}.` : ""}
+                </p>
+              </div>
+              {canManageSession && (
+                <button
+                  onClick={handleCreateSession}
+                  disabled={isCreating}
+                  style={{ height: "44px", border: "none", background: "#111827", color: "#ffffff", padding: "0 18px", fontSize: "12px", fontWeight: 800, textTransform: "uppercase", cursor: isCreating ? "not-allowed" : "pointer" }}
+                >
+                  {isCreating ? "Starting..." : "Start New Weekly Session"}
+                </button>
+              )}
+            </div>
+
+            <section style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: "14px" }}>
+              {[
+                ["Active WIGs", totals.activeWigs ?? 0],
+                ["Lead Measures", totals.leadMeasures ?? 0],
+                ["Activity Logs", totals.activityLogs ?? 0],
+                ["Avg Progress", `${totals.averageProgress ?? 0}%`],
+              ].map(([label, value]) => (
+                <div key={label} style={{ background: "#f8fafc", border: "1px solid #dbe3ef", padding: "18px" }}>
+                  <div style={{ fontSize: "12px", color: "#64748b", textTransform: "uppercase", fontWeight: 800 }}>{label}</div>
+                  <div style={{ marginTop: "8px", fontSize: "30px", fontWeight: 800, color: "#111827" }}>{value}</div>
+                </div>
+              ))}
+            </section>
+
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "18px" }}>
+              <div style={{ border: "1px solid #e2e8f0", padding: "18px", background: "#ffffff" }}>
+                <h3 style={{ margin: "0 0 10px 0", fontSize: "16px", color: "#111827" }}>Final Notes</h3>
+                <p style={{ margin: 0, color: "#475569", lineHeight: 1.7, whiteSpace: "pre-wrap" }}>
+                  {session.notes || "No final notes were recorded."}
+                </p>
+              </div>
+              <div style={{ border: "1px solid #e2e8f0", padding: "18px", background: "#ffffff" }}>
+                <h3 style={{ margin: "0 0 10px 0", fontSize: "16px", color: "#111827" }}>Commitments Logged</h3>
+                {(session.commitments || []).length === 0 ? (
+                  <p style={{ margin: 0, color: "#64748b", fontSize: "14px" }}>No commitments were logged.</p>
+                ) : (
+                  <div style={{ display: "grid", gap: "8px" }}>
+                    {(session.commitments || []).map((commitment: any) => (
+                      <div key={commitment.id} style={{ padding: "10px", background: "#f8fafc", border: "1px solid #e2e8f0", fontSize: "13px", color: "#111827" }}>{commitment.text}</div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <p style={{ margin: 0, color: "#64748b", fontSize: "13px", lineHeight: 1.6 }}>
+              This session is locked. Blockers, commitments, notes, and confidence fields are hidden after completion so the team can treat this record as history. Start a new weekly session when the team is ready to meet again.
+            </p>
           </section>
         ) : (
           <>

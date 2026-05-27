@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useSession, signOut } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { useUserStore } from "@/lib/stores/user-store";
 import { useChangePassword, useRoleCheck } from "@/lib/hooks";
 import { RoleBadge } from "@/lib/components/role-badge";
@@ -22,6 +23,7 @@ function PermissionRow({ granted, label, highlight }: { granted: boolean; label:
 }
 
 export default function SettingsPage() {
+  const router = useRouter();
   const { data: session } = useSession();
   const { user, clearUser } = useUserStore();
   const { isAdmin, isTeamLead } = useRoleCheck();
@@ -35,12 +37,9 @@ export default function SettingsPage() {
 
   const handleLogout = async () => {
     setIsLoggingOut(true);
-    // Clear user store first
     clearUser();
-    // Sign out without callback, then manually redirect
     await signOut({ redirect: false });
-    // Manually redirect to frontend login
-    window.location.href = "/login";
+    router.replace("/login");
   };
 
   if (!session?.user) {

@@ -3,7 +3,7 @@
 import { useOrgActivityData } from "@/lib/hooks";
 import { useUserStore } from "@/lib/stores/user-store";
 import { ErrorState, EmptyState } from "@/lib/components/states";
-import { LoadingSpinner } from "@/lib/components/loading-spinner";
+import { PageLoader } from "@/lib/components/loading-spinner";
 import { useMemo } from "react";
 
 interface ActivityLog {
@@ -85,11 +85,7 @@ export default function AdminActivityPage() {
 
   if (error) return <ErrorState error={error} />;
   if (isLoading) {
-    return (
-      <main style={{ flex: 1, overflowY: "auto", padding: "32px" }}>
-        <LoadingSpinner size="large" text="Loading activity..." />
-      </main>
-    );
+    return <PageLoader text="Loading activity..." />;
   }
 
   if (!org) {

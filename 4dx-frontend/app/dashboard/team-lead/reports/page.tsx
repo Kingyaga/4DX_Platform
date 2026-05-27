@@ -5,6 +5,7 @@ import { useUserStore } from "@/lib/stores/user-store";
 import { useTeamStore } from "@/lib/stores/team-store";
 import { useWIGs, useMyTeams, useTeamSessions, useExportReport, useShareReport } from "@/lib/hooks";
 import { ErrorState, EmptyState } from "@/lib/components/states";
+import { LoadingSpinner, PageLoader } from "@/lib/components/loading-spinner";
 import Link from "next/link";
 
 function getLeadMeasureScore(leadMeasure: any) {
@@ -66,20 +67,12 @@ export default function TeamLeadReportsPage() {
 
   if (error) return <ErrorState error={error} />;
   if (isLoading) {
-    return (
-      <main style={{ flex: 1, overflowY: "auto", padding: "32px" }}>
-        <div style={{ textAlign: "center", color: "#71717a" }}>Loading reports...</div>
-      </main>
-    );
+    return <PageLoader text="Loading reports..." />;
   }
 
   if (!currentTeamSlug) {
     if (teamsLoading) {
-      return (
-        <main style={{ flex: 1, overflowY: "auto", padding: "32px" }}>
-          <div style={{ textAlign: "center", color: "#71717a" }}>Loading teams...</div>
-        </main>
-      );
+      return <PageLoader text="Loading teams..." />;
     }
 
     if (teamsError) {
@@ -214,7 +207,9 @@ export default function TeamLeadReportsPage() {
             Session Status — Week of {new Date(selectedWeek).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
           </h3>
           {sessionsLoading ? (
-            <p style={{ color: "#71717a", fontSize: "14px" }}>Loading...</p>
+            <div style={{ minHeight: "220px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <LoadingSpinner size="large" text="Loading sessions..." />
+            </div>
           ) : sessions.length === 0 ? (
             <p style={{ color: "#71717a", fontSize: "14px" }}>No sessions generated for this week.</p>
           ) : (

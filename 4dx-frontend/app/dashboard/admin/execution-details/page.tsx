@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import { useUserStore } from "@/lib/stores/user-store";
 import { useOrgDashboard } from "@/lib/hooks";
 import { ErrorState, EmptyState } from "@/lib/components/states";
+import { PageLoader } from "@/lib/components/loading-spinner";
 
 export default function ExecutionDetailsPage() {
   const router = useRouter();
@@ -13,11 +14,7 @@ export default function ExecutionDetailsPage() {
 
   if (error) return <ErrorState error={error} />;
   if (isLoading) {
-    return (
-      <main style={{ flex: 1, overflowY: "auto", padding: "32px" }}>
-        <div style={{ textAlign: "center", color: "#71717a" }}>Loading execution details...</div>
-      </main>
-    );
+    return <PageLoader text="Loading execution details..." />;
   }
 
   if (!org || !org.teams) {

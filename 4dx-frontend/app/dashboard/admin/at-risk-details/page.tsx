@@ -5,7 +5,7 @@ import { useEffect } from "react";
 import { useUserStore } from "@/lib/stores/user-store";
 import { useOrgDashboard } from "@/lib/hooks";
 import { ErrorState, EmptyState } from "@/lib/components/states";
-import { LoadingSpinner } from "@/lib/components/loading-spinner";
+import { PageLoader } from "@/lib/components/loading-spinner";
 
 export default function AtRiskDetailsPage() {
   const router = useRouter();
@@ -14,11 +14,7 @@ export default function AtRiskDetailsPage() {
 
   if (error) return <ErrorState error={error} />;
   if (isLoading) {
-    return (
-      <main style={{ flex: 1, overflowY: "auto", padding: "32px" }}>
-        <LoadingSpinner size="large" text="" className="min-h-[420px] flex items-center justify-center" />
-      </main>
-    );
+    return <PageLoader text="" />;
   }
 
   if (!org || !org.teams) {

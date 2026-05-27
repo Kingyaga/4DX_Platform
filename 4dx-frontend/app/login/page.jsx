@@ -1,49 +1,28 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { getSession, signIn } from "next-auth/react";
 import { LoadingSpinner } from "@/lib/components/loading-spinner";
 
-async function fetchCsrfToken() {
-  const response = await fetch("/api/auth/csrf", {
-    cache: "no-store",
-    credentials: "same-origin",
-  });
-
-  if (!response.ok) {
-    throw new Error(`Unable to reach authentication service (${response.status}).`);
+async function waitForCurrentSession() {
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    const session = await getSession();
+    if (session?.user?.id) return session;
+    await new Promise((resolve) => setTimeout(resolve, 150));
   }
-
-  const data = await response.json();
-  if (!data?.csrfToken) {
-    throw new Error("Unable to start the login session.");
-  }
-
-  return data.csrfToken;
+  return null;
 }
 
-async function fetchCurrentSession() {
-  const response = await fetch("/api/auth/session", {
-    cache: "no-store",
-    credentials: "same-origin",
-  });
-
-  if (!response.ok) {
-    throw new Error(`Unable to verify session (${response.status}).`);
-  }
-
-  return response.json();
-}
-
-function getLoginFailureMessage(result, status) {
-  if (status === 401 || result?.url?.includes("error=CredentialsSignin")) {
+function getLoginFailureMessage(result) {
+  if (result?.status === 401 || result?.error === "CredentialsSignin") {
     return "The email or password you entered is incorrect.";
   }
 
-  if (status === 429) {
+  if (result?.status === 429) {
     return "Too many login attempts. Wait a few minutes and try again.";
   }
 
-  if (result?.url?.includes("csrf=true")) {
+  if (result?.error === "CSRFTokenMismatch" || result?.url?.includes("csrf=true")) {
     return "Your login session expired. Refresh the page and try again.";
   }
 
@@ -63,7 +42,9 @@ export default function LoginPage() {
     const authError = params.get("error");
     if (!authError) return;
 
-    setError("Sign in could not be completed. Please try again.");
+    queueMicrotask(() => {
+      setError("Sign in could not be completed. Please try again.");
+    });
   }, []);
 
   const togglePassword = () => {
@@ -72,6 +53,8 @@ export default function LoginPage() {
 
   const handleSignIn = async (event) => {
     event?.preventDefault();
+    if (loading) return;
+
     setError("");
 
     const normalizedEmail = email.trim().toLowerCase();
@@ -88,30 +71,19 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const csrfToken = await fetchCsrfToken();
-      const response = await fetch("/api/auth/callback/credentials", {
-        method: "POST",
-        credentials: "same-origin",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: new URLSearchParams({
-          csrfToken,
-          email: normalizedEmail,
-          password,
-          redirect: "false",
-          json: "true",
-        }),
-        cache: "no-store",
+      const result = await signIn("credentials", {
+        email: normalizedEmail,
+        password,
+        redirect: false,
+        callbackUrl: "/dashboard",
       });
 
-      const result = await response.json().catch(() => null);
-      if (!response.ok || result?.url?.includes("error=")) {
-        setError(getLoginFailureMessage(result, response.status));
+      if (!result?.ok || result?.error) {
+        setError(getLoginFailureMessage(result));
         return;
       }
 
-      const session = await fetchCurrentSession();
+      const session = await waitForCurrentSession();
       if (!session?.user?.id) {
         setError("Your details were accepted, but the secure session could not be loaded. Please try again.");
         return;
