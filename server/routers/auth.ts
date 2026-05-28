@@ -584,6 +584,9 @@ export const authRouter = router({
       }
 
       await ctx.db.$transaction([
+        ctx.db.notification.deleteMany({
+          where: { userId: input.userId },
+        }),
         ctx.db.activityLog.deleteMany({
           where: { userId: input.userId },
         }),
