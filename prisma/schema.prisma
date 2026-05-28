@@ -289,7 +289,7 @@ model AuditLog {
   createdAt   DateTime @default(now())
   actorUserId String
   orgId       String
-  actor       User     @relation(fields: [actorUserId], references: [id])
+  actor       User     @relation(fields: [actorUserId], references: [id], onDelete: Cascade)
   org         Organization @relation(fields: [orgId], references: [id])
 
   @@index([actorUserId])
