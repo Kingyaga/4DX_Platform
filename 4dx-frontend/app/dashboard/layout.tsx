@@ -19,6 +19,7 @@ import { useUserStore } from "@/lib/stores/user-store";
 import { useTeamStore } from "@/lib/stores/team-store";
 import { LoadingSpinner } from "@/lib/components/loading-spinner";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { OnboardingTour } from "@/lib/components/onboarding-tour";
 import { getDefaultRouteForRole, getTeamRole, isRouteAllowedForRole } from "@/lib/team-routing";
 import type { MyTeamsResponse } from "@/lib/types";
 
@@ -49,6 +50,44 @@ function getNotificationMessage(notif: any): string {
       return `New WIG created: "${p?.title || "a WIG"}" on team ${p?.teamName || ""}.`.trim();
     default:
       return notif.type;
+  }
+}
+
+function getNotificationIcon(notif: any): string {
+  switch (notif.type) {
+    case "SESSION_READY":
+    case "SESSION_OVERDUE":
+      return "event_available";
+    case "WIG_AT_RISK":
+    case "WIG_DEADLINE_PASSED":
+      return "priority_high";
+    case "ACTIVITY_APPROVED":
+      return "task_alt";
+    case "ACTIVITY_DECLINED":
+      return "do_not_disturb_on";
+    case "LEAD_MEASURE_OWNER_ADDED":
+    case "LEAD_MEASURE_OWNER_REMOVED":
+      return "assignment_ind";
+    case "WIG_CREATED":
+    case "WIG_CLOSED":
+      return "emoji_events";
+    default:
+      return "notifications";
+  }
+}
+
+function getNotificationTone(notif: any): { background: string; color: string; border: string } {
+  switch (notif.type) {
+    case "SESSION_OVERDUE":
+    case "WIG_AT_RISK":
+    case "WIG_DEADLINE_PASSED":
+      return { background: "#fff7ed", color: "#c2410c", border: "#fed7aa" };
+    case "ACTIVITY_APPROVED":
+      return { background: "#f0fdf4", color: "#15803d", border: "#bbf7d0" };
+    case "ACTIVITY_DECLINED":
+      return { background: "#fef2f2", color: "#b91c1c", border: "#fecaca" };
+    default:
+      return { background: "#eef4ff", color: "#1d4ed8", border: "#c7d8ff" };
   }
 }
 
@@ -100,14 +139,20 @@ export default function DashboardLayout({
   const [forceConfirmPassword, setForceConfirmPassword] = useState("");
   const [forcePasswordError, setForcePasswordError] = useState("");
   const [forceCurrentPassword, setForceCurrentPassword] = useState("");
+  const [nowMs, setNowMs] = useState(() => Date.now());
   const { changePassword, isLoading: isChangingForcePassword } = useChangePassword();
   const sessionExpiresAt = session?.expires ? new Date(session.expires).getTime() : null;
-  const sessionMsRemaining = sessionExpiresAt ? sessionExpiresAt - Date.now() : null;
+  const sessionMsRemaining = sessionExpiresAt ? sessionExpiresAt - nowMs : null;
   const showSessionExpiryWarning =
     status === "authenticated" &&
     sessionMsRemaining !== null &&
     sessionMsRemaining > 0 &&
     sessionMsRemaining <= 5 * 60 * 1000;
+
+  useEffect(() => {
+    const interval = window.setInterval(() => setNowMs(Date.now()), 30_000);
+    return () => window.clearInterval(interval);
+  }, []);
 
   const handleForcePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -161,6 +206,10 @@ export default function DashboardLayout({
     await markRead({ notificationId: notifId });
     refetchCount();
     refetchNotifs();
+  };
+
+  const replayOnboardingTour = () => {
+    window.dispatchEvent(new Event("4dx:start-onboarding-tour"));
   };
 
   const { sessions: currentSessions } = useCurrentSessions(
@@ -270,6 +319,24 @@ export default function DashboardLayout({
         .click-animation:hover {
           cursor: pointer;
         }
+        @keyframes notificationPanelIn {
+          from {
+            opacity: 0;
+            transform: translateY(-6px) scale(0.98);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+          }
+        }
+        @keyframes notificationBadgePulse {
+          0%, 100% {
+            box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.38);
+          }
+          50% {
+            box-shadow: 0 0 0 5px rgba(239, 68, 68, 0);
+          }
+        }
       `}</style>
 
       {/* Force password change modal */}
@@ -364,7 +431,7 @@ export default function DashboardLayout({
         >
           {/* Logo + notification bell row */}
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-            <div>
+            <div data-tour="brand">
               <h2
                 style={{
                   fontSize: "20px",
@@ -390,32 +457,39 @@ export default function DashboardLayout({
             </div>
 
             {/* Notification bell */}
-            <div ref={notifRef} style={{ position: "relative" }}>
+            <div ref={notifRef} data-tour="notifications" style={{ position: "relative" }}>
               <button
                 onClick={() => setNotifOpen((o) => !o)}
                 style={{
-                  background: "none",
-                  border: "none",
+                  background: notifOpen ? "#f4f6fb" : "#ffffff",
+                  border: "1px solid #e4e4e7",
+                  borderRadius: "8px",
                   cursor: "pointer",
-                  padding: "4px",
+                  width: "36px",
+                  height: "36px",
                   position: "relative",
                   display: "flex",
                   alignItems: "center",
+                  justifyContent: "center",
                   color: "#71717a",
+                  transition: "background-color 150ms ease, border-color 150ms ease, color 150ms ease, transform 150ms ease",
+                  boxShadow: notifOpen ? "0 8px 20px rgba(15, 23, 42, 0.08)" : "none",
                 }}
                 aria-label="Notifications"
+                aria-expanded={notifOpen}
               >
-                <span className="material-symbols-outlined" style={{ fontSize: "22px" }}>notifications</span>
+                <span className="material-symbols-outlined" style={{ fontSize: "21px", color: unreadCount > 0 ? "#18181b" : "#71717a" }}>notifications</span>
                 {unreadCount > 0 && (
                   <span
                     style={{
                       position: "absolute",
-                      top: "0",
-                      right: "0",
+                      top: "-5px",
+                      right: "-5px",
                       minWidth: "16px",
                       height: "16px",
                       borderRadius: "999px",
                       backgroundColor: "#ef4444",
+                      border: "2px solid #ffffff",
                       color: "#ffffff",
                       fontSize: "10px",
                       fontWeight: 700,
@@ -423,6 +497,7 @@ export default function DashboardLayout({
                       alignItems: "center",
                       justifyContent: "center",
                       padding: "0 3px",
+                      animation: "notificationBadgePulse 1.8s ease-in-out infinite",
                     }}
                   >
                     {unreadCount > 99 ? "99+" : unreadCount}
@@ -435,25 +510,32 @@ export default function DashboardLayout({
                 <div
                   style={{
                     position: "absolute",
-                    top: "32px",
+                    top: "46px",
                     left: "0",
-                    width: "320px",
+                    width: "360px",
                     backgroundColor: "#ffffff",
-                    border: "1px solid #e4e4e7",
-                    boxShadow: "0 8px 24px rgba(0,0,0,0.10)",
+                    border: "1px solid #dbe1ea",
+                    borderRadius: "8px",
+                    boxShadow: "0 22px 60px rgba(15,23,42,0.18)",
                     zIndex: 100,
-                    maxHeight: "400px",
-                    overflowY: "auto",
+                    maxHeight: "460px",
+                    overflow: "hidden",
+                    animation: "notificationPanelIn 160ms ease-out",
                   }}
                 >
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 16px", borderBottom: "1px solid #e4e4e7" }}>
-                    <span style={{ fontSize: "12px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "#18181b" }}>
-                      Notifications {unreadCount > 0 && `(${unreadCount})`}
-                    </span>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px", borderBottom: "1px solid #edf1f7", background: "linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)" }}>
+                    <div>
+                      <span style={{ fontSize: "12px", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.05em", color: "#18181b" }}>
+                        Notifications
+                      </span>
+                      <p style={{ margin: "4px 0 0 0", fontSize: "12px", color: "#71717a", lineHeight: 1.35 }}>
+                        {unreadCount > 0 ? `${unreadCount} unread update${unreadCount !== 1 ? "s" : ""}` : "You are all caught up"}
+                      </p>
+                    </div>
                     {unreadCount > 0 && (
                       <button
                         onClick={handleMarkAllRead}
-                        style={{ background: "none", border: "none", cursor: "pointer", fontSize: "11px", color: "#71717a", fontWeight: 600 }}
+                        style={{ background: "#18181b", border: "1px solid #18181b", borderRadius: "6px", cursor: "pointer", fontSize: "11px", color: "#ffffff", fontWeight: 700, padding: "7px 10px" }}
                       >
                         Mark all read
                       </button>
@@ -461,41 +543,53 @@ export default function DashboardLayout({
                   </div>
 
                   {notifications.length === 0 ? (
-                    <div style={{ padding: "24px 16px", textAlign: "center", color: "#71717a", fontSize: "13px" }}>
-                      No unread notifications
+                    <div style={{ padding: "36px 20px", textAlign: "center", color: "#71717a", fontSize: "13px" }}>
+                      <span className="material-symbols-outlined" style={{ width: "44px", height: "44px", borderRadius: "8px", display: "inline-flex", alignItems: "center", justifyContent: "center", backgroundColor: "#f4f6fb", color: "#52525b", fontSize: "24px", marginBottom: "12px" }}>
+                        task_alt
+                      </span>
+                      <p style={{ margin: 0, fontWeight: 700, color: "#18181b" }}>No unread notifications</p>
+                      <p style={{ margin: "6px 0 0 0", lineHeight: 1.5 }}>New approvals, risks, and session reminders will appear here.</p>
                     </div>
                   ) : (
-                    <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>
-                      {notifications.map((notif: any) => (
-                        <li
-                          key={notif.id}
-                          style={{
-                            padding: "12px 16px",
-                            borderBottom: "1px solid #f4f4f5",
-                            display: "flex",
-                            justifyContent: "space-between",
-                            alignItems: "flex-start",
-                            gap: "8px",
-                            backgroundColor: "#fafafa",
-                          }}
-                        >
-                          <div style={{ flex: 1 }}>
-                            <p style={{ margin: 0, fontSize: "13px", color: "#18181b", lineHeight: "1.4" }}>
-                              {getNotificationMessage(notif)}
-                            </p>
-                            <p style={{ margin: "4px 0 0 0", fontSize: "11px", color: "#71717a" }}>
-                              {new Date(notif.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
-                            </p>
-                          </div>
-                          <button
-                            onClick={() => handleMarkRead(notif.id)}
-                            style={{ background: "none", border: "none", cursor: "pointer", color: "#71717a", padding: "0", flexShrink: 0 }}
-                            title="Mark as read"
+                    <ul style={{ listStyle: "none", margin: 0, padding: "8px", maxHeight: "356px", overflowY: "auto" }}>
+                      {notifications.map((notif: any) => {
+                        const tone = getNotificationTone(notif);
+                        return (
+                          <li
+                            key={notif.id}
+                            style={{
+                              padding: "12px",
+                              borderBottom: "1px solid #f4f4f5",
+                              display: "flex",
+                              justifyContent: "space-between",
+                              alignItems: "flex-start",
+                              gap: "10px",
+                              backgroundColor: "#ffffff",
+                              borderRadius: "6px",
+                              transition: "background-color 150ms ease, transform 150ms ease",
+                            }}
                           >
-                            <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>check</span>
-                          </button>
-                        </li>
-                      ))}
+                            <span className="material-symbols-outlined" style={{ width: "32px", height: "32px", borderRadius: "8px", display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0, fontSize: "18px", color: tone.color, backgroundColor: tone.background, border: `1px solid ${tone.border}` }}>
+                              {getNotificationIcon(notif)}
+                            </span>
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <p style={{ margin: 0, fontSize: "13px", color: "#18181b", lineHeight: "1.45", fontWeight: 600 }}>
+                                {getNotificationMessage(notif)}
+                              </p>
+                              <p style={{ margin: "5px 0 0 0", fontSize: "11px", color: "#71717a" }}>
+                                {new Date(notif.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
+                              </p>
+                            </div>
+                            <button
+                              onClick={() => handleMarkRead(notif.id)}
+                              style={{ background: "#f8fafc", border: "1px solid #e4e4e7", borderRadius: "6px", cursor: "pointer", color: "#52525b", padding: "6px", flexShrink: 0, display: "inline-flex", alignItems: "center", justifyContent: "center" }}
+                              title="Mark as read"
+                            >
+                              <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>done</span>
+                            </button>
+                          </li>
+                        );
+                      })}
                     </ul>
                   )}
                 </div>
@@ -518,6 +612,7 @@ export default function DashboardLayout({
           )}
           {teams.length > 0 && (
             <label
+              data-tour="team-switcher"
               style={{
                 display: "flex",
                 flexDirection: "column",
@@ -558,7 +653,7 @@ export default function DashboardLayout({
           )}
         </div>
 
-        <div style={{ flex: 1, overflowY: "auto" }}>
+        <div data-tour="navigation" style={{ flex: 1, overflowY: "auto" }}>
           <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>
             {navItems.map((item) => (
               <li key={item.label}>
@@ -617,6 +712,32 @@ export default function DashboardLayout({
 
         {/* Settings */}
         <div style={{ borderTop: "1px solid #e4e4e7" }}>
+          <button
+            type="button"
+            onClick={replayOnboardingTour}
+            className="click-animation"
+            style={{
+              width: "100%",
+              display: "flex",
+              alignItems: "center",
+              gap: "12px",
+              padding: "14px 16px",
+              fontSize: "12px",
+              fontWeight: 600,
+              letterSpacing: "0.05em",
+              textTransform: "uppercase",
+              color: "#71717a",
+              backgroundColor: "transparent",
+              border: "none",
+              borderBottom: "1px solid #e4e4e7",
+              textAlign: "left",
+            }}
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>
+              help
+            </span>
+            Tutorial
+          </button>
           <Link
             href="/dashboard/settings"
             className="click-animation"
@@ -734,7 +855,7 @@ export default function DashboardLayout({
         )}
         <ErrorBoundary>
         {hasNoTeamAssignment ? (
-          <main style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "32px" }}>
+          <main data-tour="main-content" style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "32px" }}>
             <section style={{ width: "100%", maxWidth: "720px", backgroundColor: "#ffffff", border: "1px solid #e4e4e7", padding: "40px", boxShadow: "0 18px 48px rgba(15, 23, 42, 0.08)" }}>
               <span className="material-symbols-outlined" style={{ fontSize: "40px", color: "#71717a", marginBottom: "16px" }}>groups</span>
               <h1 style={{ margin: 0, fontSize: "28px", fontWeight: 700, color: "#18181b" }}>Team assignment pending</h1>
@@ -746,9 +867,14 @@ export default function DashboardLayout({
               </div>
             </section>
           </main>
-        ) : children}
+        ) : (
+          <div data-tour="main-content" style={{ flex: 1, minHeight: 0 }}>
+            {children}
+          </div>
+        )}
         </ErrorBoundary>
       </div>
+      <OnboardingTour userId={user?.id} />
     </div>
   );
 }
