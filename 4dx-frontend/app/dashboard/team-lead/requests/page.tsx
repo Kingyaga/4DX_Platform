@@ -105,13 +105,14 @@ export default function TeamLeadRequestsPage() {
   return (
     <main style={{ flex: 1, overflowY: "auto", padding: "32px" }}>
       <div style={{ maxWidth: "1200px", margin: "0 auto", display: "flex", flexDirection: "column", gap: "32px" }}>
-        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "16px", flexWrap: "wrap" }}>
+        <div data-tour="requests-header" style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "16px", flexWrap: "wrap" }}>
           <div>
             <h1 style={{ fontSize: "28px", fontWeight: 700, margin: "0 0 8px 0" }}>Requests</h1>
             <p style={{ margin: 0, color: "#71717a", fontSize: "14px" }}>
               Review and approve pending activity logging requests from your team members.
             </p>
           </div>
+          <div data-tour="approve-all">
           {hasRequests && (
             <button
               type="button"
@@ -146,6 +147,7 @@ export default function TeamLeadRequestsPage() {
               )}
             </button>
           )}
+          </div>
         </div>
 
         {(error || approveError || approveAllError || declineError) && (
@@ -171,7 +173,7 @@ export default function TeamLeadRequestsPage() {
             description="All activity requests are approved or declined. Members will see their logs once approved."
           />
         ) : (
-          <div style={{ display: "grid", gap: "18px" }}>
+          <div data-tour="requests-list" style={{ display: "grid", gap: "18px" }}>
             {sortedRequests.map((request) => (
               <div
                 key={request.id}

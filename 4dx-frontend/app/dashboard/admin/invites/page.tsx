@@ -79,7 +79,7 @@ export default function InvitesPage() {
       </div>
 
       {/* Create Invite Form */}
-      <div style={{ maxWidth: "540px", border: "1px solid #e4e4e7", padding: "24px", marginBottom: "40px", backgroundColor: "#ffffff" }}>
+      <div data-tour="invite-form" style={{ maxWidth: "540px", border: "1px solid #e4e4e7", padding: "24px", marginBottom: "40px", backgroundColor: "#ffffff" }}>
         <h2 style={{ fontSize: "16px", fontWeight: 600, color: "#18181b", marginBottom: "20px" }}>
           Generate Invite Link
         </h2>
@@ -145,6 +145,7 @@ export default function InvitesPage() {
           )}
 
           <button
+            data-tour="invite-submit"
             type="submit"
             disabled={isCreating || !orgSlug}
             style={{ padding: "10px 24px", backgroundColor: "#18181b", color: "#ffffff", border: "none", fontSize: "13px", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em", cursor: isCreating ? "not-allowed" : "pointer", opacity: isCreating ? 0.6 : 1, alignSelf: "flex-start" }}
@@ -178,7 +179,7 @@ export default function InvitesPage() {
       </div>
 
       {/* Active Invites */}
-      <div style={{ marginBottom: "40px" }}>
+      <div data-tour="active-invites" style={{ marginBottom: "40px" }}>
         <h2 style={{ fontSize: "16px", fontWeight: 600, color: "#18181b", marginBottom: "16px" }}>
           Active Invites ({activeInvites.length})
         </h2>

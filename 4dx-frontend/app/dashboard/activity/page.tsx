@@ -274,7 +274,7 @@ export default function ActivityLogPage() {
         )}
 
         <div style={{ display: "flex", justifyContent: "center" }}>
-        <div style={{ width: "100%", maxWidth: "560px", border: "1px solid #e4e4e7", backgroundColor: "#ffffff", padding: "20px", display: "flex", flexDirection: "column", gap: "24px" }}>
+        <div data-tour="activity-form" style={{ width: "100%", maxWidth: "560px", border: "1px solid #e4e4e7", backgroundColor: "#ffffff", padding: "20px", display: "flex", flexDirection: "column", gap: "24px" }}>
           <div style={{ paddingBottom: "16px", borderBottom: "1px solid #e4e4e7" }}>
             <h2 style={{ fontSize: "24px", fontWeight: 600, color: "#18181b", letterSpacing: "-0.02em" }}>Record Execution</h2>
             <p style={{ fontSize: "14px", color: "#71717a", marginTop: "4px" }}>Log your lead measure performance to update the scoreboard instantly.</p>
@@ -463,6 +463,7 @@ export default function ActivityLogPage() {
           )}
 
           <button
+            data-tour="activity-submit"
             onClick={handleSubmit}
             disabled={isSubmitting || isLoading || !hasLeadMeasures || !selectedLeadMeasureId || (selectedTrackingType === "NUMERIC" && !value)}
             style={{ height: "56px", width: "100%", backgroundColor: isSubmitting || isLoading || !hasLeadMeasures ? "#a1a1a1" : "#000000", color: "#ffffff", fontSize: "12px", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", border: "none", cursor: isSubmitting || isLoading || !hasLeadMeasures ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "12px", marginTop: "16px" }}
@@ -477,8 +478,9 @@ export default function ActivityLogPage() {
 
       <div style={{ display: "flex", justifyContent: "center" }}>
         <div style={{ width: "100%", maxWidth: "900px", marginTop: "48px", marginBottom: "48px" }}>
+          <div data-tour="activity-pending" style={{ marginBottom: pendingLogs.length > 0 ? "24px" : "0" }}>
           {pendingLogs.length > 0 && (
-            <div style={{ marginBottom: "24px" }}>
+            <div>
               <h3 style={{ fontSize: "14px", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em", color: "#71717a", marginBottom: "12px" }}>
                 Awaiting Approval ({pendingLogs.length})
               </h3>
@@ -543,8 +545,9 @@ export default function ActivityLogPage() {
               })}
             </div>
           )}
+          </div>
 
-          <h2 style={{ fontSize: "20px", fontWeight: 600, color: "#18181b", marginBottom: "24px", paddingBottom: "8px", borderBottom: "1px solid #e4e4e7" }}>
+          <h2 data-tour="activity-recent" style={{ fontSize: "20px", fontWeight: 600, color: "#18181b", marginBottom: "24px", paddingBottom: "8px", borderBottom: "1px solid #e4e4e7" }}>
             Recent Logs
           </h2>
 

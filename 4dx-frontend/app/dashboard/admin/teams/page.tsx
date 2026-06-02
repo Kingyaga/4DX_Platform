@@ -75,12 +75,13 @@ export default function AdminTeamsPage() {
     return (
       <main style={{ flex: 1, overflowY: "auto", padding: "32px" }}>
         <div style={{ maxWidth: "1000px", margin: "0 auto", display: "flex", flexDirection: "column", gap: "24px" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div data-tour="admin-teams-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <div>
               <h1 style={{ fontSize: "24px", fontWeight: "600", margin: "0 0 8px 0" }}>Team Management</h1>
               <p style={{ margin: 0, color: "#71717a", fontSize: "14px" }}>Assign team leads and manage team members</p>
             </div>
             <button
+              data-tour="admin-create-team"
               onClick={() => setShowCreateModal(true)}
               style={{
                 padding: "10px 16px",
@@ -96,7 +97,9 @@ export default function AdminTeamsPage() {
               + Create Team
             </button>
           </div>
-          <EmptyState title="No teams" description="Create your first team to get started" />
+          <div data-tour="admin-teams-grid">
+            <EmptyState title="No teams" description="Create your first team to get started" />
+          </div>
         </div>
         {showCreateModal && (
           <CreateTeamModal
@@ -122,12 +125,13 @@ export default function AdminTeamsPage() {
     <main style={{ flex: 1, overflowY: "auto", padding: "32px" }}>
       <div style={{ maxWidth: "1000px", margin: "0 auto", display: "flex", flexDirection: "column", gap: "24px" }}>
         {/* Header */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div data-tour="admin-teams-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <div>
             <h1 style={{ fontSize: "24px", fontWeight: "600", margin: "0 0 8px 0" }}>Team Management</h1>
             <p style={{ margin: 0, color: "#71717a", fontSize: "14px" }}>Assign team leads and manage team members</p>
           </div>
           <button
+            data-tour="admin-create-team"
             onClick={() => setShowCreateModal(true)}
             style={{
               padding: "10px 16px",
@@ -167,7 +171,7 @@ export default function AdminTeamsPage() {
         )}
 
         {/* Teams Grid */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: "16px" }}>
+        <div data-tour="admin-teams-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: "16px" }}>
           {teams.map((team: Team) => {
             const teamLeads = (team.members || []).filter((m: TeamMember) => m.role === "LEAD");
             const memberCount = team.members?.length || 0;
@@ -361,7 +365,7 @@ export default function AdminTeamsPage() {
                       </div>
                     )}
 
-                    <div style={{ padding: "16px", border: "1px solid #e4e4e7", borderRadius: "12px", backgroundColor: "#f8fafc" }}>
+                    <div data-tour="admin-add-team-member" style={{ padding: "16px", border: "1px solid #e4e4e7", borderRadius: "12px", backgroundColor: "#f8fafc" }}>
                       <h4 style={{ margin: 0, fontSize: "14px", fontWeight: "600", color: "#111827" }}>Add Member</h4>
                       <p style={{ margin: "6px 0 14px 0", fontSize: "12px", color: "#71717a" }}>
                         Choose a user from your organization and add them to this team.

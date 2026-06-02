@@ -59,7 +59,7 @@ export default function AdminUsersPage() {
     <main style={{ flex: 1, overflowY: "auto", padding: "32px" }}>
       <div style={{ maxWidth: "1000px", margin: "0 auto", display: "flex", flexDirection: "column", gap: "24px" }}>
         {/* Header */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "16px", flexWrap: "wrap" }}>
+        <div data-tour="admin-users-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "16px", flexWrap: "wrap" }}>
           <div>
             <h1 style={{ fontSize: "24px", fontWeight: "600", margin: "0 0 8px 0" }}>Organization Users</h1>
             <p style={{ margin: 0, color: "#71717a", fontSize: "14px" }}>
@@ -68,6 +68,7 @@ export default function AdminUsersPage() {
           </div>
           <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
             <Link
+              data-tour="admin-create-user"
               href="/dashboard/admin/users/new"
               style={{
                 padding: "10px 16px",
@@ -86,7 +87,7 @@ export default function AdminUsersPage() {
           </div>
         </div>
 
-        <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap", justifyContent: "space-between" }}>
+        <div data-tour="admin-users-filters" style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap", justifyContent: "space-between" }}>
           <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", width: "100%", maxWidth: "760px" }}>
             <input
               type="search"
@@ -148,7 +149,7 @@ export default function AdminUsersPage() {
         ) : filteredUsers.length === 0 ? (
           <EmptyState title="No users found" description="Try updating your search or filter criteria to see matching users." />
         ) : (
-          <div style={{ border: "1px solid #e4e4e7", borderRadius: "12px", overflow: "hidden" }}>
+          <div data-tour="admin-users-table" style={{ border: "1px solid #e4e4e7", borderRadius: "12px", overflow: "hidden" }}>
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
               <thead>
                 <tr style={{ backgroundColor: "#f4f4f5", borderBottom: "1px solid #e4e4e7" }}>

@@ -111,7 +111,7 @@ export default function WeeklySessionPage() {
   }
 
   return (
-    <main style={{ flex: 1, padding: "32px", backgroundColor: "#f7f9fd", fontFamily: "'Inter', sans-serif" }}>
+    <main data-tour="session-overview" style={{ flex: 1, padding: "32px", backgroundColor: "#f7f9fd", fontFamily: "'Inter', sans-serif" }}>
       <div style={{ maxWidth: "1180px", margin: "0 auto", display: "grid", gap: "24px" }}>
         <header style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: "24px", borderBottom: "1px solid #dbe3ef", paddingBottom: "18px" }}>
           <div>
@@ -157,6 +157,7 @@ export default function WeeklySessionPage() {
                   style={{ height: "44px", border: "1px solid #cbd5e1", padding: "0 12px", fontSize: "14px" }}
                 />
                 <button
+                  data-tour="session-start"
                   onClick={handleCreateSession}
                   disabled={isCreating}
                   style={{ height: "44px", border: "none", background: "#111827", color: "#ffffff", padding: "0 18px", fontSize: "12px", fontWeight: 800, textTransform: "uppercase", cursor: isCreating ? "not-allowed" : "pointer" }}
@@ -183,6 +184,7 @@ export default function WeeklySessionPage() {
               </div>
               {canManageSession && (
                 <button
+                  data-tour="session-start"
                   onClick={handleCreateSession}
                   disabled={isCreating}
                   style={{ height: "44px", border: "none", background: "#111827", color: "#ffffff", padding: "0 18px", fontSize: "12px", fontWeight: 800, textTransform: "uppercase", cursor: isCreating ? "not-allowed" : "pointer" }}
@@ -284,7 +286,7 @@ export default function WeeklySessionPage() {
                   </div>
                 </div>
 
-                <div style={{ background: "#ffffff", border: "1px solid #dbe3ef", padding: "22px" }}>
+                <div data-tour="session-notes" style={{ background: "#ffffff", border: "1px solid #dbe3ef", padding: "22px" }}>
                   <h2 style={{ margin: "0 0 14px 0", fontSize: "18px", color: "#111827" }}>Session Notes</h2>
                   <textarea
                     value={notes || session.notes || ""}
@@ -307,7 +309,7 @@ export default function WeeklySessionPage() {
               </div>
 
               <aside style={{ display: "grid", gap: "20px" }}>
-                <div style={{ background: "#ffffff", border: "1px solid #dbe3ef", padding: "20px" }}>
+                <div data-tour="session-commitments" style={{ background: "#ffffff", border: "1px solid #dbe3ef", padding: "20px" }}>
                   <h2 style={{ margin: "0 0 12px 0", fontSize: "16px", color: "#111827" }}>New Commitments</h2>
                   <form onSubmit={handleAddCommitment} style={{ display: "grid", gap: "10px", marginBottom: "14px" }}>
                     <textarea value={commitmentText} onChange={(event) => setCommitmentText(event.target.value)} rows={3} placeholder="Specific commitment for next week..." style={{ border: "1px solid #cbd5e1", padding: "10px", fontSize: "14px", fontFamily: "'Inter', sans-serif" }} />
@@ -320,7 +322,7 @@ export default function WeeklySessionPage() {
                   </div>
                 </div>
 
-                <div style={{ background: "#ffffff", border: "1px solid #dbe3ef", padding: "20px" }}>
+                <div data-tour="session-blockers" style={{ background: "#ffffff", border: "1px solid #dbe3ef", padding: "20px" }}>
                   <h2 style={{ margin: "0 0 12px 0", fontSize: "16px", color: "#111827" }}>Blockers & Risks</h2>
                   <form onSubmit={handleAddBlocker} style={{ display: "grid", gap: "10px", marginBottom: "14px" }}>
                     <input value={blockerTitle} onChange={(event) => setBlockerTitle(event.target.value)} placeholder="Blocker title" style={{ border: "1px solid #cbd5e1", padding: "10px", fontSize: "14px" }} />

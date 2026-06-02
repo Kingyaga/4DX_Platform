@@ -212,6 +212,8 @@ export default function DashboardLayout({
     window.dispatchEvent(new Event("4dx:start-onboarding-tour"));
   };
 
+  const getNavTourId = (label: string) => label.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+
   const { sessions: currentSessions } = useCurrentSessions(
     userRole !== "ADMIN" ? currentTeamSlug : null,
   );
@@ -660,6 +662,7 @@ export default function DashboardLayout({
                 <Link
                   href={item.href}
                   className="click-animation"
+                  data-tour={`nav-${getNavTourId(item.label)}`}
                   style={{
                     display: "flex",
                     alignItems: "center",
@@ -741,6 +744,7 @@ export default function DashboardLayout({
           <Link
             href="/dashboard/settings"
             className="click-animation"
+            data-tour="nav-settings"
             style={{
               display: "flex",
               alignItems: "center",
@@ -874,7 +878,7 @@ export default function DashboardLayout({
         )}
         </ErrorBoundary>
       </div>
-      <OnboardingTour userId={user?.id} />
+      <OnboardingTour userId={user?.id} role={userRole} />
     </div>
   );
 }

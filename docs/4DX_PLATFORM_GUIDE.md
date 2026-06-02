@@ -58,15 +58,44 @@ The activity log is where members submit work against lead measures. Submitted a
 
 ## First-Time Tutorial
 
-When a user opens the dashboard for the first time, the platform shows a guided tour. The tour introduces:
+When a user opens the dashboard for the first time, the platform shows a guided tour. The tour is role-aware, so admins, team leads, and members see the workflow that matches their permissions.
+
+All tutorials introduce:
 
 - The 4DX workspace purpose.
-- The active team switcher.
 - The notification center.
 - The sidebar navigation.
 - The main work area.
 
-Users can replay the tutorial at any time from the **Tutorial** button in the dashboard sidebar.
+Member tutorials focus on:
+
+- Reading the scoreboard.
+- Logging lead measure activity.
+- Submitting work for approval.
+- Tracking pending and recent activity logs.
+- Using weekly sessions.
+- Reviewing team members and account settings.
+
+Team lead tutorials focus on:
+
+- Reviewing the team lead dashboard.
+- Creating WIGs.
+- Understanding current and closed WIGs.
+- Adding and managing lead measures.
+- Logging activity where assigned.
+- Approving or declining activity requests.
+- Running weekly sessions.
+- Managing members and reports.
+
+Admin tutorials focus on:
+
+- Reviewing organization execution health.
+- Creating and managing teams.
+- Creating users.
+- Generating and tracking invites.
+- Reviewing organization activity.
+
+Users can skip the tutorial at any time. Skipping marks that role's tutorial as complete for the current user. Users can replay the correct tutorial for their current role from the **Tutorial** button in the dashboard sidebar.
 
 ## Admin Workflow
 

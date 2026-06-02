@@ -112,7 +112,7 @@ export default function MembersPage() {
 
   return (
     <main style={{ flex: 1, padding: "32px", fontFamily: "'Inter', sans-serif" }}>
-      <div style={{ marginBottom: "32px", display: "flex", justifyContent: "space-between", alignItems: "center", paddingBottom: "16px", borderBottom: "1px solid #e4e4e7" }}>
+      <div data-tour="members-header" style={{ marginBottom: "32px", display: "flex", justifyContent: "space-between", alignItems: "center", paddingBottom: "16px", borderBottom: "1px solid #e4e4e7" }}>
         <div>
           <h1 style={{ fontSize: "24px", fontWeight: 600, color: "#18181b", letterSpacing: "-0.02em", textTransform: "uppercase" }}>Team Members</h1>
           <p style={{ fontSize: "14px", color: "#71717a", marginTop: "4px" }}>
@@ -131,6 +131,7 @@ export default function MembersPage() {
         </div>
         {canAddMembers && (
           <button
+            data-tour="members-add-button"
             onClick={() => {
               setShowAddForm((current) => !current);
               setFormError(null);
@@ -159,7 +160,7 @@ export default function MembersPage() {
       )}
 
       {showAddForm && (
-        <div style={{ marginBottom: "24px", backgroundColor: "#ffffff", border: "1px solid #e4e4e7", padding: "20px" }}>
+        <div data-tour="members-add-form" style={{ marginBottom: "24px", backgroundColor: "#ffffff", border: "1px solid #e4e4e7", padding: "20px" }}>
           <h2 style={{ fontSize: "18px", fontWeight: 600, margin: 0, marginBottom: "4px" }}>Add a team member</h2>
           <p style={{ margin: "0 0 16px 0", fontSize: "14px", color: "#71717a" }}>
             Search by email address to find a user in your organization, then confirm to add them.
@@ -241,6 +242,7 @@ export default function MembersPage() {
         </div>
       )}
 
+      <div data-tour="members-list">
       {members.length === 0 ? (
         <EmptyState
           title="No team members"
@@ -307,6 +309,7 @@ export default function MembersPage() {
           </div>
         </div>
       )}
+      </div>
     </main>
   );
 }

@@ -150,13 +150,14 @@ export function WigTable() {
   return (
     <main style={{ flex: 1, padding: "32px", fontFamily: "'Inter', sans-serif" }}>
       {/* Header */}
-      <div style={{ marginBottom: "24px", display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "24px", flexWrap: "wrap", paddingBottom: "16px", borderBottom: "1px solid #e4e4e7" }}>
+      <div data-tour="wigs-header" style={{ marginBottom: "24px", display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "24px", flexWrap: "wrap", paddingBottom: "16px", borderBottom: "1px solid #e4e4e7" }}>
         <div>
           <h1 style={{ fontSize: "24px", fontWeight: 600, color: "#18181b", letterSpacing: "-0.02em", textTransform: "uppercase" }}>WIGs</h1>
           <p style={{ fontSize: "14px", color: "#71717a", marginTop: "4px" }}>Wildly Important Goals &mdash; your team&apos;s highest priorities.</p>
         </div>
         {canCreateWIG && (
           <button
+            data-tour="create-wig-button"
             onClick={() => setShowNew(true)}
             style={{ backgroundColor: "#000000", color: "#ffffff", fontSize: "12px", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", padding: "10px 16px", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: "8px" }}
           >
@@ -166,7 +167,7 @@ export function WigTable() {
         )}
       </div>
 
-      <div style={{ display: "flex", gap: "12px", marginBottom: "32px", flexWrap: "wrap" }}>
+      <div data-tour="wigs-tabs" style={{ display: "flex", gap: "12px", marginBottom: "32px", flexWrap: "wrap" }}>
         <button
           onClick={() => setSelectedTab("current")}
           style={{
@@ -203,27 +204,28 @@ export function WigTable() {
         </button>
       </div>
 
-      {/* Loading */}
-      {isLoading && <WIGListSkeleton count={3} />}
+      <div data-tour="wigs-list">
+        {/* Loading */}
+        {isLoading && <WIGListSkeleton count={3} />}
 
-      {/* Error */}
-      {error && <ErrorState error={error} title="Failed to load WIGs" onRetry={() => refetch()} />}
+        {/* Error */}
+        {error && <ErrorState error={error} title="Failed to load WIGs" onRetry={() => refetch()} />}
 
-      {/* Empty State */}
-      {!isLoading && !error && wigs.length === 0 && (
-        <EmptyState
-          title="No WIGs yet"
-          description={
-            canCreateWIG
-              ? "Create your first Wildly Important Goal to get started."
-              : "Only the current team lead can create WIGs for this team."
-          }
-          icon={<span className="material-symbols-outlined">flag</span>}
-        />
-      )}
+        {/* Empty State */}
+        {!isLoading && !error && wigs.length === 0 && (
+          <EmptyState
+            title="No WIGs yet"
+            description={
+              canCreateWIG
+                ? "Create your first Wildly Important Goal to get started."
+                : "Only the current team lead can create WIGs for this team."
+            }
+            icon={<span className="material-symbols-outlined">flag</span>}
+          />
+        )}
 
-      {/* WIG List */}
-      {!isLoading && wigs.length > 0 && (
+        {/* WIG List */}
+        {!isLoading && wigs.length > 0 && (
         <>
           {displayedWigs.length === 0 ? (
             <EmptyState
@@ -298,7 +300,8 @@ export function WigTable() {
             </div>
           )}
         </>
-      )}
+        )}
+      </div>
     </main>
   );
 }
@@ -424,7 +427,7 @@ export function WigEditPanel({ wig, onBack }: { wig: WIG; onBack: () => void }) 
       </button>
 
       {/* Header */}
-      <div style={{ marginBottom: "24px", paddingBottom: "16px", borderBottom: "1px solid #e4e4e7", display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+      <div data-tour="wig-detail-header" style={{ marginBottom: "24px", paddingBottom: "16px", borderBottom: "1px solid #e4e4e7", display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
         <div style={{ flex: 1 }}>
           <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
             <span style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "2px 8px", border: "1px solid #e4e4e7", backgroundColor: "#f4f4f5", fontSize: "12px", fontWeight: 600 }}>
@@ -439,6 +442,7 @@ export function WigEditPanel({ wig, onBack }: { wig: WIG; onBack: () => void }) 
           <div style={{ display: "flex", gap: "8px" }}>
             {activeWig.status === "ACTIVE" && (
               <button
+                data-tour="close-wig-button"
                 onClick={() => setShowCloseModal(true)}
                 style={{ backgroundColor: "#ef4444", color: "#ffffff", fontSize: "12px", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", padding: "10px 16px", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: "8px" }}
               >
@@ -447,6 +451,7 @@ export function WigEditPanel({ wig, onBack }: { wig: WIG; onBack: () => void }) 
               </button>
             )}
             <button
+              data-tour="edit-wig-button"
               onClick={() => setIsEditing(true)}
               style={{ backgroundColor: "#000000", color: "#ffffff", fontSize: "12px", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", padding: "10px 16px", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: "8px" }}
             >
@@ -470,6 +475,7 @@ export function WigEditPanel({ wig, onBack }: { wig: WIG; onBack: () => void }) 
       {canCreateWIG && activeWig.status === "DRAFT" && (
         <div style={{ marginBottom: "24px", display: "flex", justifyContent: "flex-end" }}>
           <button
+            data-tour="activate-wig-button"
             type="button"
             onClick={handleActivateWIG}
             disabled={!canActivateWIG || isActivatingWIG}
@@ -522,10 +528,11 @@ export function WigEditPanel({ wig, onBack }: { wig: WIG; onBack: () => void }) 
 
       {/* Lead Measures */}
       <div>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "16px", paddingBottom: "8px", borderBottom: "1px solid #e4e4e7" }}>
+        <div data-tour="lead-measures-section" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "16px", paddingBottom: "8px", borderBottom: "1px solid #e4e4e7" }}>
           <h2 style={{ fontSize: "20px", fontWeight: 600, color: "#18181b" }}>Lead Measures ({activeWig.leadMeasures.length})</h2>
           {canCreateWIG && (
             <button
+              data-tour="add-lead-measure-button"
               onClick={() => setShowAddLeadMeasure((current) => !current)}
               disabled={!canAddLeadMeasure}
               style={{
@@ -550,7 +557,7 @@ export function WigEditPanel({ wig, onBack }: { wig: WIG; onBack: () => void }) 
         </div>
 
         {showAddLeadMeasure && (
-          <form onSubmit={handleCreateLeadMeasure} style={{ display: "grid", gap: "16px", marginBottom: "24px", padding: "20px", backgroundColor: "#ffffff", border: "1px solid #e4e4e7", borderRadius: "16px" }}>
+          <form data-tour="lead-measure-form" onSubmit={handleCreateLeadMeasure} style={{ display: "grid", gap: "16px", marginBottom: "24px", padding: "20px", backgroundColor: "#ffffff", border: "1px solid #e4e4e7", borderRadius: "16px" }}>
             {createLeadMeasureError && <ErrorState error={createLeadMeasureError} title="Unable to add lead measure" />}
 
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
