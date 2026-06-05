@@ -177,7 +177,7 @@ export default function AdminPage() {
     : 0;
 
   // At Risk WIGs: count WIGs where current < midpoint
-  const atRiskWIGs = allWIGs.filter((wig: WIG) => wig.status === "ACTIVE" && wigProgress(wig) < 50).length;
+  const atRiskWIGs = allWIGs.filter((wig: WIG) => wig.status === "ACTIVE" && !wig.archivedAt && wigProgress(wig) < 50).length;
 
   // ─── Generate week bars for trends ─────────────────────────────────────────
   // (already computed above with useMemo)
@@ -253,7 +253,7 @@ export default function AdminPage() {
 
   // Alert 3: WIGs at risk (progress < 30% with < 30 days left - simplified for demo)
   const riskyWIGs = allWIGs.filter((wig: WIG) => {
-    return wig.status === "ACTIVE" && wigProgress(wig) < 30;
+    return wig.status === "ACTIVE" && !wig.archivedAt && wigProgress(wig) < 30;
   });
 
   if (riskyWIGs.length > 0) {

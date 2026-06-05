@@ -3,6 +3,9 @@ import { type PrismaClient, type Prisma } from "@/generated/prisma/client";
 type AuditAction =
   | "WIG_CREATED"
   | "WIG_ACTIVATED"
+  | "WIG_ARCHIVED"
+  | "WIG_RESUMED"
+  | "WIG_DELETED"
   | "WIG_CLOSED"
   | "LEAD_MEASURE_CREATED"
   | "LEAD_MEASURE_ARCHIVED"

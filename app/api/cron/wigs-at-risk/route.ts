@@ -13,7 +13,7 @@ export async function POST(req: Request) {
   // Milestone WIGs need a different risk model and are intentionally skipped here.
   const now = new Date();
   const wigs = await db.wIG.findMany({
-    where: { status: "ACTIVE", trackingType: "NUMERIC" },
+    where: { status: "ACTIVE", trackingType: "NUMERIC", archivedAt: null },
     include: {
       team: {
         include: {

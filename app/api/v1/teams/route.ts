@@ -34,7 +34,7 @@ export async function GET(req: NextRequest) {
         },
       },
       wigs: {
-        where: { status: "ACTIVE" },
+        where: { status: "ACTIVE", archivedAt: null },
       },
     },
     orderBy: { name: "asc" },

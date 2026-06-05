@@ -281,7 +281,7 @@ export const activityLogsRouter = router({
 
       if (!leadMeasure) throw new TRPCError({ code: "NOT_FOUND" });
 
-      if (leadMeasure.wig.status !== "ACTIVE") {
+      if (leadMeasure.wig.status !== "ACTIVE" || leadMeasure.wig.archivedAt) {
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: "Only active WIGs can accept activity logs.",
@@ -501,7 +501,7 @@ export const activityLogsRouter = router({
       const pendingLogs = await ctx.db.activityLog.findMany({
         where: {
           status: "PENDING",
-          leadMeasure: { wig: { teamId: team.id, status: "ACTIVE" } },
+          leadMeasure: { wig: { teamId: team.id, status: "ACTIVE", archivedAt: null } },
         },
         include: {
           leadMeasure: {

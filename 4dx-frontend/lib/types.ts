@@ -147,6 +147,7 @@ export interface WIG {
   status: WIGStatus;
   createdAt: Date;
   closedAt: Date | null;
+  archivedAt: Date | null;
   teamId: string;
   createdByUserId: string;
   leadMeasures: LeadMeasure[];

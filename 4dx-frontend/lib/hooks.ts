@@ -471,6 +471,36 @@ export function useActivateWIG() {
   };
 }
 
+export function useArchiveWIG() {
+  const mutation = (trpc.wigs as any).archive.useMutation();
+
+  return {
+    archiveWIG: mutation.mutateAsync as (input: { wigId: string }) => Promise<WIG>,
+    isLoading: mutation.isPending,
+    error: mutation.error ? parseTRPCError(mutation.error) : null,
+  };
+}
+
+export function useResumeWIG() {
+  const mutation = (trpc.wigs as any).resume.useMutation();
+
+  return {
+    resumeWIG: mutation.mutateAsync as (input: { wigId: string }) => Promise<WIG>,
+    isLoading: mutation.isPending,
+    error: mutation.error ? parseTRPCError(mutation.error) : null,
+  };
+}
+
+export function useDeleteWIG() {
+  const mutation = (trpc.wigs as any).delete.useMutation();
+
+  return {
+    deleteWIG: mutation.mutateAsync as (input: { wigId: string }) => Promise<{ success: boolean }>,
+    isLoading: mutation.isPending,
+    error: mutation.error ? parseTRPCError(mutation.error) : null,
+  };
+}
+
 /**
  * Log activity
  */

@@ -120,6 +120,7 @@ model WIG {
   status          WIGStatus       @default(DRAFT)
   createdAt       DateTime        @default(now())
   closedAt        DateTime?
+  archivedAt      DateTime?
   teamId          String
   createdByUserId String
   trackingType    TrackingType    @default(NUMERIC)
@@ -130,6 +131,7 @@ model WIG {
   @@index([teamId])
   @@index([createdByUserId])
   @@index([status])
+  @@index([archivedAt])
 }
 
 model LeadMeasure {

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useWIGs, useCreateWIG, useUpdateWIG, useCreateLeadMeasure, useRoleCheck, useMyTeams, useActivateWIG, useTeam, useCloseWIG, useUpdateLeadMeasureOwners, useArchiveLeadMeasure } from "@/lib/hooks";
+import { useWIGs, useCreateWIG, useUpdateWIG, useCreateLeadMeasure, useRoleCheck, useMyTeams, useActivateWIG, useTeam, useCloseWIG, useUpdateLeadMeasureOwners, useArchiveLeadMeasure, useArchiveWIG, useResumeWIG, useDeleteWIG } from "@/lib/hooks";
 import { useTeamStore } from "@/lib/stores/team-store";
 import { useUserStore } from "@/lib/stores/user-store";
 import { WIGListSkeleton } from "@/lib/components/skeletons";
@@ -57,7 +57,7 @@ export function WigTable() {
   const currentTeamSlug = useTeamStore((state) => state.currentTeamSlug);
   const setCurrentTeamSlug = useTeamStore((state) => state.setCurrentTeamSlug);
   const { teams, isLoading: teamsLoading, error: teamsError } = useMyTeams(orgSlug);
-  const [selectedTab, setSelectedTab] = useState<"current" | "history">("current");
+  const [selectedTab, setSelectedTab] = useState<"current" | "archived" | "history">("current");
 
   useEffect(() => {
     if (!teamsLoading && teams.length > 0 && (!currentTeamSlug || !teams.some((team: any) => team.slug === currentTeamSlug))) {
@@ -68,9 +68,10 @@ export function WigTable() {
   const { wigs, isLoading, error, refetch } = useWIGs(currentTeamSlug);
   const { canCreateWIG } = useRoleCheck();
 
-  const currentWigs = (wigs as any[]).filter((wig) => !["ACHIEVED", "MISSED", "ABANDONED"].includes(wig.status));
+  const currentWigs = (wigs as any[]).filter((wig) => !wig.archivedAt && !["ACHIEVED", "MISSED", "ABANDONED"].includes(wig.status));
+  const archivedWigs = (wigs as any[]).filter((wig) => wig.archivedAt && !["ACHIEVED", "MISSED", "ABANDONED"].includes(wig.status));
   const historyWigs = (wigs as any[]).filter((wig) => ["ACHIEVED", "MISSED", "ABANDONED"].includes(wig.status));
-  const displayedWigs = selectedTab === "current" ? currentWigs : historyWigs;
+  const displayedWigs = selectedTab === "current" ? currentWigs : selectedTab === "archived" ? archivedWigs : historyWigs;
 
   if (!currentTeamSlug) {
     if (teamsLoading) {
@@ -142,9 +143,9 @@ export function WigTable() {
   if (selectedWIG) {
     const isClosed = ["ACHIEVED", "MISSED", "ABANDONED"].includes(selectedWIG.status);
     if (isClosed) {
-      return <WigHistoryPanel wig={selectedWIG} onBack={() => setSelectedWIG(null)} />;
+      return <WigHistoryPanel wig={selectedWIG} onBack={() => { setSelectedWIG(null); refetch(); }} />;
     }
-    return <WigEditPanel wig={selectedWIG} onBack={() => setSelectedWIG(null)} />;
+    return <WigEditPanel wig={selectedWIG} onBack={() => { setSelectedWIG(null); refetch(); }} />;
   }
 
   return (
@@ -184,6 +185,23 @@ export function WigTable() {
           }}
         >
           Current WIGs ({currentWigs.length})
+        </button>
+        <button
+          onClick={() => setSelectedTab("archived")}
+          style={{
+            padding: "12px 16px",
+            borderRadius: "12px",
+            border: selectedTab === "archived" ? "1px solid #18181b" : "1px solid #e4e4e7",
+            backgroundColor: selectedTab === "archived" ? "#18181b" : "#ffffff",
+            color: selectedTab === "archived" ? "#ffffff" : "#18181b",
+            cursor: "pointer",
+            fontWeight: 700,
+            fontSize: "12px",
+            textTransform: "uppercase",
+            letterSpacing: "0.05em",
+          }}
+        >
+          Archived WIGs ({archivedWigs.length})
         </button>
         <button
           onClick={() => setSelectedTab("history")}
@@ -229,13 +247,15 @@ export function WigTable() {
         <>
           {displayedWigs.length === 0 ? (
             <EmptyState
-              title={selectedTab === "current" ? "No current WIGs" : "No closed WIGs yet"}
+              title={selectedTab === "current" ? "No current WIGs" : selectedTab === "archived" ? "No archived WIGs" : "No closed WIGs yet"}
               description={
                 selectedTab === "current"
                   ? "This team has no active or draft WIGs right now. Create one to start tracking progress."
-                  : "Closed WIGs are archived here once they are achieved, missed, or abandoned."
+                  : selectedTab === "archived"
+                    ? "Paused WIGs will appear here until they are resumed."
+                    : "Closed WIGs are stored here once they are achieved, missed, or abandoned."
               }
-              icon={<span className="material-symbols-outlined">{selectedTab === "current" ? "flag" : "inventory_2"}</span>}
+              icon={<span className="material-symbols-outlined">{selectedTab === "current" ? "flag" : selectedTab === "archived" ? "pause_circle" : "inventory_2"}</span>}
             />
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
@@ -244,6 +264,7 @@ export function WigTable() {
                 const progress = getWigProgress(wig);
                 const targetReached = wig.status === "ACTIVE" && progress >= 100;
                 const isLockedDraft = wig.status === "DRAFT" && !canCreateWIG;
+                const isArchived = Boolean(wig.archivedAt);
 
                 return (
                   <div
@@ -269,6 +290,12 @@ export function WigTable() {
                             <span style={{ width: "8px", height: "8px", borderRadius: "50%", backgroundColor: statusColor, display: "inline-block" }}></span>
                             {wig.status}
                           </span>
+                          {isArchived && (
+                            <span style={{ display: "inline-flex", alignItems: "center", gap: "4px", padding: "2px 8px", border: "1px solid #bfdbfe", backgroundColor: "#eff6ff", color: "#1d4ed8", fontSize: "12px", fontWeight: 700, letterSpacing: "0.04em", textTransform: "uppercase" }}>
+                              <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>pause_circle</span>
+                              Archived
+                            </span>
+                          )}
                           {targetReached && (
                             <span style={{ display: "inline-flex", alignItems: "center", gap: "4px", padding: "2px 8px", backgroundColor: "#f59e0b", color: "#ffffff", fontSize: "12px", fontWeight: 700, letterSpacing: "0.04em", textTransform: "uppercase" }}>
                               <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>emoji_events</span>
@@ -327,6 +354,9 @@ export function WigEditPanel({ wig, onBack }: { wig: WIG; onBack: () => void }) 
   const { archiveLeadMeasure, isLoading: isArchivingLeadMeasure } = useArchiveLeadMeasure();
   const { activateWIG, isLoading: isActivatingWIG, error: activateWIGError } = useActivateWIG();
   const { closeWIG, isLoading: isClosingWIG, error: closeWIGError } = useCloseWIG();
+  const { archiveWIG, isLoading: isArchivingWIG, error: archiveWIGError } = useArchiveWIG();
+  const { resumeWIG, isLoading: isResumingWIG, error: resumeWIGError } = useResumeWIG();
+  const { deleteWIG, isLoading: isDeletingWIG, error: deleteWIGError } = useDeleteWIG();
   const { canArchiveWIG, canCreateWIG } = useRoleCheck();
   const currentTeamSlug = useTeamStore((state) => state.currentTeamSlug);
   const { team } = useTeam(currentTeamSlug);
@@ -337,6 +367,7 @@ export function WigEditPanel({ wig, onBack }: { wig: WIG; onBack: () => void }) 
     activeWig.toValue !== null &&
     activeWig.currentValue >= activeWig.toValue;
   const statusColor = activeWig.status === "ACTIVE" ? "#16A34A" : activeWig.status === "DRAFT" ? "#71717a" : "#EAB308";
+  const isArchived = Boolean(activeWig.archivedAt);
 
   useEffect(() => {
     setActiveWig(wig);
@@ -344,10 +375,11 @@ export function WigEditPanel({ wig, onBack }: { wig: WIG; onBack: () => void }) 
     setLeadMeasureTrackingType(wig.trackingType !== "NUMERIC" ? "MILESTONE" : "NUMERIC");
   }, [wig]);
 
-  const canAddLeadMeasure = canCreateWIG && activeWig.leadMeasures.length < 3;
+  const canAddLeadMeasure = canCreateWIG && !isArchived && activeWig.leadMeasures.length < 3;
   const canActivateWIG =
     canCreateWIG &&
     activeWig.status === "DRAFT" &&
+    !isArchived &&
     activeWig.leadMeasures.length >= 1 &&
     activeWig.leadMeasures.length <= 3 &&
     activeWig.leadMeasures.every((leadMeasure) => (leadMeasure.owners?.length || 0) > 0);
@@ -411,6 +443,39 @@ export function WigEditPanel({ wig, onBack }: { wig: WIG; onBack: () => void }) 
     }
   };
 
+  const handleArchiveWIG = async () => {
+    const confirmed = window.confirm(`Archive "${activeWig.title}"? You can resume it later from Archived WIGs.`);
+    if (!confirmed) return;
+
+    try {
+      const archived = await archiveWIG({ wigId: activeWig.id });
+      setActiveWig((current) => ({ ...current, archivedAt: archived.archivedAt }));
+    } catch {
+      // Error is surfaced by hook state
+    }
+  };
+
+  const handleResumeWIG = async () => {
+    try {
+      const resumed = await resumeWIG({ wigId: activeWig.id });
+      setActiveWig((current) => ({ ...current, archivedAt: resumed.archivedAt }));
+    } catch {
+      // Error is surfaced by hook state
+    }
+  };
+
+  const handleDeleteWIG = async () => {
+    const confirmed = window.confirm(`Permanently delete "${activeWig.title}" and its lead-measure history? This cannot be undone.`);
+    if (!confirmed) return;
+
+    try {
+      await deleteWIG({ wigId: activeWig.id });
+      onBack();
+    } catch {
+      // Error is surfaced by hook state
+    }
+  };
+
   if (isEditing) {
     return <WIGEditForm wig={wig} onCancel={() => setIsEditing(false)} onSuccess={() => setIsEditing(false)} />;
   }
@@ -434,13 +499,19 @@ export function WigEditPanel({ wig, onBack }: { wig: WIG; onBack: () => void }) 
               <span style={{ width: "8px", height: "8px", borderRadius: "50%", backgroundColor: statusColor, display: "inline-block" }}></span>
               {activeWig.status}
             </span>
+            {isArchived && (
+              <span style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "2px 8px", border: "1px solid #bfdbfe", backgroundColor: "#eff6ff", color: "#1d4ed8", fontSize: "12px", fontWeight: 700, letterSpacing: "0.04em", textTransform: "uppercase" }}>
+                <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>pause_circle</span>
+                Archived
+              </span>
+            )}
             <span style={{ fontSize: "12px", color: "#71717a", textTransform: "uppercase", letterSpacing: "0.05em" }}>Wildly Important Goal</span>
           </div>
           <h1 style={{ fontSize: "24px", fontWeight: 600, color: "#18181b", letterSpacing: "-0.02em" }}>{wig.title}</h1>
         </div>
         {canArchiveWIG && (
           <div style={{ display: "flex", gap: "8px" }}>
-            {activeWig.status === "ACTIVE" && (
+            {activeWig.status === "ACTIVE" && !isArchived && (
               <button
                 data-tour="close-wig-button"
                 onClick={() => setShowCloseModal(true)}
@@ -450,29 +521,62 @@ export function WigEditPanel({ wig, onBack }: { wig: WIG; onBack: () => void }) 
                 Close WIG
               </button>
             )}
+            {isArchived ? (
+              <button
+                onClick={handleResumeWIG}
+                disabled={isResumingWIG}
+                style={{ backgroundColor: "#16A34A", color: "#ffffff", fontSize: "12px", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", padding: "10px 16px", border: "none", cursor: isResumingWIG ? "not-allowed" : "pointer", display: "flex", alignItems: "center", gap: "8px" }}
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>play_circle</span>
+                {isResumingWIG ? "Resuming..." : "Resume WIG"}
+              </button>
+            ) : (
+              <button
+                onClick={handleArchiveWIG}
+                disabled={isArchivingWIG}
+                style={{ backgroundColor: "#2563eb", color: "#ffffff", fontSize: "12px", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", padding: "10px 16px", border: "none", cursor: isArchivingWIG ? "not-allowed" : "pointer", display: "flex", alignItems: "center", gap: "8px" }}
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>pause_circle</span>
+                {isArchivingWIG ? "Archiving..." : "Archive WIG"}
+              </button>
+            )}
             <button
               data-tour="edit-wig-button"
               onClick={() => setIsEditing(true)}
-              style={{ backgroundColor: "#000000", color: "#ffffff", fontSize: "12px", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", padding: "10px 16px", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: "8px" }}
+              disabled={isArchived}
+              style={{ backgroundColor: isArchived ? "#d4d4d8" : "#000000", color: isArchived ? "#71717a" : "#ffffff", fontSize: "12px", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", padding: "10px 16px", border: "none", cursor: isArchived ? "not-allowed" : "pointer", display: "flex", alignItems: "center", gap: "8px" }}
             >
               <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>edit</span>
               Edit WIG
+            </button>
+            <button
+              onClick={handleDeleteWIG}
+              disabled={isDeletingWIG}
+              style={{ backgroundColor: "#7f1d1d", color: "#ffffff", fontSize: "12px", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", padding: "10px 16px", border: "none", cursor: isDeletingWIG ? "not-allowed" : "pointer", display: "flex", alignItems: "center", gap: "8px" }}
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>delete</span>
+              {isDeletingWIG ? "Deleting..." : "Delete WIG"}
             </button>
           </div>
         )}
       </div>
 
       {activateWIGError && <ErrorState error={activateWIGError} title="Unable to activate WIG" />}
+      {archiveWIGError && <ErrorState error={archiveWIGError} title="Unable to archive WIG" />}
+      {resumeWIGError && <ErrorState error={resumeWIGError} title="Unable to resume WIG" />}
+      {deleteWIGError && <ErrorState error={deleteWIGError} title="Unable to delete WIG" />}
 
       <div style={{ marginBottom: "24px", padding: "16px", borderRadius: "16px", backgroundColor: canArchiveWIG ? "#ecfdf5" : "#f8fafc", border: `1px solid ${canArchiveWIG ? "#10b981" : "#e4e4e7"}`, color: canArchiveWIG ? "#166534" : "#52525b" }}>
         {canArchiveWIG
-          ? activeWig.status === "DRAFT"
+          ? isArchived
+            ? "This WIG is archived and paused. Resume it when you want it back in current work."
+            : activeWig.status === "DRAFT"
             ? "This WIG is a draft. Add 1-3 owned lead measures, then activate it to put it on the scoreboard."
             : "You are the current team lead for this team, so WIG actions are available to you."
           : "This WIG is read-only unless you are the current team lead for the selected team."}
       </div>
 
-      {canCreateWIG && activeWig.status === "DRAFT" && (
+      {canCreateWIG && activeWig.status === "DRAFT" && !isArchived && (
         <div style={{ marginBottom: "24px", display: "flex", justifyContent: "flex-end" }}>
           <button
             data-tour="activate-wig-button"
@@ -497,7 +601,7 @@ export function WigEditPanel({ wig, onBack }: { wig: WIG; onBack: () => void }) 
         </div>
       )}
 
-      {activeWig.status === "ACTIVE" && numericTargetReached && (
+      {activeWig.status === "ACTIVE" && !isArchived && numericTargetReached && (
         <div style={{ marginBottom: "20px", padding: "16px 20px", backgroundColor: "#fffbeb", border: "1px solid #f59e0b", display: "flex", alignItems: "center", gap: "12px" }}>
           <span className="material-symbols-outlined" style={{ fontSize: "28px", color: "#f59e0b" }}>emoji_events</span>
           <div>
@@ -530,7 +634,7 @@ export function WigEditPanel({ wig, onBack }: { wig: WIG; onBack: () => void }) 
       <div>
         <div data-tour="lead-measures-section" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "16px", paddingBottom: "8px", borderBottom: "1px solid #e4e4e7" }}>
           <h2 style={{ fontSize: "20px", fontWeight: 600, color: "#18181b" }}>Lead Measures ({activeWig.leadMeasures.length})</h2>
-          {canCreateWIG && (
+          {canCreateWIG && !isArchived && (
             <button
               data-tour="add-lead-measure-button"
               onClick={() => setShowAddLeadMeasure((current) => !current)}
@@ -750,7 +854,7 @@ export function WigEditPanel({ wig, onBack }: { wig: WIG; onBack: () => void }) 
                       Owners: {lm.owners?.map((owner) => owner.user.name).join(", ")}
                     </p>
                   )}
-                  {canCreateWIG && (
+                  {canCreateWIG && !isArchived && (
                     <div style={{ display: "flex", gap: "12px", marginBottom: "8px" }}>
                       <button
                         onClick={() => {

@@ -95,7 +95,7 @@ export const orgRouter = router({
             },
           },
           wigs: {
-            where: { status: "ACTIVE" },
+            where: { status: "ACTIVE", archivedAt: null },
             include: {
               leadMeasures: {
                 where: { archivedAt: null },
@@ -174,7 +174,7 @@ export const orgRouter = router({
           id: true,
           name: true,
           wigs: {
-            where: { status: "ACTIVE" },
+            where: { status: "ACTIVE", archivedAt: null },
             select: {
               id: true,
               title: true,
@@ -499,7 +499,7 @@ export const orgRouter = router({
             select: { members: true },
           },
           wigs: {
-            where: { status: "ACTIVE" },
+            where: { status: "ACTIVE", archivedAt: null },
             select: { id: true, title: true, status: true },
           },
           members: {

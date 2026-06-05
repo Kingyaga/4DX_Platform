@@ -1952,6 +1952,7 @@ export const WIGScalarFieldEnum = {
   status: 'status',
   createdAt: 'createdAt',
   closedAt: 'closedAt',
+  archivedAt: 'archivedAt',
   teamId: 'teamId',
   createdByUserId: 'createdByUserId',
   trackingType: 'trackingType'

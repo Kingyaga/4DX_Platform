@@ -21,7 +21,7 @@ export async function POST(req: Request) {
     include: {
       members: true,
       wigs: {
-        where: { status: "ACTIVE" },
+        where: { status: "ACTIVE", archivedAt: null },
         include: { leadMeasures: { where: { archivedAt: null } } },
       },
     },

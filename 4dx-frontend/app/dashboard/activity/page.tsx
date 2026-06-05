@@ -16,7 +16,7 @@ type AggregatedActivityLog = ActivityLogEntry & {
   trackingType?: TrackingType;
 };
 
-type MinimalWig = { id: string; title?: string; status?: string; leadMeasures?: LeadMeasure[] };
+type MinimalWig = { id: string; title?: string; status?: string; archivedAt?: Date | string | null; leadMeasures?: LeadMeasure[] };
 
 function isNumericLike(trackingType?: TrackingType) {
   return trackingType === "NUMERIC" || trackingType === "PERCENTAGE" || trackingType === "DURATION";
@@ -83,7 +83,7 @@ export default function ActivityLogPage() {
   const PREVIEW_COUNT = 10;
   const userId = user?.id;
 
-  const activeWigs = useMemo(() => ((wigs ?? []) as MinimalWig[]).filter((wig) => wig.status === "ACTIVE"), [wigs]);
+  const activeWigs = useMemo(() => ((wigs ?? []) as MinimalWig[]).filter((wig) => wig.status === "ACTIVE" && !wig.archivedAt), [wigs]);
 
   const allLeadMeasures = useMemo(() =>
     activeWigs.flatMap((wig) =>

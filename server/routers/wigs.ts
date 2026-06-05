@@ -11,6 +11,26 @@ const wigValueSchema = z
   .finite()
   .nonnegative("WIG current and target values cannot be negative.");
 const wigTrackingTypeSchema = z.enum(["NUMERIC", "MILESTONE", "COMPLETION", "HYBRID", "CUSTOM"]);
+const closedWigStatuses = ["ACHIEVED", "MISSED", "ABANDONED"] as const;
+
+async function requireWigManager(ctx: any, wig: { team: { leadUserId: string; orgId: string } }, message: string) {
+  const actorUserId = ctx.session.user.id;
+  const isOrgAdmin = await ctx.db.orgMembership.findFirst({
+    where: {
+      userId: actorUserId,
+      orgId: wig.team.orgId,
+      role: "ADMIN",
+    },
+    select: { userId: true },
+  });
+
+  if (wig.team.leadUserId !== actorUserId && !isOrgAdmin) {
+    throw new TRPCError({
+      code: "FORBIDDEN",
+      message,
+    });
+  }
+}
 
 export const wigsRouter = router({
   create: protectedProcedure
@@ -45,7 +65,7 @@ export const wigsRouter = router({
       const team = await ctx.db.team.findUnique({
         where: { slug: input.teamSlug },
         include: {
-          wigs: { where: { status: "ACTIVE" } },
+          wigs: { where: { status: "ACTIVE", archivedAt: null } },
         },
       });
 
@@ -264,7 +284,7 @@ export const wigsRouter = router({
         include: {
           team: {
             include: {
-              wigs: { where: { status: "ACTIVE" } },
+              wigs: { where: { status: "ACTIVE", archivedAt: null } },
             },
           },
           leadMeasures: {
@@ -280,6 +300,13 @@ export const wigsRouter = router({
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: "Only draft WIGs can be activated.",
+        });
+      }
+
+      if (wig.archivedAt) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Resume this WIG before activating it.",
         });
       }
 
@@ -332,6 +359,164 @@ export const wigsRouter = router({
       });
 
       return updatedWIG;
+    }),
+
+  archive: protectedProcedure
+    .input(z.object({ wigId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const wig = await ctx.db.wIG.findUnique({
+        where: { id: input.wigId },
+        include: { team: true },
+      });
+
+      if (!wig) throw new TRPCError({ code: "NOT_FOUND" });
+
+      await requireWigManager(ctx, wig, "Only the team lead or an org admin can archive WIGs.");
+
+      if (closedWigStatuses.includes(wig.status as (typeof closedWigStatuses)[number])) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Closed WIGs cannot be archived. They already live in Closed History.",
+        });
+      }
+
+      if (wig.archivedAt) {
+        return wig;
+      }
+
+      const updatedWIG = await ctx.db.wIG.update({
+        where: { id: input.wigId },
+        data: { archivedAt: new Date() },
+      });
+
+      await auditLog({
+        db: ctx.db,
+        actorUserId: ctx.session.user.id,
+        orgId: wig.team.orgId,
+        entityType: "WIG",
+        entityId: input.wigId,
+        action: "WIG_ARCHIVED",
+        before: { archivedAt: wig.archivedAt, status: wig.status } as Prisma.InputJsonValue,
+        after: { archivedAt: updatedWIG.archivedAt, status: updatedWIG.status } as Prisma.InputJsonValue,
+      });
+
+      return updatedWIG;
+    }),
+
+  resume: protectedProcedure
+    .input(z.object({ wigId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const wig = await ctx.db.wIG.findUnique({
+        where: { id: input.wigId },
+        include: {
+          team: {
+            include: {
+              wigs: { where: { status: "ACTIVE", archivedAt: null } },
+            },
+          },
+        },
+      });
+
+      if (!wig) throw new TRPCError({ code: "NOT_FOUND" });
+
+      await requireWigManager(ctx, wig, "Only the team lead or an org admin can resume WIGs.");
+
+      if (!wig.archivedAt) {
+        return wig;
+      }
+
+      if (closedWigStatuses.includes(wig.status as (typeof closedWigStatuses)[number])) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Closed WIGs cannot be resumed.",
+        });
+      }
+
+      if (wig.status === "ACTIVE" && wig.team.wigs.length >= 2) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Teams cannot have more than 2 active WIGs. Archive or close an active WIG first.",
+        });
+      }
+
+      const updatedWIG = await ctx.db.wIG.update({
+        where: { id: input.wigId },
+        data: { archivedAt: null },
+      });
+
+      await auditLog({
+        db: ctx.db,
+        actorUserId: ctx.session.user.id,
+        orgId: wig.team.orgId,
+        entityType: "WIG",
+        entityId: input.wigId,
+        action: "WIG_RESUMED",
+        before: { archivedAt: wig.archivedAt, status: wig.status } as Prisma.InputJsonValue,
+        after: { archivedAt: updatedWIG.archivedAt, status: updatedWIG.status } as Prisma.InputJsonValue,
+      });
+
+      return updatedWIG;
+    }),
+
+  delete: protectedProcedure
+    .input(z.object({ wigId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const wig = await ctx.db.wIG.findUnique({
+        where: { id: input.wigId },
+        include: {
+          team: true,
+          leadMeasures: { select: { id: true } },
+        },
+      });
+
+      if (!wig) throw new TRPCError({ code: "NOT_FOUND" });
+
+      await requireWigManager(ctx, wig, "Only the team lead or an org admin can delete WIGs.");
+
+      const leadMeasureIds = wig.leadMeasures.map((leadMeasure) => leadMeasure.id);
+
+      await ctx.db.$transaction(async (tx: any) => {
+        await tx.weeklySession.updateMany({
+          where: { wigId: input.wigId },
+          data: { wigId: null },
+        });
+
+        if (leadMeasureIds.length > 0) {
+          await tx.commitment.deleteMany({
+            where: { linkedLeadMeasureId: { in: leadMeasureIds } },
+          });
+          await tx.activityLog.deleteMany({
+            where: { leadMeasureId: { in: leadMeasureIds } },
+          });
+          await tx.leadMeasureOwner.deleteMany({
+            where: { leadMeasureId: { in: leadMeasureIds } },
+          });
+          await tx.leadMeasure.deleteMany({
+            where: { id: { in: leadMeasureIds } },
+          });
+        }
+
+        await tx.wIG.delete({
+          where: { id: input.wigId },
+        });
+      });
+
+      await auditLog({
+        db: ctx.db,
+        actorUserId: ctx.session.user.id,
+        orgId: wig.team.orgId,
+        entityType: "WIG",
+        entityId: input.wigId,
+        action: "WIG_DELETED",
+        before: {
+          title: wig.title,
+          status: wig.status,
+          archivedAt: wig.archivedAt,
+          teamId: wig.teamId,
+        } as Prisma.InputJsonValue,
+      });
+
+      return { success: true };
     }),
   // Get a single WIG by ID with full details
   getById: protectedProcedure
@@ -405,7 +590,7 @@ export const wigsRouter = router({
       if (!isAdmin) throw new TRPCError({ code: "FORBIDDEN" });
 
       const expiredWigs = await ctx.db.wIG.findMany({
-        where: { status: "ACTIVE", deadline: { lt: new Date() } },
+        where: { status: "ACTIVE", archivedAt: null, deadline: { lt: new Date() } },
         include: {
           team: {
             include: {

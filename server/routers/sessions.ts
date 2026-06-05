@@ -30,7 +30,7 @@ function getLeadMeasureScore(leadMeasure: any) {
 async function buildWeeklySnapshot(ctx: any, teamId: string, weekStarting: Date) {
   const weekEnding = getWeekEnding(weekStarting);
   const wigs = await ctx.db.wIG.findMany({
-    where: { teamId, status: "ACTIVE" },
+    where: { teamId, status: "ACTIVE", archivedAt: null },
     include: {
       leadMeasures: {
         where: { archivedAt: null },
@@ -332,7 +332,7 @@ export const sessionsRouter = router({
         include: {
           members: true,
           wigs: {
-            where: { status: "ACTIVE" },
+            where: { status: "ACTIVE", archivedAt: null },
             include: { leadMeasures: { where: { archivedAt: null } } },
           },
         },
@@ -780,7 +780,7 @@ export const sessionsRouter = router({
     .query(async ({ ctx, input }) => {
       const team = await ctx.db.team.findUnique({
         where: { slug: input.teamSlug },
-        include: { wigs: { where: { status: "ACTIVE" } } },
+        include: { wigs: { where: { status: "ACTIVE", archivedAt: null } } },
       });
 
       if (!team) throw new TRPCError({ code: "NOT_FOUND" });

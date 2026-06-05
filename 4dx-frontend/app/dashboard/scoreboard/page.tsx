@@ -46,7 +46,7 @@ export default function ScoreboardPage() {
     return () => window.removeEventListener("keydown", handler);
   }, []);
 
-  const activeWigs = (wigs as any[]).filter((wig) => wig.status === "ACTIVE");
+  const activeWigs = (wigs as any[]).filter((wig) => wig.status === "ACTIVE" && !wig.archivedAt);
   const selected = selectedWigId ? activeWigs.find((w) => w.id === selectedWigId) : activeWigs[0];
 
   // Days remaining to deadline

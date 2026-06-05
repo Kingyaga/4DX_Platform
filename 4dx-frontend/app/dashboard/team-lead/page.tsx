@@ -124,7 +124,7 @@ export default function TeamLeadPage() {
 
   // Compute metrics
   const totalWIGs = wigs.length;
-  const activeWigList = wigs.filter((w: any) => w.status === "ACTIVE");
+  const activeWigList = wigs.filter((w: any) => w.status === "ACTIVE" && !w.archivedAt);
   const activeWIGs = activeWigList.length;
 
   const allLeadMeasures = activeWigList.flatMap((w: any) => w.leadMeasures || []);

@@ -268,7 +268,7 @@ export const teamsRouter = router({
       }
 
       const activeWigCount = await ctx.db.wIG.count({
-        where: { teamId: team.id, status: "ACTIVE" },
+        where: { teamId: team.id, status: "ACTIVE", archivedAt: null },
       });
 
       if (activeWigCount > 0) {
@@ -315,7 +315,7 @@ export const teamsRouter = router({
             },
           },
           wigs: {
-            where: { status: "ACTIVE" },
+            where: { status: "ACTIVE", archivedAt: null },
             include: { leadMeasures: true },
           },
         },
@@ -355,7 +355,7 @@ export const teamsRouter = router({
             select: { role: true },
           },
           wigs: {
-            where: { status: "ACTIVE" },
+            where: { status: "ACTIVE", archivedAt: null },
             select: { id: true },
           },
         },
@@ -404,7 +404,7 @@ export const teamsRouter = router({
             },
           },
           wigs: {
-            where: { status: "ACTIVE" },
+            where: { status: "ACTIVE", archivedAt: null },
           },
         },
       });
@@ -524,7 +524,7 @@ export const teamsRouter = router({
         where: { slug: input.teamSlug },
         include: {
           wigs: {
-            where: { status: "ACTIVE" },
+            where: { status: "ACTIVE", archivedAt: null },
             include: {
               leadMeasures: {
                 where: { archivedAt: null },
