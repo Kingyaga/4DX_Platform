@@ -1,0 +1,23 @@
+
+> 4dx-platform@0.1.0 dev
+> next dev -p 3001
+
+▲ Next.js 16.2.4 (Turbopack)
+- Local:         http://localhost:3001
+- Network:       http://192.168.88.56:3001
+- Environments: .env
+✓ Ready in 746ms
+Creating turbopack project {
+  dir: 'C:\\Users\\uhufe\\4dx-platform\\4dx-platform\\4DX_Platform',
+  testMode: true
+}
+
+ GET / 200 in 693ms (next.js: 378ms, application-code: 315ms)
+ GET / 200 in 69ms (next.js: 6ms, application-code: 62ms)
+ GET /api/auth/session 200 in 1315ms (next.js: 993ms, application-code: 322ms)
+ GET / 200 in 121ms (next.js: 8ms, application-code: 113ms)
+ POST /api/auth/_log 200 in 55ms (next.js: 34ms, application-code: 22ms)
+ GET /api/auth/session 200 in 1008ms (next.js: 11ms, application-code: 997ms)
+ POST /api/auth/_log 200 in 51ms (next.js: 36ms, application-code: 15ms)
+ GET / 200 in 118ms (next.js: 2ms, application-code: 116ms)
+ GET /api/auth/session 200 in 160ms (next.js: 9ms, application-code: 151ms)
