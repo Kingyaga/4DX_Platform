@@ -1,11 +1,11 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
 import { useUserStore } from "@/lib/stores/user-store";
 import { useOrgDashboard } from "@/lib/hooks";
 import { ErrorState, EmptyState } from "@/lib/components/states";
 import { PageLoader } from "@/lib/components/loading-spinner";
+import { getWigProgress } from "@/lib/metrics";
 
 export default function AtRiskDetailsPage() {
   const router = useRouter();
@@ -31,16 +31,14 @@ export default function AtRiskDetailsPage() {
   const allWIGs = orgTeams.flatMap((team) => team.wigs || []);
 
   const atRiskWIGs = allWIGs.filter((wig: any) => {
-    const midpoint = wig.fromValue + (wig.toValue - wig.fromValue) * 0.5;
-    return wig.currentValue < midpoint;
+    return getWigProgress(wig) < 50;
   });
 
   // Group at-risk WIGs by team
   const teamAtRiskData = orgTeams.map((team) => {
     const teamWIGs = team.wigs || [];
     const teamAtRiskWIGs = teamWIGs.filter((wig: any) => {
-      const midpoint = wig.fromValue + (wig.toValue - wig.fromValue) * 0.5;
-      return wig.currentValue < midpoint;
+      return getWigProgress(wig) < 50;
     });
 
     return {
@@ -125,8 +123,7 @@ export default function AtRiskDetailsPage() {
 
                   <div style={{ display: "grid", gap: "12px" }}>
                     {team.atRiskWIGs.map((wig: any) => {
-                      const progressPercent = wig.toValue > wig.fromValue ? (wig.currentValue - wig.fromValue) / (wig.toValue - wig.fromValue) : 0;
-                      const midpoint = 0.5;
+                      const progressPercent = getWigProgress(wig);
 
                       return (
                         <div key={wig.id} style={{
@@ -142,9 +139,8 @@ export default function AtRiskDetailsPage() {
                           </div>
 
                           <p style={{ fontSize: "14px", color: "#71717a", margin: "0 0 12px 0" }}>
-                            Current: ${(wig.currentValue / 1000000).toFixed(1)}M |
-                            Target: ${(wig.toValue / 1000000).toFixed(1)}M |
-                            Progress: {Math.round(progressPercent * 100)}%
+                            {(wig.leadMeasures?.length || 0)} lead measure{(wig.leadMeasures?.length || 0) === 1 ? "" : "s"} |
+                            Progress: {progressPercent}%
                           </p>
 
                           <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
@@ -152,20 +148,12 @@ export default function AtRiskDetailsPage() {
                               <div style={{
                                 height: "100%",
                                 backgroundColor: "#f59e0b",
-                                width: `${Math.min(progressPercent * 100, 100)}%`,
+                                width: `${Math.min(progressPercent, 100)}%`,
                                 borderRadius: "4px"
                               }} />
                             </div>
-                            <div style={{
-                              width: "2px",
-                              height: "12px",
-                              backgroundColor: "#71717a",
-                              position: "relative",
-                              left: `${midpoint * 100}%`,
-                              transform: "translateX(-50%)",
-                            }} />
                             <span style={{ fontSize: "12px", fontWeight: 500, color: "#71717a", minWidth: "60px" }}>
-                              Midpoint
+                              Below 50%
                             </span>
                           </div>
                         </div>

@@ -27,7 +27,7 @@ export const leadMeasuresRouter = router({
         name: z.string().min(3),
         description: z.string().optional(),
         trackingType: trackingTypeSchema.default("NUMERIC"),
-        cadence: z.enum(["WEEKLY", "BIWEEKLY"]),
+        cadence: z.enum(["WEEKLY", "BIWEEKLY"]).optional(),
         targetValue: z.number().optional(),
         unit: z.string().optional(),
         ownerUserIds: z.array(z.string()).min(1).max(10),
@@ -102,7 +102,7 @@ export const leadMeasuresRouter = router({
           name: input.name,
           description: input.description,
           trackingType: input.trackingType,
-          cadence: input.cadence,
+          cadence: input.cadence ?? "WEEKLY",
           targetValue: input.targetValue,
           unit: input.unit,
           owners: {
@@ -159,6 +159,15 @@ export const leadMeasuresRouter = router({
       return ctx.db.leadMeasure.update({
         where: { id: leadMeasureId },
         data: updateData,
+        include: {
+          owners: {
+            include: { user: { select: { id: true, name: true, email: true } } },
+          },
+          activityLogs: {
+            where: { status: "APPROVED" },
+            orderBy: { loggedForDate: "desc" },
+          },
+        },
       });
     }),
 

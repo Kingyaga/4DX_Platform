@@ -435,6 +435,18 @@ export function useCreateLeadMeasure() {
   };
 }
 
+export function useUpdateLeadMeasure() {
+  const mutation = trpc.leadMeasures.update.useMutation();
+
+  return {
+    updateLeadMeasure: mutation.mutateAsync,
+    isLoading: mutation.isPending,
+    error: mutation.error ? parseTRPCError(mutation.error) : null,
+    isSuccess: mutation.isSuccess,
+    reset: mutation.reset,
+  };
+}
+
 /**
  * Update owners of a lead measure (Team Lead only)
  */

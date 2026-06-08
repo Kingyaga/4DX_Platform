@@ -7,35 +7,7 @@ import { useWIGs, useMyTeams, useTeamSessions, useExportReport, useShareReport }
 import { ErrorState, EmptyState } from "@/lib/components/states";
 import { LoadingSpinner, PageLoader } from "@/lib/components/loading-spinner";
 import Link from "next/link";
-
-function getLeadMeasureScore(leadMeasure: any) {
-  if (leadMeasure.trackingType === "MILESTONE") {
-    const latest = [...(leadMeasure.activityLogs || [])].sort((a: any, b: any) => new Date(b.loggedForDate).getTime() - new Date(a.loggedForDate).getTime())[0];
-    if (latest?.progressStatus === "DONE") return 100;
-    if (latest?.progressStatus === "IN_PROGRESS") return 50;
-    if (latest?.progressStatus === "BLOCKED") return 25;
-    return 0;
-  }
-
-  const current = (leadMeasure.activityLogs || []).reduce((sum: number, log: any) => sum + (log.value ?? 0), 0);
-  const target = leadMeasure.targetValue ?? 0;
-  return target > 0 ? Math.min((current / target) * 100, 100) : 0;
-}
-
-function getWigScore(wig: any) {
-  if (wig.trackingType === "MILESTONE") {
-    const leadMeasures = wig.leadMeasures || [];
-    return leadMeasures.length > 0
-      ? Math.round(leadMeasures.reduce((sum: number, leadMeasure: any) => sum + getLeadMeasureScore(leadMeasure), 0) / leadMeasures.length)
-      : 0;
-  }
-
-  const fromValue = wig.fromValue ?? 0;
-  const toValue = wig.toValue ?? 0;
-  const currentValue = wig.currentValue ?? fromValue;
-  const denominator = toValue - fromValue;
-  return denominator > 0 ? Math.max(0, Math.min(100, Math.round(((currentValue - fromValue) / denominator) * 100))) : 0;
-}
+import { getActiveWigs, getExecutionScore, getLeadMeasureApprovedTotal, getLeadMeasureProgress, getWigProgress } from "@/lib/metrics";
 
 export default function TeamLeadReportsPage() {
   const { orgSlug } = useUserStore();
@@ -94,30 +66,16 @@ export default function TeamLeadReportsPage() {
   }
 
   // Compute report data
-  const allLeadMeasures = wigs.flatMap((w: any) => w.leadMeasures || []);
-  const incompleteLeadMeasures = allLeadMeasures.filter((lm: any) => getLeadMeasureScore(lm) < 100);
-  const executionScore = allLeadMeasures.length > 0
-    ? Math.round(
-        allLeadMeasures.reduce((sum: number, lm: any) => {
-          return sum + getLeadMeasureScore(lm);
-        }, 0) / allLeadMeasures.length
-      )
-    : 0;
-
-  const onTrackCount = allLeadMeasures.filter((lm: any) => getLeadMeasureScore(lm) >= 100).length;
-  const lagMeasures = wigs.map((w: any) => {
-    const fromValue = w.fromValue || 0;
-    const toValue = w.toValue || 0;
-    const currentValue = w.currentValue ?? fromValue;
-
-    return {
-      title: w.title,
-      baseline: fromValue,
-      current: currentValue,
-      target: toValue,
-      progress: getWigScore(w),
-    };
-  });
+  const activeWigs = getActiveWigs(wigs as any[]);
+  const allLeadMeasures = activeWigs.flatMap((w: any) => w.leadMeasures || []);
+  const incompleteLeadMeasures = allLeadMeasures.filter((lm: any) => getLeadMeasureProgress(lm) < 100);
+  const executionScore = getExecutionScore(allLeadMeasures as any);
+  const onTrackCount = allLeadMeasures.filter((lm: any) => getLeadMeasureProgress(lm) >= 100).length;
+  const lagMeasures = activeWigs.map((w: any) => ({
+    title: w.title,
+    leadMeasureCount: w.leadMeasures?.length || 0,
+    progress: getWigProgress(w),
+  }));
 
   const handleDownloadReport = async () => {
     if (!selectedReport || !currentTeamSlug) return;
@@ -358,7 +316,7 @@ export default function TeamLeadReportsPage() {
                     />
                   </div>
                   <p style={{ margin: 0, fontSize: "12px", color: "#71717a" }}>
-                    Baseline {measure.baseline} · Current {measure.current} · Target {measure.target}
+                    {measure.leadMeasureCount} lead measure{measure.leadMeasureCount === 1 ? "" : "s"} driving this WIG
                   </p>
                 </div>
               ))}
@@ -379,13 +337,15 @@ export default function TeamLeadReportsPage() {
                 </p>
               )}
               {incompleteLeadMeasures.slice(0, 10).map((lm: any, i: number) => {
-                const isOnTrack = getLeadMeasureScore(lm) >= 100;
+                const score = getLeadMeasureProgress(lm);
+                const current = getLeadMeasureApprovedTotal(lm);
+                const isOnTrack = score >= 100;
                 return (
                   <div key={i} style={{ padding: "12px", backgroundColor: "#f9fafb", borderRadius: "6px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                     <div>
                       <p style={{ margin: 0, fontWeight: "500", fontSize: "14px" }}>{lm.name || "Lead Measure"}</p>
                       <p style={{ margin: "4px 0 0 0", fontSize: "12px", color: "#71717a" }}>
-                        Cadence: {lm.cadence || "Weekly"}
+                        {Math.round(score)}% complete · {current.toFixed(1)} / {(lm.targetValue ?? 0).toFixed(1)} {lm.unit ?? ""}
                       </p>
                     </div>
                     <div

@@ -101,8 +101,8 @@ export const orgRouter = router({
                 where: { archivedAt: null },
                 include: {
                   activityLogs: {
+                    where: { status: "APPROVED" },
                     orderBy: { loggedForDate: "desc" },
-                    take: 1,
                   },
                 },
               },
@@ -116,6 +116,8 @@ export const orgRouter = router({
         by: ['status'],
         where: {
           wig: {
+            status: "ACTIVE",
+            archivedAt: null,
             team: {
               orgId: org.id
             }

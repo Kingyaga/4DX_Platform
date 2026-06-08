@@ -2,6 +2,7 @@ import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { router, protectedProcedure } from "../trpc";
 import { sendReportSharedEmail } from "../email";
+import { getLeadMeasureCompletionPercent, getWigCompletionScore } from "../wigCompletion";
 
 const reportTypeSchema = z.enum(["execution", "lag", "lead"]);
 
@@ -27,32 +28,11 @@ function reportTitle(reportType: ReportType) {
 }
 
 function leadMeasureScore(leadMeasure: any) {
-  if (leadMeasure.trackingType === "MILESTONE") {
-    const latest = [...(leadMeasure.activityLogs || [])].sort((a: any, b: any) => new Date(b.loggedForDate).getTime() - new Date(a.loggedForDate).getTime())[0];
-    if (latest?.progressStatus === "DONE") return 100;
-    if (latest?.progressStatus === "IN_PROGRESS") return 50;
-    if (latest?.progressStatus === "BLOCKED") return 25;
-    return 0;
-  }
-
-  const current = leadMeasure.activityLogs.reduce((sum: number, log: any) => sum + (log.value ?? 0), 0);
-  const target = leadMeasure.targetValue ?? 0;
-  return target > 0 ? Math.min((current / target) * 100, 100) : 0;
+  return getLeadMeasureCompletionPercent(leadMeasure);
 }
 
 function wigScore(wig: any) {
-  if (wig.trackingType === "MILESTONE") {
-    const leadMeasures = wig.leadMeasures || [];
-    return leadMeasures.length > 0
-      ? Math.round(leadMeasures.reduce((sum: number, leadMeasure: any) => sum + leadMeasureScore(leadMeasure), 0) / leadMeasures.length)
-      : 0;
-  }
-
-  const fromValue = wig.fromValue ?? 0;
-  const toValue = wig.toValue ?? 0;
-  const currentValue = wig.currentValue ?? fromValue;
-  const denominator = toValue - fromValue;
-  return denominator > 0 ? Math.max(0, Math.min(100, Math.round(((currentValue - fromValue) / denominator) * 100))) : 0;
+  return getWigCompletionScore(wig.leadMeasures || []);
 }
 
 async function assertCanUseTeamReports(ctx: any, teamSlug: string) {
@@ -89,7 +69,7 @@ async function assertCanUseTeamReports(ctx: any, teamSlug: string) {
 async function buildReport(ctx: any, teamSlug: string, reportType: ReportType) {
   const team = await assertCanUseTeamReports(ctx, teamSlug);
   const wigs = await ctx.db.wIG.findMany({
-    where: { teamId: team.id },
+    where: { teamId: team.id, status: "ACTIVE", archivedAt: null },
     include: {
       leadMeasures: {
         where: { archivedAt: null },
@@ -135,13 +115,11 @@ async function buildReport(ctx: any, teamSlug: string, reportType: ReportType) {
     ];
   } else if (reportType === "lag") {
     rows = [
-      ["WIG", "Baseline", "Current", "Target", "Progress", "Status"],
+      ["WIG", "Lead Measures", "Progress", "Status"],
       ...wigs.map((wig: any) => {
         return [
           wig.title,
-          wig.trackingType === "MILESTONE" ? "Outcome" : String(wig.fromValue ?? 0),
-          wig.trackingType === "MILESTONE" ? `${wigScore(wig)}%` : String(wig.currentValue ?? wig.fromValue ?? 0),
-          wig.trackingType === "MILESTONE" ? "Milestone" : String(wig.toValue ?? 0),
+          String(wig.leadMeasures?.length || 0),
           `${wigScore(wig)}%`,
           wig.status,
         ];
@@ -149,14 +127,14 @@ async function buildReport(ctx: any, teamSlug: string, reportType: ReportType) {
     ];
   } else {
     rows = [
-      ["WIG", "Lead Measure", "Cadence", "Current", "Target", "Unit", "Status"],
+      ["WIG", "Lead Measure", "Current", "Target", "Unit", "Progress", "Status"],
       ...incompleteLeadMeasureTotals.map((leadMeasure: any) => [
         leadMeasure.wig.title,
         leadMeasure.name,
-        leadMeasure.cadence,
         leadMeasure.trackingType === "MILESTONE" ? `${leadMeasure.score}%` : String(leadMeasure.current),
         leadMeasure.trackingType === "MILESTONE" ? "Done" : String(leadMeasure.targetValue ?? 0),
         leadMeasure.trackingType === "MILESTONE" ? "Status" : (leadMeasure.unit ?? ""),
+        `${Math.round(leadMeasure.score)}%`,
         leadMeasure.score >= 100 ? "ON TRACK" : "BEHIND",
       ]),
     ];

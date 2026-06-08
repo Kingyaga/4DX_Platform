@@ -6,21 +6,7 @@ import { useTeamStore } from "@/lib/stores/team-store";
 import { ErrorState, EmptyState } from "@/lib/components/states";
 import { LoadingSpinner } from "@/lib/components/loading-spinner";
 import type { LeadMeasure, ActivityLogEntry } from "@/lib/types";
-
-function getLeadMeasureProgress(leadMeasure: LeadMeasure) {
-  if (leadMeasure.trackingType === "MILESTONE") {
-    const latest = [...(leadMeasure.activityLogs || [])].sort((a, b) => new Date(b.loggedForDate).getTime() - new Date(a.loggedForDate).getTime())[0];
-    if (latest?.progressStatus === "DONE") return 100;
-    if (latest?.progressStatus === "IN_PROGRESS") return 50;
-    if (latest?.progressStatus === "BLOCKED") return 25;
-    return 0;
-  }
-
-  const target = leadMeasure.targetValue ?? 0;
-  if (target <= 0) return 0;
-  const current = (leadMeasure.activityLogs || []).reduce((sum, log) => sum + (log.value ?? 0), 0);
-  return Math.min(100, Math.round((current / target) * 100));
-}
+import { getLeadMeasureApprovedTotal, getLeadMeasureProgress, getLatestProgressStatus, getWigProgress, isProgressStatusLeadMeasure } from "@/lib/metrics";
 
 export default function ScoreboardPage() {
   const { currentTeamSlug } = useTeamStore();
@@ -54,20 +40,12 @@ export default function ScoreboardPage() {
     ? Math.max(0, Math.ceil((new Date(selected.deadline).getTime() - currentTime) / 86_400_000))
     : 0;
 
-  // Helper: compute status color based on progress
-  const getStatusColor = (current: number, target: number, baseline: number): string => {
-    const progress = (current - baseline) / (target - baseline);
+  const getStatusColor = (progressPercent: number): string => {
+    const progress = progressPercent / 100;
     if (progress >= 0.9) return "#16A34A";
     if (progress >= 0.7) return "#84cc16";
     if (progress >= 0.5) return "#EAB308";
     return "#ba1a1a";
-  };
-
-  const formatValue = (value: number | null | undefined, unit: string | null | undefined): string => {
-    if (value === null || value === undefined) return "Milestone";
-    if (!unit || unit.toLowerCase() === "none") return `${value}`;
-    if (unit === "$") return `$${value.toLocaleString()}`;
-    return `${value} ${unit}`;
   };
 
   // Render the core scoreboard content (reused in both normal and display modes)
@@ -77,21 +55,15 @@ export default function ScoreboardPage() {
     const headingColor = isDark ? "#ffffff" : "#18181b";
     const secondaryColor = isDark ? "#a1a1aa" : "#71717a";
     const bodyTextColor = isDark ? "#d4d4d8" : "#52525b";
-    const completionScore = selected.leadMeasures.length > 0
-      ? Math.round(
-          selected.leadMeasures.reduce((sum: number, lm: LeadMeasure) => sum + getLeadMeasureProgress(lm), 0) / selected.leadMeasures.length,
-        )
-      : 0;
+    const completionScore = getWigProgress(selected);
 
     return (
       <>
         {/* WIG Selector Tabs */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "12px", marginBottom: "32px" }}>
           {activeWigs.map((wig) => {
-            const wigScore = wig.leadMeasures.length
-              ? Math.round(wig.leadMeasures.reduce((sum: number, lm: LeadMeasure) => sum + getLeadMeasureProgress(lm), 0) / wig.leadMeasures.length)
-              : 0;
-            const statusColor = wig.trackingType === "MILESTONE" ? (wigScore >= 75 ? "#16A34A" : "#EAB308") : getStatusColor(wig.currentValue ?? 0, wig.toValue ?? 1, wig.fromValue ?? 0);
+            const wigScore = getWigProgress(wig);
+            const statusColor = getStatusColor(wigScore);
             return (
               <button
                 key={wig.id}
@@ -121,14 +93,14 @@ export default function ScoreboardPage() {
           })}
         </div>
 
-        {/* Target reached banner */}
+        {/* Lead measures complete banner */}
         {completionScore >= 100 && (
           <div style={{ marginBottom: "20px", padding: "16px 20px", backgroundColor: "#fffbeb", border: "1px solid #f59e0b", display: "flex", alignItems: "center", gap: "12px" }}>
             <span className="material-symbols-outlined" style={{ fontSize: "28px", color: "#f59e0b" }}>emoji_events</span>
             <div>
-              <div style={{ fontSize: "14px", fontWeight: 700, color: "#92400e" }}>Target Reached!</div>
+              <div style={{ fontSize: "14px", fontWeight: 700, color: "#92400e" }}>Lead Measures Complete!</div>
               <div style={{ fontSize: "13px", color: "#92400e", marginTop: "2px" }}>
-                This WIG has hit its goal. The team lead can now close it as <strong>ACHIEVED</strong> from the WIGs page.
+                This WIG&apos;s lead measures are complete. The team lead can now close it as <strong>ACHIEVED</strong> from the WIGs page.
               </div>
             </div>
           </div>
@@ -147,9 +119,9 @@ export default function ScoreboardPage() {
               </span>
             </div>
             <div style={{ textAlign: "right" }}>
-              <span style={{ fontSize: "12px", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", color: secondaryColor, display: "block", marginBottom: "8px" }}>Lag Value</span>
+              <span style={{ fontSize: "12px", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", color: secondaryColor, display: "block", marginBottom: "8px" }}>WIG Completion</span>
               <span style={{ fontSize: "20px", fontWeight: 600, color: headingColor }}>
-                {selected.trackingType === "MILESTONE" ? `${completionScore}% complete` : formatValue(selected.currentValue, selected.unit)}
+                {completionScore}% complete
               </span>
               <span style={{ fontSize: "12px", color: secondaryColor, display: "block", marginTop: "4px" }}>
                 {daysRemaining} day{daysRemaining !== 1 ? "s" : ""} remaining
@@ -160,13 +132,13 @@ export default function ScoreboardPage() {
             <div
               style={{
                 height: "100%",
-                backgroundColor: selected.trackingType === "MILESTONE" ? "#18181b" : getStatusColor(selected.currentValue ?? 0, selected.toValue ?? 1, selected.fromValue ?? 0),
+                backgroundColor: getStatusColor(completionScore),
                 width: `${completionScore}%`,
               }}
             ></div>
           </div>
           <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", color: secondaryColor }}>
-            <span>{selected.trackingType === "MILESTONE" ? "Milestone WIG" : `Baseline: ${formatValue(selected.fromValue, selected.unit)}`}</span>
+            <span>{selected.leadMeasures.length} lead measure{selected.leadMeasures.length === 1 ? "" : "s"}</span>
             <span>Deadline: {new Date(selected.deadline).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</span>
           </div>
           <p style={{ fontSize: "12px", color: secondaryColor, marginTop: "8px", fontStyle: "italic" }}>
@@ -181,10 +153,10 @@ export default function ScoreboardPage() {
             const recentLogs = (lm.activityLogs || []).slice(0, 6).reverse();
             const trend = recentLogs.map((log: ActivityLogEntry) => log.value ?? 0);
             // Cumulative total of all approved activity (correct 4DX lead measure tracking)
-            const current = (lm.activityLogs || []).reduce((sum: number, log: ActivityLogEntry) => sum + (log.value ?? 0), 0);
+            const current = getLeadMeasureApprovedTotal(lm);
             const pct = getLeadMeasureProgress(lm);
             const onTrack = pct >= 100;
-            const latestStatus = [...(lm.activityLogs || [])].sort((a, b) => new Date(b.loggedForDate).getTime() - new Date(a.loggedForDate).getTime())[0]?.progressStatus;
+            const latestStatus = getLatestProgressStatus(lm);
 
             // Group activity logs by owner for per-owner contribution
             const ownerContributions: Record<string, { name: string; total: number }> = {};
@@ -194,7 +166,7 @@ export default function ScoreboardPage() {
               if (!ownerContributions[log.userId]) {
                 ownerContributions[log.userId] = { name: ownerName, total: 0 };
               }
-              ownerContributions[log.userId].total += log.value ?? 0;
+              ownerContributions[log.userId].total += isProgressStatusLeadMeasure(lm.trackingType) ? 1 : (log.value ?? 0);
             }
             const ownerList = Object.values(ownerContributions).sort((a, b) => b.total - a.total);
 
@@ -206,16 +178,16 @@ export default function ScoreboardPage() {
                     <span style={{ fontSize: "16px", fontWeight: 500, color: headingColor }}>{lm.name}</span>
                   </div>
                   <span style={{ fontSize: "12px", fontWeight: 600, color: onTrack ? "#16A34A" : "#ba1a1a", textTransform: "uppercase", letterSpacing: "0.05em" }}>
-                    {onTrack ? "Completed" : lm.trackingType === "MILESTONE" ? latestStatus?.replace(/_/g, " ") || "Pending" : "Behind"}
+                    {onTrack ? "Completed" : isProgressStatusLeadMeasure(lm.trackingType) ? latestStatus?.replace(/_/g, " ") || "Pending" : "Behind"}
                   </span>
                 </div>
 
                 <div style={{ display: "flex", alignItems: "flex-end", gap: "8px", marginBottom: "12px" }}>
                   <span style={{ fontSize: isDark ? "40px" : "32px", fontWeight: 700, color: headingColor, letterSpacing: "-0.03em" }}>
-                    {lm.trackingType === "MILESTONE" ? `${pct}%` : current}
+                    {isProgressStatusLeadMeasure(lm.trackingType) ? `${pct}%` : current}
                   </span>
                   <span style={{ fontSize: "16px", color: secondaryColor, marginBottom: "6px" }}>
-                    {lm.trackingType === "MILESTONE" ? latestStatus?.replace(/_/g, " ") || "No update" : `/ ${lm.targetValue ?? 0} ${lm.unit ?? ""}`}
+                    {isProgressStatusLeadMeasure(lm.trackingType) ? latestStatus?.replace(/_/g, " ") || "No update" : `/ ${lm.targetValue ?? 0} ${lm.unit ?? ""}`}
                   </span>
                 </div>
 
@@ -238,7 +210,7 @@ export default function ScoreboardPage() {
                       {ownerList.map((owner) => (
                         <div key={owner.name} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                           <span style={{ fontSize: "12px", color: bodyTextColor }}>{owner.name}</span>
-                          <span style={{ fontSize: "12px", fontWeight: 600, color: headingColor }}>{owner.total.toFixed(1)} {lm.unit}</span>
+                          <span style={{ fontSize: "12px", fontWeight: 600, color: headingColor }}>{isProgressStatusLeadMeasure(lm.trackingType) ? `${owner.total} update${owner.total !== 1 ? "s" : ""}` : `${owner.total.toFixed(1)} ${lm.unit ?? ""}`}</span>
                         </div>
                       ))}
                     </div>

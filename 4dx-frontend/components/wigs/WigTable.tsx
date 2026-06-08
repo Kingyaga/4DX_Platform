@@ -1,52 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useWIGs, useCreateWIG, useUpdateWIG, useCreateLeadMeasure, useRoleCheck, useMyTeams, useActivateWIG, useTeam, useCloseWIG, useUpdateLeadMeasureOwners, useArchiveLeadMeasure, useArchiveWIG, useResumeWIG, useDeleteWIG } from "@/lib/hooks";
+import { useWIGs, useCreateWIG, useUpdateWIG, useCreateLeadMeasure, useUpdateLeadMeasure, useRoleCheck, useMyTeams, useActivateWIG, useTeam, useCloseWIG, useUpdateLeadMeasureOwners, useArchiveLeadMeasure, useArchiveWIG, useResumeWIG, useDeleteWIG } from "@/lib/hooks";
 import { useTeamStore } from "@/lib/stores/team-store";
 import { useUserStore } from "@/lib/stores/user-store";
 import { WIGListSkeleton } from "@/lib/components/skeletons";
 import { ErrorState, EmptyState } from "@/lib/components/states";
 import { PageLoader } from "@/lib/components/loading-spinner";
 import type { WIG, LeadMeasure, TeamMember, TrackingType } from "@/lib/types";
-
-type CreateWigTrackingType = "NUMERIC" | "MILESTONE" | "COMPLETION" | "HYBRID" | "CUSTOM";
-
-function isNonNumericWig(trackingType: TrackingType) {
-  return trackingType !== "NUMERIC";
-}
-
-function isNonNumericLeadMeasure(trackingType: TrackingType) {
-  return trackingType !== "NUMERIC" && trackingType !== "PERCENTAGE" && trackingType !== "DURATION";
-}
-
-function getWigProgress(wig: WIG) {
-  if (isNonNumericWig(wig.trackingType)) {
-    if (!wig.leadMeasures.length) return 0;
-    const total = wig.leadMeasures.reduce((sum, leadMeasure) => sum + getLeadMeasureProgress(leadMeasure), 0);
-    return Math.round(total / wig.leadMeasures.length);
-  }
-
-  const from = wig.fromValue ?? 0;
-  const to = wig.toValue ?? 0;
-  const current = wig.currentValue ?? from;
-  if (to <= from) return 0;
-  return Math.min(100, Math.max(0, ((current - from) / (to - from)) * 100));
-}
-
-function getLeadMeasureProgress(leadMeasure: LeadMeasure) {
-  if (isNonNumericLeadMeasure(leadMeasure.trackingType)) {
-    const latest = [...(leadMeasure.activityLogs || [])].sort((a, b) => new Date(b.loggedForDate).getTime() - new Date(a.loggedForDate).getTime())[0];
-    if (latest?.progressStatus === "DONE") return 100;
-    if (latest?.progressStatus === "IN_PROGRESS") return 50;
-    if (latest?.progressStatus === "BLOCKED") return 25;
-    return 0;
-  }
-
-  const target = leadMeasure.targetValue ?? 0;
-  if (target <= 0) return 0;
-  const total = (leadMeasure.activityLogs || []).reduce((sum, log) => sum + (log.value ?? 0), 0);
-  return Math.min(100, Math.round((total / target) * 100));
-}
+import { getLeadMeasureApprovedTotal, getLeadMeasureProgress, getLatestProgressStatus, getWigProgress, isProgressStatusLeadMeasure } from "@/lib/metrics";
 
 export function WigTable() {
   const [selectedWIG, setSelectedWIG] = useState<WIG | null>(null);
@@ -299,13 +261,10 @@ export function WigTable() {
                           {targetReached && (
                             <span style={{ display: "inline-flex", alignItems: "center", gap: "4px", padding: "2px 8px", backgroundColor: "#f59e0b", color: "#ffffff", fontSize: "12px", fontWeight: 700, letterSpacing: "0.04em", textTransform: "uppercase" }}>
                               <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>emoji_events</span>
-                              Target Reached
+                              Lead Measures Complete
                             </span>
                           )}
                           <span style={{ fontSize: "12px", color: "#71717a", textTransform: "uppercase", letterSpacing: "0.05em" }}>Wildly Important Goal</span>
-                          {wig.trackingType !== "NUMERIC" && (
-                            <span style={{ fontSize: "12px", color: "#52525b", backgroundColor: "#e4e4e7", padding: "2px 8px", fontWeight: 700 }}>Milestone</span>
-                          )}
                         </div>
                         <h2 style={{ fontSize: "20px", fontWeight: 600, color: "#18181b", letterSpacing: "-0.01em" }}>{wig.title}</h2>
                       </div>
@@ -338,7 +297,6 @@ export function WigEditPanel({ wig, onBack }: { wig: WIG; onBack: () => void }) 
   const [showAddLeadMeasure, setShowAddLeadMeasure] = useState(false);
   const [leadMeasureName, setLeadMeasureName] = useState("");
   const [leadMeasureDescription, setLeadMeasureDescription] = useState("");
-  const [cadence, setCadence] = useState<"WEEKLY" | "BIWEEKLY">("WEEKLY");
   const [leadMeasureTrackingType, setLeadMeasureTrackingType] = useState<TrackingType>("NUMERIC");
   const [targetValue, setTargetValue] = useState("");
   const [leadMeasureUnit, setLeadMeasureUnit] = useState(wig.unit || "");
@@ -348,8 +306,10 @@ export function WigEditPanel({ wig, onBack }: { wig: WIG; onBack: () => void }) 
   const [closeStatus, setCloseStatus] = useState<"ACHIEVED" | "MISSED" | "ABANDONED">("ACHIEVED");
   const [editingOwnersForLm, setEditingOwnersForLm] = useState<string | null>(null);
   const [newOwnerIds, setNewOwnerIds] = useState<string[]>([]);
+  const [editingLeadMeasure, setEditingLeadMeasure] = useState<LeadMeasure | null>(null);
 
   const { createLeadMeasure, isLoading: isCreatingLeadMeasure, error: createLeadMeasureError } = useCreateLeadMeasure();
+  const { updateLeadMeasure, isLoading: isUpdatingLeadMeasure, error: updateLeadMeasureError } = useUpdateLeadMeasure();
   const { updateOwners, isLoading: isUpdatingOwners } = useUpdateLeadMeasureOwners();
   const { archiveLeadMeasure, isLoading: isArchivingLeadMeasure } = useArchiveLeadMeasure();
   const { activateWIG, isLoading: isActivatingWIG, error: activateWIGError } = useActivateWIG();
@@ -361,18 +321,14 @@ export function WigEditPanel({ wig, onBack }: { wig: WIG; onBack: () => void }) 
   const currentTeamSlug = useTeamStore((state) => state.currentTeamSlug);
   const { team } = useTeam(currentTeamSlug);
   const progress = getWigProgress(activeWig);
-  const numericTargetReached =
-    activeWig.trackingType === "NUMERIC" &&
-    activeWig.currentValue !== null &&
-    activeWig.toValue !== null &&
-    activeWig.currentValue >= activeWig.toValue;
+  const leadMeasuresComplete = activeWig.status === "ACTIVE" && progress >= 100 && activeWig.leadMeasures.length > 0;
   const statusColor = activeWig.status === "ACTIVE" ? "#16A34A" : activeWig.status === "DRAFT" ? "#71717a" : "#EAB308";
   const isArchived = Boolean(activeWig.archivedAt);
 
   useEffect(() => {
     setActiveWig(wig);
     setLeadMeasureUnit(wig.unit || "");
-    setLeadMeasureTrackingType(wig.trackingType !== "NUMERIC" ? "MILESTONE" : "NUMERIC");
+    setLeadMeasureTrackingType("NUMERIC");
   }, [wig]);
 
   const canAddLeadMeasure = canCreateWIG && !isArchived && activeWig.leadMeasures.length < 3;
@@ -387,7 +343,7 @@ export function WigEditPanel({ wig, onBack }: { wig: WIG; onBack: () => void }) 
   const handleCreateLeadMeasure = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!leadMeasureName || !cadence || ownerUserIds.length === 0) {
+    if (!leadMeasureName || ownerUserIds.length === 0) {
       return;
     }
 
@@ -401,7 +357,6 @@ export function WigEditPanel({ wig, onBack }: { wig: WIG; onBack: () => void }) 
         name: leadMeasureName,
         description: leadMeasureDescription || undefined,
         trackingType: leadMeasureTrackingType,
-        cadence,
         targetValue: leadMeasureTrackingType === "NUMERIC" || leadMeasureTrackingType === "PERCENTAGE" || leadMeasureTrackingType === "DURATION" ? parseFloat(targetValue) : undefined,
         unit: leadMeasureTrackingType === "NUMERIC" || leadMeasureTrackingType === "PERCENTAGE" || leadMeasureTrackingType === "DURATION" ? leadMeasureUnit : undefined,
         ownerUserIds,
@@ -414,8 +369,7 @@ export function WigEditPanel({ wig, onBack }: { wig: WIG; onBack: () => void }) 
       setShowAddLeadMeasure(false);
       setLeadMeasureName("");
       setLeadMeasureDescription("");
-      setCadence("WEEKLY");
-      setLeadMeasureTrackingType(wig.trackingType !== "NUMERIC" ? "MILESTONE" : "NUMERIC");
+      setLeadMeasureTrackingType("NUMERIC");
       setTargetValue("");
       setLeadMeasureUnit(wig.unit || "");
       setOwnerUserIds([]);
@@ -601,13 +555,13 @@ export function WigEditPanel({ wig, onBack }: { wig: WIG; onBack: () => void }) 
         </div>
       )}
 
-      {activeWig.status === "ACTIVE" && !isArchived && numericTargetReached && (
+      {activeWig.status === "ACTIVE" && !isArchived && leadMeasuresComplete && (
         <div style={{ marginBottom: "20px", padding: "16px 20px", backgroundColor: "#fffbeb", border: "1px solid #f59e0b", display: "flex", alignItems: "center", gap: "12px" }}>
           <span className="material-symbols-outlined" style={{ fontSize: "28px", color: "#f59e0b" }}>emoji_events</span>
           <div>
-            <div style={{ fontSize: "14px", fontWeight: 700, color: "#92400e" }}>Target Reached!</div>
+            <div style={{ fontSize: "14px", fontWeight: 700, color: "#92400e" }}>Lead Measures Complete!</div>
             <div style={{ fontSize: "13px", color: "#92400e", marginTop: "2px" }}>
-              This WIG has hit its goal. Close it as <strong>ACHIEVED</strong> to record the win and notify the team.
+              This WIG&apos;s lead measures are complete. Close it as <strong>ACHIEVED</strong> to record the win and notify the team.
             </div>
           </div>
           {canArchiveWIG && (
@@ -623,10 +577,10 @@ export function WigEditPanel({ wig, onBack }: { wig: WIG; onBack: () => void }) 
       )}
 
       <div style={{ width: "100%", height: "4px", backgroundColor: "#e4e4e7", marginBottom: "8px", position: "relative" }}>
-        <div style={{ height: "100%", backgroundColor: numericTargetReached ? "#f59e0b" : "#18181b", width: `${Math.min(progress, 100)}%` }}></div>
+        <div style={{ height: "100%", backgroundColor: leadMeasuresComplete ? "#f59e0b" : "#18181b", width: `${Math.min(progress, 100)}%` }}></div>
       </div>
       <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", color: "#71717a" }}>
-        <span>{activeWig.trackingType !== "NUMERIC" ? "Outcome-based WIG" : `Baseline: ${activeWig.fromValue ?? 0}`}</span>
+        <span>Progress from lead measures: {progress}%</span>
         <span>Deadline: {new Date(activeWig.deadline).toLocaleDateString()}</span>
       </div>
 
@@ -694,7 +648,7 @@ export function WigEditPanel({ wig, onBack }: { wig: WIG; onBack: () => void }) 
               </div>
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: leadMeasureTrackingType === "NUMERIC" || leadMeasureTrackingType === "PERCENTAGE" || leadMeasureTrackingType === "DURATION" ? "1fr 1fr 1fr" : "1fr", gap: "16px" }}>
+            <div style={{ display: "grid", gridTemplateColumns: leadMeasureTrackingType === "NUMERIC" || leadMeasureTrackingType === "PERCENTAGE" || leadMeasureTrackingType === "DURATION" ? "1fr 1fr" : "1fr", gap: "16px" }}>
               {(leadMeasureTrackingType === "NUMERIC" || leadMeasureTrackingType === "PERCENTAGE" || leadMeasureTrackingType === "DURATION") && (
                 <>
                   <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
@@ -720,18 +674,6 @@ export function WigEditPanel({ wig, onBack }: { wig: WIG; onBack: () => void }) 
                   </div>
                 </>
               )}
-              <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-                <label style={{ fontSize: "12px", fontWeight: 600, color: "#18181b" }}>Cadence *</label>
-                <select
-                  value={cadence}
-                  onChange={(e) => setCadence(e.target.value as "WEEKLY" | "BIWEEKLY")}
-                  required
-                  style={{ border: "1px solid #e4e4e7", backgroundColor: "#ffffff", padding: "10px", fontSize: "14px", outline: "none" }}
-                >
-                  <option value="WEEKLY">Weekly</option>
-                  <option value="BIWEEKLY">Biweekly</option>
-                </select>
-              </div>
             </div>
 
             <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
@@ -833,10 +775,10 @@ export function WigEditPanel({ wig, onBack }: { wig: WIG; onBack: () => void }) 
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
             {activeWig.leadMeasures.map((lm) => {
-              const totalLogged = (lm.activityLogs || []).reduce((sum, log) => sum + (log.value ?? 0), 0);
+              const totalLogged = getLeadMeasureApprovedTotal(lm);
               const lmProgress = getLeadMeasureProgress(lm);
               const leadMeasureCompleted = lmProgress >= 100;
-              const latestStatus = [...(lm.activityLogs || [])].sort((a, b) => new Date(b.loggedForDate).getTime() - new Date(a.loggedForDate).getTime())[0]?.progressStatus;
+              const latestStatus = getLatestProgressStatus(lm);
 
               return (
                 <div key={lm.id} style={{ backgroundColor: "#ffffff", border: "1px solid #e4e4e7", padding: "20px" }}>
@@ -856,6 +798,12 @@ export function WigEditPanel({ wig, onBack }: { wig: WIG; onBack: () => void }) 
                   )}
                   {canCreateWIG && !isArchived && (
                     <div style={{ display: "flex", gap: "12px", marginBottom: "8px" }}>
+                      <button
+                        onClick={() => setEditingLeadMeasure(lm)}
+                        style={{ fontSize: "12px", color: "#71717a", background: "none", border: "none", cursor: "pointer", textDecoration: "underline", padding: 0 }}
+                      >
+                        Edit lead measure
+                      </button>
                       <button
                         onClick={() => {
                           setEditingOwnersForLm(lm.id);
@@ -881,6 +829,22 @@ export function WigEditPanel({ wig, onBack }: { wig: WIG; onBack: () => void }) 
                         Delete lead measure
                       </button>
                     </div>
+                  )}
+                  {editingLeadMeasure?.id === lm.id && (
+                    <LeadMeasureEditForm
+                      leadMeasure={lm}
+                      isSaving={isUpdatingLeadMeasure}
+                      error={updateLeadMeasureError}
+                      onCancel={() => setEditingLeadMeasure(null)}
+                      onSave={async (nextLeadMeasure) => {
+                        const updated = await updateLeadMeasure(nextLeadMeasure);
+                        setActiveWig((prev) => ({
+                          ...prev,
+                          leadMeasures: prev.leadMeasures.map((m) => m.id === lm.id ? { ...m, ...(updated as LeadMeasure) } : m),
+                        }));
+                        setEditingLeadMeasure(null);
+                      }}
+                    />
                   )}
                   {editingOwnersForLm === lm.id && (
                     <div style={{ marginTop: "8px", marginBottom: "12px", padding: "12px", border: "1px solid #e4e4e7", backgroundColor: "#f8fafc" }}>
@@ -934,14 +898,10 @@ export function WigEditPanel({ wig, onBack }: { wig: WIG; onBack: () => void }) 
                     <div>
                       <span style={{ fontSize: "12px", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", color: "#71717a", display: "block", marginBottom: "4px" }}>Progress</span>
                       <span style={{ fontSize: "20px", fontWeight: 600, color: "#18181b" }}>
-                        {isNonNumericLeadMeasure(lm.trackingType)
+                        {isProgressStatusLeadMeasure(lm.trackingType)
                           ? `${latestStatus ? latestStatus.replace(/_/g, " ") : "No update"} (${lmProgress}%)`
                           : `${totalLogged.toFixed(1)} / ${(lm.targetValue ?? 0).toFixed(1)} ${lm.unit ?? ""}`}
                       </span>
-                    </div>
-                    <div style={{ textAlign: "right" }}>
-                      <span style={{ fontSize: "12px", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", color: "#71717a", display: "block", marginBottom: "4px" }}>Cadence</span>
-                      <span style={{ fontSize: "14px", color: "#18181b" }}>{lm.cadence}</span>
                     </div>
                   </div>
                 </div>
@@ -954,13 +914,113 @@ export function WigEditPanel({ wig, onBack }: { wig: WIG; onBack: () => void }) 
   );
 }
 
+function LeadMeasureEditForm({
+  leadMeasure,
+  isSaving,
+  error,
+  onCancel,
+  onSave,
+}: {
+  leadMeasure: LeadMeasure;
+  isSaving: boolean;
+  error: unknown;
+  onCancel: () => void;
+  onSave: (input: {
+    leadMeasureId: string;
+    name: string;
+    description?: string;
+    trackingType: TrackingType;
+    targetValue?: number;
+    unit?: string;
+  }) => Promise<void>;
+}) {
+  const [name, setName] = useState(leadMeasure.name);
+  const [description, setDescription] = useState(leadMeasure.description || "");
+  const [trackingType, setTrackingType] = useState<TrackingType>(leadMeasure.trackingType);
+  const [targetValue, setTargetValue] = useState(leadMeasure.targetValue?.toString() || "");
+  const [unit, setUnit] = useState(leadMeasure.unit || "");
+  const [validationError, setValidationError] = useState<string | null>(null);
+  const needsTarget = !isProgressStatusLeadMeasure(trackingType);
+
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setValidationError(null);
+
+    if (!name.trim()) return;
+
+    let nextTarget: number | undefined;
+    if (needsTarget) {
+      nextTarget = Number(targetValue);
+      if (!targetValue || Number.isNaN(nextTarget) || nextTarget <= 0 || !unit.trim()) {
+        setValidationError("This tracking type needs a positive target value and unit.");
+        return;
+      }
+    }
+
+    await onSave({
+      leadMeasureId: leadMeasure.id,
+      name: name.trim(),
+      description: description.trim() || undefined,
+      trackingType,
+      targetValue: nextTarget,
+      unit: needsTarget ? unit.trim() : undefined,
+    });
+  };
+
+  return (
+    <form onSubmit={handleSubmit} style={{ marginTop: "8px", marginBottom: "12px", padding: "16px", border: "1px solid #e4e4e7", backgroundColor: "#f8fafc", display: "grid", gap: "12px" }}>
+      {error ? <ErrorState error={error as any} title="Unable to update lead measure" /> : null}
+      {validationError && <div style={{ padding: "10px 12px", backgroundColor: "#fee2e2", border: "1px solid #fecaca", color: "#991b1b", fontSize: "13px" }}>{validationError}</div>}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+        <label style={{ display: "flex", flexDirection: "column", gap: "4px", fontSize: "12px", fontWeight: 600, color: "#18181b" }}>
+          Name *
+          <input value={name} onChange={(event) => setName(event.target.value)} required style={{ border: "1px solid #e4e4e7", backgroundColor: "#ffffff", padding: "10px", fontSize: "14px", outline: "none" }} />
+        </label>
+        <label style={{ display: "flex", flexDirection: "column", gap: "4px", fontSize: "12px", fontWeight: 600, color: "#18181b" }}>
+          Tracking Type *
+          <select value={trackingType} onChange={(event) => setTrackingType(event.target.value as TrackingType)} style={{ border: "1px solid #e4e4e7", backgroundColor: "#ffffff", padding: "10px", fontSize: "14px", outline: "none" }}>
+            <option value="NUMERIC">Numeric target</option>
+            <option value="MILESTONE">Milestone / qualitative</option>
+            <option value="BOOLEAN">Boolean / completion</option>
+            <option value="TIME">Time of day</option>
+            <option value="TEXT">Text update</option>
+            <option value="PERCENTAGE">Percentage</option>
+            <option value="DURATION">Duration</option>
+            <option value="CHECKLIST">Checklist</option>
+          </select>
+        </label>
+      </div>
+      {needsTarget && (
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+          <label style={{ display: "flex", flexDirection: "column", gap: "4px", fontSize: "12px", fontWeight: 600, color: "#18181b" }}>
+            Target Value *
+            <input type="number" min="0" step="any" value={targetValue} onChange={(event) => setTargetValue(event.target.value)} required style={{ border: "1px solid #e4e4e7", backgroundColor: "#ffffff", padding: "10px", fontSize: "14px", outline: "none" }} />
+          </label>
+          <label style={{ display: "flex", flexDirection: "column", gap: "4px", fontSize: "12px", fontWeight: 600, color: "#18181b" }}>
+            Unit *
+            <input value={unit} onChange={(event) => setUnit(event.target.value)} required style={{ border: "1px solid #e4e4e7", backgroundColor: "#ffffff", padding: "10px", fontSize: "14px", outline: "none" }} />
+          </label>
+        </div>
+      )}
+      <label style={{ display: "flex", flexDirection: "column", gap: "4px", fontSize: "12px", fontWeight: 600, color: "#18181b" }}>
+        Description
+        <textarea value={description} onChange={(event) => setDescription(event.target.value)} rows={3} style={{ border: "1px solid #e4e4e7", backgroundColor: "#ffffff", padding: "10px", fontSize: "14px", outline: "none", fontFamily: "inherit" }} />
+      </label>
+      <div style={{ display: "flex", justifyContent: "flex-end", gap: "8px" }}>
+        <button type="button" onClick={onCancel} style={{ padding: "8px 14px", backgroundColor: "#ffffff", border: "1px solid #e4e4e7", fontSize: "12px", fontWeight: 600, cursor: "pointer" }}>Cancel</button>
+        <button type="submit" disabled={isSaving} style={{ padding: "8px 14px", backgroundColor: isSaving ? "#a1a1aa" : "#18181b", border: "none", color: "#ffffff", fontSize: "12px", fontWeight: 600, cursor: isSaving ? "not-allowed" : "pointer" }}>{isSaving ? "Saving..." : "Save changes"}</button>
+      </div>
+    </form>
+  );
+}
+
 export function WigHistoryPanel({ wig, onBack }: { wig: WIG; onBack: () => void }) {
   const outcomeColor = wig.status === "ACHIEVED" ? "#16A34A" : wig.status === "MISSED" ? "#ef4444" : "#71717a";
   const outcomeIcon = wig.status === "ACHIEVED" ? "emoji_events" : wig.status === "MISSED" ? "cancel" : "archive";
   const finalProgress = getWigProgress(wig);
   const leadMeasureCompletionEvents = wig.leadMeasures
     .map((lm) => {
-      if (isNonNumericLeadMeasure(lm.trackingType)) {
+      if (isProgressStatusLeadMeasure(lm.trackingType)) {
         const completionLog = [...(lm.activityLogs || [])]
           .sort((a, b) => new Date(a.loggedForDate).getTime() - new Date(b.loggedForDate).getTime())
           .find((log) => log.progressStatus === "DONE");
@@ -1037,12 +1097,10 @@ export function WigHistoryPanel({ wig, onBack }: { wig: WIG; onBack: () => void 
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "16px", flexWrap: "wrap", gap: "12px" }}>
           <div>
             <div style={{ fontSize: "40px", fontWeight: 700, letterSpacing: "-0.03em", color: "#18181b" }}>
-              {wig.trackingType !== "NUMERIC" ? `${finalProgress}%` : (wig.currentValue ?? wig.fromValue ?? 0)} <span style={{ fontSize: "18px", fontWeight: 500, color: "#71717a" }}>{wig.trackingType !== "NUMERIC" ? "complete" : wig.unit}</span>
+              {finalProgress}% <span style={{ fontSize: "18px", fontWeight: 500, color: "#71717a" }}>complete</span>
             </div>
             <div style={{ fontSize: "13px", color: "#71717a", marginTop: "4px" }}>
-              {wig.trackingType !== "NUMERIC"
-                ? "Outcome-based goal measured through milestone lead measures."
-                : `Baseline: ${wig.fromValue ?? 0} ${wig.unit ?? ""} -> Target: ${wig.toValue ?? 0} ${wig.unit ?? ""}`}
+              Goal progress was measured through lead measure completion.
             </div>
           </div>
           <div style={{ textAlign: "right" }}>
@@ -1098,11 +1156,11 @@ export function WigHistoryPanel({ wig, onBack }: { wig: WIG; onBack: () => void 
         <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
           {wig.leadMeasures.map((lm, i) => {
             // Cumulative approved total
-            const totalApproved = (lm.activityLogs || []).reduce((sum, log) => sum + (log.value ?? 0), 0);
+            const totalApproved = getLeadMeasureApprovedTotal(lm);
             const lmPct = getLeadMeasureProgress(lm);
             const lmOnTrack = lmPct >= 100;
-            const latestStatus = isNonNumericLeadMeasure(lm.trackingType)
-              ? [...(lm.activityLogs || [])].sort((a, b) => new Date(b.loggedForDate).getTime() - new Date(a.loggedForDate).getTime())[0]?.progressStatus
+            const latestStatus = isProgressStatusLeadMeasure(lm.trackingType)
+              ? getLatestProgressStatus(lm)
               : null;
 
             // Per-owner contribution
@@ -1111,7 +1169,7 @@ export function WigHistoryPanel({ wig, onBack }: { wig: WIG; onBack: () => void 
               if (!log.userId) continue;
               const name = log.user?.name || log.user?.email || log.userId;
               if (!ownerMap[log.userId]) ownerMap[log.userId] = { name, total: 0 };
-              ownerMap[log.userId].total += isNonNumericLeadMeasure(lm.trackingType) ? 1 : (log.value ?? 0);
+              ownerMap[log.userId].total += isProgressStatusLeadMeasure(lm.trackingType) ? 1 : (log.value ?? 0);
             }
             const owners = Object.values(ownerMap).sort((a, b) => b.total - a.total);
             const ownerTotal = owners.reduce((sum, owner) => sum + owner.total, 0);
@@ -1122,7 +1180,6 @@ export function WigHistoryPanel({ wig, onBack }: { wig: WIG; onBack: () => void 
                   <div>
                     <div style={{ fontSize: "11px", fontWeight: 600, color: "#71717a", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "4px" }}>Lead Measure {i + 1}</div>
                     <div style={{ fontSize: "16px", fontWeight: 600, color: "#18181b" }}>{lm.name}</div>
-                    {lm.cadence && <div style={{ fontSize: "12px", color: "#71717a", marginTop: "2px" }}>{lm.cadence}</div>}
                   </div>
                   <div style={{ display: "flex", alignItems: "center", gap: "6px", padding: "4px 10px", border: `1px solid ${lmOnTrack ? "#16A34A" : "#e4e4e7"}`, backgroundColor: lmOnTrack ? "#f0fdf4" : "#f4f4f5" }}>
                     <span style={{ fontSize: "12px", fontWeight: 700, color: lmOnTrack ? "#16A34A" : "#71717a", textTransform: "uppercase", letterSpacing: "0.05em" }}>
@@ -1134,10 +1191,10 @@ export function WigHistoryPanel({ wig, onBack }: { wig: WIG; onBack: () => void 
                 {/* Total vs target */}
                 <div style={{ display: "flex", alignItems: "flex-end", gap: "8px", marginBottom: "10px" }}>
                   <span style={{ fontSize: "28px", fontWeight: 700, color: "#18181b", letterSpacing: "-0.02em" }}>
-                    {isNonNumericLeadMeasure(lm.trackingType) ? `${lmPct}%` : totalApproved.toFixed(1)}
+                    {isProgressStatusLeadMeasure(lm.trackingType) ? `${lmPct}%` : totalApproved.toFixed(1)}
                   </span>
                   <span style={{ fontSize: "14px", color: "#71717a", marginBottom: "4px" }}>
-                    {isNonNumericLeadMeasure(lm.trackingType) ? (latestStatus ? latestStatus.replace(/_/g, " ") : "No update") : `/ ${(lm.targetValue ?? 0).toFixed(1)} ${lm.unit ?? ""}`}
+                    {isProgressStatusLeadMeasure(lm.trackingType) ? (latestStatus ? latestStatus.replace(/_/g, " ") : "No update") : `/ ${(lm.targetValue ?? 0).toFixed(1)} ${lm.unit ?? ""}`}
                   </span>
                 </div>
 
@@ -1158,7 +1215,7 @@ export function WigHistoryPanel({ wig, onBack }: { wig: WIG; onBack: () => void 
                             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "4px" }}>
                               <span style={{ fontSize: "13px", color: "#18181b" }}>{owner.name}</span>
                               <span style={{ fontSize: "13px", fontWeight: 600, color: "#18181b" }}>
-                                {isNonNumericLeadMeasure(lm.trackingType) ? `${owner.total} update${owner.total !== 1 ? "s" : ""}` : `${owner.total.toFixed(1)} ${lm.unit ?? ""}`}
+                                {isProgressStatusLeadMeasure(lm.trackingType) ? `${owner.total} update${owner.total !== 1 ? "s" : ""}` : `${owner.total.toFixed(1)} ${lm.unit ?? ""}`}
                                 <span style={{ fontWeight: 400, color: "#71717a", marginLeft: "6px" }}>({share}%)</span>
                               </span>
                             </div>
@@ -1187,13 +1244,8 @@ export function WigHistoryPanel({ wig, onBack }: { wig: WIG; onBack: () => void 
 
 export function WigCreationModal({ onCancel, onSuccess }: { onCancel: () => void; onSuccess: () => void }) {
   const [title, setTitle] = useState("");
-  const [trackingType, setTrackingType] = useState<CreateWigTrackingType>("NUMERIC");
-  const [from, setFrom] = useState("");
-  const [to, setTo] = useState("");
-  const [unit, setUnit] = useState("USD");
   const [deadline, setDeadline] = useState("");
   const [description, setDescription] = useState("");
-  const [validationError, setValidationError] = useState<string | null>(null);
 
   const currentTeamSlug = useTeamStore((state) => state.currentTeamSlug);
   const { createWIG, isLoading, error } = useCreateWIG();
@@ -1201,51 +1253,17 @@ export function WigCreationModal({ onCancel, onSuccess }: { onCancel: () => void
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    setValidationError(null);
-
     if (!currentTeamSlug || !title || !deadline) {
       return;
     }
 
-    let fromValue: number | undefined;
-    let toValue: number | undefined;
-
-    if (trackingType === "NUMERIC") {
-      if (!from || !to || !unit) {
-        setValidationError("Numeric WIGs need current value, target value, and unit.");
-        return;
-      }
-
-      fromValue = parseFloat(from);
-      toValue = parseFloat(to);
-
-      if (Number.isNaN(fromValue) || Number.isNaN(toValue)) {
-        setValidationError("Enter valid numeric values for current and target.");
-        return;
-      }
-
-      if (fromValue < 0 || toValue < 0) {
-        setValidationError("Current and target values cannot be negative.");
-        return;
-      }
-
-      if (toValue <= fromValue) {
-        setValidationError("Target value must be greater than current value.");
-        return;
-      }
-    }
-
-    const confirmed = window.confirm(`Create this WIG?\n\n${trackingType === "NUMERIC" ? `Increase ${title} from ${fromValue} to ${toValue}` : title} by ${new Date(deadline).toLocaleDateString()}.`);
+    const confirmed = window.confirm(`Create this WIG?\n\n${title} by ${new Date(deadline).toLocaleDateString()}.`);
     if (!confirmed) return;
 
     try {
       await createWIG({
         teamSlug: currentTeamSlug,
         title,
-        trackingType,
-        fromValue,
-        toValue,
-        unit: trackingType === "NUMERIC" ? unit : undefined,
         deadline: new Date(deadline),
         description: description || undefined,
       });
@@ -1266,28 +1284,14 @@ export function WigCreationModal({ onCancel, onSuccess }: { onCancel: () => void
 
         {/* Error */}
         {error && <ErrorState error={error} title="Failed to create WIG" />}
-        {validationError && (
-          <div style={{ padding: "12px", backgroundColor: "#fee2e2", border: "1px solid #fecaca", color: "#991b1b", fontSize: "14px", borderRadius: "4px" }}>
-            {validationError}
-          </div>
-        )}
 
         {/* Live Preview */}
         <div style={{ backgroundColor: "#f4f4f5", border: "1px solid #e4e4e7", padding: "20px" }}>
           <span style={{ fontSize: "12px", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", color: "#71717a", display: "block", marginBottom: "8px" }}>Live WIG Statement</span>
-          {trackingType === "NUMERIC" ? (
-            <p style={{ fontSize: "20px", fontWeight: 600, color: "#18181b" }}>
-              Increase <span style={{ color: title ? "#18181b" : "#71717a" }}>{title || "[Title]"}</span>
-              {" "}from <span style={{ color: from ? "#18181b" : "#71717a" }}>{from || "[A]"}</span>
-              {" "}to <span style={{ color: to ? "#18181b" : "#71717a" }}>{to || "[B]"}</span>
-              {" "}by <span style={{ color: deadline ? "#18181b" : "#71717a" }}>{deadline ? new Date(deadline).toLocaleDateString() : "[Date]"}</span>
-            </p>
-          ) : (
-            <p style={{ fontSize: "20px", fontWeight: 600, color: "#18181b" }}>
-              Complete <span style={{ color: title ? "#18181b" : "#71717a" }}>{title || "[Outcome]"}</span>
-              {" "}by <span style={{ color: deadline ? "#18181b" : "#71717a" }}>{deadline ? new Date(deadline).toLocaleDateString() : "[Date]"}</span>
-            </p>
-          )}
+          <p style={{ fontSize: "20px", fontWeight: 600, color: "#18181b" }}>
+            Complete <span style={{ color: title ? "#18181b" : "#71717a" }}>{title || "[Title]"}</span>
+            {" "}by <span style={{ color: deadline ? "#18181b" : "#71717a" }}>{deadline ? new Date(deadline).toLocaleDateString() : "[Date]"}</span>
+          </p>
         </div>
 
         {/* Form */}
@@ -1305,63 +1309,8 @@ export function WigCreationModal({ onCancel, onSuccess }: { onCancel: () => void
             />
           </div>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-            <label style={{ fontSize: "12px", fontWeight: 500, color: "#18181b" }}>Tracking Style *</label>
-            <select
-              value={trackingType}
-              onChange={(e) => setTrackingType(e.target.value as CreateWigTrackingType)}
-              style={{ border: "1px solid #e4e4e7", backgroundColor: "#ffffff", padding: "10px", fontSize: "16px", color: "#18181b", outline: "none", width: "100%" }}
-            >
-              <option value="NUMERIC">Numeric: from X to Y</option>
-              <option value="MILESTONE">Milestone/project: deliver an outcome by a date</option>
-              <option value="COMPLETION">Completion: not started/in progress/completed</option>
-              <option value="HYBRID">Hybrid/custom: mix milestone and measurable work</option>
-            </select>
-          </div>
-
-          {/* From / To */}
-          {trackingType === "NUMERIC" && <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
-            <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-              <label style={{ fontSize: "12px", fontWeight: 500, color: "#18181b" }}>From (Current Value) *</label>
-              <input
-                type="number"
-                min="0"
-                step="any"
-                placeholder="0"
-                value={from}
-                onChange={(e) => setFrom(e.target.value)}
-                required
-                style={{ border: "1px solid #e4e4e7", backgroundColor: "#ffffff", padding: "8px", fontSize: "16px", color: "#18181b", outline: "none", width: "100%" }}
-              />
-            </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-              <label style={{ fontSize: "12px", fontWeight: 500, color: "#18181b" }}>To (Target Value) *</label>
-              <input
-                type="number"
-                min="0"
-                step="any"
-                placeholder="1000000"
-                value={to}
-                onChange={(e) => setTo(e.target.value)}
-                required
-                style={{ border: "1px solid #e4e4e7", backgroundColor: "#ffffff", padding: "8px", fontSize: "16px", color: "#18181b", outline: "none", width: "100%" }}
-              />
-            </div>
-          </div>}
-
-          {/* Unit / Deadline */}
-          <div style={{ display: "grid", gridTemplateColumns: trackingType === "NUMERIC" ? "1fr 1fr" : "1fr", gap: "16px" }}>
-            {trackingType === "NUMERIC" && <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-              <label style={{ fontSize: "12px", fontWeight: 500, color: "#18181b" }}>Unit *</label>
-              <input
-                type="text"
-                placeholder="e.g., USD, calls, NPS score"
-                value={unit}
-                onChange={(e) => setUnit(e.target.value)}
-                required
-                style={{ border: "1px solid #e4e4e7", backgroundColor: "#ffffff", padding: "8px", fontSize: "16px", color: "#18181b", outline: "none", width: "100%" }}
-              />
-            </div>}
+          {/* Deadline */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "16px" }}>
             <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
               <label style={{ fontSize: "12px", fontWeight: 500, color: "#18181b" }}>Deadline *</label>
               <input

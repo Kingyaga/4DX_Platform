@@ -1,11 +1,11 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
 import { useUserStore } from "@/lib/stores/user-store";
 import { useOrgDashboard } from "@/lib/hooks";
 import { ErrorState, EmptyState } from "@/lib/components/states";
 import { PageLoader } from "@/lib/components/loading-spinner";
+import { getLeadMeasureApprovedTotal, getLeadMeasureProgress, isProgressStatusLeadMeasure } from "@/lib/metrics";
 
 export default function ExecutionDetailsPage() {
   const router = useRouter();
@@ -34,9 +34,7 @@ export default function ExecutionDetailsPage() {
   const executionScore = allLeadMeasures.length > 0
     ? Math.round(
         allLeadMeasures.reduce((sum: number, lm: any) => {
-          const currentValue = (lm.activityLogs || []).reduce((s: number, l: any) => s + l.value, 0);
-          const onTrack = currentValue >= (lm.targetValue || 0) ? 100 : (currentValue / (lm.targetValue || 1)) * 100;
-          return sum + Math.min(onTrack, 100);
+          return sum + getLeadMeasureProgress(lm);
         }, 0) / allLeadMeasures.length
       )
     : 0;
@@ -50,13 +48,12 @@ export default function ExecutionDetailsPage() {
       teamLMs.length > 0
         ? Math.round(
             teamLMs.reduce((sum: number, lm: any) => {
-              const current = (lm.activityLogs || []).reduce((s: number, l: any) => s + l.value, 0);
-              return sum + Math.min((current / (lm.targetValue || 1)) * 100, 100);
+              return sum + getLeadMeasureProgress(lm);
             }, 0) / teamLMs.length
           )
         : 50;
 
-    const onTrackCount = teamLMs.filter((lm: any) => (lm.activityLogs || []).reduce((s: number, l: any) => s + l.value, 0) >= lm.targetValue).length;
+    const onTrackCount = teamLMs.filter((lm: any) => getLeadMeasureProgress(lm) >= 100).length;
 
     return {
       teamName: team.name,
@@ -165,10 +162,10 @@ export default function ExecutionDetailsPage() {
           <div style={{ padding: "20px" }}>
             <div style={{ display: "grid", gap: "16px" }}>
               {allLeadMeasures.map((lm: any) => {
-                const currentValue = (lm.activityLogs || []).reduce((s: number, l: any) => s + l.value, 0);
+                const currentValue = getLeadMeasureApprovedTotal(lm);
                 const targetValue = lm.targetValue || 0;
-                const progressPercent = targetValue > 0 ? Math.min((currentValue / targetValue) * 100, 100) : 0;
-                const isOnTrack = currentValue >= targetValue;
+                const progressPercent = getLeadMeasureProgress(lm);
+                const isOnTrack = progressPercent >= 100;
 
                 return (
                   <div key={lm.id} style={{
@@ -181,10 +178,10 @@ export default function ExecutionDetailsPage() {
                   }}>
                     <div style={{ flex: 1 }}>
                       <h3 style={{ fontSize: "16px", fontWeight: 600, color: "#18181b", margin: "0 0 4px 0" }}>
-                        {lm.title}
+                        {lm.name || "Lead Measure"}
                       </h3>
                       <p style={{ fontSize: "14px", color: "#71717a", margin: "0 0 8px 0" }}>
-                        Current: {currentValue} | Target: {targetValue}
+                        {isProgressStatusLeadMeasure(lm.trackingType) ? `${progressPercent}% complete` : `Current: ${currentValue} | Target: ${targetValue}`}
                       </p>
                       <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                         <div style={{ flex: 1, height: "6px", backgroundColor: "#e0e2e6", borderRadius: "3px" }}>

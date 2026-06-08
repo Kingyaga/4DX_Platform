@@ -106,7 +106,7 @@ const memberSteps: TourStep[] = [
     selector: "[data-tour='session-overview']",
     icon: "event",
     title: "Weekly execution session",
-    body: "This page supports the weekly cadence: review progress, capture commitments, note blockers, and complete the session.",
+    body: "This page supports the weekly execution rhythm: review progress, capture commitments, note blockers, and complete the session.",
     placement: "center",
   },
   {
@@ -198,7 +198,7 @@ const teamLeadSteps: TourStep[] = [
     selector: "[data-tour='session-overview']",
     icon: "event_available",
     title: "Run weekly sessions",
-    body: "Use weekly sessions to review execution, capture notes, add commitments, record blockers, and complete the cadence.",
+    body: "Use weekly sessions to review execution, capture notes, add commitments, record blockers, and complete the session.",
     placement: "center",
   },
   {
@@ -226,7 +226,7 @@ const adminSteps: TourStep[] = [
     selector: "[data-tour='main-content']",
     icon: "admin_panel_settings",
     title: "Admin dashboard",
-    body: "Admins monitor organization execution health, risk areas, overdue cadence, lag performance, and activity patterns.",
+    body: "Admins monitor organization execution health, risk areas, overdue sessions, WIG performance, and activity patterns.",
     placement: "center",
   },
   {
@@ -242,7 +242,7 @@ const adminSteps: TourStep[] = [
     selector: "[data-tour='admin-create-team']",
     icon: "add_circle",
     title: "Create teams",
-    body: "Use Create Team when a new unit needs its own WIGs, members, scoreboard, and execution cadence.",
+    body: "Use Create Team when a new unit needs its own WIGs, members, scoreboard, and execution rhythm.",
     placement: "left",
   },
   {

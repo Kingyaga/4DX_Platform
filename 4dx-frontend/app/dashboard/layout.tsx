@@ -272,6 +272,10 @@ export default function DashboardLayout({
   }, [pathname, userRole, router]);
 
   // Show loading spinner while session or user data is loading
+  if (status === "unauthenticated") {
+    return <LoadingSpinner size="large" text="Signing out..." className="min-h-screen flex items-center justify-center" />;
+  }
+
   if (status === "loading" || userLoading || (status === "authenticated" && !userRole) || (userRole && teamsLoading)) {
     return <LoadingSpinner size="large" text="Loading dashboard..." className="min-h-screen flex items-center justify-center" />;
   }

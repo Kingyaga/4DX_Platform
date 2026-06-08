@@ -156,10 +156,6 @@ export interface WIG {
 export interface CreateWIGInput {
   teamSlug: string;
   title: string;
-  trackingType?: TrackingType;
-  fromValue?: number;
-  toValue?: number;
-  unit?: string;
   deadline: string; // ISO string
   description?: string;
 }
@@ -224,7 +220,7 @@ export interface LeadMeasure {
 export interface CreateLeadMeasureInput {
   wigId: string;
   name: string;
-  cadence: Cadence;
+  cadence?: Cadence;
   trackingType?: TrackingType;
   targetValue?: number;
   unit?: string;
@@ -234,14 +230,12 @@ export interface CreateLeadMeasureInput {
 
 export interface UpdateLeadMeasureInput {
   leadMeasureId: string;
-  data: {
-    name?: string;
-    cadence?: Cadence;
-    trackingType?: TrackingType;
-    targetValue?: number;
-    unit?: string;
-    description?: string;
-  };
+  name?: string;
+  cadence?: Cadence;
+  trackingType?: TrackingType;
+  targetValue?: number;
+  unit?: string;
+  description?: string;
 }
 
 // ─── ACTIVITY LOG ──────────────────────────────────────────────────────────

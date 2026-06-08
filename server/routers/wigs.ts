@@ -6,10 +6,6 @@ import { auditLog } from "../audit";
 import { sendWigClosedEmail, sendWigDeadlinePassedEmail } from "../email";
 import { notify, notifyMany } from "../notify";
 
-const wigValueSchema = z
-  .number()
-  .finite()
-  .nonnegative("WIG current and target values cannot be negative.");
 const wigTrackingTypeSchema = z.enum(["NUMERIC", "MILESTONE", "COMPLETION", "HYBRID", "CUSTOM"]);
 const closedWigStatuses = ["ACHIEVED", "MISSED", "ABANDONED"] as const;
 
@@ -38,9 +34,9 @@ export const wigsRouter = router({
       z.object({
         teamSlug: z.string(),
         title: z.string().min(3).max(200),
-        trackingType: wigTrackingTypeSchema.default("NUMERIC"),
-        fromValue: wigValueSchema.optional(),
-        toValue: wigValueSchema.optional(),
+        trackingType: wigTrackingTypeSchema.optional(),
+        fromValue: z.number().finite().optional(),
+        toValue: z.number().finite().optional(),
         unit: z.string().optional(),
         deadline: z.coerce.date(),
         description: z.string().optional(),
@@ -48,20 +44,6 @@ export const wigsRouter = router({
     )
 
     .mutation(async ({ ctx, input }) => {
-      if (input.trackingType === "NUMERIC" && (input.fromValue === undefined || input.toValue === undefined || !input.unit)) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "Numeric WIGs require current value, target value, and unit.",
-        });
-      }
-
-      if (input.trackingType === "NUMERIC" && input.toValue! <= input.fromValue!) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "Target value must be greater than the current value.",
-        });
-      }
-
       const team = await ctx.db.team.findUnique({
         where: { slug: input.teamSlug },
         include: {
@@ -98,11 +80,11 @@ export const wigsRouter = router({
       const createdWIG = await ctx.db.wIG.create({
         data: {
           title: input.title,
-          trackingType: input.trackingType,
-          fromValue: input.fromValue,
-          toValue: input.toValue,
-          currentValue: input.trackingType === "NUMERIC" ? input.fromValue : 0,
-          unit: input.unit,
+          trackingType: "MILESTONE",
+          fromValue: null,
+          toValue: null,
+          currentValue: 0,
+          unit: null,
           deadline: input.deadline,
           description: input.description,
           status: "DRAFT",

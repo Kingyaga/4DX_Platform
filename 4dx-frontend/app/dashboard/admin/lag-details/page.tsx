@@ -1,11 +1,11 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
 import { useUserStore } from "@/lib/stores/user-store";
 import { useOrgDashboard } from "@/lib/hooks";
 import { ErrorState, EmptyState } from "@/lib/components/states";
 import { PageLoader } from "@/lib/components/loading-spinner";
+import { getWigProgress } from "@/lib/metrics";
 
 export default function LagMeasureDetailsPage() {
   const router = useRouter();
@@ -30,16 +30,16 @@ export default function LagMeasureDetailsPage() {
   const orgTeams = (org?.teams || []) as Array<{ id: string; slug: string; name: string; wigs?: any[] }>;
   const allWIGs = orgTeams.flatMap((team) => team.wigs || []);
 
-  const totalCurrentValue = allWIGs.reduce((sum: number, wig: any) => sum + (wig.currentValue || 0), 0);
-  const totalTargetValue = allWIGs.reduce((sum: number, wig: any) => sum + (wig.toValue || 0), 0);
-  const globalLagPercent = totalTargetValue > 0 ? Math.round((totalCurrentValue / totalTargetValue) * 100) : 0;
+  const globalLagPercent = allWIGs.length > 0
+    ? Math.round(allWIGs.reduce((sum: number, wig: any) => sum + getWigProgress(wig), 0) / allWIGs.length)
+    : 0;
 
   // Group by team
   const teamLagData = orgTeams.map((team) => {
     const teamWIGs = team.wigs || [];
-    const teamCurrentValue = teamWIGs.reduce((sum: number, wig: any) => sum + (wig.currentValue || 0), 0);
-    const teamTargetValue = teamWIGs.reduce((sum: number, wig: any) => sum + (wig.toValue || 0), 0);
-    const teamLagPercent = teamTargetValue > 0 ? Math.round((teamCurrentValue / teamTargetValue) * 100) : 0;
+    const teamLagPercent = teamWIGs.length > 0
+      ? Math.round(teamWIGs.reduce((sum: number, wig: any) => sum + getWigProgress(wig), 0) / teamWIGs.length)
+      : 0;
 
     return {
       teamName: team.name,
@@ -166,7 +166,7 @@ export default function LagMeasureDetailsPage() {
                       {wig.title}
                     </h3>
                     <p style={{ fontSize: "14px", color: "#71717a", margin: 0 }}>
-                        Current: {wig.currentValue || 0} | Target: {wig.toValue || 0}
+                        {(wig.leadMeasures?.length || 0)} lead measure{(wig.leadMeasures?.length || 0) === 1 ? "" : "s"}
                     </p>
                   </div>
                   <div style={{
@@ -181,7 +181,7 @@ export default function LagMeasureDetailsPage() {
                     fontWeight: 700,
                     color: "#18181b",
                   }}>
-                    {Math.round(((wig.currentValue || 0) / wig.toValue) * 100)}%
+                    {getWigProgress(wig)}%
                   </div>
                 </div>
               ))}
